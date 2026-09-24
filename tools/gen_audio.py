@@ -315,6 +315,66 @@ def sfx_echo():
     return reverb(fade(out, 0.01, 0.4), mix=0.5, size=2.6, feedback=0.85)
 
 
+def sfx_parry():
+    """Parry: a bright steel-on-steel ring — sharp transient, inharmonic partials
+    that decay slowly, and a short shimmer tail."""
+    dur = 1.1
+    out = silence(dur)
+    add(out, shape(highpass(noise(0.03), 3000.0), 0.0005, 0.006), 0.0, 1.0)
+    for f, g, d in ((1480.0, 0.5, 0.35), (2210.0, 0.4, 0.3), (3170.0, 0.35, 0.22), (4630.0, 0.25, 0.16), (6020.0, 0.15, 0.1)):
+        add(out, shape(tone(dur, f, f * 0.995), 0.0005, d), 0.0, g)
+    add(out, shape(tone(0.25, 180.0, 90.0), 0.001, 0.05), 0.0, 0.5)
+    return reverb(fade(out, 0.0005, 0.2), mix=0.25, size=1.2)
+
+
+def sfx_block():
+    """Block: a dull, damped metal thud — the shield takes it."""
+    dur = 0.45
+    out = silence(dur)
+    add(out, shape(tone(dur, 140.0, 70.0), 0.001, 0.08), 0.0, 1.0)
+    add(out, shape(bandpass(noise(0.12), 300.0, 2200.0), 0.0005, 0.03), 0.0, 0.8)
+    for f in (620.0, 910.0, 1340.0):
+        add(out, shape(tone(dur, f), 0.0005, 0.05), 0.0, 0.12)
+    return fade(out, 0.0005, 0.05)
+
+
+def sfx_execute():
+    """Köz İnfazı: a reversed rush of fire into a crushing, ringing blow."""
+    dur = 1.6
+    out = silence(dur)
+    rush = lowpass(noise(0.35), lambda t: 300.0 + 5000.0 * (t / 0.35) ** 2)
+    add(out, [x * (i / len(rush)) ** 2 for i, x in enumerate(rush)], 0.0, 0.8)
+    add(out, sfx_hit(0, heavy=True), 0.35, 1.3)
+    add(out, shape(tone(1.0, 70.0, 30.0), 0.002, 0.35), 0.35, 1.2)
+    for f in (1180.0, 1760.0):
+        add(out, shape(tone(1.0, f, f * 0.97), 0.001, 0.3), 0.35, 0.12)
+    return reverb(fade(out, 0.002, 0.2), mix=0.3, size=1.8)
+
+
+def sfx_drink():
+    """Nar şərbəti: three gulps and a breath."""
+    dur = 0.9
+    out = silence(dur)
+    for k, t in enumerate((0.05, 0.28, 0.5)):
+        g = bandpass(noise(0.14), 250.0, 900.0)
+        g = [x * math.sin(math.pi * min(1.0, i / len(g))) for i, x in enumerate(g)]
+        add(out, g, t, 0.8)
+        add(out, shape(tone(0.12, 260.0 - k * 20, 180.0), 0.005, 0.04), t + 0.02, 0.3)
+    add(out, shape(bandpass(noise(0.25), 800.0, 3000.0), 0.08, 0.1), 0.65, 0.25)
+    return fade(out, 0.005, 0.05)
+
+
+def sfx_perfect_dodge():
+    """Perfect dodge: time bends — a pitch-dropping whoosh with a glassy chime."""
+    dur = 0.9
+    out = silence(dur)
+    w = resonant(noise(0.5), lambda t: 3000.0 * math.exp(-t * 5.0) + 300.0, q=4.0)
+    add(out, shape(w, 0.02, 0.15), 0.0, 1.0)
+    for f in (1760.0, 2637.0):
+        add(out, shape(tone(dur, f, f * 0.94), 0.005, 0.25), 0.02, 0.15)
+    return reverb(fade(out, 0.002, 0.2), mix=0.4, size=1.6)
+
+
 def sfx_whisper():
     dur = 2.2
     out = silence(dur)
@@ -553,6 +613,15 @@ def sting_defeat():
     return reverb(fade(out, 0.01, 1.2), mix=0.45, size=2.5, feedback=0.84)
 
 
+def _save_combat():
+    """V3 combat sounds: parry, block, execution, drinking, perfect dodge."""
+    save("parry", sfx_parry(), peak=0.85)
+    save("block", sfx_block(), peak=0.75)
+    save("execute", sfx_execute(), peak=0.9)
+    save("drink", sfx_drink(), peak=0.6)
+    save("perfect_dodge", sfx_perfect_dodge(), peak=0.7)
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     only = set(sys.argv[1:])
@@ -563,7 +632,10 @@ def main():
                 save("swing_%d" % v, sfx_swing(v), peak=0.85)
         if "echo" in only:
             save("echo", sfx_echo(), peak=0.7)
+        if "combat" in only:
+            _save_combat()
         return
+    _save_combat()
     for v in range(3):
         save("swing_%d" % v, sfx_swing(v), peak=0.85)
         save("hit_%d" % v, sfx_hit(v))

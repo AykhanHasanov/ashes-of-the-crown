@@ -1,0 +1,3 @@
+@echo off
+rem Double-click to open the V3 combat test arena.
+start "" "%USERPROFILE%\Documents\games\_tools\godot\Godot_v4.7.2-stable_win64.exe" --path "%~dp0." res://scenes/arena.tscn

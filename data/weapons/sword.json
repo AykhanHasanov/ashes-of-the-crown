@@ -1,0 +1,23 @@
+{
+	"id": "sword",
+	"name": "Qılınc",
+	"damage_type": "slash",
+	"grip": "1h",
+	"model": {"donor": "res://assets/characters/adventurers/Knight.glb", "node": "1H_Sword"},
+	"shield": false,
+	"hitstop": "light",
+	"locomotion": {"idle": "Idle", "run": "Running_A"},
+	"light": [
+		{"clip": "1H_Melee_Attack_Slice_Diagonal", "speed": 1.9, "impact": 0.22, "cancel": 0.34, "damage": 20, "range": 2.5, "arc": 110, "lunge": 7.5, "shake": 0.22},
+		{"clip": "1H_Melee_Attack_Slice_Horizontal", "speed": 1.9, "impact": 0.23, "cancel": 0.36, "damage": 22, "range": 2.6, "arc": 130, "lunge": 7.5, "shake": 0.22},
+		{"clip": "1H_Melee_Attack_Chop", "speed": 1.7, "impact": 0.28, "cancel": 0.42, "damage": 26, "range": 2.6, "arc": 80, "lunge": 8.5, "shake": 0.3},
+		{"clip": "1H_Melee_Attack_Stab", "speed": 1.8, "impact": 0.24, "cancel": 0.4, "damage": 30, "range": 2.9, "arc": 50, "lunge": 10.0, "shake": 0.3, "mastery": 2}
+	],
+	"heavy": {"clip": "1H_Melee_Attack_Chop", "speed": 1.2, "impact": 0.42, "cancel": 0.62, "damage": 38, "range": 2.8, "arc": 90, "lunge": 9.0, "shake": 0.5, "hyper_armor": true},
+	"charged": {"clip": "1H_Melee_Attack_Chop", "speed": 1.35, "impact": 0.38, "cancel": 0.6, "damage": 58, "range": 3.0, "arc": 100, "lunge": 11.0, "shake": 0.7, "hyper_armor": true, "windup_clip": "2H_Melee_Idle"},
+	"running": {"clip": "1H_Melee_Attack_Stab", "speed": 1.6, "impact": 0.24, "cancel": 0.45, "damage": 28, "range": 3.0, "arc": 60, "lunge": 12.0, "shake": 0.3},
+	"dodge_attack": {"clip": "1H_Melee_Attack_Slice_Horizontal", "speed": 2.1, "impact": 0.18, "cancel": 0.34, "damage": 24, "range": 2.7, "arc": 140, "lunge": 9.0, "shake": 0.25},
+	"execution": {"clip": "1H_Melee_Attack_Stab", "speed": 1.2, "impact": 0.34, "cancel": 0.8},
+	"parry_window_bonus": 0.0,
+	"recovery_factor": 0.85
+}
