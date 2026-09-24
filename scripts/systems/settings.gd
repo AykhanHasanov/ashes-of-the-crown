@@ -6,10 +6,12 @@ extends Node
 ##   --capture=<path.png>   save a screenshot at --frame and quit
 ##   --frame=<n>            frame number for --capture (default 150)
 ##   --demo=<mode>          menu | explore | dialogue | fight | combat | victory | pause |
-##                          settings | echoes | echo | journal | chapter_end |
+##                          settings | keys | echoes | echo | journal | chapter_end |
 ##                          radial | offer | strike | whirl | unstoppable (self-test)
 ##                          (Chapter 2 scene, run with scenes/chapter2.tscn as the scene:)
 ##                          c2 | c2_talk
+##                          (V3 arena, scenes/arena.tscn:)
+##                          arena_fight | arena_lock | arena_wolves | arena_selftest
 ##                          (anything but "menu" skips the title screen; "combat" also
 ##                          swings and fires the ember before the capture)
 
@@ -116,31 +118,80 @@ func _parse_args() -> void:
 			demo = value
 
 
+## Actions the player may rebind, with their Azerbaijani labels (settings → Düymələr).
+const REBINDABLE := [
+	["move_up", "İrəli"], ["move_down", "Geri"], ["move_left", "Sola"], ["move_right", "Sağa"],
+	["attack", "Yüngül zərbə"], ["heavy", "Ağır zərbə (basılı: yüklə)"], ["block", "Blok / parry"],
+	["dash", "Kül addımı"], ["sprint", "Qaçış"], ["jump", "Tullanma"],
+	["ember_power", "Köz / Alov Dalğası"], ["lock_on", "Hədəfə kilidlən"],
+	["drink", "Nar şərbəti"], ["interact", "Danış / toxun / infaz"],
+	["skill_1", "Slot 1"], ["skill_2", "Slot 2"], ["skill_3", "Slot 3"], ["skill_4", "Slot 4"],
+	["journal", "Jurnal"], ["pause", "Fasilə"],
+]
+const INPUT_PATH := "user://input.cfg"
+
+
 func _setup_input() -> void:
 	_bind_keys("move_up", [KEY_W, KEY_UP])
 	_bind_keys("move_down", [KEY_S, KEY_DOWN])
 	_bind_keys("move_left", [KEY_A, KEY_LEFT])
 	_bind_keys("move_right", [KEY_D, KEY_RIGHT])
 	_bind_keys("dash", [KEY_SPACE])
+	_bind_keys("sprint", [KEY_SHIFT])
+	_bind_keys("jump", [KEY_X])
+	_bind_keys("heavy", [KEY_F])
 	_bind_keys("interact", [KEY_E])
 	_bind_keys("ember_power", [KEY_Q])
 	_bind_keys("attack", [KEY_J])
+	_bind_keys("lock_on", [KEY_C])
+	_bind_keys("drink", [KEY_R])
 	_bind_keys("restart", [KEY_R])
 	_bind_keys("pause", [KEY_ESCAPE, KEY_P])
 	_bind_keys("journal", [KEY_TAB])
 	_bind_keys("toggle_quality", [KEY_F9])
 	_bind_keys("toggle_fps", [KEY_F3])
 	_bind_keys("toggle_fullscreen", [KEY_F11])
+	_bind_keys("debug_menu", [KEY_F10])
 	_bind_keys("continue", [KEY_ENTER, KEY_KP_ENTER])
 	for i in 9:
 		_bind_keys("choice_%d" % (i + 1), [KEY_1 + i])
+	for i in 4:
+		_bind_keys("skill_%d" % (i + 1), [KEY_1 + i])
 	_bind_mouse("attack", MOUSE_BUTTON_LEFT)
-	_bind_mouse("ember_power", MOUSE_BUTTON_RIGHT)
+	_bind_mouse("block", MOUSE_BUTTON_RIGHT)
+	_bind_mouse("lock_on", MOUSE_BUTTON_MIDDLE)
+	_bind_mouse("lock_next", MOUSE_BUTTON_WHEEL_DOWN)
+	_bind_mouse("lock_prev", MOUSE_BUTTON_WHEEL_UP)
+	# Gamepad (Xbox layout names; works for any SDL-mapped pad)
+	_bind_axis("move_left", JOY_AXIS_LEFT_X, -1.0)
+	_bind_axis("move_right", JOY_AXIS_LEFT_X, 1.0)
+	_bind_axis("move_up", JOY_AXIS_LEFT_Y, -1.0)
+	_bind_axis("move_down", JOY_AXIS_LEFT_Y, 1.0)
+	_bind_axis("look_left", JOY_AXIS_RIGHT_X, -1.0)
+	_bind_axis("look_right", JOY_AXIS_RIGHT_X, 1.0)
+	_bind_axis("look_up", JOY_AXIS_RIGHT_Y, -1.0)
+	_bind_axis("look_down", JOY_AXIS_RIGHT_Y, 1.0)
+	_bind_axis("heavy", JOY_AXIS_TRIGGER_RIGHT, 1.0)
+	_bind_axis("sprint", JOY_AXIS_TRIGGER_LEFT, 1.0)
+	_bind_button("attack", JOY_BUTTON_RIGHT_SHOULDER)
+	_bind_button("block", JOY_BUTTON_LEFT_SHOULDER)
+	_bind_button("dash", JOY_BUTTON_B)
+	_bind_button("jump", JOY_BUTTON_A)
+	_bind_button("interact", JOY_BUTTON_X)
+	_bind_button("continue", JOY_BUTTON_A)
+	_bind_button("ember_power", JOY_BUTTON_Y)
+	_bind_button("lock_on", JOY_BUTTON_RIGHT_STICK)
+	_bind_button("lock_next", JOY_BUTTON_DPAD_RIGHT)
+	_bind_button("lock_prev", JOY_BUTTON_DPAD_LEFT)
+	_bind_button("drink", JOY_BUTTON_DPAD_DOWN)
+	_bind_button("pause", JOY_BUTTON_START)
+	_bind_button("journal", JOY_BUTTON_BACK)
+	_load_bindings()
 
 
 func _ensure_action(action: StringName) -> void:
 	if not InputMap.has_action(action):
-		InputMap.add_action(action)
+		InputMap.add_action(action, 0.3)
 
 
 func _bind_keys(action: StringName, keys: Array) -> void:
@@ -156,3 +207,113 @@ func _bind_mouse(action: StringName, button: MouseButton) -> void:
 	var ev := InputEventMouseButton.new()
 	ev.button_index = button
 	InputMap.action_add_event(action, ev)
+
+
+func _bind_button(action: StringName, button: JoyButton) -> void:
+	_ensure_action(action)
+	var ev := InputEventJoypadButton.new()
+	ev.button_index = button
+	InputMap.action_add_event(action, ev)
+
+
+func _bind_axis(action: StringName, axis: JoyAxis, sign_value: float) -> void:
+	_ensure_action(action)
+	var ev := InputEventJoypadMotion.new()
+	ev.axis = axis
+	ev.axis_value = sign_value
+	InputMap.action_add_event(action, ev)
+
+
+# --- Rebinding -------------------------------------------------------------------------------
+
+## Keyboard/mouse events of an action (gamepad bindings are kept separately).
+func pc_events(action: String) -> Array:
+	return InputMap.action_get_events(action).filter(func(e): return e is InputEventKey or e is InputEventMouseButton)
+
+
+## Replaces an action's keyboard/mouse binding with `event` and saves it. If another
+## rebindable action already used that input, the two swap so nothing is left unbound.
+func rebind(action: String, event: InputEvent) -> void:
+	var previous: Array = pc_events(action)
+	for pair in REBINDABLE:
+		var other: String = pair[0]
+		if other == action:
+			continue
+		for e in pc_events(other):
+			if _same_input(e, event):
+				InputMap.action_erase_event(other, e)
+				if not previous.is_empty():
+					InputMap.action_add_event(other, previous[0])
+	for e in previous:
+		InputMap.action_erase_event(action, e)
+	InputMap.action_add_event(action, event)
+	_save_bindings()
+
+
+## Restores the default controls and forgets the saved ones.
+func reset_bindings() -> void:
+	if FileAccess.file_exists(INPUT_PATH):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(INPUT_PATH))
+	InputMap.load_from_project_settings()
+	_setup_input()
+
+
+func _same_input(a: InputEvent, b: InputEvent) -> bool:
+	if a is InputEventKey and b is InputEventKey:
+		return a.physical_keycode == b.physical_keycode
+	if a is InputEventMouseButton and b is InputEventMouseButton:
+		return a.button_index == b.button_index
+	return false
+
+
+func event_label(event: InputEvent) -> String:
+	if event is InputEventKey:
+		return OS.get_keycode_string(event.physical_keycode if event.physical_keycode != 0 else event.keycode)
+	if event is InputEventMouseButton:
+		match event.button_index:
+			MOUSE_BUTTON_LEFT:
+				return "Sol klik"
+			MOUSE_BUTTON_RIGHT:
+				return "Sağ klik"
+			MOUSE_BUTTON_MIDDLE:
+				return "Orta düymə"
+			MOUSE_BUTTON_WHEEL_UP:
+				return "Çarx yuxarı"
+			MOUSE_BUTTON_WHEEL_DOWN:
+				return "Çarx aşağı"
+		return "Siçan %d" % event.button_index
+	return "?"
+
+
+func _save_bindings() -> void:
+	var cfg := ConfigFile.new()
+	for pair in REBINDABLE:
+		var events := []
+		for e in pc_events(pair[0]):
+			if e is InputEventKey:
+				events.append({"key": e.physical_keycode})
+			else:
+				events.append({"mouse": e.button_index})
+		cfg.set_value("bindings", pair[0], events)
+	cfg.save(INPUT_PATH)
+
+
+func _load_bindings() -> void:
+	var cfg := ConfigFile.new()
+	if cfg.load(INPUT_PATH) != OK:
+		return
+	for pair in REBINDABLE:
+		var action: String = pair[0]
+		if not cfg.has_section_key("bindings", action):
+			continue
+		for e in pc_events(action):
+			InputMap.action_erase_event(action, e)
+		for d in cfg.get_value("bindings", action):
+			if d.has("key"):
+				var k := InputEventKey.new()
+				k.physical_keycode = int(d["key"])
+				InputMap.action_add_event(action, k)
+			elif d.has("mouse"):
+				var m := InputEventMouseButton.new()
+				m.button_index = int(d["mouse"])
+				InputMap.action_add_event(action, m)

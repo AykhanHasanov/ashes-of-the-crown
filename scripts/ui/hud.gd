@@ -20,6 +20,14 @@ var _marker: Control
 var _marker_target: Variant = null  # Vector3 world position or null
 var _marker_camera: Camera3D
 var _ember_pulse := 0.0
+var _ember_back: ColorRect
+var _stamina_back: ColorRect
+var _stamina_fill: ColorRect
+var _stamina_ratio := 1.0
+var _flasks: Label
+var _weapon: Label
+var _lock = null
+var _hint: Label
 var _objective: Label
 var _banner: Label
 var _whisper: Label
@@ -77,6 +85,7 @@ func _ready() -> void:
 
 	# Ember meter (Köz Zərbəsi fuel) right under the health bar
 	var ember_back := ColorRect.new()
+	_ember_back = ember_back
 	ember_back.color = Color(0.05, 0.03, 0.03, 0.85)
 	ember_back.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(ember_back)
@@ -93,6 +102,24 @@ func _ready() -> void:
 	cost_tick.size = Vector2(1, 8)
 	ember_back.add_child(cost_tick)
 	_embers.draw.connect(_draw_embers)
+
+	# V3 only: stamina bar (shown once a stamina-using body reports in), flask count, weapon
+	_stamina_back = ColorRect.new()
+	_stamina_back.color = Color(0.05, 0.03, 0.03, 0.85)
+	_stamina_back.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(_stamina_back)
+	_place(_stamina_back, Vector4(0, 0, 0, 0), Vector4(24, 61, 304, 69))
+	_stamina_fill = ColorRect.new()
+	_stamina_fill.color = Color(0.72, 0.78, 0.35)
+	_stamina_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_stamina_back.add_child(_stamina_fill)
+	_stamina_fill.position = Vector2(1, 1)
+	_stamina_fill.size = Vector2(278, 6)
+	_stamina_back.visible = false
+	_flasks = _label("", 20, Color(1.0, 0.55, 0.45))
+	_place(_flasks, Vector4(0, 1, 0, 1), Vector4(24, -64, 400, -36))
+	_weapon = _label("", 17, GOLD)
+	_place(_weapon, Vector4(0, 1, 0, 1), Vector4(24, -92, 400, -66))
 
 	# Objective marker: hovers over the target, or clings to the screen edge pointing at it
 	_marker = Control.new()
@@ -113,8 +140,9 @@ func _ready() -> void:
 	_prompt = _label("", 22, GOLD, HORIZONTAL_ALIGNMENT_CENTER)
 	_place(_prompt, Vector4(0.5, 1, 0.5, 1), Vector4(-300, -130, 300, -100))
 
-	var hint := _label("LMB / J — qılınc     RMB / Q — Köz Zərbəsi  ·  basılı saxla — Alov Dalğası\nSpace — Kül addımı     E — danış     Tab — jurnal     Esc — fasilə", 14, Color(0.7, 0.66, 0.6, 0.85), HORIZONTAL_ALIGNMENT_RIGHT)
-	_place(hint, Vector4(1, 1, 1, 1), Vector4(-640, -60, -20, -12))
+	_hint = _label("LMB / J — qılınc     RMB / Q — Köz Zərbəsi  ·  basılı saxla — Alov Dalğası\nSpace — Kül addımı     E — danış     Tab — jurnal     Esc — fasilə", 14, Color(0.7, 0.66, 0.6, 0.85), HORIZONTAL_ALIGNMENT_RIGHT)
+	_place(_hint, Vector4(0.25, 1, 1, 1), Vector4(0, -60, -20, -12))
+	_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_info = _label("", 14, Color(0.7, 0.66, 0.6, 0.85), HORIZONTAL_ALIGNMENT_RIGHT)
 	_place(_info, Vector4(1, 0, 1, 0), Vector4(-420, 16, -20, 60))
 
@@ -173,6 +201,9 @@ func _process(delta: float) -> void:
 	_ember_pulse += delta
 	_embers.queue_redraw()
 	_marker.queue_redraw()
+	if _stamina_back.visible:
+		_stamina_fill.size.x = lerpf(_stamina_fill.size.x, 278.0 * _stamina_ratio, 1.0 - exp(-14.0 * delta))
+		_stamina_fill.color = Color(0.72, 0.78, 0.35) if _stamina_ratio > 0.25 else Color(0.85, 0.35, 0.2)
 	_vignette_mat.set_shader_parameter("damage", _damage)
 	if _boss != null:
 		if is_instance_valid(_boss) and _boss.health > 0.0:
@@ -184,6 +215,33 @@ func _process(delta: float) -> void:
 	_info.text = "Qrafika: %s (F9)" % quality
 	if Settings.show_fps:
 		_info.text += "\nFPS: %d" % Engine.get_frames_per_second()
+
+
+func set_stamina(current: float, maximum: float) -> void:
+	if not _stamina_back.visible:
+		# Make room: stamina sits under health, ember and memories move down
+		_stamina_back.visible = true
+		_ember_back.offset_top += 11
+		_ember_back.offset_bottom += 11
+		_embers.offset_top += 11
+		_embers.offset_bottom += 11
+	_stamina_ratio = current / maximum
+
+
+func set_flasks(current: int, maximum: int) -> void:
+	_flasks.text = "Nar şərbəti  %d / %d   [R]" % [current, maximum]
+
+
+func set_hint(text: String) -> void:
+	_hint.text = text
+
+
+func set_weapon(weapon_name: String) -> void:
+	_weapon.text = weapon_name
+
+
+func set_lock(target) -> void:
+	_lock = target
 
 
 func set_ember(current: float, maximum: float) -> void:
@@ -210,6 +268,7 @@ func set_marker(target: Variant, camera: Camera3D = null) -> void:
 
 
 func _draw_marker() -> void:
+	_draw_lock()
 	if _marker_target == null or _marker_camera == null:
 		return
 	var world: Vector3 = _marker_target + Vector3(0, 2.6, 0)
@@ -234,6 +293,22 @@ func _draw_marker() -> void:
 	var pos := center + dir * t
 	var side := Vector2(-dir.y, dir.x)
 	_marker.draw_colored_polygon(PackedVector2Array([pos + dir * 16.0, pos - dir * 6.0 + side * 11.0, pos - dir * 6.0 - side * 11.0]), col)
+
+
+## Lock-on reticle on the target's chest.
+func _draw_lock() -> void:
+	if _lock == null or not is_instance_valid(_lock) or _lock.dead or _marker_camera == null:
+		return
+	var p3: Vector3 = _lock.global_position + Vector3(0, 1.1, 0)
+	if _marker_camera.is_position_behind(p3):
+		return
+	var p := _marker_camera.unproject_position(p3)
+	var r := 13.0 + sin(_ember_pulse * 5.0) * 1.5
+	_marker.draw_arc(p, r, 0, TAU, 32, Color(1.0, 0.85, 0.55, 0.9), 2.0)
+	for i in 4:
+		var a := i * PI * 0.5 + PI * 0.25
+		var d := Vector2(cos(a), sin(a))
+		_marker.draw_line(p + d * (r + 3.0), p + d * (r + 9.0), Color(1.0, 0.6, 0.25, 0.95), 2.0)
 
 
 func set_prompt(text: String) -> void:

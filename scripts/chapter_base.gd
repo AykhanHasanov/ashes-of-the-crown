@@ -4,7 +4,8 @@ extends Node3D
 ## hearth healing, scene changes between chapters and the debug capture.
 ##
 ## A chapter overrides: _make_level(), _setup(), _begin(mode), _tick(delta),
-## _marker_target(), _on_dialogue_finished(event), _on_player_died().
+## _marker_target(), _on_dialogue_finished(event), _on_player_died(), and may swap in the
+## V3 body and camera through _make_player() / _make_camera().
 
 const Player := preload("res://scripts/player/player.gd")
 const CameraRig := preload("res://scripts/camera/camera_rig.gd")
@@ -45,12 +46,14 @@ func _ready() -> void:
 	add_child(level)
 	level.build()
 
-	rig = CameraRig.new()
+	rig = _make_camera()
 	add_child(rig)
-	player = Player.new()
+	player = _make_player()
 	add_child(player)
 	player.global_position = level.player_spawn
 	player.camera = rig.camera
+	if "rig" in player:
+		player.rig = rig
 	rig.target = player
 	rig.snap()
 
@@ -76,6 +79,11 @@ func _ready() -> void:
 	Fx.world = self
 	player.health_changed.connect(hud.set_health)
 	player.ember_changed.connect(hud.set_ember)
+	if player.has_signal("stamina_changed"):
+		player.stamina_changed.connect(hud.set_stamina)
+		player.flasks_changed.connect(hud.set_flasks)
+		player.weapon_changed.connect(hud.set_weapon)
+		player.lock_changed.connect(hud.set_lock)
 	player.died.connect(_on_player_died)
 	Settings.changed.connect(_apply_quality)
 	_apply_quality()
@@ -89,6 +97,14 @@ func _ready() -> void:
 
 func _make_level() -> Node3D:
 	return null
+
+
+func _make_player() -> Node3D:
+	return Player.new()
+
+
+func _make_camera() -> Node3D:
+	return CameraRig.new()
 
 
 func _setup() -> void:
@@ -193,7 +209,7 @@ func end_talk() -> void:
 
 ## Hearths heal Ayxan — but not in the middle of a fight.
 func _update_hearths(delta: float) -> void:
-	if player.dead or player.health >= Player.MAX_HEALTH:
+	if player.dead or player.health >= player.MAX_HEALTH:
 		return
 	if Time.get_ticks_msec() - player.last_hurt_ms < Balance.HEARTH_HIT_BLOCK * 1000.0:
 		return
@@ -202,7 +218,7 @@ func _update_hearths(delta: float) -> void:
 			return
 	for h in level.braziers:
 		if player.global_position.distance_to(h) < Balance.HEARTH_RANGE:
-			player.heal(Balance.HEARTH_HEAL * delta)
+			player.heal(Balance.HEARTH_HEAL * (5.0 / 9.0 if Memory.is_burned("mother_name") else 1.0) * delta)
 			if not _hearth_hint_shown:
 				_hearth_hint_shown = true
 				hud.banner("Ocağın istisi yaralarını sağaldır")
@@ -222,10 +238,12 @@ func _apply_quality() -> void:
 # --- Debug capture (see scripts/systems/settings.gd) ------------------------------
 
 func _demo_actions() -> void:
-	if Settings.demo in ["pause", "settings"] and _frame == 60:
+	if Settings.demo in ["pause", "settings", "keys"] and _frame == 60:
 		pause_menu.open()
-	if Settings.demo == "settings" and _frame == 70:
+	if Settings.demo in ["settings", "keys"] and _frame == 70:
 		pause_menu._open_settings()
+	if Settings.demo == "keys" and _frame == 80:
+		pause_menu._settings._show_keys(true)
 	if Settings.demo == "journal" and _frame == 60:
 		journal.open()
 

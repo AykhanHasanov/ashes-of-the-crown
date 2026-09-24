@@ -12,6 +12,7 @@ config/features=PackedStringArray("4.7", "Forward Plus")
 
 [autoload]
 
+DataDB="*res://scripts/core/data_db.gd"
 Settings="*res://scripts/systems/settings.gd"
 Memory="*res://scripts/systems/memory_system.gd"
 GameState="*res://scripts/systems/game_state.gd"

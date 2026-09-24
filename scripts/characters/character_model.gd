@@ -1,5 +1,5 @@
 extends Node3D
-## Wraps an imported KayKit character (glTF): hides unused equipment, recolors parts,
+## Wraps an imported character (KayKit or Quaternius glTF): hides unused equipment, recolors parts,
 ## attaches extra weapons to hand bones, loops locomotion clips and plays one-shot
 ## actions with cross-fades. Faces -Z like every other actor in the game.
 
@@ -27,13 +27,16 @@ var hold_last := false
 var _locomotion := ""
 
 
-func setup(path: String, hidden: Array, model_scale: float) -> void:
+func setup(path: String, hidden: Array, model_scale: float, extra_loops: Array = []) -> void:
 	scene = load(path).instantiate()
 	scene.scale = Vector3.ONE * model_scale
 	scene.rotation.y = PI  # glTF faces +Z, the game faces -Z
 	add_child(scene)
 	anim = scene.find_children("*", "AnimationPlayer", true, false)[0]
 	skeleton = scene.find_children("*", "Skeleton3D", true, false)[0]
+	for n in extra_loops:
+		if anim.has_animation(n):
+			anim.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	for mi in scene.find_children("*", "MeshInstance3D", true, false):
 		if mi.name in hidden:
 			mi.visible = false
@@ -43,6 +46,58 @@ func setup(path: String, hidden: Array, model_scale: float) -> void:
 			anim.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	anim.animation_finished.connect(_on_finished)
 	set_locomotion(false)
+
+
+## Rescales the model so its longest horizontal extent is length metres
+## (Quaternius models come in their own units).
+func fit_length(length: float) -> void:
+	var box := bounds()
+	var longest := maxf(box.size.x, box.size.z)
+	if longest > 0.0001:
+		scene.scale *= length / longest
+
+
+## Bounding box of all meshes in this node's local space.
+func bounds() -> AABB:
+	var box := AABB()
+	var first := true
+	# Skinned meshes render where their bones are, whatever the node scales say
+	# (Quaternius armatures are scaled x100 with bones in 1/100 units).
+	if skeleton != null and skeleton.get_bone_count() > 1:
+		var to_local: Transform3D = _local_xf(skeleton)
+		for i in skeleton.get_bone_count():
+			var bone_name := skeleton.get_bone_name(i)
+			if bone_name.contains("Pole") or bone_name.contains("IK"):
+				continue  # IK helpers float outside the body
+			var p: Vector3 = to_local * skeleton.get_bone_global_pose(i).origin
+			box = AABB(p, Vector3.ZERO) if first else box.expand(p)
+			first = false
+		return box.grow(box.get_longest_axis_size() * 0.08)
+	for mi: MeshInstance3D in scene.find_children("*", "MeshInstance3D", true, false):
+		var b: AABB = _local_xf(mi) * mi.get_aabb()
+		box = b if first else box.merge(b)
+		first = false
+	return box
+
+
+## Transform from a descendant's space into this node's space.
+func _local_xf(node: Node3D) -> Transform3D:
+	var xf := Transform3D()
+	var n: Node = node
+	while n != self and n != null:
+		xf = (n as Node3D).transform * xf
+		n = n.get_parent()
+	return xf
+
+
+## Plays a looping clip as the current locomotion (no-op while a one-shot runs).
+func play_loop(clip: String, speed := 1.0, blend := 0.18) -> void:
+	if action != "" or not anim.has_animation(clip):
+		return
+	anim.speed_scale = speed
+	if _locomotion != clip:
+		_locomotion = clip
+		anim.play(clip, blend)
 
 
 func mesh(mesh_name: String) -> MeshInstance3D:
@@ -143,6 +198,8 @@ func set_locomotion(moving: bool, speed_scale := 1.0) -> void:
 	if action != "":
 		return
 	var want := move_anim if moving else idle_anim
+	if not anim.has_animation(want):
+		return  # clip names are set right after setup() for non-KayKit rigs
 	anim.speed_scale = speed_scale if moving else 1.0
 	if want != _locomotion:
 		_locomotion = want

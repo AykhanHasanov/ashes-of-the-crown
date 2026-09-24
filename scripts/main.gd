@@ -58,7 +58,7 @@ func _begin(mode: String) -> void:
 	match Settings.demo:
 		"menu":
 			_menu()
-		"pause", "settings":
+		"pause", "settings", "keys":
 			_find_rufet()
 			process_mode = Node.PROCESS_MODE_ALWAYS  # keep counting frames for the capture
 		"explore", "radial", "offer", "whirl", "unstoppable":
