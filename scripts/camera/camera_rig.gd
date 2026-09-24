@@ -21,6 +21,7 @@ var _focus := Vector3.ZERO
 var _yaw := YAW
 var _pitch := PITCH
 var _dist := DISTANCE
+var _punch := 0.0
 
 
 func _ready() -> void:
@@ -52,6 +53,11 @@ func add_trauma(amount: float) -> void:
 	trauma = minf(trauma + amount, 1.0)
 
 
+## Short zoom-in that springs back (finishers, ember blasts).
+func punch(amount: float) -> void:
+	_punch = maxf(_punch, amount)
+
+
 func _process(delta: float) -> void:
 	var want_focus := _focus
 	if _cine:
@@ -65,12 +71,13 @@ func _process(delta: float) -> void:
 	_dist = lerpf(_dist, CINE_DISTANCE if _cine else DISTANCE, k)
 	camera.fov = lerpf(camera.fov, CINE_FOV if _cine else FOV, k)
 	trauma = maxf(trauma - delta * 1.6, 0.0)
+	_punch = maxf(_punch - delta * 3.0, 0.0)
 	_place()
 
 
 func _place() -> void:
 	var b := Basis.from_euler(Vector3(deg_to_rad(_pitch), deg_to_rad(_yaw), 0.0))
-	var pos := _focus + b * Vector3(0, 0, _dist)
+	var pos := _focus + b * Vector3(0, 0, _dist * (1.0 - 0.12 * _punch * _punch))
 	var s := trauma * trauma
 	var t := Time.get_ticks_msec() * 0.001
 	var off := Vector3(sin(t * 43.0), sin(t * 37.0 + 1.3), 0.0) * s * 0.45

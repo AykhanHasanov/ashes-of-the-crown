@@ -1,22 +1,23 @@
 extends CharacterBody3D
-## Rüfət — Ayxan's blood brother and captain of the palace guard.
-## Waits by the south-gate hearth, talks, and fights beside Ayxan during waves.
-## Shades target only Ayxan, so Rüfət never dies in this chapter.
+## Rüfət — Ayxan's blood brother and captain of the palace guard (KayKit Knight
+## with helmet, sword and round shield). Waits by the south-gate hearth, talks, and
+## fights beside Ayxan during the waves. Shades target only Ayxan in this chapter.
 
-const Visuals := preload("res://scripts/world/visuals.gd")
+const CharacterModel := preload("res://scripts/characters/character_model.gd")
+const MODEL_PATH := "res://assets/characters/adventurers/Knight.glb"
+const HIDDEN := ["1H_Sword_Offhand", "Badge_Shield", "Rectangle_Shield", "Spike_Shield", "2H_Sword"]
 
-const SPEED := 5.2
-const REACH := 1.8
+const SPEED := 5.4
+const REACH := 1.9
 const DAMAGE := 12.0
-const ATTACK_COOLDOWN := 1.05
-const SWORD_REST := Vector3(-30, 20, 0)
+const ATTACK_COOLDOWN := 1.1
+const IMPACT := 0.32
 
 var in_combat := false
-var _model: Node3D
-var _sword: Node3D
+var _model
 var _attack_cd := 0.0
-var _t := 0.0
-var _swing_side := 1.0
+var _swing_t := -1.0
+var _swing_target
 
 
 func _ready() -> void:
@@ -30,9 +31,16 @@ func _ready() -> void:
 	shape.shape = cap
 	shape.position.y = 0.9
 	add_child(shape)
-	_model = Visuals.humanoid(Color(0.1, 0.14, 0.27), Color(0.56, 0.58, 0.62), Color(0.72, 0.55, 0.43), Color(0.04, 0.03, 0.03))
+	_model = CharacterModel.new()
 	add_child(_model)
-	_sword = _model.get_node("SwordPivot")
+	_model.setup(MODEL_PATH, HIDDEN, 0.82)
+	_model.tint(Color(0.85, 0.85, 0.9))
+	var cape: MeshInstance3D = _model.mesh("Knight_Cape")
+	if cape:
+		var blue := StandardMaterial3D.new()
+		blue.albedo_color = Color(0.1, 0.15, 0.3)
+		blue.roughness = 0.85
+		cape.material_override = blue
 
 
 func face(point: Vector3) -> void:
@@ -43,10 +51,16 @@ func face(point: Vector3) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	_t += delta
 	_attack_cd -= delta
 	var move := Vector3.ZERO
-	if in_combat:
+	if _swing_t >= 0.0:
+		var before := _swing_t
+		_swing_t += delta
+		if before < IMPACT and _swing_t >= IMPACT:
+			_land_swing()
+		if _swing_t > 0.6:
+			_swing_t = -1.0
+	elif in_combat:
 		var e = _nearest_enemy(14.0)
 		if e != null:
 			var to: Vector3 = e.global_position - global_position
@@ -56,12 +70,26 @@ func _physics_process(delta: float) -> void:
 				move = to.normalized() * SPEED
 			elif _attack_cd <= 0.0:
 				_attack_cd = ATTACK_COOLDOWN
-				_swing()
-				e.take_damage(DAMAGE, to.normalized() * 4.0)
+				_swing_t = 0.0
+				_swing_target = e
+				_model.play_action("1H_Melee_Attack_Chop", 1.6, 0.06)
+				Audio.play("swing", -12.0, 0.1, global_position, 3)
 	velocity = Vector3(move.x, -0.5, move.z)
 	move_and_slide()
-	var k := clampf(move.length() / SPEED, 0.0, 1.0)
-	_model.position.y = absf(sin(_t * 9.0)) * 0.07 * k + sin(_t * 1.6) * 0.01
+	_model.set_locomotion(move.length() > 0.1)
+
+
+func _land_swing() -> void:
+	var e = _swing_target
+	if not is_instance_valid(e) or not e.is_in_group("enemies"):
+		return
+	var to: Vector3 = e.global_position - global_position
+	to.y = 0.0
+	if to.length() > REACH + e.radius + 0.6:
+		return
+	e.take_damage(DAMAGE, to.normalized() * 4.0)
+	Fx.damage_number(e.global_position + Vector3(0, 2.0 * e.size, 0), DAMAGE)
+	Audio.play("hit", -8.0, 0.1, e.global_position, 3)
 
 
 func _nearest_enemy(max_dist: float):
@@ -73,13 +101,3 @@ func _nearest_enemy(max_dist: float):
 			best_d = d
 			best = e
 	return best
-
-
-func _swing() -> void:
-	_swing_side = -_swing_side
-	var dir := -_model.global_basis.z
-	Fx.slash(global_position + Vector3(0, 1.0, 0), dir, _swing_side)
-	_sword.rotation_degrees = Vector3(-10, 85 * _swing_side, 0)
-	var tw := create_tween()
-	tw.tween_property(_sword, "rotation_degrees", Vector3(-10, -85 * _swing_side, 0), 0.14)
-	tw.tween_property(_sword, "rotation_degrees", SWORD_REST, 0.3)

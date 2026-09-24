@@ -357,6 +357,14 @@ func _make_braziers() -> void:
 		flame.position = p + Vector3(0, 1.3, 0)
 		add_child(flame)
 		_fire_light(p + Vector3(0, 2.0, 0), 1.8, 9.0)
+		var crackle := AudioStreamPlayer3D.new()
+		crackle.stream = Audio.stream("loop_fire")
+		crackle.volume_db = -8.0
+		crackle.unit_size = 2.5
+		crackle.max_distance = 14.0
+		crackle.autoplay = true
+		crackle.position = p + Vector3(0, 1.2, 0)
+		add_child(crackle)
 
 
 func _make_rubble() -> void:

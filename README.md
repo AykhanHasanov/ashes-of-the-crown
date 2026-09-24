@@ -10,9 +10,9 @@ Mühərrik: **Godot 4.7.2** (Forward+). Bütün səviyyə, personajlar və effek
 | Düymə | Hərəkət |
 |---|---|
 | W A S D | Hərəkət |
-| Sol klik / J | Qılınc |
+| Sol klik / J | Qılınc. Ardıcıl 3 dəfə bas: kombo, 3-cü zərbə ən güclüsüdür |
 | Sağ klik / Q | **Alov Dalğası**: bir xatirəni yandırır |
-| Space | Kül addımı (sürətli qaçış) |
+| Space | Kül addımı (yayınma, zərbədən qoruyur) |
 | E | Danış / davam et |
 | 1-3 | Dialoq seçimi |
 | F9 | Qrafika: Aşağı / Yüksək |
@@ -22,6 +22,7 @@ Mühərrik: **Godot 4.7.2** (Forward+). Bütün səviyyə, personajlar və effek
 | Esc | Çıxış |
 
 Yaralanmısansa, ocaqların yanında dayan: odun istisi səni sağaldır.
+Düşmənin altında qırmızı halqa böyüyürsə, o, zərbə vurmağa hazırlaşır. Yayın!
 
 ## Struktur
 
@@ -30,7 +31,8 @@ docs/         GDD və qərarlar jurnalı
 scenes/       main.tscn (giriş nöqtəsi)
 scripts/
   main.gd       Fəsil 1 axını: giriş → Rüfət → 3 dalğa → son
-  systems/      Settings, Memory (Yaddaş Yanğını), Fx (effektlər) autoload-ları
+  systems/      Settings, Memory (Yaddaş Yanğını), Fx (hitstop, effektlər), Audio autoload-ları
+  characters/   KayKit modellərini idarə edən qat (animasiya, rəng, silah)
   world/        Közqala səviyyəsi, vizual və partikl köməkçiləri
   player/       Ayxan
   npc/          Rüfət
@@ -38,8 +40,12 @@ scripts/
   camera/       İzometrik kamera + dialoq kamerası
   ui/           HUD, dialoq pəncərəsi
   story/        Dialoq mətnləri
-shaders/      Yer, daş, lava, kölgə, vinyet
+shaders/      Yer, daş, lava, kül örtüyü, rəng dəyişmə, vinyet
+assets/       KayKit personajları (CC0), sintez olunmuş səslər
+tools/        gen_audio.py (səs və musiqi generatoru), inspect_models.gd
 ```
+
+Səsləri yenidən yaratmaq üçün: `python tools/gen_audio.py`
 
 ## Tərtibatçı üçün: avtomatik ekran görüntüsü
 

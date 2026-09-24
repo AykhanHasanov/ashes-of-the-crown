@@ -78,6 +78,17 @@ Satqın kim olursa olsun, sonda həqiqət açılır: **kral yanğını özü ist
 - Ocaqların istisi yaraları sağaldır, yəni ərazinin taktiki mənası var.
 - Yoldaş döyüşdə kömək edir. Satqın yoldaş isə kritik anda arxa çevirə bilər.
 
+### Döyüş hissi (M2)
+- **Kombo:** çəpinə → üfüqi → yuxarıdan güclü zərbə. Düymə əvvəlcədən basılsa, yadda saxlanılır. Hər zərbədə irəli addım atılır, zərər qılıncın dəydiyi anda hesablanır.
+- **Çəki:** zərbədə qısa zaman dayanması (hitstop), kameranın silkələnməsi, güclü zərbədə kamera yaxınlaşması, qığılcım və işıq partlayışı, uçan zərbə rəqəmləri.
+- **Oxunaqlılıq:** düşmən hücumdan əvvəl gözlərini alışdırır, altında isə böyüyən qırmızı halqa çıxır. Adi düşmənin hücumunu qılınc kəsir, elitə hücumunu isə yalnız güclü zərbə kəsə bilir.
+- **Kulminasiya:** dalğanın son düşməni yavaş çəkilişdə yıxılır.
+
+### Səs dizaynı
+- Bütün səslər `tools/gen_audio.py` ilə sintez olunur.
+- **Musiqi:** sakit qat (tar improvizasiyası, kamança, uzaq qonq) və döyüş qatı (6/8 ölçüdə nağara və qaval, tar ostinatosu, kamança fəryadı). Qatlar arasında yumşaq keçid var.
+- Ocaqların çırtıltısı 3D məkanda eşidilir, külək isə daim əsir.
+
 ## 9. NPC süni intellekti
 
 - Əsas yanaşma "utility AI"dır: hər NPC-nin məqsədi, qorxusu, sirri, sədaqəti və Ayxan haqqında yaddaşı olur.
@@ -97,8 +108,8 @@ Satqın kim olursa olsun, sonda həqiqət açılır: **kral yanğını özü ist
 | Mərhələ | Məzmun | Status |
 |---|---|---|
 | **M1: Prototip** | Közqala həyəti, Ayxan, Rüfət, dialoq, Yaddaş Yanğını, 3 dalğa, 2 qrafika rejimi | ✅ Hazırdır |
-| M2: Hiss | Səs və musiqi, daha yaxşı animasiyalar, döyüşün tarazlanması, menyu və fasilə | Növbəti |
-| M3: Real vizual | Pulsuz CC0 3D model və animasiya paketləri (Quaternius, KayKit), Közqalanın tam bədii versiyası | |
+| **M2: Hiss** | KayKit 3D personajları və animasiyaları, kombo döyüşü, hitstop, zərbə rəqəmləri, 28 sintez səs və muğam musiqisi (sakit və döyüş qatları) | ✅ Hazırdır |
+| M3: Dünya və interfeys | Közqalanın bədii versiyası (CC0 mühit modelləri), baş menyu, fasilə, parametrlər, döyüşün tarazlanması | Növbəti |
 | M4: Sistemlər | Satqın sistemi, sübutlar, NPC süni intellekti, Son Ocaq bazası | |
 | M5: Vertical slice | Közqala tam hekayə xətti ilə, 3 NPC, 1 satqın ssenarisi | |
 | M6+ | Digər bölgələr, bütün sonlar, Steam | |

@@ -41,8 +41,9 @@ var _hearth_hint_shown := false
 
 
 func _ready() -> void:
-	Engine.time_scale = 1.0
+	Fx.reset_time()
 	Memory.reset()
+	Audio.music("ambient", 3.0)
 
 	level = Kozqala.new()
 	add_child(level)
@@ -181,6 +182,8 @@ func _start_wave(i: int, close := false) -> void:
 	hud.set_objective("Dalğa %d / %d" % [i + 1, WAVES.size()])
 	hud.banner(w["title"])
 	Fx.shake(0.35)
+	Audio.play("horn", -3.0, 0.0)
+	Audio.music("battle", 1.2)
 	var kinds: Array[String] = []
 	for k in ["elite", "normal", "fast"]:
 		for n in int(w[k]):
@@ -219,6 +222,10 @@ func _spawn_point(close: bool) -> Vector3:
 
 func _on_enemy_killed(_e: Node) -> void:
 	_alive -= 1
+	if _alive <= 0 and phase == Phase.WAVES:
+		# Last shade of the wave falls in slow motion
+		Fx.slowmo(0.25, 0.8)
+		Fx.punch(0.8)
 
 
 func _update_hearths(delta: float) -> void:
@@ -237,6 +244,8 @@ func _on_player_died() -> void:
 	phase = Phase.DEFEAT
 	rufet.in_combat = false
 	hud.set_objective("")
+	Audio.music("", 1.0)
+	Audio.play("sting_defeat", -2.0, 0.0)
 	await get_tree().create_timer(1.2).timeout
 	hud.show_card("KÖZ SÖNDÜ", "Ayxan külün içində yıxıldı.", "[R] — yenidən başla", 0.75)
 
@@ -246,6 +255,8 @@ func _victory() -> void:
 	rufet.in_combat = false
 	player.input_locked = true
 	hud.set_objective("")
+	Audio.music("ambient", 4.0)
+	Audio.play("sting_victory", -2.0, 0.0)
 	var burned: int = Memory.burned.size()
 	var lines := PackedStringArray()
 	lines.append("Yanmış xatirələr: %d / %d" % [burned, Memory.MEMORIES.size()])
@@ -282,7 +293,7 @@ func _demo_actions() -> void:
 		return
 	if _frame == Settings.capture_frame - 60:
 		player.attack()
-	elif _frame == Settings.capture_frame - 12:
+	elif _frame == Settings.capture_frame - 30:
 		player.ember_power()
 
 

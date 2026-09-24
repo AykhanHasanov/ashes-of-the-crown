@@ -1,6 +1,7 @@
 extends Node
-## Game-feel helpers shared by every actor: camera shake, hitstop, notifications
-## and one-shot visual effects (fire nova, sword slash, hit sparks, death bursts).
+## Game-feel helpers shared by every actor: time control (hitstop and slow motion),
+## camera shake and punch, floating damage numbers, notifications and one-shot
+## visual effects (fire nova, sword slash, hit sparks, death bursts, dust).
 
 signal notified(text: String)
 
@@ -9,7 +10,41 @@ const Effects := preload("res://scripts/world/effects.gd")
 var camera_rig: Node
 var world: Node3D
 
-var _hitstop_active := false
+var _stop_until := 0
+var _slow_until := 0
+var _slow_scale := 1.0
+
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
+
+func _process(_delta: float) -> void:
+	# Real-time clock so hitstop and slow motion never stretch themselves.
+	var now := Time.get_ticks_msec()
+	if now < _stop_until:
+		Engine.time_scale = 0.03
+	elif now < _slow_until:
+		Engine.time_scale = _slow_scale
+	else:
+		Engine.time_scale = 1.0
+
+
+func reset_time() -> void:
+	_stop_until = 0
+	_slow_until = 0
+	Engine.time_scale = 1.0
+
+
+## Freezes the game for `duration` real seconds — the weight of a hit.
+func hitstop(duration: float) -> void:
+	_stop_until = maxi(_stop_until, Time.get_ticks_msec() + int(duration * 1000.0))
+
+
+## Slows time to `time_scale` for `duration` real seconds (kills, finishers).
+func slowmo(time_scale: float, duration: float) -> void:
+	_slow_scale = time_scale
+	_slow_until = maxi(_slow_until, Time.get_ticks_msec() + int(duration * 1000.0))
 
 
 func shake(amount: float) -> void:
@@ -17,24 +52,50 @@ func shake(amount: float) -> void:
 		camera_rig.add_trauma(amount)
 
 
-func hitstop(duration: float) -> void:
-	if _hitstop_active:
-		return
-	_hitstop_active = true
-	Engine.time_scale = 0.05
-	await get_tree().create_timer(duration, true, false, true).timeout
-	Engine.time_scale = 1.0
-	_hitstop_active = false
+## Quick zoom toward the action.
+func punch(amount: float) -> void:
+	if is_instance_valid(camera_rig):
+		camera_rig.punch(amount)
 
 
 func notify(text: String) -> void:
 	notified.emit(text)
 
 
+## Floating number above a hit. kind: "normal", "heavy", "ember".
+func damage_number(pos: Vector3, amount: float, kind := "normal") -> void:
+	if not is_instance_valid(world):
+		return
+	var label := Label3D.new()
+	label.text = str(int(round(amount)))
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.no_depth_test = true
+	label.fixed_size = true
+	label.pixel_size = 0.0011
+	label.font_size = 42 if kind == "normal" else 58
+	label.outline_size = 12
+	label.outline_modulate = Color(0.08, 0.02, 0.0, 0.9)
+	match kind:
+		"heavy":
+			label.modulate = Color(1.0, 0.72, 0.3)
+		"ember":
+			label.modulate = Color(1.0, 0.42, 0.12)
+		_:
+			label.modulate = Color(1.0, 0.95, 0.88)
+	var jitter := Vector3(randf_range(-0.4, 0.4), 0.0, randf_range(-0.4, 0.4))
+	_spawn_temp(label, pos + jitter, 1.0)
+	var tw := label.create_tween().set_parallel()
+	tw.tween_property(label, "position:y", label.position.y + 1.3, 0.7).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	label.scale = Vector3.ONE * 1.6
+	tw.tween_property(label, "scale", Vector3.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(label, "modulate:a", 0.0, 0.3).set_delay(0.45)
+	tw.tween_property(label, "outline_modulate:a", 0.0, 0.3).set_delay(0.45)
+
+
 func fire_nova(pos: Vector3, radius: float) -> void:
 	if not is_instance_valid(world):
 		return
-	var burst := Effects.burst(140, 16.0, 0.9, 0.5, true, Color(3.2, 1.3, 0.3))
+	var burst := Effects.burst(90, 16.0, 0.9, 0.45, true, Color(2.0, 0.8, 0.18))
 	_spawn_temp(burst, pos + Vector3(0, 0.7, 0), 2.0)
 	burst.emitting = true
 
@@ -61,27 +122,33 @@ func fire_nova(pos: Vector3, radius: float) -> void:
 	light.create_tween().tween_property(light, "light_energy", 0.0, 0.7)
 
 
-func slash(pos: Vector3, dir: Vector3, side: float) -> void:
+func slash(pos: Vector3, dir: Vector3, side: float, heavy := false) -> void:
 	if not is_instance_valid(world):
 		return
 	var arc := MeshInstance3D.new()
-	arc.mesh = Effects.arc_mesh(0.7, 2.5, 120.0)
-	var mat := Effects.additive_material(Color(1.0, 0.62, 0.28))
+	arc.mesh = Effects.arc_mesh(0.7, 2.9 if heavy else 2.5, 150.0 if heavy else 120.0)
+	var mat := Effects.additive_material(Color(1.0, 0.55, 0.2) if heavy else Color(1.0, 0.7, 0.4))
 	arc.material_override = mat
 	_spawn_temp(arc, pos, 0.5)
 	arc.rotation.y = atan2(-dir.x, -dir.z)
 	arc.rotation.z = 0.25 * side
 	var tw := arc.create_tween().set_parallel()
 	tw.tween_property(arc, "rotation:y", arc.rotation.y - 0.5 * side, 0.16)
-	tw.tween_property(mat, "albedo_color:a", 0.0, 0.18)
+	tw.tween_property(mat, "albedo_color:a", 0.0, 0.2)
 
 
-func hit_spark(pos: Vector3) -> void:
+func hit_spark(pos: Vector3, heavy := false) -> void:
 	if not is_instance_valid(world):
 		return
-	var p := Effects.burst(18, 7.0, 0.35, 0.18, false, Color(5.0, 2.2, 0.5))
+	var p := Effects.burst(34 if heavy else 18, 9.0 if heavy else 7.0, 0.4, 0.2, false, Color(5.0, 2.2, 0.5))
 	_spawn_temp(p, pos, 1.0)
 	p.emitting = true
+	var flash := OmniLight3D.new()
+	flash.light_color = Color(1.0, 0.6, 0.3)
+	flash.light_energy = 4.0 if heavy else 2.0
+	flash.omni_range = 4.0
+	_spawn_temp(flash, pos, 0.3)
+	flash.create_tween().tween_property(flash, "light_energy", 0.0, 0.15)
 
 
 func death_burst(pos: Vector3, size: float) -> void:

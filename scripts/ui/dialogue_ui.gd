@@ -126,6 +126,7 @@ func _show(id: String) -> void:
 	if node.has("set"):
 		flag_set.emit(node["set"])
 	_node = node
+	Audio.play("ui_click", -12.0, 0.05)
 	var speaker: String = node.get("speaker", "")
 	_name.text = speaker
 	_name.add_theme_color_override("font_color", EMBER if speaker == "Ayxan" else GOLD)
@@ -177,6 +178,7 @@ func _choose(i: int) -> void:
 	if not _active or _typing:
 		return
 	var c: Dictionary = _node["choices"][i]
+	Audio.play("ui_select", -10.0, 0.0)
 	if c.has("set"):
 		flag_set.emit(c["set"])
 	if c.has("next"):
