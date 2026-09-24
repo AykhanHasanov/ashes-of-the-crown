@@ -1,6 +1,8 @@
 # Ashes of the Crown: Oyun Dizayn Sənədi (GDD)
 
 > Versiya 0.1 · 2026-09-24 · Status: canlı sənəddir, hər mərhələdə yenilənir.
+>
+> ⚠️ **V2 qeydi:** Satqın/detektiv sistemi (bölmə 4-dəki cədvəl, iz sistemi, Fəsil 2-nin sorğu-sual və divan hissəsi) V2-də silinib. Aktual dizayn üçün **docs/SPEC_V2.md** faylına bax. Dünya, personajlar, döyüş və Yaddaş Yanğınının əsasları qüvvədədir.
 
 ## 1. Bir cümlədə
 

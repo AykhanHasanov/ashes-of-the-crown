@@ -1,7 +1,7 @@
 extends "res://scripts/world/kozqala.gd"
 ## Son Ocaq — the ruined caravanserai where the survivors gathered. An arcaded
 ## yard (two storeys of arches to the north and west, low parapets to the south
-## and east for the camera) around one great fire: the last hearth. Each suspect
+## and east for the camera) around one great fire: the last hearth. Each survivor
 ## has a small station of their own belongings around the yard.
 ##
 ## Reuses Közqala's prop, material, lighting and effect helpers.
@@ -117,7 +117,7 @@ func _make_hearth() -> void:
 	add_child(crackle)
 
 
-## Each suspect's corner of the yard, matching their station in interrogation.gd.
+## Each survivor's corner of the yard, matching their station in survivors.gd.
 func _make_stations() -> void:
 	# Sabir: a reading table with candles
 	_prop("dungeon/table_medium_broken.glb", Vector3(-9.0, 0, -12.8), 10.0, 1.0, true, WOOD_TINT)

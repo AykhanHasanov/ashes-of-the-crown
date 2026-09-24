@@ -24,13 +24,12 @@ const DATA := {
 	"ember_a": {"speaker": "Rüfət", "text": "Onda heç olmasa bunu yadda saxla: nə qədər yandırsan da, mən sənin qardaşınam.", "next": "status"},
 	"ember_b": {"speaker": "Rüfət", "text": "Qoca Sabir deyir ki, Tacın odunu daşıyan hər kral il-il unudurmuş. Sənin atan axırda... öz oğlunun adını da unutmuşdu.", "set": "lore_forgetting_king", "next": "status"},
 
-	"where": {"speaker": "Rüfət", "text": "Mən... postumda idim.", "set": "rufet_hesitated", "next": "where2"},
-	"where2": {"speaker": "Rüfət", "text": "Yox. Sənə yalan deməyəcəyəm. Sabir məni aşağı şəhərə göndərmişdi — bir məktubu çatdırmaq üçün. Qayıdanda saray artıq yanırdı.", "choices": [
-		{"text": "Hansı məktub? Kimə?", "next": "letter"},
-		{"text": "Sənə inanıram.", "next": "trust"},
+	"where": {"speaker": "Rüfət", "text": "Postumda idim... Yox. Kral axşam əmr verdi ki, bütün mühafizə saraydan çıxsın. Bunu heç vaxt etməzdi.", "choices": [
+		{"text": "Niyə belə etdi?", "next": "why"},
+		{"text": "Sənə inanıram.", "next": "believe"},
 	]},
-	"letter": {"speaker": "Rüfət", "text": "Möhürlü idi, açmadım. Karvansarada Anarın adamlarına verdim. Bundan artığını bilmirəm, and olsun.", "set": "clue_letter", "next": "status"},
-	"trust": {"speaker": "Rüfət", "text": "...Sağ ol. Bu sözə hamıdan çox ehtiyacım vardı.", "set": "rufet_trusted", "next": "status"},
+	"why": {"speaker": "Rüfət", "text": "Bilmirəm. Amma bir şeyi bilirəm: o, nə edəcəyini bilirdi.", "set": "king_sent_guards_away", "next": "status"},
+	"believe": {"speaker": "Rüfət", "text": "...Sağ ol. Bu sözə ehtiyacım vardı.", "set": "rufet_believed", "next": "status"},
 
 	# --- The ember took his face ----------------------------------------------
 	"stranger": {"speaker": "Rüfət", "text": "Ayxan! Şükür... Üç gündür külün altında səni axtarıram.", "choices": [
@@ -54,20 +53,16 @@ const DATA := {
 const AFTER_WAVES := {
 	"start": {"speaker": "Rüfət", "text": "Bitdi... hələlik. Ayxan, bax — kül hələ də közərir. Orada, orada, bir də orada.", "next": "b"},
 	"b": {"speaker": "Rüfət", "text": "Kahinlər deyir ki, böyük od öldüyü yerdə yaddaş qoyur. Sənin közün o yaddaşı oyada bilər. Bəlkə o gecə nə baş verdiyini görərsən.", "next": "c"},
-	"c": {"speaker": "Ayxan", "text": "Onda görəcəyəm. Kim bu şəhəri yandırıbsa, izi külün içindədir.", "end": true, "event": "start_echoes"},
+	"c": {"speaker": "Ayxan", "text": "Onda görəcəyəm. O gecə nə baş veribsə, külün içində qalıb.", "end": true, "event": "start_echoes"},
 }
 
-## After all three echoes: what Ayxan tells Rüfət — and how Rüfət takes it.
+## After all three echoes: what Ayxan saw of his father's last night.
 const AFTER_ECHOES := {
 	"start": {"speaker": "Rüfət", "text": "Nə gördün? Gözlərin yenə közün rəngini alıb.", "choices": [
-		{"text": "Satqın aramızdadır, Rüfət. İzlər saraydan kiməsə aparır.", "next": "tell"},
-		{"text": "Hələ heç nə deyə bilmərəm.", "next": "silent"},
+		{"text": "Atam tacı özü taxdı. Bilə-bilə.", "next": "knew"},
+		{"text": "Heç nə anlamadım.", "next": "lost"},
 	]},
-	"tell": {"branch": {"if": "traitor:rufet", "then": "tell_guilty", "else": "tell_loyal"}},
-	"tell_loyal": {"speaker": "Rüfət", "text": "Deməli, Kül Gecəsi təsadüf deyildi... And olsun, o adamı tapacağıq. Hansı adla çağırılırsa çağırılsın.", "next": "camp"},
-	"tell_guilty": {"speaker": "Rüfət", "text": "...Sübut? Kül yalan danışmağı da bacarır, Ayxan. Közə bu qədər inanma.", "set": "rufet_deflected", "next": "tell_guilty2"},
-	"tell_guilty2": {"speaker": "Ayxan", "text": "(Səsi titrədi. Bir anlıq gözlərini yayındırdı.)", "next": "camp"},
-	"silent": {"speaker": "Rüfət", "text": "Başa düşürəm. Hər şeyi ürəyində saxlama, amma. Tək daşıya bilməzsən.", "next": "camp"},
-	"camp": {"speaker": "Rüfət", "text": "Sağ qalanlar köhnə karvansarada toplaşıb — Son Ocaqda. Sabir də oradadır, Əhliman da, hətta Elvinin adamları da. Satqın, çox güman, onların arasındadır.", "next": "go"},
-	"go": {"speaker": "Ayxan", "text": "Onda Son Ocağa gedirik. Qoy üzlərinə baxım.", "end": true, "event": "chapter_end"},
+	"knew": {"speaker": "Rüfət", "text": "Deməli, bu yanğın təsadüf deyildi... Bəs niyə? Niyə səni tək qoydu?", "set": "king_chose_fire", "next": "camp"},
+	"lost": {"speaker": "Rüfət", "text": "Tək daşıya bilməzsən.", "next": "camp"},
+	"camp": {"speaker": "Rüfət", "text": "Sağ qalanlar Son Ocaqda toplaşıb. Onlara od lazımdır, Ayxan. Sənin odun.", "end": true, "event": "chapter_end"},
 }

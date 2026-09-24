@@ -1,7 +1,7 @@
 extends "res://scripts/chapter_base.gd"
 ## Chapter 1 "Birinci səhər" (also hosts the title screen): Ayxan rises from the
 ## ash → Rüfət → three waves of ash shades → three Kül əks-sədaları (ember echoes)
-## that each reveal a trait of the hidden traitor → back to Rüfət → chapter end,
+## that replay the king's last night → back to Rüfət → chapter end,
 ## from where Enter leads on to Chapter 2 (Son Ocaq).
 ##
 ## Checkpoints: start, waves, echoes, return, chapter_end.
@@ -13,7 +13,7 @@ const EchoSpot := preload("res://scripts/world/echo_spot.gd")
 const CharacterModel := preload("res://scripts/characters/character_model.gd")
 const MainMenu := preload("res://scripts/ui/main_menu.gd")
 const RufetDialogue := preload("res://scripts/story/rufet_dialogue.gd")
-const Conspiracy := preload("res://scripts/story/conspiracy.gd")
+const KingEchoes := preload("res://scripts/story/king_echoes.gd")
 const GHOST_SHADER := preload("res://shaders/ghost.gdshader")
 const GHOST_MODEL := "res://assets/characters/adventurers/Rogue_Hooded.glb"
 
@@ -72,11 +72,11 @@ func _begin(mode: String) -> void:
 		"echoes", "echo":
 			_resume("echoes")
 		"journal":
-			GameState.clues = GameState.echo_traits.slice(0, 2)
+			GameState.echoes_seen = [0, 1]
 			_resume("echoes")
 			process_mode = Node.PROCESS_MODE_ALWAYS
 		"chapter_end", "victory":
-			GameState.clues = GameState.echo_traits.duplicate()
+			GameState.echoes_seen = [0, 1, 2]
 			_resume("chapter_end")
 		_:
 			if mode == "checkpoint" and GameState.load_game():
@@ -305,7 +305,7 @@ func _after_waves() -> void:
 		_talk(RufetDialogue.AFTER_WAVES)
 
 
-# --- Ember echoes (clues) ---------------------------------------------------------
+# --- Ember echoes (the king's last night) ---------------------------------------------------------
 
 func _start_echoes() -> void:
 	phase = Phase.ECHOES
@@ -316,14 +316,13 @@ func _start_echoes() -> void:
 func _spawn_echoes() -> void:
 	if not _echoes.is_empty():
 		return
-	for i in Conspiracy.ECHO_SPOTS.size():
+	for i in KingEchoes.ECHOES.size():
 		var spot = EchoSpot.new()
 		spot.index = i
-		spot.trait_id = GameState.echo_traits[i]
-		spot.place = Conspiracy.ECHO_SPOTS[i]["place"]
+		spot.place = KingEchoes.ECHOES[i]["place"]
 		add_child(spot)
-		spot.global_position = Conspiracy.ECHO_SPOTS[i]["pos"]
-		if GameState.clues.has(spot.trait_id):
+		spot.global_position = KingEchoes.ECHOES[i]["pos"]
+		if GameState.echoes_seen.has(i):
 			spot.extinguish()
 		_echoes.append(spot)
 
@@ -357,7 +356,7 @@ func _play_echo(spot) -> void:
 	hud.set_prompt("")
 	hud.visible = false
 	player.input_locked = true
-	var info: Dictionary = Conspiracy.TRAITS[spot.trait_id]
+	var info: Dictionary = KingEchoes.ECHOES[spot.index]
 	Audio.play("echo", -2.0, 0.0)
 
 	var toward: Vector3 = player.global_position - spot.global_position
@@ -387,15 +386,17 @@ func _play_echo(spot) -> void:
 	create_tween().tween_method(func(v: float): _ghost_mat.set_shader_parameter("alpha", v), 0.0, 1.0, 1.2)
 
 	await get_tree().create_timer(1.4).timeout
+	var words: String = KingEchoes.SILENT if Memory.is_burned("father_voice") else "Kral: \"%s\"" % info["words"]
 	dialogue.start({
-		"start": {"speaker": "Kül əks-sədası · " + spot.place, "text": info["echo"], "next": "t"},
-		"t": {"speaker": "Ayxan", "text": "(%s... Bunu unutmamalıyam.)" % info["title"], "end": true, "event": "echo_done"},
+		"start": {"speaker": "Kül əks-sədası · " + spot.place, "text": info["scene"], "next": "t"},
+		"t": {"speaker": "Kül əks-sədası · " + spot.place, "text": words, "end": true, "event": "echo_done"},
 	})
 
 
 func _finish_echo() -> void:
 	var spot = _active_echo
-	GameState.add_clue(spot.trait_id)
+	if not GameState.echoes_seen.has(spot.index):
+		GameState.echoes_seen.append(spot.index)
 	spot.extinguish()
 	var ghost = _ghost
 	var tw := create_tween()
@@ -403,9 +404,9 @@ func _finish_echo() -> void:
 	tw.tween_callback(ghost.queue_free)
 	create_tween().tween_property(level.env, "adjustment_saturation", NORMAL_SATURATION, 1.5)
 	Audio.play("memory_burn", -8.0, 0.1)
-	hud.banner("Yeni sübut: %s   ·   Tab — jurnal" % Conspiracy.TRAITS[spot.trait_id]["title"])
+	hud.banner("%s — kralın son gecəsindən bir an" % spot.place)
 	set_controls(true)
-	if GameState.clues.size() >= Conspiracy.ECHO_SPOTS.size():
+	if GameState.echoes_seen.size() >= KingEchoes.ECHOES.size():
 		save_checkpoint("return")
 		_begin_return()
 	else:
@@ -441,23 +442,13 @@ func _chapter_end() -> void:
 	Audio.play("sting_victory", -2.0, 0.0)
 
 	var lines := PackedStringArray()
-	var titles := PackedStringArray()
-	for t in GameState.clues:
-		titles.append(Conspiracy.TRAITS[t]["title"])
-	lines.append("Sübutlar: " + (", ".join(titles) if not titles.is_empty() else "yoxdur"))
-	var matching := GameState.suspects_matching()
-	if matching.size() == 1:
-		lines.append("Bütün izlər bir nəfərə aparır. Amma sübut hökm deyil — hələ yox.")
-	else:
-		lines.append("Şübhəlilər: %d nəfər." % matching.size())
+	lines.append("Görülən əks-sədalar: %d / %d" % [GameState.echoes_seen.size(), KingEchoes.ECHOES.size()])
 	var burned: int = Memory.burned.size()
 	lines.append("Yanmış xatirələr: %d / %d" % [burned, Memory.MEMORIES.size()])
 	if Memory.is_burned("rufet_face"):
-		lines.append("Rüfət yanında addımlayır — tanımadığın bir üzlə.")
-	elif GameState.flags.has("rufet_deflected"):
-		lines.append("Rüfətin gözləri sənin gözlərindən qaçır.")
-	elif GameState.flags.has("clue_letter"):
-		lines.append("Sabirin möhürlü məktubu hələ də ağlından çıxmır.")
+		lines.append("Rüfəti tanımırsan, amma o səni tanıyır.")
+	else:
+		lines.append("Rüfət yanındadır. Onun üzü hələ də yadındadır.")
 	if burned >= 4:
 		lines.append("\"...yaxınlaşırsan, Ayxan. Tac səni gözləyir...\"  — Kül Şahı")
 	lines.append("")

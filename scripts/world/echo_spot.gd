@@ -1,12 +1,11 @@
 extends Node3D
 ## Kül əks-sədası: a place where the Night of Ash still smoulders. A pulsing ring
 ## of embers marks it; touching it (handled by Main) replays one moment of that
-## night and reveals one of the traitor's traits.
+## night — the king's last hours.
 
 const Effects := preload("res://scripts/world/effects.gd")
 
 var index := 0
-var trait_id := ""
 var place := ""
 var done := false
 

@@ -7,13 +7,12 @@ extends CharacterBody3D
 ## one, with a little randomness and a personality weighting. The result is a camp
 ## where people drift between the fire, each other and their posts on their own.
 ##
-## Modes let the chapter take over: FLEE (hide during an attack), ABSENT (slip out
-## of the gate — the traitor does this during the attack), EXILED (leave for good).
+## Modes let the chapter take over: HOLD (stop for a conversation), FLEE (hide during an attack).
 
 const CharacterModel := preload("res://scripts/characters/character_model.gd")
-const Interrogation := preload("res://scripts/story/interrogation.gd")
+const Survivors := preload("res://scripts/story/survivors.gd")
 
-enum Mode { LIVE, HOLD, FLEE, ABSENT, EXILED }
+enum Mode { LIVE, HOLD, FLEE }
 
 const WALK := 1.7
 const RUN := 4.2
@@ -21,12 +20,10 @@ const RUN := 4.2
 var id := ""
 var display_name := ""
 var mode := Mode.LIVE
-## Set by the chapter: hearth centre, yard half-size, hiding place, gate points.
+## Set by the chapter: hearth centre, yard half-size, hiding place.
 var hearth := Vector3.ZERO
 var yard := 15.0
 var hide_spot := Vector3.ZERO
-var gate_inside := Vector3.ZERO
-var gate_outside := Vector3.ZERO
 
 var _model
 var _station := Vector3.ZERO
@@ -44,10 +41,10 @@ var _time_left := 0.0
 var _arrived := false
 
 
-func setup(suspect: String) -> void:
-	id = suspect
-	display_name = Interrogation.display_name(id)
-	var p: Dictionary = Interrogation.PEOPLE[id]
+func setup(survivor_id: String) -> void:
+	id = survivor_id
+	display_name = Survivors.display_name(id)
+	var p: Dictionary = Survivors.PEOPLE[id]
 	_station = p["station"][0]
 	_station_clip = p["station"][1]
 	_station_yaw = deg_to_rad(p["station"][2])
@@ -71,10 +68,10 @@ func _ready() -> void:
 	shape.position.y = 0.9
 	add_child(shape)
 
-	var p: Dictionary = Interrogation.PEOPLE[id]
+	var p: Dictionary = Survivors.PEOPLE[id]
 	_model = CharacterModel.new()
 	add_child(_model)
-	_model.setup(Interrogation.model_path(id), p["hidden"], 0.82)
+	_model.setup(Survivors.model_path(id), p["hidden"], 0.82)
 	_model.move_anim = "Walking_A"
 	var rc: Array = p["recolor"]
 	if rc.size() == 5:
@@ -112,24 +109,9 @@ func flee() -> void:
 		_arrived = false
 
 
-func slip_away() -> void:
-	mode = Mode.ABSENT
-	_arrived = false
-
-
-func exile() -> void:
-	mode = Mode.EXILED
-	_arrived = false
-	remove_from_group("survivors")
-
-
-## Back to the camp after the attack (absent ones walk in through the gate).
+## Back to normal life once the danger has passed.
 func return_to_camp() -> void:
-	if mode == Mode.ABSENT:
-		visible = true
-		global_position = gate_inside
-		collision_layer = 2
-	if mode in [Mode.FLEE, Mode.ABSENT]:
+	if mode == Mode.FLEE:
 		mode = Mode.LIVE
 		_start("work")
 
@@ -149,9 +131,6 @@ func _physics_process(delta: float) -> void:
 		Mode.FLEE:
 			goal = hide_spot
 			speed = RUN
-		Mode.ABSENT, Mode.EXILED:
-			goal = gate_outside
-			speed = WALK * 1.4
 
 	var to := goal - global_position
 	to.y = 0.0
@@ -190,11 +169,6 @@ func _on_arrived() -> void:
 				face(hearth)
 		Mode.FLEE:
 			_model.set_idle("Sit_Floor_Idle")
-		Mode.ABSENT:
-			visible = false
-			collision_layer = 0
-		Mode.EXILED:
-			queue_free()
 
 
 func _satisfy(delta: float) -> void:

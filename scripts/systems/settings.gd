@@ -8,7 +8,7 @@ extends Node
 ##   --demo=<mode>          menu | explore | dialogue | fight | combat | victory | pause |
 ##                          settings | echoes | echo | journal | chapter_end
 ##                          (Chapter 2 scene, run with scenes/chapter2.tscn as the scene:)
-##                          c2 | c2_talk | c2_attack | c2_council | c2_boss
+##                          c2 | c2_talk
 ##                          (anything but "menu" skips the title screen; "combat" also
 ##                          swings and fires the ember before the capture)
 
