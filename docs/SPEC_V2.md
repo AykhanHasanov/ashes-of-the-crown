@@ -6,8 +6,8 @@
 | Faza | Məzmun | Status |
 |---|---|---|
 | 1 | Təmizlik: satqın sistemi silindi, Fəsil 2 müvəqqəti "gəz və tanış ol" vəziyyətindədir | ✅ |
-| 2 | Od sistemi və balans | Növbəti |
-| 3 | Xatirə nəticələri, səs, vizual | |
+| 2 | Od sistemi və balans: köz ölçüsü, Köz Zərbəsi, radial menyu, ilk istifadə təsdiqi, mükəmməl yayınma, kəsilməz faza, Kül Burulğanı, Kül Şahının təklifi, ocaq sağaltma qaydaları, bütün rəqəmlər `balance.gd`-də | ✅ |
+| 3 | Xatirə nəticələri, səs, vizual | Növbəti |
 | 4 | Fəsil 1-in yenilənməsi (qismən Faza 1-də edildi: Rüfətin yeni "harada idin?" qolu, kralın əks-sədalarının mətnləri, yeni qayıdış dialoqu, yeni son kart) | Qismən |
 | 5 | Fəsil 2-nin əsası | |
 | 6 | Final | |

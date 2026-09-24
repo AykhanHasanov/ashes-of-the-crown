@@ -61,8 +61,10 @@ func _begin(mode: String) -> void:
 		"pause", "settings":
 			_find_rufet()
 			process_mode = Node.PROCESS_MODE_ALWAYS  # keep counting frames for the capture
-		"explore":
+		"explore", "radial", "offer", "whirl", "unstoppable":
 			_find_rufet()
+		"strike":
+			_resume("waves", true)
 		"dialogue":
 			player.global_position = level.rufet_spot + Vector3(-2.4, 0, -1.2)
 			_find_rufet()
@@ -243,6 +245,8 @@ func _start_wave(i: int, close := false) -> void:
 		_after_waves()
 		return
 	var w: Dictionary = WAVES[i]
+	if i == 0:
+		player.begin_encounter()  # the wave block is one fight for Kül Şahı's offer
 	hud.set_objective("Dalğa %d / %d" % [i + 1, WAVES.size()])
 	hud.banner(w["title"])
 	Fx.shake(0.35)
@@ -464,9 +468,59 @@ func _demo_actions() -> void:
 	if Settings.demo == "echo" and _frame == 30:
 		player.global_position = _echoes[0].global_position + Vector3(1.6, 0, 1.6)
 		_play_echo(_echoes[0])
+	match Settings.demo:
+		"radial":
+			if _frame == 40:
+				player._open_wheel()
+			if _frame == 70:
+				radial.selected = "first_sword"
+		"offer":
+			if _frame == 40:
+				player.begin_encounter()
+				player.take_damage(90.0)
+		"strike":
+			if _frame == Settings.capture_frame - 12:
+				player.gain_ember(100.0)
+				player.ember_strike()
+		"whirl", "unstoppable":
+			if _frame == 5:
+				var e = AshShade.new()
+				e.configure("elite" if Settings.demo == "whirl" else "normal")
+				add_child(e)
+				e.global_position = player.global_position + Vector3(0, 0, -2.2)
+				e.target = player
+			if Settings.demo == "whirl" and _frame in [100, 106, 112]:
+				for e in get_tree().get_nodes_in_group("enemies"):
+					e.take_damage(5.0)
+			if Settings.demo == "unstoppable":
+				_check_unstoppable_and_perfect()
 	if Settings.demo != "combat" or Settings.capture_path == "":
 		return
 	if _frame == Settings.capture_frame - 60:
 		player.attack()
 	elif _frame == Settings.capture_frame - 30:
-		player.ember_power()
+		player.cast_wave(Memory.unburned()[0]["id"])
+
+
+var _checked_unstoppable := false
+var _checked_perfect := false
+
+
+## Debug self-test: a hit during the white-hot windup must not stagger; a dodge
+## started just before the blow lands must count as perfect.
+func _check_unstoppable_and_perfect() -> void:
+	for e in get_tree().get_nodes_in_group("enemies"):
+		var tts: float = e.time_to_strike()
+		if not _checked_unstoppable and tts < 0.3 and tts > 0.15:
+			_checked_unstoppable = true
+			var hp_before: float = e.health
+			e.take_damage(1.0)
+			print("SELFTEST unstoppable: still attacking=%s (health %.0f -> %.0f)" % [e.is_attacking(), hp_before, e.health])
+		if _checked_unstoppable and not _checked_perfect and tts <= 0.1:
+			_checked_perfect = true
+			var ember_before: float = player.ember
+			player.dash(Vector3.RIGHT)
+			print("SELFTEST perfect dodge: ember %.0f -> %.0f" % [ember_before, player.ember])
+			await get_tree().process_frame
+			await get_tree().process_frame
+			print("SELFTEST perfect dodge slow motion: time_scale=%.2f" % Engine.time_scale)

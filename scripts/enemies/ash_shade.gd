@@ -1,23 +1,25 @@
 extends CharacterBody3D
-## Kül Kölgəsi — a skeleton risen from the ash of Közqala (KayKit Skeletons).
-## Claws out of the ground, runs at Ayxan, telegraphs its strike with a glowing ring
-## on the floor, lunges on the impact frame, then recovers. Sword hits stagger it.
-## Kinds: "normal" (minion), "fast" (rogue) and "elite" (Kül Cəngavəri, a crown guard).
+## Kül Kölgəsi — a skeleton risen from the ash (KayKit Skeletons).
+## Claws out of the ground, runs at Ayxan, telegraphs its strike with a ring on the
+## floor that grows for Balance.WINDUP seconds, lunges, then recovers. Sword hits
+## stagger it — except during the last Balance.UNSTOPPABLE seconds of the windup,
+## when the ring turns white-hot and only a dodge helps.
+## Kinds: "normal" (minion), "fast" (rogue) and "elite" (Kül Cəngavəri), whose extra
+## move is Kül Burulğanı: a 360° sweep used when Ayxan gets behind it or piles on hits.
 
 signal killed(shade: Node)
 
+const Balance := preload("res://scripts/systems/balance.gd")
 const CharacterModel := preload("res://scripts/characters/character_model.gd")
 const Effects := preload("res://scripts/world/effects.gd")
 const OVERLAY := preload("res://shaders/ash_overlay.gdshader")
+const HP_BAR := preload("res://shaders/hp_bar.gdshader")
 const DIR := "res://assets/characters/skeletons/"
 ## Real seconds into the chop clip (at speed 1) where the blade lands.
 const CHOP_IMPACT := 0.55
-const HP_BAR := preload("res://shaders/hp_bar.gdshader")
-## Only this many shades may strike at once; the rest circle at WAIT_RING and wait.
-const MAX_ATTACKERS := 2
 const WAIT_RING := 3.4
 
-enum State { RISING, CHASE, WINDUP, LUNGE, RECOVER, DEAD }
+enum State { RISING, CHASE, WINDUP, LUNGE, RECOVER, WHIRL_WINDUP, DEAD }
 
 var kind := "normal"
 var display_name := "Kül Kölgəsi"
@@ -25,7 +27,6 @@ var max_health := 40.0
 var health := 40.0
 var damage := 12.0
 var speed := 3.6
-var windup_time := 0.55
 var radius := 0.45
 var size := 1.0
 var target  # the player node; untyped so its script members resolve at runtime
@@ -42,33 +43,32 @@ var _model
 var _overlay: ShaderMaterial
 var _ring: MeshInstance3D
 var _ring_mat: StandardMaterial3D
+var _whirl_ring: MeshInstance3D
+var _whirl_mat: StandardMaterial3D
 var _shape: CollisionShape3D
 var _bar: MeshInstance3D
 var _bar_mat: ShaderMaterial
 var _bar_lag := 1.0
 var _bar_hold := 0.0
 var _orbit := 1.0
+var _whirl_cd := 0.0
+var _recent_hits: Array[int] = []
 
 
 func configure(k: String) -> void:
 	kind = k
+	var stats: Dictionary = Balance.ENEMIES[k]
+	max_health = stats["health"]
+	damage = stats["damage"]
+	speed = stats["speed"]
+	size = stats["size"]
 	match k:
 		"fast":
 			_model_file = "Skeleton_Rogue.glb"
-			max_health = 26.0
-			damage = 9.0
-			speed = 5.6
-			windup_time = 0.42
-			size = 0.95
 		"elite":
 			_model_file = "Skeleton_Warrior.glb"
 			_weapon_file = "Skeleton_Axe.gltf"
 			display_name = "Kül Cəngavəri"
-			max_health = 280.0
-			damage = 24.0
-			speed = 3.2
-			windup_time = 0.85
-			size = 1.45
 			radius = 0.75
 	health = max_health
 
@@ -107,19 +107,13 @@ func _ready() -> void:
 	trail.position.y = 0.9 * size
 	add_child(trail)
 
-	# Telegraph ring on the ground, grows during the windup
-	_ring = MeshInstance3D.new()
-	var torus := TorusMesh.new()
-	torus.inner_radius = 0.85
-	torus.outer_radius = 1.0
-	torus.rings = 32
-	torus.ring_segments = 4
-	_ring.mesh = torus
-	_ring_mat = Effects.additive_material(Color(1.0, 0.25, 0.05, 0.0))
-	_ring.material_override = _ring_mat
-	_ring.position.y = 0.05
-	_ring.visible = false
-	add_child(_ring)
+	# Strike telegraph: a ring on the ground that grows during the windup
+	_ring = _make_ring(0.85)
+	_ring_mat = _ring.material_override
+	if kind == "elite":
+		# Kül Burulğanı telegraph: a full-radius ring that fills in
+		_whirl_ring = _make_ring(0.93)
+		_whirl_mat = _whirl_ring.material_override
 
 	# Health bar above the head (the elite uses the HUD boss bar instead)
 	_bar = MeshInstance3D.new()
@@ -141,6 +135,22 @@ func _ready() -> void:
 	_spawn_sound.call_deferred()  # after the spawner has placed us
 
 
+func _make_ring(inner: float) -> MeshInstance3D:
+	var ring := MeshInstance3D.new()
+	var torus := TorusMesh.new()
+	torus.inner_radius = inner
+	torus.outer_radius = 1.0
+	torus.rings = 40
+	torus.ring_segments = 4
+	ring.mesh = torus
+	ring.material_override = Effects.additive_material(Color(1.0, 0.25, 0.05, 0.0))
+	ring.position.y = 0.05
+	ring.visible = false
+	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(ring)
+	return ring
+
+
 func _spawn_sound() -> void:
 	Audio.play("boss_roar" if kind == "elite" else "shade_spawn", 0.0 if kind == "elite" else -6.0, 0.12, global_position)
 
@@ -149,6 +159,7 @@ func _physics_process(delta: float) -> void:
 	_flash = maxf(_flash - delta * 6.0, 0.0)
 	_overlay.set_shader_parameter("hit_flash", _flash * 0.45)
 	_knock = _knock.move_toward(Vector3.ZERO, 30.0 * delta)
+	_whirl_cd -= delta
 	_update_bar(delta)
 	if _state == State.DEAD:
 		velocity = Vector3(_knock.x, 0.0, _knock.z)
@@ -171,23 +182,23 @@ func _physics_process(delta: float) -> void:
 				_model.cancel_action()
 		State.CHASE:
 			if has_target:
-				var slot_free := _attackers() < MAX_ATTACKERS
-				if dist < 1.8 + radius and slot_free:
-					_begin_windup()
-				elif not slot_free and dist < WAIT_RING + 1.0:
-					# Circle Ayxan, keeping the wait distance, until a slot opens
-					var radial := -to.normalized() * clampf(WAIT_RING - dist, -1.0, 1.0)
-					var tangent := Vector3(-to.z, 0.0, to.x).normalized() * _orbit * 0.6
-					move = (radial + tangent + _separation()).limit_length(1.0) * speed * 0.6
+				if kind == "elite" and _whirl_cd <= 0.0 and _wants_whirl(to, dist):
+					_begin_whirl()
 				else:
-					move = (to.normalized() + _separation() * 1.2).normalized() * speed
+					var slot_free := _attackers() < Balance.MAX_ATTACKERS
+					if dist < 1.8 + radius and slot_free:
+						_begin_windup()
+					elif not slot_free and dist < WAIT_RING + 1.0:
+						# Circle Ayxan, keeping the wait distance, until a slot opens
+						var radial := -to.normalized() * clampf(WAIT_RING - dist, -1.0, 1.0)
+						var tangent := Vector3(-to.z, 0.0, to.x).normalized() * _orbit * 0.6
+						move = (radial + tangent + _separation()).limit_length(1.0) * speed * 0.6
+					else:
+						move = (to.normalized() + _separation() * 1.2).normalized() * speed
 				_face(to, delta, 10.0)
 		State.WINDUP:
 			_face(to, delta, 6.0)
-			var k := clampf(1.0 - _timer / windup_time, 0.0, 1.0)
-			var r := lerpf(0.4, 2.0 + radius, k)
-			_ring.scale = Vector3(r, 0.3, r)
-			_ring_mat.albedo_color.a = 0.25 + 0.6 * k
+			_update_telegraph(_ring, _ring_mat, lerpf(0.4, 2.0 + radius, _windup_progress()))
 			if _timer <= 0.0:
 				_state = State.LUNGE
 				_timer = 0.14
@@ -202,6 +213,14 @@ func _physics_process(delta: float) -> void:
 			if _timer <= 0.0:
 				_state = State.RECOVER
 				_timer = 0.55
+		State.WHIRL_WINDUP:
+			var k := clampf(1.0 - _timer / Balance.WHIRL_TELEGRAPH, 0.0, 1.0)
+			_whirl_ring.visible = true
+			_whirl_ring.scale = Vector3(Balance.WHIRL_RADIUS, 0.3, Balance.WHIRL_RADIUS)
+			_whirl_mat.albedo_color = Color(1.0, 0.25, 0.05).lerp(Color(1.0, 0.95, 0.8), k * k)
+			_whirl_mat.albedo_color.a = 0.25 + 0.7 * k
+			if _timer <= 0.0:
+				_whirl_strike(has_target, dist)
 		State.RECOVER:
 			if _timer <= 0.0:
 				_state = State.CHASE
@@ -212,12 +231,29 @@ func _physics_process(delta: float) -> void:
 		_model.set_locomotion(move.length() > 0.1, speed / 4.0)
 
 
+## Seconds until this shade's blow lands on Ayxan (INF when not attacking). Used for perfect dodges.
+func time_to_strike() -> float:
+	match _state:
+		State.WINDUP:
+			return maxf(_timer, 0.0)
+		State.LUNGE:
+			return 0.0 if not _lunge_hit else INF
+		State.WHIRL_WINDUP:
+			return maxf(_timer, 0.0)
+	return INF
+
+
+func is_attacking() -> bool:
+	return _state in [State.WINDUP, State.LUNGE, State.WHIRL_WINDUP]
+
+
 func take_damage(amount: float, knock := Vector3.ZERO, heavy := false) -> void:
 	if _state == State.DEAD:
 		return
 	health -= amount
 	_flash = 1.0
 	_knock += knock * (0.3 if kind == "elite" else 1.0)
+	_recent_hits.append(Time.get_ticks_msec())
 	Fx.hit_spark(global_position + Vector3(0, 1.1 * size, 0), heavy)
 	if Settings.damage_numbers:
 		Fx.damage_number(global_position + Vector3(0, 2.0 * size, 0), amount, "heavy" if heavy else "normal")
@@ -225,6 +261,8 @@ func take_damage(amount: float, knock := Vector3.ZERO, heavy := false) -> void:
 	_bar_hold = 0.45
 	if health <= 0.0:
 		_die()
+		return
+	if _unstoppable():
 		return
 	var staggers := kind != "elite" or heavy
 	if staggers and _state != State.RISING:
@@ -234,34 +272,91 @@ func take_damage(amount: float, knock := Vector3.ZERO, heavy := false) -> void:
 		_model.play_action("Hit_B" if heavy else "Hit_A", 1.8, 0.04)
 
 
+## The last moments of a windup (and the whole whirl) cannot be interrupted.
+func _unstoppable() -> bool:
+	if _state == State.WINDUP and _timer <= Balance.UNSTOPPABLE:
+		return true
+	return _state in [State.WHIRL_WINDUP, State.LUNGE]
+
+
+func _windup_progress() -> float:
+	return clampf(1.0 - _timer / Balance.WINDUP, 0.0, 1.0)
+
+
+## Grows the ring; in the unstoppable phase its edge burns white.
+func _update_telegraph(ring: MeshInstance3D, mat: StandardMaterial3D, r: float) -> void:
+	ring.scale = Vector3(r, 0.3, r)
+	if _timer <= Balance.UNSTOPPABLE:
+		var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.04)
+		mat.albedo_color = Color(1.0, 0.9, 0.75).lerp(Color(1.0, 1.0, 1.0), pulse)
+		mat.albedo_color.a = 1.0
+	else:
+		mat.albedo_color = Color(1.0, 0.25, 0.05, 0.25 + 0.6 * _windup_progress())
+
+
 func _begin_windup() -> void:
 	_state = State.WINDUP
-	_timer = windup_time
+	_timer = Balance.WINDUP
 	_ring.visible = true
 	_ring.scale = Vector3(0.4, 0.3, 0.4)
-	_model.play_action("1H_Melee_Attack_Chop", CHOP_IMPACT / windup_time, 0.06)
+	_model.play_action("1H_Melee_Attack_Chop", CHOP_IMPACT / Balance.WINDUP, 0.06)
 	Audio.play("shade_windup", -10.0, 0.15, global_position)
 
+
+# --- Kül Burulğanı (elite) ------------------------------------------------------------------
+
+func _wants_whirl(to: Vector3, dist: float) -> bool:
+	if dist > Balance.WHIRL_RADIUS + 0.5:
+		return false
+	var facing: Vector3 = -_model.global_basis.z
+	var behind := facing.dot(to.normalized()) < -0.3
+	var now := Time.get_ticks_msec()
+	_recent_hits = _recent_hits.filter(func(t): return now - t < Balance.WHIRL_HITS_WINDOW * 1000.0)
+	return behind or _recent_hits.size() >= Balance.WHIRL_HITS_TRIGGER
+
+
+func _begin_whirl() -> void:
+	_state = State.WHIRL_WINDUP
+	_timer = Balance.WHIRL_TELEGRAPH
+	_recent_hits.clear()
+	_model.play_action("2H_Melee_Attack_Spin", 1.8 / Balance.WHIRL_TELEGRAPH, 0.08)
+	Audio.play("boss_roar", -6.0, 0.1, global_position)
+
+
+func _whirl_strike(has_target: bool, dist: float) -> void:
+	_whirl_ring.visible = false
+	_whirl_cd = Balance.WHIRL_COOLDOWN
+	_state = State.RECOVER
+	_timer = 0.8
+	Fx.fire_nova(global_position, Balance.WHIRL_RADIUS)
+	Fx.shake(0.5)
+	Audio.play("hit_heavy", -2.0, 0.1, global_position)
+	if has_target and dist <= Balance.WHIRL_RADIUS + 0.4:
+		var away: Vector3 = (target.global_position - global_position).normalized()
+		target.take_damage(Balance.WHIRL_DAMAGE, away * 10.0)
+
+
+# --- Death and helpers ----------------------------------------------------------------------
 
 func _die() -> void:
 	_state = State.DEAD
 	remove_from_group("enemies")
 	_shape.set_deferred("disabled", true)
 	_ring.visible = false
+	if _whirl_ring:
+		_whirl_ring.visible = false
 	create_tween().tween_method(func(v: float): _bar_mat.set_shader_parameter("alpha", v), 1.0, 0.0, 0.4)
 	_model.play_action("Death_C_Skeletons", 1.4, 0.05, true)
 	Fx.death_burst(global_position, size)
 	Audio.play("shade_death", -3.0, 0.12, global_position)
+	if is_instance_valid(target) and target.has_method("on_enemy_killed"):
+		target.on_enemy_killed()
 	killed.emit(self)
 	# Crumble, then sink into the ash
 	var tw := create_tween()
 	tw.tween_interval(1.4)
 	tw.tween_property(_model, "position:y", -1.6 * size, 1.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tw.tween_callback(queue_free)
-
-
-func is_attacking() -> bool:
-	return _state == State.WINDUP or _state == State.LUNGE
 
 
 func _attackers() -> int:

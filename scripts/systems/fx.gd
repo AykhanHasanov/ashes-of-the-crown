@@ -13,6 +13,8 @@ var world: Node3D
 var _stop_until := 0
 var _slow_until := 0
 var _slow_scale := 1.0
+## Open-ended slowdowns keyed by who asked (radial menu, Kül Şahı's offer).
+var _holds := {}
 
 
 func _ready() -> void:
@@ -22,18 +24,30 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	# Real-time clock so hitstop and slow motion never stretch themselves.
 	var now := Time.get_ticks_msec()
+	var scale := 1.0
 	if now < _stop_until:
-		Engine.time_scale = 0.03
+		scale = 0.03
 	elif now < _slow_until:
-		Engine.time_scale = _slow_scale
-	else:
-		Engine.time_scale = 1.0
+		scale = _slow_scale
+	for k in _holds:
+		scale = minf(scale, _holds[k])
+	Engine.time_scale = scale
 
 
 func reset_time() -> void:
 	_stop_until = 0
 	_slow_until = 0
+	_holds.clear()
 	Engine.time_scale = 1.0
+
+
+## Keeps time at `time_scale` until release_time(key).
+func hold_time(key: String, time_scale: float) -> void:
+	_holds[key] = time_scale
+
+
+func release_time(key: String) -> void:
+	_holds.erase(key)
 
 
 ## Freezes the game for `duration` real seconds — the weight of a hit.
@@ -160,6 +174,35 @@ func death_burst(pos: Vector3, size: float) -> void:
 	var sparks := Effects.burst(int(30 * size), 6.0, 0.8, 0.2, false, Color(5.0, 1.8, 0.4))
 	_spawn_temp(sparks, pos + Vector3(0, 1.0 * size, 0), 2.0)
 	sparks.emitting = true
+
+
+## Köz Zərbəsi: a short cone of fire in front of Ayxan.
+func ember_cone(pos: Vector3, dir: Vector3, reach: float) -> void:
+	if not is_instance_valid(world):
+		return
+	var arc := MeshInstance3D.new()
+	arc.mesh = Effects.arc_mesh(0.4, reach, 120.0, 20)
+	var mat := Effects.additive_material(Color(1.0, 0.45, 0.12))
+	arc.material_override = mat
+	_spawn_temp(arc, pos + Vector3(0, 0.6, 0), 0.6)
+	arc.rotation.y = atan2(-dir.x, -dir.z)
+	arc.scale = Vector3(0.4, 1, 0.4)
+	var tw := arc.create_tween().set_parallel()
+	tw.tween_property(arc, "scale", Vector3.ONE, 0.14).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
+	tw.tween_property(mat, "albedo_color:a", 0.0, 0.3)
+	var burst := Effects.burst(40, 10.0, 0.5, 0.35, true, Color(2.4, 1.0, 0.25))
+	_spawn_temp(burst, pos + Vector3(0, 0.8, 0) + dir * 1.2, 1.2)
+	burst.emitting = true
+
+
+## Perfect dodge: a trail of ash where Ayxan was.
+func ash_trail(pos: Vector3) -> void:
+	if not is_instance_valid(world):
+		return
+	for i in 3:
+		var p := Effects.smoke_burst(12, 1.2, 0.8, 0.6)
+		_spawn_temp(p, pos + Vector3(randf_range(-0.3, 0.3), 0.8, randf_range(-0.3, 0.3)), 1.5)
+		p.emitting = true
 
 
 func ash_puff(pos: Vector3) -> void:

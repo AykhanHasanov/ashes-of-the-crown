@@ -6,7 +6,8 @@ extends Node
 ##   --capture=<path.png>   save a screenshot at --frame and quit
 ##   --frame=<n>            frame number for --capture (default 150)
 ##   --demo=<mode>          menu | explore | dialogue | fight | combat | victory | pause |
-##                          settings | echoes | echo | journal | chapter_end
+##                          settings | echoes | echo | journal | chapter_end |
+##                          radial | offer | strike | whirl | unstoppable (self-test)
 ##                          (Chapter 2 scene, run with scenes/chapter2.tscn as the scene:)
 ##                          c2 | c2_talk
 ##                          (anything but "menu" skips the title screen; "combat" also

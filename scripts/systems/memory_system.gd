@@ -1,18 +1,26 @@
 extends Node
-## Yaddaş Yanğını — Ayxan's memories. Every use of the crown's ember burns the
-## next memory in the queue. The queue is visible to the player, so each blast
-## is an informed sacrifice. Burned memories change dialogue and endings.
+## Yaddaş Yanğını — Ayxan's memories are his fuel. The player chooses which one
+## burns for each Alov Dalğası; only Kül Şahı's offer picks one at random.
+## Burned memories never come back.
+##
+## `gifted` will hold memories given by survivors (V2 phase 5); they burn the same way.
 
 signal memory_burned(memory: Dictionary)
 signal memories_reset
 
 const MEMORIES := [
-	{"id": "rufet_face", "title": "Rüfətin üzü", "text": "Çay kənarında qan qardaşı olduğumuz gün onun gülüşü."},
-	{"id": "mother_name", "title": "Anamın adı", "text": "Hər gecə laylamı oxuyan səs. Onun adı..."},
-	{"id": "sabir_lesson", "title": "Sabirin ilk dərsi", "text": "\"Tac başa deyil, çiyinə qoyulur, şahzadəm.\""},
-	{"id": "kozqala_streets", "title": "Közqalanın küçələri", "text": "Bazarın ədviyyat qoxusu, karvansaranın zəngləri."},
-	{"id": "father_voice", "title": "Atamın səsi", "text": "Kral olmazdan əvvəl, sadəcə ata olduğu illər."},
-	{"id": "first_sword", "title": "İlk qılıncım", "text": "Şahbazın mənə bağışladığı taxta qılınc."},
+	{"id": "rufet_face", "title": "Rüfətin üzü", "text": "Çay kənarında qan qardaşı olduğumuz gün onun gülüşü.",
+		"cost": "Rüfəti tanımayacaqsan."},
+	{"id": "mother_name", "title": "Anamın adı", "text": "Hər gecə laylamı oxuyan səs. Onun adı...",
+		"cost": "Ocaqların istisi daha zəif sağaldacaq."},
+	{"id": "sabir_lesson", "title": "Sabirin ilk dərsi", "text": "\"Tac başa deyil, çiyinə qoyulur, şahzadəm.\"",
+		"cost": "Mükəmməl yayınma çətinləşəcək."},
+	{"id": "kozqala_streets", "title": "Közqalanın küçələri", "text": "Bazarın ədviyyat qoxusu, karvansaranın zəngləri.",
+		"cost": "Yol göstərən işarələr sönəcək."},
+	{"id": "father_voice", "title": "Atamın səsi", "text": "Kral olmazdan əvvəl, sadəcə ata olduğu illər.",
+		"cost": "Əks-sədalar susacaq."},
+	{"id": "first_sword", "title": "İlk qılıncım", "text": "Şahbazın mənə bağışladığı taxta qılınc.",
+		"cost": "Güclü zərbən zəifləyəcək."},
 ]
 
 ## Kül Şahı grows louder with every burned memory.
@@ -24,9 +32,10 @@ const WHISPERS := [
 	"...tac səni gözləyir. MƏN səni gözləyirəm...",
 	"...Ayxan kim idi?...",
 ]
+const GIFT_WHISPER := "...başqasının acısı da dadlıdır..."
 
-var queue: Array[Dictionary] = []
 var burned: Array[Dictionary] = []
+var gifted: Array[Dictionary] = []
 
 
 func _ready() -> void:
@@ -34,36 +43,44 @@ func _ready() -> void:
 
 
 func reset() -> void:
-	queue.clear()
 	burned.clear()
-	for m in MEMORIES:
-		queue.append(m.duplicate())
-	queue.shuffle()
-	# Keep Rüfət's face early in the queue so its consequence is felt in the first chapter.
-	for i in queue.size():
-		if queue[i]["id"] == "rufet_face":
-			var m: Dictionary = queue[i]
-			queue.remove_at(i)
-			queue.insert(randi_range(0, 2), m)
-			break
+	gifted.clear()
 	memories_reset.emit()
 
 
+func unburned() -> Array:
+	return MEMORIES.filter(func(m): return not is_burned(m["id"]))
+
+
 func can_burn() -> bool:
-	return not queue.is_empty()
+	return not unburned().is_empty() or not gifted.is_empty()
 
 
-func next_memory() -> Dictionary:
-	return queue[0] if not queue.is_empty() else {}
+func get_memory(id: String) -> Dictionary:
+	for m in MEMORIES:
+		if m["id"] == id:
+			return m
+	return {}
 
 
-func burn_next() -> Dictionary:
-	if queue.is_empty():
+## Burns one of Ayxan's own memories by id. Returns it, or {} if it was already gone.
+func burn(id: String) -> Dictionary:
+	if is_burned(id):
 		return {}
-	var m: Dictionary = queue.pop_front()
-	burned.append(m)
+	var m := get_memory(id)
+	if m.is_empty():
+		return {}
+	burned.append(m.duplicate())
 	memory_burned.emit(m)
 	return m
+
+
+## Kül Şahı chooses: a random unburned memory of Ayxan's own.
+func burn_random() -> Dictionary:
+	var left := unburned()
+	if left.is_empty():
+		return {}
+	return burn(left.pick_random()["id"])
 
 
 func is_burned(id: String) -> bool:
@@ -74,24 +91,17 @@ func is_burned(id: String) -> bool:
 
 
 func to_dict() -> Dictionary:
-	return {"queue": queue.map(func(m): return m["id"]), "burned": burned.map(func(m): return m["id"])}
+	return {"burned": burned.map(func(m): return m["id"])}
 
 
 func from_dict(data: Dictionary) -> void:
-	queue.clear()
 	burned.clear()
-	for id in data.get("queue", []):
-		queue.append(_by_id(id))
+	gifted.clear()
 	for id in data.get("burned", []):
-		burned.append(_by_id(id))
+		var m := get_memory(id)
+		if not m.is_empty():
+			burned.append(m.duplicate())
 	memories_reset.emit()
-
-
-func _by_id(id: String) -> Dictionary:
-	for m in MEMORIES:
-		if m["id"] == id:
-			return m.duplicate()
-	return {}
 
 
 func whisper() -> String:

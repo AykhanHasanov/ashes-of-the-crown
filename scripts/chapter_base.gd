@@ -12,11 +12,12 @@ const Hud := preload("res://scripts/ui/hud.gd")
 const DialogueUI := preload("res://scripts/ui/dialogue_ui.gd")
 const PauseMenu := preload("res://scripts/ui/pause_menu.gd")
 const Journal := preload("res://scripts/ui/journal.gd")
+const RadialMenu := preload("res://scripts/ui/radial_menu.gd")
+const AshOffer := preload("res://scripts/ui/ash_offer.gd")
+const Balance := preload("res://scripts/systems/balance.gd")
 
 const CHAPTER_SCENES := {1: "res://scenes/main.tscn", 2: "res://scenes/chapter2.tscn"}
 const TALK_RANGE := 3.0
-const HEARTH_RANGE := 2.8
-const HEARTH_HEAL := 9.0
 
 ## How the next scene should start: "" = title screen, "checkpoint" = load the
 ## save and resume it, "fresh" = brand-new game.
@@ -29,6 +30,8 @@ var hud
 var dialogue
 var pause_menu
 var journal
+var radial
+var offer
 
 var _frame := 0
 var _fps_sum := 0.0
@@ -62,10 +65,17 @@ func _ready() -> void:
 	pause_menu.main_menu_requested.connect(to_main_menu)
 	journal = Journal.new()
 	add_child(journal)
+	radial = RadialMenu.new()
+	add_child(radial)
+	offer = AshOffer.new()
+	add_child(offer)
+	player.radial = radial
+	player.offer = offer
 
 	Fx.camera_rig = rig
 	Fx.world = self
 	player.health_changed.connect(hud.set_health)
+	player.ember_changed.connect(hud.set_ember)
 	player.died.connect(_on_player_died)
 	Settings.changed.connect(_apply_quality)
 	_apply_quality()
@@ -181,12 +191,18 @@ func end_talk() -> void:
 	player.input_locked = false
 
 
+## Hearths heal Ayxan — but not in the middle of a fight.
 func _update_hearths(delta: float) -> void:
 	if player.dead or player.health >= Player.MAX_HEALTH:
 		return
+	if Time.get_ticks_msec() - player.last_hurt_ms < Balance.HEARTH_HIT_BLOCK * 1000.0:
+		return
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if player.global_position.distance_to(e.global_position) < Balance.HEARTH_ENEMY_BLOCK:
+			return
 	for h in level.braziers:
-		if player.global_position.distance_to(h) < HEARTH_RANGE:
-			player.heal(HEARTH_HEAL * delta)
+		if player.global_position.distance_to(h) < Balance.HEARTH_RANGE:
+			player.heal(Balance.HEARTH_HEAL * delta)
 			if not _hearth_hint_shown:
 				_hearth_hint_shown = true
 				hud.banner("Ocağın istisi yaralarını sağaldır")

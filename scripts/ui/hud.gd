@@ -11,6 +11,8 @@ const WHISPER := Color(0.95, 0.32, 0.2)
 
 var _root: Control
 var _health_fill: ColorRect
+var _ember_fill: ColorRect
+var _ember_ratio := 0.0
 var _health_ratio := 1.0
 var _shown_ratio := 1.0
 var _embers: Control
@@ -71,7 +73,25 @@ func _ready() -> void:
 	_embers = Control.new()
 	_embers.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_embers)
-	_place(_embers, Vector4(0, 0, 0, 0), Vector4(24, 64, 200, 84))
+	_place(_embers, Vector4(0, 0, 0, 0), Vector4(24, 76, 260, 118))
+
+	# Ember meter (Köz Zərbəsi fuel) right under the health bar
+	var ember_back := ColorRect.new()
+	ember_back.color = Color(0.05, 0.03, 0.03, 0.85)
+	ember_back.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(ember_back)
+	_place(ember_back, Vector4(0, 0, 0, 0), Vector4(24, 61, 264, 69))
+	_ember_fill = ColorRect.new()
+	_ember_fill.color = Color(1.0, 0.55, 0.15)
+	_ember_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ember_back.add_child(_ember_fill)
+	_ember_fill.position = Vector2(1, 1)
+	_ember_fill.size = Vector2(0, 6)
+	var cost_tick := ColorRect.new()
+	cost_tick.color = Color(1, 1, 1, 0.5)
+	cost_tick.position = Vector2(120, 0)
+	cost_tick.size = Vector2(1, 8)
+	ember_back.add_child(cost_tick)
 	_embers.draw.connect(_draw_embers)
 
 	# Objective marker: hovers over the target, or clings to the screen edge pointing at it
@@ -93,7 +113,7 @@ func _ready() -> void:
 	_prompt = _label("", 22, GOLD, HORIZONTAL_ALIGNMENT_CENTER)
 	_place(_prompt, Vector4(0.5, 1, 0.5, 1), Vector4(-300, -130, 300, -100))
 
-	var hint := _label("LMB / J — qılınc     RMB / Q — Alov Dalğası (xatirə yandırır)\nSpace — Kül addımı     E — danış     Tab — jurnal     Esc — fasilə", 14, Color(0.7, 0.66, 0.6, 0.85), HORIZONTAL_ALIGNMENT_RIGHT)
+	var hint := _label("LMB / J — qılınc     RMB / Q — Köz Zərbəsi  ·  basılı saxla — Alov Dalğası\nSpace — Kül addımı     E — danış     Tab — jurnal     Esc — fasilə", 14, Color(0.7, 0.66, 0.6, 0.85), HORIZONTAL_ALIGNMENT_RIGHT)
 	_place(hint, Vector4(1, 1, 1, 1), Vector4(-640, -60, -20, -12))
 	_info = _label("", 14, Color(0.7, 0.66, 0.6, 0.85), HORIZONTAL_ALIGNMENT_RIGHT)
 	_place(_info, Vector4(1, 0, 1, 0), Vector4(-420, 16, -20, 60))
@@ -147,6 +167,8 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_shown_ratio = lerpf(_shown_ratio, _health_ratio, 1.0 - exp(-10.0 * delta))
 	_health_fill.size.x = 316.0 * _shown_ratio
+	_ember_fill.size.x = lerpf(_ember_fill.size.x, 238.0 * _ember_ratio, 1.0 - exp(-12.0 * delta))
+	_ember_fill.color = Color(1.0, 0.75, 0.3) if _ember_ratio >= 0.5 else Color(0.7, 0.3, 0.1)
 	_damage = maxf(_damage - delta * 1.8, 0.0)
 	_ember_pulse += delta
 	_embers.queue_redraw()
@@ -162,6 +184,10 @@ func _process(delta: float) -> void:
 	_info.text = "Qrafika: %s (F9)" % quality
 	if Settings.show_fps:
 		_info.text += "\nFPS: %d" % Engine.get_frames_per_second()
+
+
+func set_ember(current: float, maximum: float) -> void:
+	_ember_ratio = current / maximum
 
 
 func set_health(current: float, maximum: float) -> void:
@@ -278,26 +304,23 @@ func _refresh_memories() -> void:
 	_embers.queue_redraw()
 
 
-## Burned memories are grey ash; the one the ember will take next pulses.
+## Ayxan's own memories as large ember diamonds (burned ones are grey ash) and the
+## memories gifted by survivors as a smaller row underneath.
 func _draw_embers() -> void:
-	var next := Memory.next_memory()
-	var x := 8.0
+	var x := 10.0
 	for m in Memory.MEMORIES:
-		var c := Vector2(x, 10)
-		var r := 7.0
-		var pts := PackedVector2Array([c + Vector2(0, -r), c + Vector2(r * 0.7, 0), c + Vector2(0, r), c + Vector2(-r * 0.7, 0)])
-		var col: Color
-		if Memory.is_burned(m["id"]):
-			col = Color(0.3, 0.28, 0.27, 0.9)
-		elif not next.is_empty() and next["id"] == m["id"]:
-			col = Color(1.0, 0.55, 0.15).lerp(Color(1.0, 0.85, 0.5), 0.5 + 0.5 * sin(_ember_pulse * 4.0))
-			_embers.draw_circle(c, r + 3.0, Color(1.0, 0.45, 0.1, 0.25))
-		else:
-			col = Color(0.95, 0.42, 0.12)
-		_embers.draw_colored_polygon(pts, col)
-		_embers.draw_polyline(pts + PackedVector2Array([pts[0]]), Color(0, 0, 0, 0.7), 1.5)
-		x += 20.0
+		_diamond(Vector2(x, 12), 9.0, Color(0.3, 0.28, 0.27, 0.9) if Memory.is_burned(m["id"]) else Color(0.95, 0.42, 0.12))
+		x += 24.0
+	x = 8.0
+	for g in Memory.gifted:
+		_diamond(Vector2(x, 34), 5.5, Color(1.0, 0.7, 0.35))
+		x += 15.0
 
+
+func _diamond(c: Vector2, r: float, col: Color) -> void:
+	var pts := PackedVector2Array([c + Vector2(0, -r), c + Vector2(r * 0.7, 0), c + Vector2(0, r), c + Vector2(-r * 0.7, 0)])
+	_embers.draw_colored_polygon(pts, col)
+	_embers.draw_polyline(pts + PackedVector2Array([pts[0]]), Color(0, 0, 0, 0.7), 1.5)
 
 func _label(text: String, size: int, color: Color, align := HORIZONTAL_ALIGNMENT_LEFT, parent: Control = null) -> Label:
 	var l := Label.new()

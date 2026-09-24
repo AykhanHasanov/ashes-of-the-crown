@@ -1,51 +1,44 @@
 extends CharacterBody3D
 ## Ayxan — the last heir of Atəşan, hooded in exile (KayKit Rogue with the Knight's sword).
 ##
-## Combat: a three-hit sword combo (diagonal → horizontal → heavy chop) with input
-## buffering, a forward lunge on each swing and damage dealt on the impact frame;
-## Kül addımı (dodge roll with i-frames); Alov Dalğası (ember nova) which burns the
-## next memory. As memories burn, ember cracks spread over his armor.
+## Sword: a three-hit combo (diagonal → horizontal → heavy chop) with input buffering,
+## a forward lunge on each swing and damage on the impact frame.
+## Kül addımı: dodge roll with i-frames; started just before an enemy strike lands it
+## becomes a perfect dodge (slow motion, +ember, ash trail).
+## Fire, in two layers:
+##   • tap Q / right mouse — Köz Zərbəsi, a cone of fire paid for with the ember meter;
+##   • hold Q / right mouse — the memory wheel opens; releasing on a memory casts
+##     Alov Dalğası and burns that memory for good.
+## At ≤ 15 health, once per fight, Kül Şahı offers to save him for a memory of his choosing.
 
 signal health_changed(current: float, maximum: float)
+signal ember_changed(current: float, maximum: float)
 signal died
 
+const Balance := preload("res://scripts/systems/balance.gd")
 const CharacterModel := preload("res://scripts/characters/character_model.gd")
 const Effects := preload("res://scripts/world/effects.gd")
 const OVERLAY := preload("res://shaders/ash_overlay.gdshader")
 const MODEL_PATH := "res://assets/characters/adventurers/Rogue_Hooded.glb"
 const SWORD_DONOR := "res://assets/characters/adventurers/Knight.glb"
 const HIDDEN := ["Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Knife", "Throwable"]
-
-const MAX_HEALTH := 100.0
-const SPEED := 6.2
-const ACCEL := 50.0
-const LUNGE_SPEED := 7.5
-const DASH_SPEED := 15.0
-const DASH_TIME := 0.26
-const DASH_COOLDOWN := 0.55
-const POWER_RADIUS := 7.0
-const POWER_DAMAGE := 75.0
-const POWER_COOLDOWN := 1.0
-const CAST_TRIGGER := 0.26
-const CAST_TIME := 0.5
-const HURT_STUN := 0.25
-
-## impact/cancel are real seconds after the swing starts.
-const COMBO := [
-	{"clip": "1H_Melee_Attack_Slice_Diagonal", "speed": 1.9, "impact": 0.22, "cancel": 0.34, "damage": 18.0, "knock": 6.0, "dot": 0.4, "range": 2.5, "heavy": false},
-	{"clip": "1H_Melee_Attack_Slice_Horizontal", "speed": 1.9, "impact": 0.23, "cancel": 0.36, "damage": 21.0, "knock": 7.0, "dot": 0.35, "range": 2.6, "heavy": false},
-	{"clip": "1H_Melee_Attack_Chop", "speed": 1.55, "impact": 0.3, "cancel": 0.5, "damage": 38.0, "knock": 13.0, "dot": 0.25, "range": 2.9, "heavy": true},
-]
+const MAX_HEALTH := Balance.PLAYER_HEALTH
 
 var health := MAX_HEALTH
+var ember := 0.0
 var dead := false
 var input_locked := false
 var camera: Camera3D
+## UI hooks set by the chapter.
+var radial
+var offer
+## Real-time ms of the last hit taken (hearths refuse to heal right after).
+var last_hurt_ms := -100000
 
 var _model
 var _overlay: ShaderMaterial
 var _cloth: Array = []
-var _ember: Node3D
+var _ember_node: Node3D
 var _ember_light: OmniLight3D
 var _ember_mat: StandardMaterial3D
 
@@ -58,12 +51,17 @@ var _buffered := false
 var _dash_time := 0.0
 var _dash_cd := 0.0
 var _dash_dir := Vector3.FORWARD
-var _power_cd := 0.0
+var _strike_cd := 0.0
+var _wave_cd := 0.0
 var _cast_t := -1.0
+var _cast_memory := ""
 var _stun := 0.0
 var _invuln := 0.0
 var _flash := 0.0
 var _step_dist := 0.0
+var _fire_down_ms := -1
+var _last_ember_gain_ms := -100000
+var _offer_used := false
 
 
 func _ready() -> void:
@@ -92,9 +90,9 @@ func _ready() -> void:
 	_model.set_overlay(_overlay)
 
 	# The crown's ember, kept on the chest bone every frame
-	_ember = Node3D.new()
-	_ember.top_level = true
-	add_child(_ember)
+	_ember_node = Node3D.new()
+	_ember_node.top_level = true
+	add_child(_ember_node)
 	_ember_mat = StandardMaterial3D.new()
 	_ember_mat.albedo_color = Color(1.0, 0.45, 0.1)
 	_ember_mat.emission_enabled = true
@@ -106,13 +104,13 @@ func _ready() -> void:
 	sphere.height = 0.14
 	core.mesh = sphere
 	core.material_override = _ember_mat
-	_ember.add_child(core)
+	_ember_node.add_child(core)
 	_ember_light = OmniLight3D.new()
 	_ember_light.light_color = Color(1.0, 0.5, 0.2)
 	_ember_light.light_energy = 1.2
 	_ember_light.omni_range = 3.5
-	_ember.add_child(_ember_light)
-	_ember.add_child(Effects.ember_trail())
+	_ember_node.add_child(_ember_light)
+	_ember_node.add_child(Effects.ember_trail())
 
 	# Soft "hero light" keeps Ayxan readable against the dark ground.
 	var hero := OmniLight3D.new()
@@ -123,12 +121,47 @@ func _ready() -> void:
 	add_child(hero)
 
 	Memory.memory_burned.connect(_on_memory_burned)
+	Memory.memories_reset.connect(_refresh_burn_look)
 	health_changed.emit.call_deferred(health, MAX_HEALTH)
+	ember_changed.emit.call_deferred(ember, Balance.EMBER_MAX)
+
+
+## A new fight begins: Kül Şahı may make his offer again.
+func begin_encounter() -> void:
+	_offer_used = false
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ember_power") and not event.is_echo():
+		_fire_down_ms = Time.get_ticks_msec() if _can_act() else -1
+	elif event.is_action_released("ember_power") and _fire_down_ms >= 0:
+		var held := (Time.get_ticks_msec() - _fire_down_ms) / 1000.0
+		_fire_down_ms = -1
+		if radial != null and radial.is_open:
+			_release_wheel()
+		elif held < Balance.TAP_THRESHOLD:
+			ember_strike()
+
+
+func _process(_delta: float) -> void:
+	var fwd: Vector3 = -_model.global_basis.z
+	_ember_node.global_position = _model.bone_position("chest") + fwd * 0.3 + Vector3(0, 0.05, 0)
+	# Holding fire past the tap threshold opens the memory wheel (in real time).
+	if _fire_down_ms >= 0 and radial != null and not radial.is_open:
+		if (Time.get_ticks_msec() - _fire_down_ms) / 1000.0 >= Balance.TAP_THRESHOLD:
+			_open_wheel()
+	if not _can_act() and radial != null and radial.is_open:
+		radial.close()
+		Fx.release_time("radial")
+	# Ember cools once the fighting stops
+	if ember > 0.0 and Time.get_ticks_msec() - _last_ember_gain_ms > Balance.EMBER_DECAY_DELAY * 1000.0:
+		_set_ember(ember - Balance.EMBER_DECAY * _delta)
 
 
 func _physics_process(delta: float) -> void:
 	_dash_cd -= delta
-	_power_cd -= delta
+	_strike_cd -= delta
+	_wave_cd -= delta
 	_invuln -= delta
 	_stun -= delta
 	_flash = maxf(_flash - delta * 4.0, 0.0)
@@ -138,22 +171,21 @@ func _physics_process(delta: float) -> void:
 		return
 
 	var input := Vector2.ZERO
-	if not input_locked:
+	var wheel_open: bool = radial != null and radial.is_open
+	if not input_locked and not wheel_open:
 		input = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var move := _to_world(input)
 
-	if not input_locked and _stun <= 0.0:
+	if not input_locked and not wheel_open and _stun <= 0.0:
 		if Input.is_action_just_pressed("dash"):
 			dash(move)
 		if Input.is_action_just_pressed("attack"):
 			attack()
-		if Input.is_action_just_pressed("ember_power"):
-			ember_power()
 
 	var want := Vector3.ZERO
 	if _dash_time > 0.0:
 		_dash_time -= delta
-		want = _dash_dir * DASH_SPEED
+		want = _dash_dir * Balance.DASH_SPEED
 		velocity.x = want.x
 		velocity.z = want.z
 	else:
@@ -162,9 +194,9 @@ func _physics_process(delta: float) -> void:
 		elif _cast_t >= 0.0:
 			_update_cast(delta)
 		elif _stun <= 0.0:
-			want = move * SPEED
-		velocity.x = move_toward(velocity.x, want.x, ACCEL * delta)
-		velocity.z = move_toward(velocity.z, want.z, ACCEL * delta)
+			want = move * Balance.PLAYER_SPEED
+		velocity.x = move_toward(velocity.x, want.x, Balance.PLAYER_ACCEL * delta)
+		velocity.z = move_toward(velocity.z, want.z, Balance.PLAYER_ACCEL * delta)
 	velocity.y = -0.5 if is_on_floor() else velocity.y - 30.0 * delta
 	move_and_slide()
 
@@ -176,13 +208,8 @@ func _physics_process(delta: float) -> void:
 	_model.rotation.y = lerp_angle(_model.rotation.y, yaw, 1.0 - exp(-20.0 * delta))
 
 	var speed := Vector2(velocity.x, velocity.z).length()
-	_model.set_locomotion(speed > 0.6, clampf(speed / SPEED, 0.6, 1.2))
+	_model.set_locomotion(speed > 0.6, clampf(speed / Balance.PLAYER_SPEED, 0.6, 1.2))
 	_footsteps(delta, speed)
-
-
-func _process(_delta: float) -> void:
-	var fwd: Vector3 = -_model.global_basis.z
-	_ember.global_position = _model.bone_position("chest") + fwd * 0.3 + Vector3(0, 0.05, 0)
 
 
 ## Ayxan lies unconscious in the ash (title screen and opening).
@@ -214,6 +241,10 @@ func face_towards(point: Vector3) -> void:
 		_model.rotation.y = atan2(-_facing.x, -_facing.z)
 
 
+func _can_act() -> bool:
+	return not dead and not input_locked and _stun <= 0.0 and _cast_t < 0.0
+
+
 # --- Sword combo ---------------------------------------------------------------
 
 func attack() -> void:
@@ -226,7 +257,7 @@ func attack() -> void:
 
 
 func _start_attack(step: int) -> void:
-	var a: Dictionary = COMBO[step]
+	var a: Dictionary = Balance.COMBO[step]
 	_attack_step = step
 	_attack_t = 0.0
 	_impact_done = false
@@ -241,21 +272,21 @@ func _start_attack(step: int) -> void:
 
 ## Runs the current swing; returns the desired velocity (forward lunge).
 func _update_attack(delta: float, move: Vector3) -> Vector3:
-	var a: Dictionary = COMBO[_attack_step]
+	var a: Dictionary = Balance.COMBO[_attack_step]
 	_attack_t += delta
 	if not _impact_done and _attack_t >= a["impact"]:
 		_impact_done = true
 		_impact(a)
 	if _attack_t >= a["cancel"]:
 		if _buffered:
-			_start_attack((_attack_step + 1) % COMBO.size())
+			_start_attack((_attack_step + 1) % Balance.COMBO.size())
 			return Vector3.ZERO
 		if move.length() > 0.1 or _attack_t >= a["cancel"] + 0.3:
 			_end_attack()
 		return Vector3.ZERO
 	# Step into the swing unless an enemy is already in the face
 	if _attack_t < 0.14 and not _enemy_within(1.3):
-		return _aim * LUNGE_SPEED * (1.4 if a["heavy"] else 1.0)
+		return _aim * Balance.LUNGE_SPEED * (1.4 if a["heavy"] else 1.0)
 	return Vector3.ZERO
 
 
@@ -280,6 +311,7 @@ func _impact(a: Dictionary) -> void:
 			hits += 1
 	if hits == 0:
 		return
+	gain_ember(Balance.EMBER_ON_HIT)
 	if a["heavy"]:
 		Audio.play("hit_heavy", 0.0, 0.06)
 		Fx.hitstop(0.11)
@@ -291,37 +323,95 @@ func _impact(a: Dictionary) -> void:
 		Fx.shake(0.22)
 
 
-# --- Dodge, ember, damage -----------------------------------------------------
+# --- Ember meter and Köz Zərbəsi -------------------------------------------------------
 
-func dash(move: Vector3) -> void:
-	if _dash_cd > 0.0 or dead:
+func gain_ember(amount: float) -> void:
+	_last_ember_gain_ms = Time.get_ticks_msec()
+	_set_ember(ember + amount)
+
+
+## Called by shades as they die.
+func on_enemy_killed() -> void:
+	gain_ember(Balance.EMBER_ON_KILL)
+
+
+func _set_ember(v: float) -> void:
+	var nv := clampf(v, 0.0, Balance.EMBER_MAX)
+	if absf(nv - ember) > 0.001:
+		ember = nv
+		ember_changed.emit(ember, Balance.EMBER_MAX)
+
+
+## Tap fire: a cone of flame in front of Ayxan, paid for with the ember meter.
+func ember_strike() -> void:
+	if not _can_act() or _strike_cd > 0.0:
+		return
+	if ember < Balance.STRIKE_COST:
+		Fx.notify("Köz kifayət etmir...")
 		return
 	if _attack_step >= 0:
 		_end_attack()
-	_cast_t = -1.0
-	_dash_cd = DASH_COOLDOWN
-	_dash_time = DASH_TIME
-	_invuln = maxf(_invuln, DASH_TIME + 0.1)
-	_dash_dir = move.normalized() if move.length() > 0.1 else _facing
-	_facing = _dash_dir
-	_model.rotation.y = atan2(-_dash_dir.x, -_dash_dir.z)
-	_model.play_action("Dodge_Forward", 1.35, 0.04)
-	Fx.ash_puff(global_position)
-	Audio.play("dash", -6.0, 0.1)
+	_strike_cd = Balance.STRIKE_COOLDOWN
+	_set_ember(ember - Balance.STRIKE_COST)
+	_update_aim()
+	_aim = _assist(_aim, Balance.STRIKE_RANGE + 1.0)
+	_facing = _aim
+	_model.rotation.y = atan2(-_aim.x, -_aim.z)
+	_model.play_action("Spellcast_Shoot", 2.2, 0.04)
+	Fx.ember_cone(global_position, _aim, Balance.STRIKE_RANGE)
+	Fx.shake(0.3)
+	Audio.play("nova", -8.0, 0.12)
+	for e in get_tree().get_nodes_in_group("enemies"):
+		var to: Vector3 = e.global_position - global_position
+		to.y = 0.0
+		var dist := to.length()
+		if dist <= Balance.STRIKE_RANGE + e.radius and (dist < 0.8 or to.normalized().dot(_aim) >= Balance.STRIKE_CONE_DOT):
+			var dir := to.normalized() if dist > 0.01 else _aim
+			e.take_damage(Balance.STRIKE_DAMAGE, dir * Balance.STRIKE_KNOCK, false)
+	Fx.hitstop(0.05)
 
 
-## Alov Dalğası: raise the ember, then a ring of fire. Burns the next memory.
-func ember_power() -> void:
-	if _power_cd > 0.0 or dead or _cast_t >= 0.0:
+# --- Alov Dalğası: the memory wheel ---------------------------------------------------
+
+func _open_wheel() -> void:
+	if not _can_act() or _wave_cd > 0.0:
+		_fire_down_ms = -1
 		return
 	if not Memory.can_burn():
-		Fx.notify("Yandırılacaq xatirə qalmayıb...")
+		# Nothing left to give: an empty gesture, and the Ash Shah laughs.
+		_fire_down_ms = -1
+		_model.play_action("Spellcast_Raise", 2.8, 0.05)
+		Audio.play("whisper", -2.0, 0.0)
+		Fx.notify("...hə-hə... heç nə qalmayıb, balaca şah...")
 		return
 	if _attack_step >= 0:
 		_end_attack()
-	_power_cd = POWER_COOLDOWN
+	radial.open()
+	Fx.hold_time("radial", Balance.RADIAL_TIME_SCALE)
+
+
+func _release_wheel() -> void:
+	var id: String = radial.close()
+	Fx.release_time("radial")
+	if id == "":
+		return
+	if not GameState.flags.has("wave_confirmed"):
+		radial.ask_confirm()
+		var ok: bool = await radial.confirmed
+		if not ok:
+			return
+		GameState.set_flag("wave_confirmed")
+	cast_wave(id)
+
+
+## Raises the ember and burns `memory_id`; the nova goes off on the cast trigger.
+func cast_wave(memory_id: String) -> void:
+	if dead or _cast_t >= 0.0:
+		return
+	_wave_cd = Balance.WAVE_COOLDOWN
 	_cast_t = 0.0
-	_invuln = maxf(_invuln, CAST_TIME)
+	_cast_memory = memory_id
+	_invuln = maxf(_invuln, Balance.WAVE_CAST_TIME)
 	_update_aim()
 	_model.play_action("Spellcast_Raise", 2.8, 0.05)
 
@@ -329,16 +419,16 @@ func ember_power() -> void:
 func _update_cast(delta: float) -> void:
 	var before := _cast_t
 	_cast_t += delta
-	if before < CAST_TRIGGER and _cast_t >= CAST_TRIGGER:
+	if before < Balance.WAVE_CAST_TRIGGER and _cast_t >= Balance.WAVE_CAST_TRIGGER:
 		_release_nova()
-	if _cast_t >= CAST_TIME:
+	if _cast_t >= Balance.WAVE_CAST_TIME:
 		_cast_t = -1.0
 		_model.cancel_action()
 
 
 func _release_nova() -> void:
-	Memory.burn_next()
-	Fx.fire_nova(global_position, POWER_RADIUS)
+	Memory.burn(_cast_memory)
+	Fx.fire_nova(global_position, Balance.WAVE_RADIUS)
 	Fx.shake(0.8)
 	Fx.punch(1.0)
 	Fx.hitstop(0.1)
@@ -349,18 +439,63 @@ func _release_nova() -> void:
 		var to: Vector3 = e.global_position - global_position
 		to.y = 0.0
 		var dist := to.length()
-		if dist <= POWER_RADIUS + e.radius:
-			var dmg := POWER_DAMAGE * lerpf(1.0, 0.55, clampf(dist / POWER_RADIUS, 0.0, 1.0))
+		if dist <= Balance.WAVE_RADIUS + e.radius:
+			var dmg := Balance.WAVE_DAMAGE * lerpf(1.0, Balance.WAVE_EDGE_FALLOFF, clampf(dist / Balance.WAVE_RADIUS, 0.0, 1.0))
 			var dir := to.normalized() if dist > 0.01 else Vector3.FORWARD
-			e.take_damage(dmg, dir * 16.0, true)
+			e.take_damage(dmg, dir * Balance.WAVE_KNOCK, true)
+
+
+# --- Dodge, damage, Kül Şahının təklifi -------------------------------------------------
+
+func dash(move: Vector3) -> void:
+	if _dash_cd > 0.0 or dead:
+		return
+	if _attack_step >= 0:
+		_end_attack()
+	_cast_t = -1.0
+	_dash_cd = Balance.DASH_COOLDOWN
+	_dash_time = Balance.DASH_TIME
+	_invuln = maxf(_invuln, Balance.DASH_TIME + 0.1)
+	_dash_dir = move.normalized() if move.length() > 0.1 else _facing
+	_facing = _dash_dir
+	_model.rotation.y = atan2(-_dash_dir.x, -_dash_dir.z)
+	_model.play_action("Dodge_Forward", 1.35, 0.04)
+	Fx.ash_puff(global_position)
+	Audio.play("dash", -6.0, 0.1)
+	if _is_perfect_dodge():
+		_perfect_dodge()
+
+
+## A dodge counts as perfect when a nearby shade's strike is about to land on Ayxan.
+func _is_perfect_dodge() -> bool:
+	var window := perfect_window()
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if global_position.distance_to(e.global_position) > 4.5 + e.radius:
+			continue
+		if e.time_to_strike() <= window:
+			return true
+	return false
+
+
+func perfect_window() -> float:
+	return Balance.PERFECT_WINDOW
+
+
+func _perfect_dodge() -> void:
+	Fx.slowmo(Balance.PERFECT_SLOWMO_SCALE, Balance.PERFECT_SLOWMO_TIME)
+	Fx.ash_trail(global_position)
+	gain_ember(Balance.PERFECT_EMBER)
+	Audio.play("memory_burn", -14.0, 0.2)
+	Fx.notify("Mükəmməl yayınma")
 
 
 func take_damage(amount: float, knock := Vector3.ZERO) -> void:
 	if dead or _invuln > 0.0:
 		return
 	health = maxf(health - amount, 0.0)
-	_invuln = 0.4
+	_invuln = Balance.HURT_INVULN
 	_flash = 1.0
+	last_hurt_ms = Time.get_ticks_msec()
 	velocity += knock
 	health_changed.emit(health, MAX_HEALTH)
 	Fx.shake(0.45)
@@ -372,8 +507,26 @@ func take_damage(amount: float, knock := Vector3.ZERO) -> void:
 	if _dash_time <= 0.0 and _cast_t < 0.0:
 		if _attack_step >= 0:
 			_end_attack()
-		_stun = HURT_STUN
+		_stun = Balance.HURT_STUN
 		_model.play_action("Hit_A", 1.7, 0.05)
+	if health <= Balance.OFFER_HEALTH:
+		_maybe_offer()
+
+
+func _maybe_offer() -> void:
+	if _offer_used or offer == null or offer.is_open or Memory.unburned().is_empty():
+		return
+	_offer_used = true
+	offer.open()
+	var accepted: bool = await offer.resolved
+	if accepted and not dead:
+		var m := Memory.burn_random()
+		health = MAX_HEALTH
+		health_changed.emit(health, MAX_HEALTH)
+		Fx.fire_nova(global_position, 3.0)
+		Audio.play("memory_burn", -2.0, 0.0)
+		if not m.is_empty():
+			Fx.notify("Kül Şahı «%s» xatirəsini seçdi." % m["title"])
 
 
 func heal(amount: float) -> void:
@@ -387,13 +540,20 @@ func _die() -> void:
 	dead = true
 	_attack_step = -1
 	_cast_t = -1.0
+	if radial != null and radial.is_open:
+		radial.close()
+		Fx.release_time("radial")
 	_model.play_action("Death_A", 1.0, 0.1, true)
 	create_tween().tween_property(_ember_light, "light_energy", 0.0, 1.5)
 	died.emit()
 
 
 func _on_memory_burned(_memory: Dictionary) -> void:
-	# The ember feeds on what Ayxan forgets: it burns brighter, his armor turns to ash.
+	_refresh_burn_look()
+
+
+## The ember feeds on what Ayxan forgets: it burns brighter, his clothes turn to ash.
+func _refresh_burn_look() -> void:
 	var n := Memory.burned.size()
 	var t := float(n) / Memory.MEMORIES.size()
 	_ember_light.light_energy = 1.2 + n * 0.45

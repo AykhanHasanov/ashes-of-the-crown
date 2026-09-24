@@ -91,16 +91,11 @@ func _column(parent: Control, width: float) -> RichTextLabel:
 
 func _refresh() -> void:
 	var m := "[color=#e8b870][font_size=22]XATİRƏLƏR[/font_size][/color]\n"
-	var next := Memory.next_memory()
 	for mem in Memory.MEMORIES:
 		if Memory.is_burned(mem["id"]):
 			m += "[color=#5f5852][s]%s[/s] — kül[/color]\n" % mem["title"]
-		elif not next.is_empty() and next["id"] == mem["id"]:
-			m += "[color=#ff8a3d]%s[/color]  [color=#9a9088](köz bunu növbəti alacaq)[/color]\n" % mem["title"]
 		else:
-			m += "%s\n" % mem["title"]
-		if not Memory.is_burned(mem["id"]):
-			m += "[color=#9a9088][i]%s[/i][/color]\n" % mem["text"]
+			m += "%s\n[color=#9a9088][i]%s[/i][/color]\n[color=#c07a50]Yanarsa: %s[/color]\n" % [mem["title"], mem["text"], mem["cost"]]
 	_memories.text = m
 
 	var e := "[color=#e8b870][font_size=22]ƏKS-SƏDALAR[/font_size][/color]\n"
