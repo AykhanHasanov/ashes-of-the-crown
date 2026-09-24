@@ -1,6 +1,7 @@
 extends Node3D
 ## Prototype entry point: builds Közqala, spawns Ayxan and Rüfət and runs
-## Chapter 1 "Birinci səhər" — find Rüfət, talk, survive three waves of ash shades.
+## Chapter 1 "Birinci səhər" — title screen, Ayxan rises from the ash, find Rüfət,
+## talk, survive three waves of ash shades. Esc pauses at any point after the menu.
 
 const Kozqala := preload("res://scripts/world/kozqala.gd")
 const Player := preload("res://scripts/player/player.gd")
@@ -10,8 +11,13 @@ const CameraRig := preload("res://scripts/camera/camera_rig.gd")
 const Hud := preload("res://scripts/ui/hud.gd")
 const DialogueUI := preload("res://scripts/ui/dialogue_ui.gd")
 const RufetDialogue := preload("res://scripts/story/rufet_dialogue.gd")
+const MainMenu := preload("res://scripts/ui/main_menu.gd")
+const PauseMenu := preload("res://scripts/ui/pause_menu.gd")
 
-enum Phase { INTRO, FIND_RUFET, DIALOGUE, WAVES, VICTORY, DEFEAT }
+enum Phase { MENU, INTRO, FIND_RUFET, DIALOGUE, WAVES, VICTORY, DEFEAT }
+
+## Set by "restart" so a reload goes straight into the chapter instead of the title screen.
+static var skip_menu := false
 
 const WAVES := [
 	{"normal": 4, "fast": 0, "elite": 0, "title": "Kül Kölgələri qalxır!"},
@@ -29,6 +35,7 @@ var rufet
 var rig
 var hud
 var dialogue
+var pause_menu
 var flags := {}
 
 var _wave := -1
@@ -70,18 +77,28 @@ func _ready() -> void:
 	add_child(dialogue)
 	dialogue.finished.connect(_on_dialogue_finished)
 	dialogue.flag_set.connect(func(f: String): flags[f] = true)
+	pause_menu = PauseMenu.new()
+	add_child(pause_menu)
+	pause_menu.main_menu_requested.connect(_to_main_menu)
 
 	Fx.camera_rig = rig
 	Fx.world = self
 	player.health_changed.connect(hud.set_health)
 	player.died.connect(_on_player_died)
-	Settings.quality_changed.connect(_apply_quality)
+	Settings.changed.connect(_apply_quality)
 	_apply_quality()
 	_begin()
 
 
 func _begin() -> void:
+	if Settings.demo != "" and Settings.demo != "menu":
+		pause_menu.enabled = true
 	match Settings.demo:
+		"menu":
+			_menu()
+		"pause", "settings":
+			_find_rufet()
+			process_mode = Node.PROCESS_MODE_ALWAYS  # keep counting frames for the capture
 		"explore":
 			_find_rufet()
 		"dialogue":
@@ -95,15 +112,43 @@ func _begin() -> void:
 		"victory":
 			_victory()
 		_:
-			_intro()
+			if skip_menu:
+				_intro()
+			else:
+				_menu()
+
+
+## Title screen: the camera circles the ruins while Ayxan lies in the ash.
+func _menu() -> void:
+	phase = Phase.MENU
+	hud.visible = false
+	player.lie_down()
+	rig.orbit(Vector3(0, 1.5, 0), 27.0)
+	var menu = MainMenu.new()
+	add_child(menu)
+	menu.new_game.connect(_on_new_game)
+
+
+func _on_new_game() -> void:
+	rig.release()
+	hud.visible = true
+	_intro()
 
 
 func _intro() -> void:
 	phase = Phase.INTRO
-	player.input_locked = true
+	pause_menu.enabled = false
+	player.lie_down()
 	await hud.title_card("ASHES OF THE CROWN", "Közqala. Kül Gecəsindən üç gün sonra.", 3.2)
-	player.input_locked = false
+	await player.stand_up()
+	pause_menu.enabled = true
 	_find_rufet()
+
+
+func _to_main_menu() -> void:
+	skip_menu = false
+	get_tree().paused = false
+	get_tree().reload_current_scene()
 
 
 func _find_rufet() -> void:
@@ -133,10 +178,9 @@ func _process(delta: float) -> void:
 					_start_wave(_wave + 1)
 		Phase.VICTORY, Phase.DEFEAT:
 			if Input.is_action_just_pressed("restart"):
+				skip_menu = true
 				get_tree().reload_current_scene()
 
-	if Input.is_action_just_pressed("quit"):
-		get_tree().quit()
 	_demo_actions()
 	if Settings.capture_path != "" and _frame == Settings.capture_frame:
 		_capture()
@@ -247,7 +291,7 @@ func _on_player_died() -> void:
 	Audio.music("", 1.0)
 	Audio.play("sting_defeat", -2.0, 0.0)
 	await get_tree().create_timer(1.2).timeout
-	hud.show_card("KÖZ SÖNDÜ", "Ayxan külün içində yıxıldı.", "[R] — yenidən başla", 0.75)
+	hud.show_card("KÖZ SÖNDÜ", "Ayxan külün içində yıxıldı.", "[R] — yenidən başla   ·   [Esc] — menyu", 0.75)
 
 
 func _victory() -> void:
@@ -271,7 +315,7 @@ func _victory() -> void:
 	elif burned == 0:
 		lines.append("Közü bir dəfə də olsun oyatmadın. Kül Şahı səbirlə gözləyir.")
 	lines.append("")
-	lines.append("PROTOTİP SONU   ·   [R] — yenidən başla")
+	lines.append("PROTOTİP SONU   ·   [R] — yenidən başla   ·   [Esc] — menyu")
 	await get_tree().create_timer(1.5).timeout
 	hud.show_card("KÖZQALA SAĞ QALDI", "Hələlik.", "\n".join(lines), 0.8)
 
@@ -289,6 +333,10 @@ func _apply_quality() -> void:
 # --- Debug capture (see scripts/systems/settings.gd) -------------------------
 
 func _demo_actions() -> void:
+	if Settings.demo in ["pause", "settings"] and _frame == 60:
+		pause_menu.open()
+	if Settings.demo == "settings" and _frame == 70:
+		pause_menu._open_settings()
 	if Settings.demo != "combat" or Settings.capture_path == "":
 		return
 	if _frame == Settings.capture_frame - 60:

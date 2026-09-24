@@ -10,7 +10,7 @@ const RECOLOR := preload("res://shaders/recolor.gdshader")
 const LOOPING := [
 	"Idle", "Idle_B", "Idle_Combat", "2H_Melee_Idle", "Unarmed_Idle",
 	"Running_A", "Running_B", "Running_C", "Walking_A", "Walking_B", "Walking_C",
-	"Walking_D_Skeletons", "Blocking", "Spellcasting",
+	"Walking_D_Skeletons", "Blocking", "Spellcasting", "Lie_Idle",
 ]
 
 var anim: AnimationPlayer

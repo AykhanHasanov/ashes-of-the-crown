@@ -12,6 +12,10 @@ const OVERLAY := preload("res://shaders/ash_overlay.gdshader")
 const DIR := "res://assets/characters/skeletons/"
 ## Real seconds into the chop clip (at speed 1) where the blade lands.
 const CHOP_IMPACT := 0.55
+const HP_BAR := preload("res://shaders/hp_bar.gdshader")
+## Only this many shades may strike at once; the rest circle at WAIT_RING and wait.
+const MAX_ATTACKERS := 2
+const WAIT_RING := 3.4
 
 enum State { RISING, CHASE, WINDUP, LUNGE, RECOVER, DEAD }
 
@@ -39,6 +43,11 @@ var _overlay: ShaderMaterial
 var _ring: MeshInstance3D
 var _ring_mat: StandardMaterial3D
 var _shape: CollisionShape3D
+var _bar: MeshInstance3D
+var _bar_mat: ShaderMaterial
+var _bar_lag := 1.0
+var _bar_hold := 0.0
+var _orbit := 1.0
 
 
 func configure(k: String) -> void:
@@ -112,6 +121,20 @@ func _ready() -> void:
 	_ring.visible = false
 	add_child(_ring)
 
+	# Health bar above the head (the elite uses the HUD boss bar instead)
+	_bar = MeshInstance3D.new()
+	var quad := QuadMesh.new()
+	quad.size = Vector2(1.1, 0.13)
+	_bar.mesh = quad
+	_bar_mat = ShaderMaterial.new()
+	_bar_mat.shader = HP_BAR
+	_bar.material_override = _bar_mat
+	_bar.position.y = 2.25 * size
+	_bar.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_bar.visible = false
+	add_child(_bar)
+	_orbit = 1.0 if randf() < 0.5 else -1.0
+
 	_model.move_anim = "Walking_D_Skeletons" if kind == "elite" else "Running_A"
 	_model.play_action("Spawn_Ground_Skeletons", 2.4, 0.0)
 	_timer = 1.4
@@ -126,6 +149,7 @@ func _physics_process(delta: float) -> void:
 	_flash = maxf(_flash - delta * 6.0, 0.0)
 	_overlay.set_shader_parameter("hit_flash", _flash * 0.45)
 	_knock = _knock.move_toward(Vector3.ZERO, 30.0 * delta)
+	_update_bar(delta)
 	if _state == State.DEAD:
 		velocity = Vector3(_knock.x, 0.0, _knock.z)
 		move_and_slide()
@@ -147,8 +171,14 @@ func _physics_process(delta: float) -> void:
 				_model.cancel_action()
 		State.CHASE:
 			if has_target:
-				if dist < 1.8 + radius:
+				var slot_free := _attackers() < MAX_ATTACKERS
+				if dist < 1.8 + radius and slot_free:
 					_begin_windup()
+				elif not slot_free and dist < WAIT_RING + 1.0:
+					# Circle Ayxan, keeping the wait distance, until a slot opens
+					var radial := -to.normalized() * clampf(WAIT_RING - dist, -1.0, 1.0)
+					var tangent := Vector3(-to.z, 0.0, to.x).normalized() * _orbit * 0.6
+					move = (radial + tangent + _separation()).limit_length(1.0) * speed * 0.6
 				else:
 					move = (to.normalized() + _separation() * 1.2).normalized() * speed
 				_face(to, delta, 10.0)
@@ -189,6 +219,10 @@ func take_damage(amount: float, knock := Vector3.ZERO, heavy := false) -> void:
 	_flash = 1.0
 	_knock += knock * (0.3 if kind == "elite" else 1.0)
 	Fx.hit_spark(global_position + Vector3(0, 1.1 * size, 0), heavy)
+	if Settings.damage_numbers:
+		Fx.damage_number(global_position + Vector3(0, 2.0 * size, 0), amount, "heavy" if heavy else "normal")
+	_bar.visible = kind != "elite"
+	_bar_hold = 0.45
 	if health <= 0.0:
 		_die()
 		return
@@ -214,6 +248,7 @@ func _die() -> void:
 	remove_from_group("enemies")
 	_shape.set_deferred("disabled", true)
 	_ring.visible = false
+	create_tween().tween_method(func(v: float): _bar_mat.set_shader_parameter("alpha", v), 1.0, 0.0, 0.4)
 	_model.play_action("Death_C_Skeletons", 1.4, 0.05, true)
 	Fx.death_burst(global_position, size)
 	Audio.play("shade_death", -3.0, 0.12, global_position)
@@ -223,6 +258,30 @@ func _die() -> void:
 	tw.tween_interval(1.4)
 	tw.tween_property(_model, "position:y", -1.6 * size, 1.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tw.tween_callback(queue_free)
+
+
+func is_attacking() -> bool:
+	return _state == State.WINDUP or _state == State.LUNGE
+
+
+func _attackers() -> int:
+	var n := 0
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if e != self and e.is_attacking():
+			n += 1
+	return n
+
+
+## The bar shows current health instantly; the pale "lost" segment drains after a beat.
+func _update_bar(delta: float) -> void:
+	if not _bar.visible:
+		return
+	var ratio := clampf(health / max_health, 0.0, 1.0)
+	_bar_hold -= delta
+	if _bar_hold <= 0.0:
+		_bar_lag = move_toward(_bar_lag, ratio, delta * 1.5)
+	_bar_mat.set_shader_parameter("ratio", ratio)
+	_bar_mat.set_shader_parameter("lag", maxf(_bar_lag, ratio))
 
 
 func _face(dir: Vector3, delta: float, rate: float) -> void:

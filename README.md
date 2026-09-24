@@ -15,11 +15,11 @@ Mühərrik: **Godot 4.7.2** (Forward+). Bütün səviyyə, personajlar və effek
 | Space | Kül addımı (yayınma, zərbədən qoruyur) |
 | E | Danış / davam et |
 | 1-3 | Dialoq seçimi |
-| F9 | Qrafika: Aşağı / Yüksək |
+| F9 | Qrafika: Aşağı / Yüksək (parametrlərdə də var) |
 | F3 | FPS göstər |
 | F11 | Tam ekran |
 | R | Yenidən başla (son ekranında) |
-| Esc | Çıxış |
+| Esc / P | Fasilə menyusu: davam et, parametrlər, baş menyu, çıxış |
 
 Yaralanmısansa, ocaqların yanında dayan: odun istisi səni sağaldır.
 Düşmənin altında qırmızı halqa böyüyürsə, o, zərbə vurmağa hazırlaşır. Yayın!

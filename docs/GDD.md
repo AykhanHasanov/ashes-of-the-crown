@@ -83,6 +83,8 @@ Satqın kim olursa olsun, sonda həqiqət açılır: **kral yanğını özü ist
 - **Çəki:** zərbədə qısa zaman dayanması (hitstop), kameranın silkələnməsi, güclü zərbədə kamera yaxınlaşması, qığılcım və işıq partlayışı, uçan zərbə rəqəmləri.
 - **Oxunaqlılıq:** düşmən hücumdan əvvəl gözlərini alışdırır, altında isə böyüyən qırmızı halqa çıxır. Adi düşmənin hücumunu qılınc kəsir, elitə hücumunu isə yalnız güclü zərbə kəsə bilir.
 - **Kulminasiya:** dalğanın son düşməni yavaş çəkilişdə yıxılır.
+- **Can zolaqları (M3):** düşmənin başı üstündə zolaq zərbə dəyəndən sonra görünür. İtirilən hissə bir anlıq açıq rəngdə qalıb əriyir. Zərbə rəqəmləri default olaraq bağlıdır, parametrlərdən açıla bilər.
+- **Hücum növbəsi (M3):** eyni anda ən çox 2 kölgə hücum edir, qalanları Ayxanın ətrafında dövrə vurub növbə gözləyir. Kalabalıq ədalətli, amma gərgin qalır.
 
 ### Səs dizaynı
 - Bütün səslər `tools/gen_audio.py` ilə sintez olunur.
@@ -109,8 +111,8 @@ Satqın kim olursa olsun, sonda həqiqət açılır: **kral yanğını özü ist
 |---|---|---|
 | **M1: Prototip** | Közqala həyəti, Ayxan, Rüfət, dialoq, Yaddaş Yanğını, 3 dalğa, 2 qrafika rejimi | ✅ Hazırdır |
 | **M2: Hiss** | KayKit 3D personajları və animasiyaları, kombo döyüşü, hitstop, zərbə rəqəmləri, 28 sintez səs və muğam musiqisi (sakit və döyüş qatları) | ✅ Hazırdır |
-| M3: Dünya və interfeys | Közqalanın bədii versiyası (CC0 mühit modelləri), baş menyu, fasilə, parametrlər, döyüşün tarazlanması | Növbəti |
-| M4: Sistemlər | Satqın sistemi, sübutlar, NPC süni intellekti, Son Ocaq bazası | |
+| **M3: Dünya və interfeys** | Közqala KayKit mühit modelləri ilə yenidən quruldu (hisə batmış divarlar, bayraqlar, xəzinə, sümüklər, yanmış ağaclar, məşələlər). Baş menyu (Ayxan külün içində yatır, kamera həyət ətrafında fırlanır), fasilə menyusu, yadda qalan parametrlər (səs, qrafika, tam ekran, silkələnmə, zərbə rəqəmləri). Düşmənlərin üstündə can zolaqları, eyni anda ən çox 2 düşmən hücum edir | ✅ Hazırdır |
+| M4: Sistemlər | Satqın sistemi, sübutlar, NPC süni intellekti, Son Ocaq bazası, yadda saxlama | Növbəti |
 | M5: Vertical slice | Közqala tam hekayə xətti ilə, 3 NPC, 1 satqın ssenarisi | |
 | M6+ | Digər bölgələr, bütün sonlar, Steam | |
 

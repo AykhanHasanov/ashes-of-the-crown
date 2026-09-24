@@ -1,6 +1,6 @@
 extends Node3D
 ## Isometric-style follow camera (south-east, looking north-west) with trauma-based
-## shake and a cinematic close-up mode used during dialogue.
+## shake, a cinematic close-up mode for dialogue and a slow orbit for the title screen.
 
 const YAW := 45.0
 const PITCH := -50.0
@@ -22,6 +22,9 @@ var _yaw := YAW
 var _pitch := PITCH
 var _dist := DISTANCE
 var _punch := 0.0
+var _orbit := false
+var _orbit_center := Vector3.ZERO
+var _orbit_dist := 24.0
 
 
 func _ready() -> void:
@@ -47,6 +50,18 @@ func cinematic(focus: Vector3, yaw_deg: float) -> void:
 
 func release() -> void:
 	_cine = false
+	_orbit = false
+
+
+## Slow circling shot around `center` (title screen). Ends with release().
+func orbit(center: Vector3, dist: float) -> void:
+	_orbit = true
+	_orbit_center = center
+	_orbit_dist = dist
+	_focus = center
+	_pitch = -24.0
+	_dist = dist
+	_place()
 
 
 func add_trauma(amount: float) -> void:
@@ -59,6 +74,14 @@ func punch(amount: float) -> void:
 
 
 func _process(delta: float) -> void:
+	if _orbit:
+		_yaw += delta * 3.5
+		_focus = _orbit_center
+		_pitch = -24.0
+		_dist = _orbit_dist
+		camera.fov = FOV
+		_place()
+		return
 	var want_focus := _focus
 	if _cine:
 		want_focus = _cine_focus

@@ -49,13 +49,13 @@ func slowmo(time_scale: float, duration: float) -> void:
 
 func shake(amount: float) -> void:
 	if is_instance_valid(camera_rig):
-		camera_rig.add_trauma(amount)
+		camera_rig.add_trauma(amount * Settings.screen_shake)
 
 
 ## Quick zoom toward the action.
 func punch(amount: float) -> void:
 	if is_instance_valid(camera_rig):
-		camera_rig.punch(amount)
+		camera_rig.punch(amount * Settings.screen_shake)
 
 
 func notify(text: String) -> void:

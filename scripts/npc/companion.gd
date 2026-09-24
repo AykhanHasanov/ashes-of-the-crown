@@ -88,7 +88,6 @@ func _land_swing() -> void:
 	if to.length() > REACH + e.radius + 0.6:
 		return
 	e.take_damage(DAMAGE, to.normalized() * 4.0)
-	Fx.damage_number(e.global_position + Vector3(0, 2.0 * e.size, 0), DAMAGE)
 	Audio.play("hit", -8.0, 0.1, e.global_position, 3)
 
 

@@ -185,6 +185,20 @@ func _process(_delta: float) -> void:
 	_ember.global_position = _model.bone_position("chest") + fwd * 0.3 + Vector3(0, 0.05, 0)
 
 
+## Ayxan lies unconscious in the ash (title screen and opening).
+func lie_down() -> void:
+	input_locked = true
+	_model.play_action("Lie_Idle", 1.0, 0.0, true)
+
+
+## Gets up out of the ash; await it before handing control back.
+func stand_up() -> void:
+	_model.play_action("Lie_StandUp", 1.3, 0.1)
+	await get_tree().create_timer(1.4).timeout
+	_model.cancel_action()
+	input_locked = false
+
+
 func face_towards(point: Vector3) -> void:
 	var d := point - global_position
 	d.y = 0.0
@@ -256,7 +270,6 @@ func _impact(a: Dictionary) -> void:
 			var dmg: float = a["damage"] * randf_range(0.9, 1.1)
 			var dir := to.normalized() if dist > 0.01 else _aim
 			e.take_damage(dmg, dir * a["knock"], a["heavy"])
-			Fx.damage_number(e.global_position + Vector3(0, 2.0 * e.size, 0), dmg, "heavy" if a["heavy"] else "normal")
 			hits += 1
 	if hits == 0:
 		return
@@ -333,7 +346,6 @@ func _release_nova() -> void:
 			var dmg := POWER_DAMAGE * lerpf(1.0, 0.55, clampf(dist / POWER_RADIUS, 0.0, 1.0))
 			var dir := to.normalized() if dist > 0.01 else Vector3.FORWARD
 			e.take_damage(dmg, dir * 16.0, true)
-			Fx.damage_number(e.global_position + Vector3(0, 2.0 * e.size, 0), dmg, "ember")
 
 
 func take_damage(amount: float, knock := Vector3.ZERO) -> void:

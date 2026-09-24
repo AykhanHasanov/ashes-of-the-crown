@@ -21,20 +21,25 @@ var _fade_time := 2.0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_make_bus("Music")
+	_make_bus("SFX")
 	for i in POOL_SIZE:
 		var p := AudioStreamPlayer.new()
+		p.bus = "SFX"
 		add_child(p)
 		_pool.append(p)
 		var p3 := AudioStreamPlayer3D.new()
 		p3.unit_size = 6.0
 		p3.max_distance = 45.0
 		p3.attenuation_filter_cutoff_hz = 9000.0
+		p3.bus = "SFX"
 		add_child(p3)
 		_pool_3d.append(p3)
 	for key in MUSIC:
 		var mp := AudioStreamPlayer.new()
 		mp.stream = stream(MUSIC[key])
 		mp.volume_db = -80.0
+		mp.bus = "Music"
 		add_child(mp)
 		_music_players[key] = mp
 		_music_level[key] = 0.0
@@ -42,8 +47,24 @@ func _ready() -> void:
 	var wind := AudioStreamPlayer.new()
 	wind.stream = stream("loop_wind")
 	wind.volume_db = -16.0
+	wind.bus = "SFX"
 	add_child(wind)
 	wind.play()
+
+
+## Linear 0..1 volumes for the Music and SFX buses.
+func set_volumes(music_level: float, sfx_level: float) -> void:
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Music"), linear_to_db(maxf(music_level, 0.0001)))
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("SFX"), linear_to_db(maxf(sfx_level, 0.0001)))
+
+
+func _make_bus(bus_name: String) -> void:
+	if AudioServer.get_bus_index(bus_name) >= 0:
+		return
+	AudioServer.add_bus()
+	var idx := AudioServer.bus_count - 1
+	AudioServer.set_bus_name(idx, bus_name)
+	AudioServer.set_bus_send(idx, "Master")
 
 
 func stream(sfx_name: String) -> AudioStream:
