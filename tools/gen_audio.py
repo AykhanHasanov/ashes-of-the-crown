@@ -613,6 +613,103 @@ def sting_defeat():
     return reverb(fade(out, 0.01, 1.2), mix=0.45, size=2.5, feedback=0.84)
 
 
+# --- Open world (V3 Faza B) -------------------------------------------------------
+
+def loop_rain():
+    """Rain: dense filtered hiss with scattered drops on leaves and puddles."""
+    dur = 8.0
+    out = silence(dur + 2.0)
+    add(out, lowpass(highpass(noise(dur + 2.0), 400.0), 5200.0), 0.0, 0.55)
+    add(out, lowpass(noise(dur + 2.0), 260.0), 0.0, 0.35)
+    for _ in range(420):
+        t = rng.uniform(0.0, dur + 1.8)
+        f = rng.uniform(1800.0, 5200.0)
+        add(out, shape(tone(0.03, f, f * 0.7), 0.0005, 0.006), t, rng.uniform(0.05, 0.18))
+    return make_loop(out, 2.0)
+
+
+def loop_river():
+    """River: low churning rush with bubbling mid tones."""
+    dur = 10.0
+    out = silence(dur + 2.0)
+    add(out, lowpass(noise(dur + 2.0), lambda t: 500.0 + 140.0 * math.sin(TAU * t / 3.1)), 0.0, 0.9)
+    add(out, bandpass(noise(dur + 2.0), 700.0, 2400.0), 0.0, 0.12)
+    for _ in range(160):
+        t = rng.uniform(0.0, dur + 1.8)
+        f = rng.uniform(300.0, 900.0)
+        add(out, shape(tone(0.06, f, f * 1.8), 0.002, 0.02), t, rng.uniform(0.04, 0.12))
+    return make_loop(out, 2.0)
+
+
+def loop_birds():
+    """Daytime: a soft wind bed with scattered birdsong chirps and trills."""
+    dur = 14.0
+    out = silence(dur + 2.0)
+    add(out, lowpass(noise(dur + 2.0), 300.0), 0.0, 0.12)
+    t = 0.3
+    while t < dur + 1.0:
+        kind = rng.random()
+        base = rng.uniform(2200.0, 4200.0)
+        if kind < 0.5:
+            for k in range(rng.randint(2, 5)):
+                add(out, shape(tone(0.07, base * 1.15, base), 0.004, 0.025), t + k * 0.09, 0.22)
+        elif kind < 0.8:
+            add(out, shape(tone(0.35, base, base, vib_rate=28.0, vib_depth=0.05), 0.01, 0.12), t, 0.16)
+        else:
+            add(out, shape(tone(0.18, base * 0.8, base * 1.3), 0.01, 0.05), t, 0.2)
+        t += rng.uniform(0.5, 1.8)
+    return make_loop(reverb(out, mix=0.25, size=1.4), 2.0)
+
+
+def loop_crickets():
+    """Night: cricket chorus pulsing at slightly different rates."""
+    dur = 12.0
+    out = silence(dur + 2.0)
+    for c in range(5):
+        f = rng.uniform(4200.0, 5600.0)
+        rate = rng.uniform(2.5, 4.5)
+        off = rng.uniform(0.0, 1.0)
+        n = int((dur + 2.0) * SR)
+        ch = [0.0] * n
+        for i in range(n):
+            tt = i / SR
+            burst = max(0.0, math.sin(TAU * rate * tt + off * TAU)) ** 8
+            ch[i] = math.sin(TAU * f * tt) * burst * (0.5 + 0.5 * math.sin(TAU * 40.0 * tt))
+        add(out, ch, 0.0, 0.08)
+    add(out, lowpass(noise(dur + 2.0), 200.0), 0.0, 0.08)
+    return make_loop(out, 2.0)
+
+
+def sfx_splash():
+    """Falling into water."""
+    dur = 1.0
+    out = silence(dur)
+    add(out, shape(lowpass(noise(0.6), lambda t: 4000.0 * math.exp(-t * 4.0) + 300.0), 0.002, 0.18), 0.0, 1.0)
+    add(out, shape(tone(0.3, 220.0, 90.0), 0.002, 0.08), 0.0, 0.4)
+    for _ in range(18):
+        t = rng.uniform(0.05, 0.7)
+        f = rng.uniform(600.0, 1600.0)
+        add(out, shape(tone(0.05, f, f * 1.6), 0.001, 0.015), t, 0.15)
+    return fade(out, 0.001, 0.1)
+
+
+def sfx_swim_stroke():
+    """One swimming stroke: a soft push of water."""
+    dur = 0.5
+    out = silence(dur)
+    add(out, shape(bandpass(noise(0.4), 200.0, 1400.0), 0.08, 0.1), 0.0, 1.0)
+    return fade(out, 0.01, 0.05)
+
+
+def _save_world():
+    save("rain_loop", loop_rain(), peak=0.55)
+    save("river_loop", loop_river(), peak=0.55)
+    save("birds_loop", loop_birds(), peak=0.45)
+    save("crickets_loop", loop_crickets(), peak=0.4)
+    save("splash", sfx_splash(), peak=0.8)
+    save("swim_stroke", sfx_swim_stroke(), peak=0.5)
+
+
 def _save_combat():
     """V3 combat sounds: parry, block, execution, drinking, perfect dodge."""
     save("parry", sfx_parry(), peak=0.85)
@@ -634,8 +731,11 @@ def main():
             save("echo", sfx_echo(), peak=0.7)
         if "combat" in only:
             _save_combat()
+        if "world" in only:
+            _save_world()
         return
     _save_combat()
+    _save_world()
     for v in range(3):
         save("swing_%d" % v, sfx_swing(v), peak=0.85)
         save("hit_%d" % v, sfx_hit(v))

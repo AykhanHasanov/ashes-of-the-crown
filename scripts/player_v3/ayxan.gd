@@ -11,6 +11,9 @@ extends "res://scripts/combat/combatant.gd"
 ## Nar şərbəti (R) heals 40% over a vulnerable drink.
 ## V2 fire stays: Q tap = Köz Zərbəsi, Q hold = memory wheel + Alov Dalğası,
 ## perfect dodges, and Kül Şahı's offer at low health.
+## Open world (data/balance/world.json → movement): swimming costs stamina and then
+## health, slopes steeper than slide_angle slide you down, falls above fall_safe hurt
+## (fall_lethal kills), and low obstacles up to vault_height are vaulted while running.
 
 signal ember_changed(current: float, maximum: float)
 signal flasks_changed(current: int, maximum: int)
@@ -25,7 +28,7 @@ const MODEL_PATH := "res://assets/characters/adventurers/Rogue_Hooded.glb"
 const HIDDEN := ["Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Knife", "Throwable"]
 const MAX_HEALTH := 120.0
 
-enum S { MOVE, AIR, DODGE, ATTACK, CHARGE, BLOCK, DRINK, HURT, KNOCKDOWN, EXECUTE, STRIKE, CAST, DEAD }
+enum S { MOVE, AIR, DODGE, ATTACK, CHARGE, BLOCK, DRINK, HURT, KNOCKDOWN, EXECUTE, STRIKE, CAST, DEAD, SWIM, SLIDE, VAULT }
 
 var camera: Camera3D
 var rig                     # third-person camera node
@@ -39,6 +42,8 @@ var weapon: Dictionary = {}
 var weapon_slots := ["sword", "sword_shield", "mace"]
 var lock_target = null
 var last_hurt_ms := -100000
+## Open world: returns the water surface height at a point, or -1000 when dry.
+var water_query := Callable()
 
 var _cfg: Dictionary
 var _state := S.MOVE
@@ -76,6 +81,12 @@ var _offer_used := false
 var _step_dist := 0.0
 var _flash := 0.0
 var _tokens_used := 0
+var _move_cfg: Dictionary = {}
+var _fall_from := NAN
+var _vault_from := Vector3.ZERO
+var _vault_to := Vector3.ZERO
+var _slide_t := 0.0
+var _water_level := -1000.0
 
 
 func _ready() -> void:
@@ -97,6 +108,8 @@ func _ready() -> void:
 	collision_layer = 2
 	collision_mask = 1
 	floor_snap_length = 0.4
+	floor_max_angle = deg_to_rad(52.0)
+	_move_cfg = DataDB.balance("world").get("movement", {})
 	var shape := CollisionShape3D.new()
 	var cap := CapsuleShape3D.new()
 	cap.radius = 0.4
@@ -259,6 +272,7 @@ func _physics_process(delta: float) -> void:
 		if Input.is_action_just_pressed("interact"):
 			_request("execute")
 	_move_dir = _camera_relative(input)
+	_check_water()
 	_try_buffer()
 
 	match _state:
@@ -286,12 +300,20 @@ func _physics_process(delta: float) -> void:
 				_enter(S.MOVE)
 		S.CAST:
 			_do_cast(delta)
+		S.SWIM:
+			_do_swim(delta)
+		S.SLIDE:
+			_do_slide(delta)
+		S.VAULT:
+			_do_vault(delta)
 
-	if not is_on_floor() and _state != S.AIR and _state != S.DODGE:
+	if not is_on_floor() and _state not in [S.AIR, S.DODGE, S.SWIM, S.VAULT]:
 		velocity.y -= _cfg["player"]["gravity"] * delta
 	elif is_on_floor() and velocity.y < 0.0:
 		velocity.y = -0.5
-	move_and_slide()
+	if _state != S.VAULT:
+		move_and_slide()
+	_check_fall()
 	_update_facing(delta)
 	if rig:
 		rig.in_combat = _enemies_near(14.0)
@@ -372,6 +394,10 @@ func _do_move(delta: float) -> void:
 		_enter(S.AIR)
 	_locomotion_anim(speed, sprint)
 	_footsteps(delta)
+	if not _move_cfg.is_empty():
+		_check_slope()
+		if speed >= _cfg["player"]["run_speed"] - 0.1 and _state == S.MOVE:
+			_try_vault()
 
 
 func _do_air(delta: float) -> void:
@@ -763,7 +789,7 @@ func _drain_stamina(amount: float) -> void:
 
 func _tick_stamina(delta: float) -> void:
 	var st: Dictionary = _cfg["stamina"]
-	if _state in [S.ATTACK, S.DODGE, S.CHARGE] or _is_sprinting():
+	if _state in [S.ATTACK, S.DODGE, S.CHARGE, S.SWIM] or _is_sprinting():
 		return
 	if Time.get_ticks_msec() - _stamina_last_use_ms < st["regen_delay"] * 1000.0:
 		return
@@ -1111,6 +1137,154 @@ func _footsteps(delta: float) -> void:
 	if _step_dist > 1.7:
 		_step_dist = 0.0
 		Audio.play("footstep", -15.0, 0.15, null, 3)
+
+
+# --- Open-world movement: swim, slide, fall, vault -----------------------------------------------
+
+func _check_water() -> void:
+	if not water_query.is_valid() or dead or _move_cfg.is_empty():
+		return
+	_water_level = water_query.call(global_position)
+	var depth: float = _move_cfg["swim_depth"]
+	if _state != S.SWIM:
+		if _water_level > -999.0 and global_position.y < _water_level - depth and _state in [S.MOVE, S.AIR, S.DODGE, S.SLIDE, S.HURT]:
+			_end_attack()
+			_model.cancel_action()
+			_fall_from = NAN
+			velocity.y *= 0.2
+			Audio.play("splash", -4.0, 0.1)
+			_enter(S.SWIM)
+
+
+func _do_swim(delta: float) -> void:
+	var m := _move_cfg
+	var depth: float = m["swim_depth"]
+	if _water_level < -999.0 or (is_on_floor() and global_position.y > _water_level - depth + 0.3):
+		_model.position.y = 0.0
+		_enter(S.MOVE)
+		return
+	var fast: bool = Input.is_action_pressed("sprint") and stamina > 0.0 and not input_locked
+	var speed: float = m["swim_sprint_speed"] if fast else m["swim_speed"]
+	var want := _move_dir * speed
+	velocity.x = move_toward(velocity.x, want.x, 10.0 * delta)
+	velocity.z = move_toward(velocity.z, want.z, 10.0 * delta)
+	velocity.y = clampf((_water_level - depth - global_position.y) * 5.0, -3.0, 3.0)
+	# Swimming always tires; out of stamina the water takes health
+	_drain_stamina(float(m["swim_stamina"]) * (2.0 if fast else 1.0) * delta)
+	if stamina <= 0.0:
+		health = maxf(health - max_health * float(m["drown_damage_fraction"]) * delta, 0.0)
+		health_changed.emit(health, max_health)
+		_flash = maxf(_flash, 0.3)
+		if health <= 0.0 and not dead:
+			dead = true
+			_on_died(null)
+			died.emit()
+			return
+	_model.position.y = lerpf(_model.position.y, -0.55, 1.0 - exp(-6.0 * delta))
+	var moving := _move_dir.length() > 0.1
+	_model.play_loop("Running_A" if moving else "Idle", 0.55 if moving else 0.6)
+	_step_dist += Vector2(velocity.x, velocity.z).length() * delta
+	if _step_dist > 2.2:
+		_step_dist = 0.0
+		Audio.play("swim_stroke", -12.0, 0.15)
+
+
+func _check_slope() -> void:
+	if not is_on_floor() or _state != S.MOVE:
+		return
+	var angle := rad_to_deg(get_floor_normal().angle_to(Vector3.UP))
+	if angle > float(_move_cfg["slide_angle"]):
+		_slide_t = 0.0
+		_enter(S.SLIDE)
+
+
+func _do_slide(delta: float) -> void:
+	var n := get_floor_normal() if is_on_floor() else Vector3.UP
+	var angle := rad_to_deg(n.angle_to(Vector3.UP))
+	var down := Vector3(n.x, 0.0, n.z)
+	if down.length() > 0.01:
+		down = down.normalized()
+		velocity.x = move_toward(velocity.x, down.x * 9.0 + _move_dir.x * 1.5, float(_move_cfg["slide_accel"]) * delta)
+		velocity.z = move_toward(velocity.z, down.z * 9.0 + _move_dir.z * 1.5, float(_move_cfg["slide_accel"]) * delta)
+		_facing = down
+	_model.play_loop("Jump_Idle", 1.0)
+	_slide_t = _slide_t + delta if angle < float(_move_cfg["slide_angle"]) - 4.0 or not is_on_floor() else 0.0
+	if _slide_t > 0.18:
+		_enter(S.MOVE if is_on_floor() else S.AIR)
+
+
+## Falls above fall_safe hurt; fall_lethal and more kill.
+func _check_fall() -> void:
+	if _move_cfg.is_empty() or dead:
+		return
+	if _state == S.SWIM:
+		_fall_from = NAN
+		return
+	if not is_on_floor():
+		if is_nan(_fall_from) or global_position.y > _fall_from:
+			_fall_from = global_position.y
+		return
+	if is_nan(_fall_from):
+		return
+	var fall := _fall_from - global_position.y
+	_fall_from = NAN
+	var safe: float = _move_cfg["fall_safe"]
+	var lethal: float = _move_cfg["fall_lethal"]
+	if fall <= safe:
+		return
+	var dmg := max_health * clampf((fall - safe) / (lethal - safe), 0.0, 1.0)
+	if fall >= lethal:
+		dmg = health + 1.0
+	var hit = Hit.new().setup(null, dmg, "crush", 0.0, Vector3.ZERO)
+	hit.blockable = false
+	invulnerable_until = 0
+	receive_hit(hit)
+	Fx.shake(0.5)
+
+
+## A low wall or fence ahead while running: hop over it.
+func _try_vault() -> void:
+	if _move_dir.length() < 0.5 or not is_on_floor():
+		return
+	var space := get_world_3d().direct_space_state
+	var fwd := _move_dir.normalized()
+	var base := global_position
+	var low := PhysicsRayQueryParameters3D.create(base + Vector3(0, 0.45, 0), base + Vector3(0, 0.45, 0) + fwd * 0.75, 1, [get_rid()])
+	if space.intersect_ray(low).is_empty():
+		return
+	var top_h: float = _move_cfg["vault_height"]
+	var high := PhysicsRayQueryParameters3D.create(base + Vector3(0, top_h + 0.25, 0), base + Vector3(0, top_h + 0.25, 0) + fwd * 1.1, 1, [get_rid()])
+	if not space.intersect_ray(high).is_empty():
+		return
+	var probe := base + fwd * 1.05 + Vector3(0, top_h + 0.3, 0)
+	var down := PhysicsRayQueryParameters3D.create(probe, probe - Vector3(0, top_h + 0.6, 0), 1, [get_rid()])
+	var hit := space.intersect_ray(down)
+	if hit.is_empty():
+		return
+	var rise: float = hit["position"].y - base.y
+	if rise < 0.35 or rise > top_h:
+		return
+	_vault_from = base
+	_vault_to = hit["position"] + fwd * 0.9
+	_model.play_action("Jump_Start", 1.8, 0.05)
+	Audio.play("dash", -10.0, 0.1)
+	_enter(S.VAULT)
+
+
+func _do_vault(_delta: float) -> void:
+	var t := clampf(_state_t / 0.34, 0.0, 1.0)
+	var p := _vault_from.lerp(_vault_to, t)
+	p.y += sin(t * PI) * 0.55
+	global_position = p
+	velocity = Vector3.ZERO
+	if t >= 1.0:
+		_model.cancel_action()
+		_fall_from = NAN
+		_enter(S.MOVE)
+
+
+func is_swimming() -> bool:
+	return _state == S.SWIM
 
 
 # --- Attack tokens (budget others draw from) -------------------------------------------------------

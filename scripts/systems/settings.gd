@@ -12,6 +12,7 @@ extends Node
 ##                          c2 | c2_talk
 ##                          (V3 arena, scenes/arena.tscn:)
 ##                          arena_fight | arena_lock | arena_wolves | arena_selftest
+##                          (V3 open world, scenes/world.tscn: see world_mode.gd _demo_setup)
 ##                          (anything but "menu" skips the title screen; "combat" also
 ##                          swings and fires the ember before the capture)
 
@@ -126,7 +127,7 @@ const REBINDABLE := [
 	["ember_power", "Köz / Alov Dalğası"], ["lock_on", "Hədəfə kilidlən"],
 	["drink", "Nar şərbəti"], ["interact", "Danış / toxun / infaz"],
 	["skill_1", "Slot 1"], ["skill_2", "Slot 2"], ["skill_3", "Slot 3"], ["skill_4", "Slot 4"],
-	["journal", "Jurnal"], ["pause", "Fasilə"],
+	["journal", "Jurnal"], ["map", "Xəritə"], ["pause", "Fasilə"],
 ]
 const INPUT_PATH := "user://input.cfg"
 
@@ -152,6 +153,8 @@ func _setup_input() -> void:
 	_bind_keys("toggle_fps", [KEY_F3])
 	_bind_keys("toggle_fullscreen", [KEY_F11])
 	_bind_keys("debug_menu", [KEY_F10])
+	_bind_keys("map", [KEY_M])
+	_bind_keys("debug_stream", [KEY_F6])
 	_bind_keys("continue", [KEY_ENTER, KEY_KP_ENTER])
 	for i in 9:
 		_bind_keys("choice_%d" % (i + 1), [KEY_1 + i])
@@ -186,6 +189,7 @@ func _setup_input() -> void:
 	_bind_button("drink", JOY_BUTTON_DPAD_DOWN)
 	_bind_button("pause", JOY_BUTTON_START)
 	_bind_button("journal", JOY_BUTTON_BACK)
+	_bind_button("map", JOY_BUTTON_DPAD_UP)
 	_load_bindings()
 
 

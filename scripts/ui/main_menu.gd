@@ -49,6 +49,12 @@ func _ready() -> void:
 	if GameState.has_save():
 		_button("Davam et", _on_continue)
 	_button("Yeni oyun", _on_new_game)
+	_button("Kür Vadisi (açıq dünya, V3 test)", func():
+		get_tree().paused = false
+		get_tree().change_scene_to_file("res://scenes/world.tscn"))
+	_button("Döyüş arenası (V3 test)", func():
+		get_tree().paused = false
+		get_tree().change_scene_to_file("res://scenes/arena.tscn"))
 	_button("Parametrlər", _on_settings)
 	_button("Çıxış", func(): get_tree().quit())
 

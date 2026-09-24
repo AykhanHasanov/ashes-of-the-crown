@@ -7,3 +7,6 @@ captures/
 # OS noise
 Thumbs.db
 .DS_Store
+
+# Poly Haven source textures (CC0); packed results live in assets/terrain
+assets/terrain/src/

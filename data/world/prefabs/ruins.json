@@ -1,0 +1,28 @@
+{
+	"id": "ruins",
+	"_about": "Köhnə atəşgah: meşəli təpədə sönməyən alovlu qədim məbəd xarabalığı. Gecə kölgələr çoxalır.",
+	"icon": "ruins",
+	"discover_radius": 50,
+	"pieces": [
+		{"ring": "d:Column", "radius": 9.0, "count": 6, "s": 1.6, "far": true, "skip": [2]},
+		{"m": "d:Column_Broken", "p": [4.5, 0, 7.8], "r": 60, "s": 1.6},
+		{"m": "d:Column_Broken2", "p": [-9, 0, 0], "s": 1.6},
+		{"m": "d:ModularFloor", "p": [0, 0, 0], "s": 3.0, "c": false},
+		{"m": "d:Stairs", "p": [0, 0, 4.2], "r": 180, "s": 1.6, "c": false},
+		{"m": "kd:rubble_large", "p": [6, 0, -5], "r": 30, "s": 1.4},
+		{"m": "kd:rubble_half", "p": [-5, 0, 6], "r": 110, "s": 1.4, "c": false},
+		{"m": "d:Candelabrum_tall", "p": [-2, 0, -2], "s": 1.5, "c": false},
+		{"m": "d:Candelabrum_tall", "p": [2, 0, -2], "s": 1.5, "c": false},
+		{"m": "d:Bones", "p": [-6, 0, -6], "r": 40, "s": 1.0, "c": false}
+	],
+	"lights": [
+		{"p": [0, 1.0, 0], "kind": "eternal_flame", "scale": 1.3}
+	],
+	"actors": [
+		{"enemy": "ash_shade", "p": [-5, 0, -3], "level": 2},
+		{"enemy": "ash_shade", "p": [6, 0, 2], "level": 2},
+		{"enemy": "ash_shade", "p": [0, 0, -8], "level": 3, "night_only": true},
+		{"enemy": "ash_shade", "p": [-7, 0, 5], "level": 3, "night_only": true}
+	],
+	"interact": [{"kind": "echo", "p": [0, 0, -3.2], "text": "Atəşgahın alovu min ildir sönmür. Kül Şahı gələndə belə sönmədi. Sanki kimisə gözləyir."}]
+}

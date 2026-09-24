@@ -1,0 +1,14 @@
+{
+	"id": "great_tree",
+	"_about": "Qoca Çinar: vadinin ortasında min illik çinar, uzaqdan görünən orientir.",
+	"icon": "landmark",
+	"discover_radius": 40,
+	"pieces": [
+		{"m": "n:CommonTree_1", "p": [0, -0.4, 0], "r": 30, "s": 9.5, "c": false, "far": true, "trunk": 1.9},
+		{"ring": "n:Rock_Moss_2", "radius": 7.0, "count": 5, "s": 2.2, "c": false},
+		{"m": "n:Flowers", "p": [4, 0, 5], "s": 1.2, "c": false},
+		{"m": "n:Flowers", "p": [-5, 0, 3], "s": 1.1, "c": false},
+		{"m": "v:Bench_2", "p": [0, 0, 6.5], "r": 180, "s": 2.4, "c": false}
+	],
+	"interact": [{"kind": "echo", "p": [0, 0, 5.2], "text": "Çinarın gövdəsində yüzlərlə ad oyulub. Ən təzəsi hələ ağarır: «Ayxan + ...». Qalanını kül silib."}]
+}

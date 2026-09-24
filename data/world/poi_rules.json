@@ -1,0 +1,15 @@
+{
+	"_about": "Kiçik POI-lərin prosedur yerləşdirilməsi. Generator xəritəni gəzir, ən yaxın POI-dən 'gap' metrdən uzaq olan nöqtələrə qaydalara uyğun kiçik POI qoyur. Beləcə hər yerdən 150–200 m radiusda ən azı bir POI olur.",
+	"gap": 125.0,
+	"min_distance": 90.0,
+	"max_slope_deg": 18.0,
+	"water_clearance": 14.0,
+	"road_clearance": 6.0,
+	"edge_margin": 60.0,
+	"types": [
+		{"type": "camp", "name": "Tərk edilmiş düşərgə", "weight": 1.0, "biomes": ["meadow", "forest", "riverside"], "flatten": 9.0},
+		{"type": "stones", "name": "Daş dairəsi", "weight": 0.8, "biomes": ["meadow", "farmland"], "flatten": 8.0},
+		{"type": "graves", "name": "Köhnə məzarlıq", "weight": 0.8, "biomes": ["forest", "meadow"], "flatten": 8.0},
+		{"type": "chest", "name": "Gizli sandıq", "weight": 0.6, "biomes": ["forest", "riverside", "meadow"], "flatten": 3.0}
+	]
+}
