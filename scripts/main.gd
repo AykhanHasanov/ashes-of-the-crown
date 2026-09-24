@@ -1,23 +1,17 @@
-extends Node3D
-## Chapter 1 "Birinci səhər": title screen → Ayxan rises from the ash → Rüfət →
-## three waves of ash shades → three Kül əks-sədaları (ember echoes) that each
-## reveal a trait of the hidden traitor → back to Rüfət → chapter end.
+extends "res://scripts/chapter_base.gd"
+## Chapter 1 "Birinci səhər" (also hosts the title screen): Ayxan rises from the
+## ash → Rüfət → three waves of ash shades → three Kül əks-sədaları (ember echoes)
+## that each reveal a trait of the hidden traitor → back to Rüfət → chapter end,
+## from where Enter leads on to Chapter 2 (Son Ocaq).
 ##
-## Progress is saved at checkpoints (GameState): start, waves, echoes, return,
-## chapter_end. Dying reloads the last checkpoint; "Davam et" resumes it.
+## Checkpoints: start, waves, echoes, return, chapter_end.
 
 const Kozqala := preload("res://scripts/world/kozqala.gd")
-const Player := preload("res://scripts/player/player.gd")
 const AshShade := preload("res://scripts/enemies/ash_shade.gd")
 const Companion := preload("res://scripts/npc/companion.gd")
-const CameraRig := preload("res://scripts/camera/camera_rig.gd")
 const EchoSpot := preload("res://scripts/world/echo_spot.gd")
 const CharacterModel := preload("res://scripts/characters/character_model.gd")
-const Hud := preload("res://scripts/ui/hud.gd")
-const DialogueUI := preload("res://scripts/ui/dialogue_ui.gd")
 const MainMenu := preload("res://scripts/ui/main_menu.gd")
-const PauseMenu := preload("res://scripts/ui/pause_menu.gd")
-const Journal := preload("res://scripts/ui/journal.gd")
 const RufetDialogue := preload("res://scripts/story/rufet_dialogue.gd")
 const Conspiracy := preload("res://scripts/story/conspiracy.gd")
 const GHOST_SHADER := preload("res://shaders/ghost.gdshader")
@@ -30,25 +24,11 @@ const WAVES := [
 	{"normal": 3, "fast": 4, "elite": 0, "title": "Külün altından daha çoxu gəlir..."},
 	{"normal": 3, "fast": 1, "elite": 1, "title": "Kül Cəngavəri — Tacın keçmiş keşikçisi"},
 ]
-const TALK_RANGE := 3.0
 const ECHO_RANGE := 2.4
-const HEARTH_RANGE := 2.8
-const HEARTH_HEAL := 9.0
 const NORMAL_SATURATION := 1.08
 
-## How the next reload should start: "" = title screen, "checkpoint" = reload the
-## save (after death), "fresh" = brand-new game (after finishing the chapter).
-static var restart_mode := ""
-
 var phase := Phase.MENU
-var level
-var player
 var rufet
-var rig
-var hud
-var dialogue
-var pause_menu
-var journal
 
 var _echoes: Array = []
 var _active_echo
@@ -57,62 +37,24 @@ var _ghost_mat: ShaderMaterial
 var _wave := -1
 var _alive := 0
 var _next_wave_in := -1.0
-var _frame := 0
-var _fps_sum := 0.0
-var _fps_count := 0
-var _hearth_hint_shown := false
 
 
-func _ready() -> void:
-	Fx.reset_time()
+func _make_level() -> Node3D:
+	return Kozqala.new()
+
+
+func _setup() -> void:
 	Audio.music("ambient", 3.0)
-
-	level = Kozqala.new()
-	add_child(level)
-	level.build()
-
-	rig = CameraRig.new()
-	add_child(rig)
-
-	player = Player.new()
-	add_child(player)
-	player.global_position = level.player_spawn
-	player.camera = rig.camera
-	rig.target = player
-	rig.snap()
-
 	rufet = Companion.new()
 	add_child(rufet)
 	rufet.global_position = level.rufet_spot
 	rufet.face(level.player_spawn)
 
-	hud = Hud.new()
-	add_child(hud)
-	dialogue = DialogueUI.new()
-	add_child(dialogue)
-	dialogue.finished.connect(_on_dialogue_finished)
-	dialogue.flag_set.connect(GameState.set_flag)
-	pause_menu = PauseMenu.new()
-	add_child(pause_menu)
-	pause_menu.main_menu_requested.connect(_to_main_menu)
-	journal = Journal.new()
-	add_child(journal)
 
-	Fx.camera_rig = rig
-	Fx.world = self
-	player.health_changed.connect(hud.set_health)
-	player.died.connect(_on_player_died)
-	Settings.changed.connect(_apply_quality)
-	_apply_quality()
-	_begin()
-
-
-func _begin() -> void:
-	var mode := restart_mode
-	restart_mode = ""
+func _begin(mode: String) -> void:
 	if Settings.demo != "" and Settings.demo != "menu":
 		GameState.new_game()
-		_set_controls(true)
+		set_controls(true)
 	match Settings.demo:
 		"menu":
 			_menu()
@@ -138,7 +80,7 @@ func _begin() -> void:
 			_resume("chapter_end")
 		_:
 			if mode == "checkpoint" and GameState.load_game():
-				_resume(GameState.checkpoint)
+				_continue_save()
 			elif mode == "fresh":
 				_start_new_game()
 			else:
@@ -159,9 +101,16 @@ func _menu() -> void:
 	menu.continue_game.connect(func():
 		if GameState.load_game():
 			_leave_menu()
-			_resume(GameState.checkpoint)
+			_continue_save()
 		else:
 			_start_new_game())
+
+
+func _continue_save() -> void:
+	if GameState.chapter != 1:
+		go_to_chapter(GameState.chapter)
+		return
+	_resume(GameState.checkpoint)
 
 
 func _leave_menu() -> void:
@@ -172,65 +121,42 @@ func _leave_menu() -> void:
 func _start_new_game() -> void:
 	_leave_menu()
 	GameState.new_game()
-	_save("start")
+	save_checkpoint("start")
 	_intro()
 
 
 func _resume(checkpoint: String, close_spawns := false) -> void:
 	hud.visible = true
+	if checkpoint == "start":
+		_intro()
+		return
+	player.wake()
+	set_controls(true)
 	match checkpoint:
-		"start":
-			_intro()
-			return
 		"waves":
-			player.wake()
-			_set_controls(true)
 			phase = Phase.WAVES
 			rufet.in_combat = true
 			_start_wave(0, close_spawns)
 		"echoes":
-			player.wake()
-			_set_controls(true)
 			_start_echoes()
 		"return":
-			player.wake()
-			_set_controls(true)
 			_spawn_echoes()
 			_begin_return()
 		"chapter_end":
-			player.wake()
-			_set_controls(true)
 			_spawn_echoes()
 			_chapter_end()
 		_:
 			_intro()
 
 
-func _save(checkpoint: String) -> void:
-	GameState.checkpoint = checkpoint
-	if Settings.demo == "":  # debug captures must never overwrite the player's save
-		GameState.save_game()
-
-
-func _set_controls(on: bool) -> void:
-	pause_menu.enabled = on
-	journal.enabled = on
-
-
 func _intro() -> void:
 	phase = Phase.INTRO
-	_set_controls(false)
+	set_controls(false)
 	player.lie_down()
 	await hud.title_card("ASHES OF THE CROWN", "Közqala. Kül Gecəsindən üç gün sonra.", 3.2)
 	await player.stand_up()
-	_set_controls(true)
+	set_controls(true)
 	_find_rufet()
-
-
-func _to_main_menu() -> void:
-	restart_mode = ""
-	get_tree().paused = false
-	get_tree().reload_current_scene()
 
 
 func _find_rufet() -> void:
@@ -238,24 +164,17 @@ func _find_rufet() -> void:
 	hud.set_objective("Rüfəti tap — o, cənub darvazasındakı ocağın yanındadır")
 
 
-func _process(delta: float) -> void:
-	_frame += 1
-	if _frame > 30:
-		_fps_sum += Engine.get_frames_per_second()
-		_fps_count += 1
-	_update_hearths(delta)
-	_update_marker()
-
+func _tick(delta: float) -> void:
 	match phase:
 		Phase.FIND_RUFET:
-			if _near_prompt(rufet.global_position, TALK_RANGE, "[E]  Rüfətlə danış"):
+			if near_prompt(rufet.global_position, TALK_RANGE, "[E]  Rüfətlə danış"):
 				_talk(RufetDialogue.DATA)
 		Phase.RETURN:
-			if _near_prompt(rufet.global_position, TALK_RANGE, "[E]  Rüfətə gördüklərini danış"):
+			if near_prompt(rufet.global_position, TALK_RANGE, "[E]  Rüfətə gördüklərini danış"):
 				_talk(RufetDialogue.AFTER_ECHOES)
 		Phase.ECHOES:
 			var spot = _nearest_echo()
-			if spot != null and _near_prompt(spot.global_position, ECHO_RANGE, "[E]  Kül əks-sədasına toxun"):
+			if spot != null and near_prompt(spot.global_position, ECHO_RANGE, "[E]  Kül əks-sədasına toxun"):
 				_play_echo(spot)
 			elif spot == null:
 				hud.set_prompt("")
@@ -271,67 +190,39 @@ func _process(delta: float) -> void:
 				restart_mode = "checkpoint"
 				get_tree().reload_current_scene()
 		Phase.CHAPTER_END:
-			if Input.is_action_just_pressed("restart"):
+			if Input.is_action_just_pressed("continue"):
+				GameState.chapter = 2
+				save_checkpoint("c2_start")
+				go_to_chapter(2)
+			elif Input.is_action_just_pressed("restart"):
 				restart_mode = "fresh"
 				get_tree().reload_current_scene()
 
-	_demo_actions()
-	if Settings.capture_path != "" and _frame == Settings.capture_frame:
-		_capture()
 
-
-func _update_marker() -> void:
-	var target: Variant = null
+func _marker_target() -> Variant:
 	match phase:
 		Phase.FIND_RUFET, Phase.RETURN:
-			target = rufet.global_position
+			return rufet.global_position
 		Phase.ECHOES:
 			var spot = _nearest_echo()
 			if spot != null:
-				target = spot.global_position
-	hud.set_marker(target, rig.camera)
-
-
-## Shows `text` while Ayxan is within `dist`; returns true when E is pressed there.
-func _near_prompt(point: Vector3, dist: float, text: String) -> bool:
-	var near: bool = player.global_position.distance_to(point) < dist
-	hud.set_prompt(text if near else "")
-	return near and Input.is_action_just_pressed("interact")
+				return spot.global_position
+	return null
 
 
 # --- Dialogue -------------------------------------------------------------------
 
 func _talk(data: Dictionary) -> void:
 	phase = Phase.DIALOGUE
-	hud.set_prompt("")
 	hud.set_objective("")
-	hud.visible = false
-	player.input_locked = true
-	# Bring Rüfət over if the fight left him far away
-	var gap: Vector3 = rufet.global_position - player.global_position
-	gap.y = 0.0
-	if gap.length() > 4.0:
-		rufet.global_position = player.global_position + gap.normalized() * 2.6
-	player.face_towards(rufet.global_position)
-	rufet.face(player.global_position)
-	var a: Vector3 = player.global_position
-	var b: Vector3 = rufet.global_position
-	var line := b - a
-	line.y = 0.0
-	var side := Vector3(-line.z, 0.0, line.x).normalized()
-	if side.dot(Vector3(1, 0, 1)) < 0.0:
-		side = -side  # stay on the camera's usual south-east side
-	rig.cinematic((a + b) * 0.5 + Vector3(0, 1.45, 0), rad_to_deg(atan2(side.x, side.z)) - 20.0)
-	dialogue.start(data)
+	talk_with(rufet, data)
 
 
 func _on_dialogue_finished(event: String) -> void:
-	rig.release()
-	hud.visible = true
-	player.input_locked = false
+	end_talk()
 	match event:
 		"start_waves":
-			_save("waves")
+			save_checkpoint("waves")
 			phase = Phase.WAVES
 			rufet.in_combat = true
 			_start_wave(0)
@@ -408,7 +299,7 @@ func _after_waves() -> void:
 	Audio.music("ambient", 4.0)
 	Audio.play("sting_victory", -2.0, 0.0)
 	hud.banner("Kül yatdı. Közqala susur.")
-	_save("echoes")
+	save_checkpoint("echoes")
 	await get_tree().create_timer(2.5).timeout
 	if phase == Phase.AFTERMATH:
 		_talk(RufetDialogue.AFTER_WAVES)
@@ -462,7 +353,7 @@ func _nearest_echo():
 func _play_echo(spot) -> void:
 	phase = Phase.VISION
 	_active_echo = spot
-	_set_controls(false)
+	set_controls(false)
 	hud.set_prompt("")
 	hud.visible = false
 	player.input_locked = true
@@ -513,13 +404,13 @@ func _finish_echo() -> void:
 	create_tween().tween_property(level.env, "adjustment_saturation", NORMAL_SATURATION, 1.5)
 	Audio.play("memory_burn", -8.0, 0.1)
 	hud.banner("Yeni sübut: %s   ·   Tab — jurnal" % Conspiracy.TRAITS[spot.trait_id]["title"])
-	_set_controls(true)
+	set_controls(true)
 	if GameState.clues.size() >= Conspiracy.ECHO_SPOTS.size():
-		_save("return")
+		save_checkpoint("return")
 		_begin_return()
 	else:
 		phase = Phase.ECHOES
-		_save("echoes")
+		save_checkpoint("echoes")
 		_update_echo_objective()
 
 
@@ -529,18 +420,6 @@ func _begin_return() -> void:
 
 
 # --- Endings -----------------------------------------------------------------------
-
-func _update_hearths(delta: float) -> void:
-	if player.dead or player.health >= Player.MAX_HEALTH:
-		return
-	for h in level.braziers:
-		if player.global_position.distance_to(h) < HEARTH_RANGE:
-			player.heal(HEARTH_HEAL * delta)
-			if not _hearth_hint_shown:
-				_hearth_hint_shown = true
-				hud.banner("Ocağın istisi yaralarını sağaldır")
-			return
-
 
 func _on_player_died() -> void:
 	phase = Phase.DEFEAT
@@ -554,7 +433,7 @@ func _on_player_died() -> void:
 
 func _chapter_end() -> void:
 	phase = Phase.CHAPTER_END
-	_save("chapter_end")
+	save_checkpoint("chapter_end")
 	player.input_locked = true
 	hud.set_objective("")
 	hud.set_prompt("")
@@ -582,31 +461,15 @@ func _chapter_end() -> void:
 	if burned >= 4:
 		lines.append("\"...yaxınlaşırsan, Ayxan. Tac səni gözləyir...\"  — Kül Şahı")
 	lines.append("")
-	lines.append("FƏSİL 2: SON OCAQ — tezliklə")
-	lines.append("[R] — yeni oyun (yeni satqın)   ·   [Esc] — menyu")
+	lines.append("[Enter] — Fəsil 2: Son Ocaq   ·   [R] — yeni oyun   ·   [Esc] — menyu")
 	await get_tree().create_timer(1.2).timeout
 	hud.show_card("FƏSİL 1 BİTDİ", "Birinci səhər", "\n".join(lines), 0.82)
 
 
-func _apply_quality() -> void:
-	var high := Settings.is_high()
-	level.apply_quality(high)
-	var vp := get_viewport()
-	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR if high else Viewport.SCALING_3D_MODE_FSR
-	vp.scaling_3d_scale = 1.0 if high else 0.77
-	vp.msaa_3d = Viewport.MSAA_2X if high else Viewport.MSAA_DISABLED
-	vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED if high else Viewport.SCREEN_SPACE_AA_FXAA
-
-
-# --- Debug capture (see scripts/systems/settings.gd) -------------------------
+# --- Debug capture -----------------------------------------------------------------
 
 func _demo_actions() -> void:
-	if Settings.demo in ["pause", "settings"] and _frame == 60:
-		pause_menu.open()
-	if Settings.demo == "settings" and _frame == 70:
-		pause_menu._open_settings()
-	if Settings.demo == "journal" and _frame == 60:
-		journal.open()
+	super._demo_actions()
 	if Settings.demo == "echo" and _frame == 30:
 		player.global_position = _echoes[0].global_position + Vector3(1.6, 0, 1.6)
 		_play_echo(_echoes[0])
@@ -616,14 +479,3 @@ func _demo_actions() -> void:
 		player.attack()
 	elif _frame == Settings.capture_frame - 30:
 		player.ember_power()
-
-
-func _capture() -> void:
-	await RenderingServer.frame_post_draw
-	var img := get_viewport().get_texture().get_image()
-	DirAccess.make_dir_recursive_absolute(Settings.capture_path.get_base_dir())
-	img.save_png(Settings.capture_path)
-	var avg := _fps_sum / maxf(_fps_count, 1)
-	print("CAPTURE saved=%s avg_fps=%.1f adapter=%s quality=%s" % [
-		Settings.capture_path, avg, RenderingServer.get_video_adapter_name(), "high" if Settings.is_high() else "low"])
-	get_tree().quit()

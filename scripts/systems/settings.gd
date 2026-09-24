@@ -7,6 +7,8 @@ extends Node
 ##   --frame=<n>            frame number for --capture (default 150)
 ##   --demo=<mode>          menu | explore | dialogue | fight | combat | victory | pause |
 ##                          settings | echoes | echo | journal | chapter_end
+##                          (Chapter 2 scene, run with scenes/chapter2.tscn as the scene:)
+##                          c2 | c2_talk | c2_attack | c2_council | c2_boss
 ##                          (anything but "menu" skips the title screen; "combat" also
 ##                          swings and fires the ember before the capture)
 
@@ -128,9 +130,9 @@ func _setup_input() -> void:
 	_bind_keys("toggle_quality", [KEY_F9])
 	_bind_keys("toggle_fps", [KEY_F3])
 	_bind_keys("toggle_fullscreen", [KEY_F11])
-	_bind_keys("choice_1", [KEY_1])
-	_bind_keys("choice_2", [KEY_2])
-	_bind_keys("choice_3", [KEY_3])
+	_bind_keys("continue", [KEY_ENTER, KEY_KP_ENTER])
+	for i in 9:
+		_bind_keys("choice_%d" % (i + 1), [KEY_1 + i])
 	_bind_mouse("attack", MOUSE_BUTTON_LEFT)
 	_bind_mouse("ember_power", MOUSE_BUTTON_RIGHT)
 

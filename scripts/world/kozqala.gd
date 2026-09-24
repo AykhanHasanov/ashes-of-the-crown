@@ -30,6 +30,7 @@ var player_spawn := Vector3(0, 0, 14)
 var rufet_spot := Vector3(3.2, 0, 19.5)
 var crater_pos := Vector3(0, 0, -9)
 var braziers: Array[Vector3] = []
+var crack_glow := 1.6
 var spawn_points: Array[Vector3] = []
 
 var env: Environment
@@ -284,6 +285,7 @@ func _fire(pos: Vector3, scale: float, amount: int) -> void:
 func _make_ground() -> void:
 	var ground_mat := Visuals.shader_mat(GROUND_SHADER)
 	ground_mat.set_shader_parameter("crater_pos", crater_pos)
+	ground_mat.set_shader_parameter("crack_glow", crack_glow)
 	var plane := PlaneMesh.new()
 	plane.size = Vector2(160, 160)
 	add_child(Visuals.mesh_node(plane, ground_mat))

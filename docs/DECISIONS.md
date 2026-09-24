@@ -24,4 +24,6 @@ Burada yalnız təsdiqlənmiş qərarlar yazılır. Burada olmayan heç nə qər
 | 2026-09-24 | Ekranın solundakı xatirə yazıları silindi. Yerinə can zolağının altında 6 köz ikonu var, mətnlər jurnala (Tab) köçürüldü | Sahib | "Çox pis görünür" |
 | 2026-09-24 | Qılınc səsi yenidən sintez olundu: 0.22 saniyəlik rezonanslı "şşing" və polad cingiltisi (köhnəsi küləyə bənzəyirdi) | Sahib | Döyüş hissi |
 | 2026-09-24 | Satqın sistemi: 8 şübhəli × 3 unikal iz, Kül əks-sədaları, jurnal, checkpoint əsaslı yadda saxlama (`user://save.json`). Ölümdən sonra oyun son checkpoint-dən davam edir | Claude | M4 |
+| 2026-09-24 | Fəsil 2 (Son Ocaq): bütün fəsillər üçün ortaq `chapter_base.gd`, ayrıca `chapter2.tscn` səhnəsi. Mage və Rogue modelləri endirildi (CC0). Hər şübhəli model + rəng dəyişməsi ilə fərqlənir | Sahib icazə verdi, dizayn Claude-undur | Fəsillər arası keçid, vahid kod bazası |
+| 2026-09-24 | Səhv ittihamın real nəticəsi var: günahsız sürgün edilir, satqın qaçır, son dəyişir | Claude | Qərarlar mənalı olmalıdır |
 | 2026-09-24 | Layihə qovluğu: `Documents/games/ashes-of-the-crown` (boşluqsuz). Godot isə `Documents/games/_tools/godot` qovluğundadır | Claude | Köhnə `ashes-of-the crown` qovluğu başqa proqram tərəfindən açıq idi, adını dəyişmək mümkün olmadı. O qovluq boşdur, silinə bilər |

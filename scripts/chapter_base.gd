@@ -1,0 +1,225 @@
+extends Node3D
+## Shared scaffolding for every chapter scene: the level, camera, Ayxan, HUD,
+## dialogue box, pause menu, journal, checkpoints, prompts, the objective marker,
+## hearth healing, scene changes between chapters and the debug capture.
+##
+## A chapter overrides: _make_level(), _setup(), _begin(mode), _tick(delta),
+## _marker_target(), _on_dialogue_finished(event), _on_player_died().
+
+const Player := preload("res://scripts/player/player.gd")
+const CameraRig := preload("res://scripts/camera/camera_rig.gd")
+const Hud := preload("res://scripts/ui/hud.gd")
+const DialogueUI := preload("res://scripts/ui/dialogue_ui.gd")
+const PauseMenu := preload("res://scripts/ui/pause_menu.gd")
+const Journal := preload("res://scripts/ui/journal.gd")
+
+const CHAPTER_SCENES := {1: "res://scenes/main.tscn", 2: "res://scenes/chapter2.tscn"}
+const TALK_RANGE := 3.0
+const HEARTH_RANGE := 2.8
+const HEARTH_HEAL := 9.0
+
+## How the next scene should start: "" = title screen, "checkpoint" = load the
+## save and resume it, "fresh" = brand-new game.
+static var restart_mode := ""
+
+var level
+var player
+var rig
+var hud
+var dialogue
+var pause_menu
+var journal
+
+var _frame := 0
+var _fps_sum := 0.0
+var _fps_count := 0
+var _hearth_hint_shown := false
+
+
+func _ready() -> void:
+	Fx.reset_time()
+	level = _make_level()
+	add_child(level)
+	level.build()
+
+	rig = CameraRig.new()
+	add_child(rig)
+	player = Player.new()
+	add_child(player)
+	player.global_position = level.player_spawn
+	player.camera = rig.camera
+	rig.target = player
+	rig.snap()
+
+	hud = Hud.new()
+	add_child(hud)
+	dialogue = DialogueUI.new()
+	add_child(dialogue)
+	dialogue.finished.connect(_on_dialogue_finished)
+	dialogue.flag_set.connect(GameState.set_flag)
+	pause_menu = PauseMenu.new()
+	add_child(pause_menu)
+	pause_menu.main_menu_requested.connect(to_main_menu)
+	journal = Journal.new()
+	add_child(journal)
+
+	Fx.camera_rig = rig
+	Fx.world = self
+	player.health_changed.connect(hud.set_health)
+	player.died.connect(_on_player_died)
+	Settings.changed.connect(_apply_quality)
+	_apply_quality()
+	_setup()
+	var mode := restart_mode
+	restart_mode = ""
+	_begin(mode)
+
+
+# --- Overridables ---------------------------------------------------------------
+
+func _make_level() -> Node3D:
+	return null
+
+
+func _setup() -> void:
+	pass
+
+
+func _begin(_mode: String) -> void:
+	pass
+
+
+func _tick(_delta: float) -> void:
+	pass
+
+
+func _marker_target() -> Variant:
+	return null
+
+
+func _on_dialogue_finished(_event: String) -> void:
+	pass
+
+
+func _on_player_died() -> void:
+	pass
+
+
+# --- Frame loop -----------------------------------------------------------------
+
+func _process(delta: float) -> void:
+	_frame += 1
+	if _frame > 30:
+		_fps_sum += Engine.get_frames_per_second()
+		_fps_count += 1
+	_update_hearths(delta)
+	hud.set_marker(_marker_target(), rig.camera)
+	_tick(delta)
+	_demo_actions()
+	if Settings.capture_path != "" and _frame == Settings.capture_frame:
+		_capture()
+
+
+# --- Helpers --------------------------------------------------------------------
+
+## Loads another chapter scene. `mode` is passed on as restart_mode.
+func go_to_chapter(n: int, mode := "checkpoint") -> void:
+	restart_mode = mode
+	get_tree().paused = false
+	get_tree().change_scene_to_file(CHAPTER_SCENES[n])
+
+
+func to_main_menu() -> void:
+	go_to_chapter(1, "")
+
+
+func save_checkpoint(checkpoint: String) -> void:
+	GameState.checkpoint = checkpoint
+	if Settings.demo == "":  # debug captures must never overwrite the player's save
+		GameState.save_game()
+
+
+func set_controls(on: bool) -> void:
+	pause_menu.enabled = on
+	journal.enabled = on
+
+
+## Shows `text` while Ayxan is within `dist`; returns true when E is pressed there.
+func near_prompt(point: Vector3, dist: float, text: String) -> bool:
+	var near: bool = player.global_position.distance_to(point) < dist
+	hud.set_prompt(text if near else "")
+	return near and Input.is_action_just_pressed("interact")
+
+
+## Frames Ayxan and `other` side-on and opens a dialogue.
+func talk_with(other: Node3D, data: Dictionary, bring_closer := true) -> void:
+	hud.set_prompt("")
+	hud.visible = false
+	player.input_locked = true
+	var gap: Vector3 = other.global_position - player.global_position
+	gap.y = 0.0
+	if bring_closer and gap.length() > 4.0:
+		other.global_position = player.global_position + gap.normalized() * 2.6
+	player.face_towards(other.global_position)
+	if other.has_method("face"):
+		other.face(player.global_position)
+	var a: Vector3 = player.global_position
+	var b: Vector3 = other.global_position
+	var line := b - a
+	line.y = 0.0
+	var side := Vector3(-line.z, 0.0, line.x).normalized()
+	if side.dot(Vector3(1, 0, 1)) < 0.0:
+		side = -side  # stay on the camera's usual south-east side
+	rig.cinematic((a + b) * 0.5 + Vector3(0, 1.45, 0), rad_to_deg(atan2(side.x, side.z)) - 20.0)
+	dialogue.start(data)
+
+
+## Undo talk_with once the dialogue closes.
+func end_talk() -> void:
+	rig.release()
+	hud.visible = true
+	player.input_locked = false
+
+
+func _update_hearths(delta: float) -> void:
+	if player.dead or player.health >= Player.MAX_HEALTH:
+		return
+	for h in level.braziers:
+		if player.global_position.distance_to(h) < HEARTH_RANGE:
+			player.heal(HEARTH_HEAL * delta)
+			if not _hearth_hint_shown:
+				_hearth_hint_shown = true
+				hud.banner("Ocağın istisi yaralarını sağaldır")
+			return
+
+
+func _apply_quality() -> void:
+	var high := Settings.is_high()
+	level.apply_quality(high)
+	var vp := get_viewport()
+	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR if high else Viewport.SCALING_3D_MODE_FSR
+	vp.scaling_3d_scale = 1.0 if high else 0.77
+	vp.msaa_3d = Viewport.MSAA_2X if high else Viewport.MSAA_DISABLED
+	vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED if high else Viewport.SCREEN_SPACE_AA_FXAA
+
+
+# --- Debug capture (see scripts/systems/settings.gd) ------------------------------
+
+func _demo_actions() -> void:
+	if Settings.demo in ["pause", "settings"] and _frame == 60:
+		pause_menu.open()
+	if Settings.demo == "settings" and _frame == 70:
+		pause_menu._open_settings()
+	if Settings.demo == "journal" and _frame == 60:
+		journal.open()
+
+
+func _capture() -> void:
+	await RenderingServer.frame_post_draw
+	var img := get_viewport().get_texture().get_image()
+	DirAccess.make_dir_recursive_absolute(Settings.capture_path.get_base_dir())
+	img.save_png(Settings.capture_path)
+	var avg := _fps_sum / maxf(_fps_count, 1)
+	print("CAPTURE saved=%s avg_fps=%.1f adapter=%s quality=%s" % [
+		Settings.capture_path, avg, RenderingServer.get_video_adapter_name(), "high" if Settings.is_high() else "low"])
+	get_tree().quit()

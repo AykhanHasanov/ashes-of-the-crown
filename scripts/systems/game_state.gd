@@ -1,31 +1,49 @@
 extends Node
 ## Everything that must survive a save: the hidden traitor, the clue behind each
-## ember echo, discovered clues, dialogue flags, burned memories and the chapter
-## checkpoint. Saved as JSON to user://save.json.
+## ember echo, discovered clues, dialogue flags, burned memories, how far each
+## suspect trusts Ayxan, and the chapter checkpoint. Saved as JSON to user://save.json.
 ##
-## Checkpoints (Chapter 1): "start" → "echoes" (waves won) → "return" (all echoes
-## seen, go back to Rüfət) → "chapter_end".
+## Chapter 1 checkpoints: start → waves → echoes → return → chapter_end
+## Chapter 2 checkpoints: c2_start → c2_after_attack → c2_end
 
 signal clue_found(trait_id: String)
+signal trust_changed(suspect: String, value: int)
 
 const Conspiracy := preload("res://scripts/story/conspiracy.gd")
 const PATH := "user://save.json"
-const VERSION := 1
+const VERSION := 2
 
+## Starting trust (0..100): old allies trust Ayxan, rivals do not.
+const BASE_TRUST := {
+	"sabir": 65, "anar": 40, "elvin": 25, "sahbaz": 55,
+	"esref": 30, "rufet": 80, "ibrahim": 50, "ehliman": 35,
+}
+
+var chapter := 1
 var traitor := ""
 var echo_traits: Array = []
 var clues: Array = []
 var flags := {}
 var checkpoint := ""
+var trust := {}
+var talked: Array = []
+## Who was missing from the camp during the night attack (Chapter 2).
+var absent: Array = []
+var accused := ""
 
 
 func new_game() -> void:
+	chapter = 1
 	traitor = Conspiracy.SUSPECTS.keys().pick_random()
 	echo_traits = Conspiracy.SUSPECTS[traitor]["traits"].duplicate()
 	echo_traits.shuffle()
 	clues = []
 	flags = {}
 	checkpoint = "start"
+	trust = BASE_TRUST.duplicate()
+	talked = []
+	absent = []
+	accused = ""
 	Memory.reset()
 
 
@@ -36,11 +54,16 @@ func has_save() -> bool:
 func save_game() -> void:
 	var data := {
 		"version": VERSION,
+		"chapter": chapter,
 		"traitor": traitor,
 		"echo_traits": echo_traits,
 		"clues": clues,
 		"flags": flags,
 		"checkpoint": checkpoint,
+		"trust": trust,
+		"talked": talked,
+		"absent": absent,
+		"accused": accused,
 		"memory": Memory.to_dict(),
 	}
 	var f := FileAccess.open(PATH, FileAccess.WRITE)
@@ -54,11 +77,18 @@ func load_game() -> bool:
 	var data = JSON.parse_string(FileAccess.get_file_as_string(PATH))
 	if not (data is Dictionary) or int(data.get("version", 0)) != VERSION:
 		return false
+	chapter = int(data["chapter"])
 	traitor = data["traitor"]
 	echo_traits = data["echo_traits"]
 	clues = data["clues"]
 	flags = data["flags"]
 	checkpoint = data["checkpoint"]
+	trust = {}
+	for k in data["trust"]:
+		trust[k] = int(data["trust"][k])
+	talked = data["talked"]
+	absent = data["absent"]
+	accused = data["accused"]
 	Memory.from_dict(data["memory"])
 	return true
 
@@ -73,8 +103,29 @@ func set_flag(flag: String) -> void:
 	flags[flag] = true
 
 
+func change_trust(suspect: String, delta: int) -> void:
+	trust[suspect] = clampi(int(trust.get(suspect, 50)) + delta, 0, 100)
+	trust_changed.emit(suspect, trust[suspect])
+
+
+## Side effects attached to dialogue nodes and choices ("do": [...]):
+## "trust:<suspect>:<delta>", "flag:<name>", "talked:<suspect>".
+func apply(action: String) -> void:
+	var kind := action.get_slice(":", 0)
+	var arg := action.get_slice(":", 1)
+	match kind:
+		"trust":
+			change_trust(arg, int(action.get_slice(":", 2)))
+		"flag":
+			set_flag(arg)
+		"talked":
+			if not talked.has(arg):
+				talked.append(arg)
+
+
 ## Condition strings used by dialogue branches:
-## "memory:<id>" (burned), "traitor:<suspect>", "flag:<name>", "clue:<trait>", "clues:<n>".
+## "memory:<id>" (burned), "traitor:<suspect>", "flag:<name>", "clue:<trait>",
+## "clues:<n>", "trust:<suspect>:<min>".
 func check(cond: String) -> bool:
 	var kind := cond.get_slice(":", 0)
 	var arg := cond.get_slice(":", 1)
@@ -89,6 +140,8 @@ func check(cond: String) -> bool:
 			return clues.has(arg)
 		"clues":
 			return clues.size() >= int(arg)
+		"trust":
+			return int(trust.get(arg, 0)) >= int(cond.get_slice(":", 2))
 	return false
 
 

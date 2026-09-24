@@ -107,6 +107,16 @@ Satqın kim olursa olsun, sonda həqiqət açılır: **kral yanğını özü ist
 - **Musiqi:** sakit qat (tar improvizasiyası, kamança, uzaq qonq) və döyüş qatı (6/8 ölçüdə nağara və qaval, tar ostinatosu, kamança fəryadı). Qatlar arasında yumşaq keçid var.
 - Ocaqların çırtıltısı 3D məkanda eşidilir, külək isə daim əsir.
 
+## 8b. Fəsil 2: Son Ocaq (M5)
+
+**Axın:** Ayxan sağ qalanların toplaşdığı karvansaraya gəlir → şübhəliləri sorğu-suala tutur → 4 söhbətdən sonra **gecə hücumu** başlayır (darvaza içəridən açılır, satqın və təsadüfi bir günahsız yoxa çıxır) → şahid kimin olmadığını deyir → **Ocaqda divan**: bir ad seçilir.
+- **Doğru ittiham:** satqın etiraf edir (hər personajın öz motivi var), Kül Şahı danışır, satqın külə çevrilib **"<ad> — Külün Xaini"** bossu kimi qalxır.
+- **Səhv ittiham:** günahsız sürgün edilir, hamının etibarı düşür, satqın son hücumu təşkil edir. Satqın Fəsil 3-ə qədər sağ qalır.
+
+**Sorğu-sual (`scripts/story/interrogation.gd`):** hər şübhəlinin isti və soyuq salamı var (etibar < 35 olanda soyuq). Alibisinin satqın versiyası yayındırıcı səslənir. Öz izlərinə günahsız və ya günahkar cavab verir, başqasının izinə isə inkarla cavab verir. Sübut göstərmək etibarı azaldır (–4 öz izi üçün, –8 əsassız ittiham üçün). Etibar ≥ 55 olanda şübhəli gördüyü birinin adını deyir: çox vaxt satqını, bəzən isə səhv adamı.
+
+**NPC süni intellekti (`scripts/npc/survivor.gd`):** hər sağ qalanın 3 ehtiyacı zamanla azalır: istilik, ünsiyyət və vəzifə. Hər birinin azalma sürəti fərqlidir (xasiyyət). Hər 9–18 saniyədən bir fəaliyyətlər qiymətləndirilir: ocağın yanında oturmaq, başqası ilə söhbət, öz guşəsi, gəzinti. Ən təcili olan seçilir. Rejimlər: danışıq üçün dayanmaq, hücumda gizlənmək, darvazadan sıvışmaq (satqın), sürgün.
+
 ## 9. NPC süni intellekti
 
 - Əsas yanaşma "utility AI"dır: hər NPC-nin məqsədi, qorxusu, sirri, sədaqəti və Ayxan haqqında yaddaşı olur.
@@ -129,7 +139,8 @@ Satqın kim olursa olsun, sonda həqiqət açılır: **kral yanğını özü ist
 | **M2: Hiss** | KayKit 3D personajları və animasiyaları, kombo döyüşü, hitstop, zərbə rəqəmləri, 28 sintez səs və muğam musiqisi (sakit və döyüş qatları) | ✅ Hazırdır |
 | **M3: Dünya və interfeys** | Közqala KayKit mühit modelləri ilə yenidən quruldu (hisə batmış divarlar, bayraqlar, xəzinə, sümüklər, yanmış ağaclar, məşələlər). Baş menyu (Ayxan külün içində yatır, kamera həyət ətrafında fırlanır), fasilə menyusu, yadda qalan parametrlər (səs, qrafika, tam ekran, silkələnmə, zərbə rəqəmləri). Düşmənlərin üstündə can zolaqları, eyni anda ən çox 2 düşmən hücum edir | ✅ Hazırdır |
 | **M4: Satqın və sübutlar** | Hər oyunda təsadüfi satqın (8 şübhəli × 3 iz), 3 Kül əks-sədası (görüntü: dünya boz rəngə keçir, közdən xəyal çıxır), jurnal (Tab), şərtli dialoqlar (satqın Rüfətdirsə, o, özünü başqa cür aparır), avtomatik yadda saxlama və "Davam et", hədəf işarəsi, köz ikonları | ✅ Hazırdır |
-| M5: Son Ocaq | Fəsil 2: karvansara bazası, şübhəlilərin hamısı bir yerdə, NPC süni intellekti (məqsəd, qorxu, münasibət), sorğu-sual və ittiham | Növbəti |
+| **M5: Son Ocaq** | Fəsil 2: karvansara, 8 şübhəli (hər birinin ayrıca modeli və rəngi), utility AI (istilik, ünsiyyət, vəzifə ehtiyacları), sorğu-sual (alibi, sübut, şübhə), etibar sistemi, gecə hücumu (satqın darvazanı açır, 2 nəfər yox olur), divan və ittiham, iki son (boss döyüşü və ya günahsızın sürgünü) | ✅ Hazırdır |
+| M6: Fəsil 3 | Kül Şahının həqiqəti, bölgələrə səyahət, Yaddaş Yanğınının sonlara təsiri | Növbəti |
 | M5: Vertical slice | Közqala tam hekayə xətti ilə, 3 NPC, 1 satqın ssenarisi | |
 | M6+ | Digər bölgələr, bütün sonlar, Steam | |
 

@@ -11,6 +11,7 @@ const LOOPING := [
 	"Idle", "Idle_B", "Idle_Combat", "2H_Melee_Idle", "Unarmed_Idle",
 	"Running_A", "Running_B", "Running_C", "Walking_A", "Walking_B", "Walking_C",
 	"Walking_D_Skeletons", "Blocking", "Spellcasting", "Lie_Idle",
+	"Sit_Floor_Idle", "Sit_Chair_Idle",
 ]
 
 var anim: AnimationPlayer
@@ -146,6 +147,16 @@ func set_locomotion(moving: bool, speed_scale := 1.0) -> void:
 	if want != _locomotion:
 		_locomotion = want
 		anim.play(want, 0.18)
+
+
+## Changes the clip used when standing still (sitting, praying, guarding...).
+func set_idle(clip: String) -> void:
+	if idle_anim == clip:
+		return
+	idle_anim = clip
+	if action == "" and _locomotion != move_anim:
+		_locomotion = ""
+		set_locomotion(false)
 
 
 ## Plays a one-shot. Returns to locomotion when it ends unless `hold` is set.

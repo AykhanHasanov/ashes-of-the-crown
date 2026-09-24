@@ -8,6 +8,7 @@ extends CanvasLayer
 ##   branch                  — {memory, burned, intact}: jump depending on Yaddaş Yanğını, or
 ##                             {if, then, else} with a GameState.check() condition
 ##   set                     — flag emitted through flag_set when the node is shown
+##   do                      — [GameState.apply() actions] run when a node is shown or a choice taken
 ##   end + event             — closes the dialogue and emits finished(event)
 
 signal finished(event: String)
@@ -112,7 +113,7 @@ func _process(delta: float) -> void:
 	if _typing or not _node.has("choices"):
 		return
 	var count: int = _node["choices"].size()
-	for i in mini(count, 3):
+	for i in mini(count, 9):
 		if Input.is_action_just_pressed("choice_%d" % (i + 1)):
 			_choose(i)
 			return
@@ -129,6 +130,8 @@ func _show(id: String) -> void:
 		return
 	if node.has("set"):
 		flag_set.emit(node["set"])
+	for action in node.get("do", []):
+		GameState.apply(action)
 	_node = node
 	Audio.play("ui_click", -12.0, 0.05)
 	var speaker: String = node.get("speaker", "")
@@ -185,6 +188,8 @@ func _choose(i: int) -> void:
 	Audio.play("ui_select", -10.0, 0.0)
 	if c.has("set"):
 		flag_set.emit(c["set"])
+	for action in c.get("do", []):
+		GameState.apply(action)
 	if c.has("next"):
 		_show(c["next"])
 	else:

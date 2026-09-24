@@ -115,6 +115,15 @@ func _refresh() -> void:
 			s += "[color=#ffb070]%s[/color]  [color=#9a9088]%s[/color]\n   [color=#ff8a3d]%s[/color]\n" % [sus["name"], sus["role"], dots]
 		else:
 			s += "[color=#5f5852][s]%s[/s]  %s — izlər uyğun gəlmir[/color]\n" % [sus["name"], sus["role"]]
+	if GameState.chapter >= 2:
+		s += "\n[color=#9a9088]Etibar: [/color]"
+		var parts := PackedStringArray()
+		for id in Conspiracy.SUSPECTS:
+			parts.append("%s %d" % [Conspiracy.SUSPECTS[id]["name"], int(GameState.trust.get(id, 50))])
+		s += "[color=#9a9088]%s[/color]\n" % ", ".join(parts)
+	if not GameState.absent.is_empty():
+		s += "[color=#ffb070]Hücum vaxtı yox idi: %s, %s[/color]\n" % [
+			Conspiracy.SUSPECTS[GameState.absent[0]]["name"], Conspiracy.SUSPECTS[GameState.absent[1]]["name"]]
 	if clues.size() >= 3 and matching.size() == 1:
 		var who: String = Conspiracy.SUSPECTS[matching[0]]["name"]
 		s += "\n[color=#ff6a3d]Bütün izlər bir nəfərə aparır: %s.[/color]" % who
