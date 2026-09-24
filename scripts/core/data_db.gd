@@ -1,11 +1,14 @@
 extends Node
 ## Loads the game's content from JSON under res://data (spec V3 rule 4): balance
-## tables, weapons and enemies. Everything tunable lives in those files.
+## tables, weapons, enemies, the world layout and POI prefabs. Everything tunable
+## lives in those files. World files are keyed by file name, the rest by their "id".
 
 const DIRS := {
 	"balance": "res://data/balance/",
 	"weapons": "res://data/weapons/",
 	"enemies": "res://data/enemies/",
+	"world": "res://data/world/",
+	"prefabs": "res://data/world/prefabs/",
 }
 
 var _tables := {}   # category -> {id -> Dictionary}
@@ -27,7 +30,8 @@ func reload() -> void:
 				continue
 			var data = JSON.parse_string(FileAccess.get_file_as_string(dir + file))
 			if data is Dictionary:
-				table[data.get("id", file.get_basename())] = data
+				var key: String = file.get_basename() if category == "world" else data.get("id", file.get_basename())
+				table[key] = data
 			else:
 				push_error("DataDB: cannot parse %s%s" % [dir, file])
 		_tables[category] = table
@@ -44,6 +48,15 @@ func weapon(id: String) -> Dictionary:
 
 func enemy(id: String) -> Dictionary:
 	return _tables["enemies"].get(id, {})
+
+
+## A world file by name: world("world_layout"), world("vegetation")...
+func world(file: String) -> Dictionary:
+	return _tables["world"].get(file, {})
+
+
+func prefab(id: String) -> Dictionary:
+	return _tables["prefabs"].get(id, {})
 
 
 func ids(category: String) -> Array:

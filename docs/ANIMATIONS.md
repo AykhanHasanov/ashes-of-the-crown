@@ -45,5 +45,8 @@ godot --headless --path . -s tools/check_anims.gd
 | Ayrıca parry klipi | Block_Attack sürətləndirilmiş | Faza H |
 | Yüklənmə (charge) pozası | 2H_Melee_Idle / Blocking | Faza H |
 | Canavar stagger/qalxma | Death dondurulur + Jump_ToIdle | Başqa heyvan paketi tapılsa |
-| At minmə, üzmə, dırmaşma | yoxdur | Faza B–D-də lazım olarsa |
+| Üzmə | Running_A yavaşladılır, model 0.55 m suya batırılır | Faza H: üzmə klipi (Mixamo retarget) |
+| Yamacda sürüşmə | Jump_Idle | Faza H |
+| Maneədən aşma (vault) | Jump_Start + qövs üzrə hərəkət | Faza H |
+| At minmə, dırmaşma | yoxdur | Faza G |
 | Boss/canavarlar (Div, Təpəgöz, ayı) | model yoxdur | Faza D–E: CC0 mənbə axtarışı |

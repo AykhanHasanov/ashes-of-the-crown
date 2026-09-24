@@ -1,0 +1,11 @@
+{
+	"id": "echo",
+	"_about": "Körpü daşı: yol kənarında köz damarlı daş, kral dövründən qalma yazı.",
+	"icon": "echo",
+	"discover_radius": 25,
+	"pieces": [
+		{"m": "n:Rock_1", "p": [0, 0, 0], "r": 15, "s": 2.8}
+	],
+	"lights": [{"p": [0, 1.4, 0], "kind": "ember", "scale": 0.4}],
+	"interact": [{"kind": "echo", "p": [0, 0, 1.2], "text": "Daşa kral möhürü vurulub: «Bu körpünü Atəşan xalqı üçün Şahbaz tikdi». Möhürün üstündən kimsə qılıncla xətt çəkib."}]
+}

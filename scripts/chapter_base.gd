@@ -256,4 +256,13 @@ func _capture() -> void:
 	var avg := _fps_sum / maxf(_fps_count, 1)
 	print("CAPTURE saved=%s avg_fps=%.1f adapter=%s quality=%s" % [
 		Settings.capture_path, avg, RenderingServer.get_video_adapter_name(), "high" if Settings.is_high() else "low"])
+	# Profile for the phase reports (the F3 numbers)
+	print("PROFILE draw_calls=%d primitives=%dk objects=%d vram=%dMB frame_ms=%.1f physics_ms=%.1f nodes=%d" % [
+		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
+		int(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000.0),
+		Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
+		int(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0),
+		Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
+		Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
+		Performance.get_monitor(Performance.OBJECT_NODE_COUNT)])
 	get_tree().quit()

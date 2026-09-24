@@ -9,6 +9,10 @@ extends "res://scripts/combat/combatant.gd"
 ## `unstoppable` seconds burn white and cannot be interrupted; unparryable attacks
 ## glow red. Parries stun, heavy blows knock small foes down, a full stance bar
 ## collapses them for an execution.
+##
+## In the open world a foe has a home: it idles there until Ayxan comes within
+## `aggro_range` (or hurts it / a packmate), and gives up the chase past `leash`
+## metres from home, walking back and healing. aggro_range 0 = always hunting (arena).
 
 signal killed(foe: Node)
 
@@ -50,6 +54,16 @@ var _knock := Vector3.ZERO
 var _flash := 0.0
 var _shape: CollisionShape3D
 var _executor = null
+var home := Vector3.ZERO
+var aggro_range := 0.0
+var leash := 42.0
+var aggro := true
+var spawn_key := ""          # set by the open world to remember kills
+## Open world: terrain height at (x, z). Terrain colliders only exist near the camera,
+## so far-off foes are held on the ground by this instead of falling through.
+var ground_query := Callable()
+var _returning := false
+var _vy := 0.0
 
 
 func configure(id: String, enemy_level := 1) -> void:
@@ -92,6 +106,10 @@ func _ready() -> void:
 	_build_model()
 	_build_telegraph()
 	_build_bar()
+	if aggro_range > 0.0:
+		aggro = false
+		if home == Vector3.ZERO:
+			home = global_position
 	var spawn: String = data["anims"].get("spawn", "")
 	if spawn != "":
 		_model.play_action(spawn, 2.4, 0.0)
@@ -193,12 +211,16 @@ func _physics_process(delta: float) -> void:
 				_model.cancel_action()
 				_enter(S.THINK_MOVE)
 		S.THINK_MOVE:
-			_think_t -= delta
-			if _think_t <= 0.0:
-				_think_t = THINK * randf_range(0.8, 1.2)
-				_think(to, dist)
-			move = _steer(to, dist)
-			_face(to if dist > 0.1 else -_model.global_basis.z, delta, 9.0)
+			if not aggro:
+				move = _home_behaviour(dist, delta)
+			else:
+				_think_t -= delta
+				if _think_t <= 0.0:
+					_think_t = THINK * randf_range(0.8, 1.2)
+					_think(to, dist)
+					_check_leash(dist)
+				move = _steer(to, dist)
+				_face(to if dist > 0.1 else -_model.global_basis.z, delta, 9.0)
 		S.WINDUP:
 			_face(to, delta, 5.0)
 			_update_ring()
@@ -236,8 +258,17 @@ func _physics_process(delta: float) -> void:
 		S.EXECUTED, S.DEAD:
 			pass
 
-	velocity = Vector3(move.x + _knock.x, -2.0, move.z + _knock.z)
+	if is_on_floor():
+		_vy = -1.0
+	else:
+		_vy = maxf(_vy - 22.0 * delta, -40.0)
+	velocity = Vector3(move.x + _knock.x, _vy, move.z + _knock.z)
 	move_and_slide()
+	if ground_query.is_valid():
+		var gy: float = ground_query.call(global_position.x, global_position.z)
+		if global_position.y < gy - 0.3:
+			global_position.y = gy + 0.05
+			_vy = 0.0
 	if _state == S.THINK_MOVE:
 		var moving := move.length() > 0.3
 		var a: Dictionary = data["anims"]
@@ -439,6 +470,7 @@ func _unstoppable() -> bool:
 
 
 func _on_hurt(hit, amount: float) -> void:
+	_alert()
 	_flash = 1.0
 	_bar.visible = true
 	_bar_hold = 0.45
@@ -542,6 +574,51 @@ func _on_died(_hit) -> void:
 	tw.tween_interval(2.0)
 	tw.tween_property(_model, "position:y", -1.8, 1.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tw.tween_callback(queue_free)
+
+
+# --- Home, aggro and leash (open world) -------------------------------------------------------
+
+func _home_behaviour(dist: float, delta: float) -> Vector3:
+	if _target_ok() and dist < aggro_range and not _returning:
+		_alert()
+		return Vector3.ZERO
+	var to_home := home - global_position
+	to_home.y = 0.0
+	if to_home.length() > 1.5:
+		_face(to_home, delta, 6.0)
+		return to_home.normalized() * (_run_speed if _returning else _speed * 0.6)
+	if _returning:
+		_returning = false
+		health = max_health
+		stance = 0.0
+		health_changed.emit(health, max_health)
+		_bar.visible = false
+	return Vector3.ZERO
+
+
+## Wakes this foe and its packmates nearby.
+func _alert() -> void:
+	if aggro or _returning:
+		return
+	aggro = true
+	for other in get_tree().get_nodes_in_group("enemies"):
+		if other != self and other.has_method("_alert") and other.global_position.distance_to(global_position) < 14.0:
+			other._alert()
+
+
+func _check_leash(dist: float) -> void:
+	if aggro_range <= 0.0:
+		return
+	var from_home := global_position.distance_to(home)
+	if from_home > leash or (_target_ok() and dist > aggro_range * 2.6):
+		aggro = false
+		_returning = true
+		_release_token()
+		_ring.visible = false
+
+
+func is_engaged() -> bool:
+	return aggro and not dead
 
 
 # --- Helpers ----------------------------------------------------------------------------------

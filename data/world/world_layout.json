@@ -1,0 +1,84 @@
+{
+	"_about": "Kür Vadisi, V3 Faza B parçası (512×512 m). Koordinatlar metrlə: x şərqə, z cənuba (z=0 şimal kənarıdır). Generator: tools/gen_world.gd",
+	"id": "kur_slice",
+	"name": "Kür Vadisi",
+	"size": 512,
+	"seed": 7131,
+	"base_height": 11.0,
+
+	"noise": {
+		"large": {"frequency": 0.0045, "octaves": 4, "amplitude": 7.0},
+		"detail": {"frequency": 0.03, "octaves": 3, "amplitude": 0.9}
+	},
+
+	"border": {"width": 56.0, "height": 52.0, "noise": 10.0, "gaps": [{"at": [0, 300], "radius": 46.0, "depth": 0.85}, {"at": [270, 512], "radius": 30.0, "depth": 0.6}]},
+
+	"ridges": [
+		{"id": "west_north", "points": [[40, 30], [52, 130], [64, 250]], "height": 30.0, "width": 52.0},
+		{"id": "west_south", "points": [[58, 350], [56, 430], [72, 500]], "height": 26.0, "width": 48.0},
+		{"id": "east_spur", "points": [[500, 250], [470, 300], [455, 330]], "height": 16.0, "width": 50.0}
+	],
+
+	"hills": [
+		{"id": "castle_hill", "center": [395, 108], "radius": 100.0, "height": 17.0},
+		{"id": "ruin_knoll", "center": [118, 152], "radius": 40.0, "height": 9.0},
+		{"id": "tower_knoll", "center": [168, 445], "radius": 34.0, "height": 8.0},
+		{"id": "meadow_rise", "center": [262, 222], "radius": 55.0, "height": 4.0}
+	],
+
+	"river": {
+		"id": "kur_arm",
+		"name": "Kür qolu",
+		"points": [[172, -20], [186, 70], [164, 150], [196, 225], [226, 290], [248, 350], [228, 420], [258, 470], [276, 540]],
+		"level_start": 14.0,
+		"level_end": 6.2,
+		"width": 11.0,
+		"bank": 13.0,
+		"depth": 2.6
+	},
+
+	"lakes": [
+		{"id": "mavi_gol", "name": "Mavi Göl", "center": [398, 398], "radius": 56.0, "level": 6.5, "depth": 5.0, "shore": 14.0,
+		 "island": {"center": [412, 386], "radius": 8.0, "height": 1.6}}
+	],
+
+	"biomes": [
+		{"type": "forest", "center": [430, 468], "radius": 95.0},
+		{"type": "forest", "center": [145, 118], "radius": 80.0},
+		{"type": "forest", "center": [448, 215], "radius": 58.0},
+		{"type": "forest", "center": [196, 408], "radius": 48.0},
+		{"type": "forest", "center": [352, 262], "radius": 38.0},
+		{"type": "meadow", "center": [285, 220], "radius": 130.0},
+		{"type": "meadow", "center": [140, 330], "radius": 70.0},
+		{"type": "farmland", "center": [310, 385], "radius": 55.0},
+		{"type": "riverside", "follow": "river", "width": 34.0}
+	],
+
+	"pois": [
+		{"id": "hearth_west", "type": "hearth", "name": "Aşırım ocağı", "pos": [128, 298], "flatten": 14.0, "start": true},
+		{"id": "hearth_north", "type": "hearth", "name": "Qarağac ocağı", "pos": [312, 150], "flatten": 14.0},
+		{"id": "kurkend", "type": "village", "name": "Kürkənd", "pos": [304, 342], "flatten": 46.0, "landmark": true},
+		{"id": "qaragac_fort", "type": "castle", "name": "Qarağac qalası", "pos": [395, 106], "flatten": 34.0, "landmark": true},
+		{"id": "qoca_cinar", "type": "great_tree", "name": "Qoca Çinar", "pos": [258, 224], "flatten": 10.0, "landmark": true},
+		{"id": "old_atashgah", "type": "ruins", "name": "Köhnə atəşgah", "pos": [116, 150], "flatten": 20.0, "landmark": true},
+		{"id": "wolf_den", "type": "den", "name": "Canavar yuvası", "pos": [446, 468], "flatten": 14.0},
+		{"id": "nar_bagi", "type": "grove", "name": "Nar bağı", "pos": [318, 446], "flatten": 20.0},
+		{"id": "watchtower", "type": "watchtower", "name": "Gözətçi qülləsi", "pos": [168, 446], "flatten": 12.0, "landmark": true},
+		{"id": "island_cache", "type": "chest", "name": "Adadakı sandıq", "pos": [412, 386], "flatten": 0.0},
+		{"id": "bridge_echo", "type": "echo", "name": "Körpü daşı", "pos": [0, 0], "at_bridge": true}
+	],
+
+	"roads": [
+		{"from": "edge_west", "to": "hearth_west", "edge": [0, 300]},
+		{"from": "hearth_west", "to": "kurkend"},
+		{"from": "kurkend", "to": "hearth_north"},
+		{"from": "hearth_north", "to": "qaragac_fort"},
+		{"from": "kurkend", "to": "nar_bagi"},
+		{"from": "hearth_west", "to": "old_atashgah"},
+		{"from": "hearth_west", "to": "watchtower"}
+	],
+
+	"landmarks_far": [
+		{"id": "kozqala_smoke", "name": "Közqala", "pos": [-260, 300], "kind": "smoke_column"}
+	]
+}

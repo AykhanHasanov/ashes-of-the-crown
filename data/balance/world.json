@@ -1,0 +1,144 @@
+{
+	"_about": "Açıq dünya balansı (V3 Faza B): vaxt, hava, streaming, hərəkət qaydaları.",
+	"time": {
+		"day_minutes": 24.0,
+		"start_hour": 8.5,
+		"dawn": 5.5,
+		"dusk": 19.5
+	},
+	"weather": {
+		"change_minutes": [
+			3.0,
+			7.0
+		],
+		"blend_seconds": 25.0,
+		"states": {
+			"clear": {
+				"weight": 4.0,
+				"cloud": 0.15,
+				"fog": 0.0,
+				"rain": 0.0,
+				"sun": 1.0
+			},
+			"cloudy": {
+				"weight": 2.5,
+				"cloud": 0.6,
+				"fog": 0.1,
+				"rain": 0.0,
+				"sun": 0.65
+			},
+			"rain": {
+				"weight": 1.5,
+				"cloud": 0.95,
+				"fog": 0.35,
+				"rain": 1.0,
+				"sun": 0.35
+			},
+			"fog": {
+				"weight": 1.2,
+				"cloud": 0.5,
+				"fog": 1.0,
+				"rain": 0.0,
+				"sun": 0.55
+			}
+		},
+		"forest_fog_bonus": 0.35
+	},
+	"streaming": {
+		"cell_size": 128.0,
+		"full_radius": 1,
+		"visual_radius": 2,
+		"check_interval": 0.4
+	},
+	"movement": {
+		"swim_speed": 3.2,
+		"swim_sprint_speed": 4.6,
+		"swim_stamina": 6.0,
+		"drown_damage_fraction": 0.06,
+		"swim_depth": 1.25,
+		"slide_angle": 40.0,
+		"slide_accel": 18.0,
+		"fall_safe": 6.0,
+		"fall_lethal": 15.0,
+		"vault_height": 1.05
+	},
+	"terrain": {
+		"collision_radius": 64,
+		"textures": [
+			{
+				"id": "grass",
+				"src": "leafy_grass",
+				"uv_scale": 0.16,
+				"tint": [
+					0.78,
+					0.95,
+					0.6
+				]
+			},
+			{
+				"id": "meadow",
+				"src": "leafy_grass",
+				"uv_scale": 0.11,
+				"tint": [
+					1.0,
+					0.98,
+					0.62
+				]
+			},
+			{
+				"id": "dirt",
+				"src": "dirt_floor",
+				"uv_scale": 0.22,
+				"tint": [
+					0.95,
+					0.85,
+					0.72
+				]
+			},
+			{
+				"id": "rock",
+				"src": "rock_face_03",
+				"uv_scale": 0.07,
+				"tint": [
+					0.9,
+					0.86,
+					0.82
+				]
+			},
+			{
+				"id": "mud",
+				"src": "brown_mud_leaves_01",
+				"uv_scale": 0.18,
+				"tint": [
+					0.8,
+					0.72,
+					0.62
+				]
+			},
+			{
+				"id": "forest",
+				"src": "forest_leaves_02",
+				"uv_scale": 0.16,
+				"tint": [
+					0.85,
+					0.8,
+					0.68
+				]
+			},
+			{
+				"id": "sand",
+				"src": "coast_sand_rocks_02",
+				"uv_scale": 0.14,
+				"tint": [
+					1.0,
+					0.94,
+					0.84
+				]
+			}
+		]
+	},
+	"map": {
+		"fog_cell": 16.0,
+		"reveal_radius": 70.0
+	}
+}

@@ -1,0 +1,14 @@
+{
+	"id": "hearth",
+	"_about": "Ocaq: sürətli səyahət və dincəlmə nöqtəsi. Yandırılanda göyə köz sütunu qalxır (uzaqdan orientir).",
+	"icon": "hearth",
+	"discover_radius": 45,
+	"pieces": [
+		{"m": "v:Bonfire", "p": [0, 0, 0], "s": 4.5, "c": false},
+		{"ring": "d:Rock2", "radius": 2.4, "count": 8, "s": 1.1, "c": false},
+		{"m": "n:Rock_1", "p": [-3.6, 0, -2.2], "r": 20, "s": 4.2, "far": true},
+		{"m": "n:Rock_1", "p": [3.4, 0, -2.6], "r": -35, "s": 3.6, "far": true},
+		{"m": "d:Rock3", "p": [0, 0, 3.4], "r": 0, "s": 1.6, "c": false}
+	],
+	"interact": [{"kind": "hearth", "p": [0, 0, 0]}]
+}
