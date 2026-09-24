@@ -2,6 +2,7 @@ extends CanvasLayer
 ## Title screen shown over the slowly orbiting courtyard: new game, settings, quit.
 
 signal new_game
+signal continue_game
 
 const UITheme := preload("res://scripts/ui/ui_theme.gd")
 const SettingsPanel := preload("res://scripts/ui/settings_panel.gd")
@@ -45,6 +46,8 @@ func _ready() -> void:
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(0, 40)
 	_menu.add_child(gap)
+	if GameState.has_save():
+		_button("Davam et", _on_continue)
 	_button("Yeni oyun", _on_new_game)
 	_button("Parametrlər", _on_settings)
 	_button("Çıxış", func(): get_tree().quit())
@@ -88,6 +91,14 @@ func _focus_first() -> void:
 
 
 func _on_new_game() -> void:
+	_leave(new_game)
+
+
+func _on_continue() -> void:
+	_leave(continue_game)
+
+
+func _leave(result: Signal) -> void:
 	if _starting:
 		return
 	_starting = true
@@ -95,7 +106,7 @@ func _on_new_game() -> void:
 	var tw := create_tween()
 	tw.tween_property(_root, "modulate:a", 0.0, 0.8)
 	await tw.finished
-	new_game.emit()
+	result.emit()
 	queue_free()
 
 

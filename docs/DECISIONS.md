@@ -21,4 +21,7 @@ Burada yalnız təsdiqlənmiş qərarlar yazılır. Burada olmayan heç nə qər
 | 2026-09-24 | Mühit: KayKit Dungeon Remastered + Halloween Bits (CC0). Tint və hisə batma şeyderi ilə "yanmış" görünüş verilir. Taxt, krater və effektlər isə kodla qalır | Sahib icazə verdi, seçim Claude-undur | Primitiv formalar əvəzinə detallı xarabalıq |
 | 2026-09-24 | Baş menyu, fasilə (Esc/P), parametrlər (`user://settings.cfg`-də saxlanılır), Musiqi/SFX səs kanalları. Esc artıq oyunu bağlamır | Claude | M3 məqsədi |
 | 2026-09-24 | Balans: eyni anda ən çox 2 hücum edən düşmən (hücum növbəsi) | Claude | Kütlə halında hücumlar ədalətsiz olurdu |
+| 2026-09-24 | Ekranın solundakı xatirə yazıları silindi. Yerinə can zolağının altında 6 köz ikonu var, mətnlər jurnala (Tab) köçürüldü | Sahib | "Çox pis görünür" |
+| 2026-09-24 | Qılınc səsi yenidən sintez olundu: 0.22 saniyəlik rezonanslı "şşing" və polad cingiltisi (köhnəsi küləyə bənzəyirdi) | Sahib | Döyüş hissi |
+| 2026-09-24 | Satqın sistemi: 8 şübhəli × 3 unikal iz, Kül əks-sədaları, jurnal, checkpoint əsaslı yadda saxlama (`user://save.json`). Ölümdən sonra oyun son checkpoint-dən davam edir | Claude | M4 |
 | 2026-09-24 | Layihə qovluğu: `Documents/games/ashes-of-the-crown` (boşluqsuz). Godot isə `Documents/games/_tools/godot` qovluğundadır | Claude | Köhnə `ashes-of-the crown` qovluğu başqa proqram tərəfindən açıq idi, adını dəyişmək mümkün olmadı. O qovluq boşdur, silinə bilər |

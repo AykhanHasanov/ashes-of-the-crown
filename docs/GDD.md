@@ -44,6 +44,22 @@ Satqın kim olursa olsun, sonda həqiqət açılır: **kral yanğını özü ist
 
 **Satqın hər oyunda təsadüfi seçilir.** Sübutlar da ona uyğun paylanır. Hər personajın həm satqın, həm də sadiq variantı üçün ayrıca hekayə xətti var.
 
+### İz sistemi (M4, `scripts/story/conspiracy.gd`)
+8 iz: ağır əsgər çəkməsi, ladan, mürəkkəb, yad sikkə, canavar xəzi, kral möhürü, kükürd, solaxay zərbə. Hər şübhəlinin 3 izi var, dəstlər unikaldır:
+
+| Şübhəli | İzlər |
+|---|---|
+| Sabir | ladan, mürəkkəb, möhür |
+| Anar | yad sikkə, kükürd, solaxay |
+| Elvin | mürəkkəb, yad sikkə, möhür |
+| Şahbaz | çəkmə, xəz, solaxay |
+| Əşrəf | çəkmə, xəz, yad sikkə |
+| Rüfət | çəkmə, möhür, solaxay |
+| İbrahim | ladan, mürəkkəb, kükürd |
+| Əhliman | ladan, kükürd, solaxay |
+
+1 iz 2–4 şübhəli, 2 iz 1–2 şübhəli qoyur, 3 iz isə həmişə tək bir nəfərə aparır (bu, avtomatik yoxlanılıb). Fəsil 1-də sübut hələ hökm deyil: ittiham Fəsil 2-də, Son Ocaqda olacaq.
+
 ## 5. Əsas mexanika: Yaddaş Yanğını ⭐
 
 - Ayxanın **6 xatirəsi** var: Rüfətin üzü, anasının adı, Sabirin ilk dərsi, Közqalanın küçələri, atasının səsi, ilk qılıncı.
@@ -112,7 +128,8 @@ Satqın kim olursa olsun, sonda həqiqət açılır: **kral yanğını özü ist
 | **M1: Prototip** | Közqala həyəti, Ayxan, Rüfət, dialoq, Yaddaş Yanğını, 3 dalğa, 2 qrafika rejimi | ✅ Hazırdır |
 | **M2: Hiss** | KayKit 3D personajları və animasiyaları, kombo döyüşü, hitstop, zərbə rəqəmləri, 28 sintez səs və muğam musiqisi (sakit və döyüş qatları) | ✅ Hazırdır |
 | **M3: Dünya və interfeys** | Közqala KayKit mühit modelləri ilə yenidən quruldu (hisə batmış divarlar, bayraqlar, xəzinə, sümüklər, yanmış ağaclar, məşələlər). Baş menyu (Ayxan külün içində yatır, kamera həyət ətrafında fırlanır), fasilə menyusu, yadda qalan parametrlər (səs, qrafika, tam ekran, silkələnmə, zərbə rəqəmləri). Düşmənlərin üstündə can zolaqları, eyni anda ən çox 2 düşmən hücum edir | ✅ Hazırdır |
-| M4: Sistemlər | Satqın sistemi, sübutlar, NPC süni intellekti, Son Ocaq bazası, yadda saxlama | Növbəti |
+| **M4: Satqın və sübutlar** | Hər oyunda təsadüfi satqın (8 şübhəli × 3 iz), 3 Kül əks-sədası (görüntü: dünya boz rəngə keçir, közdən xəyal çıxır), jurnal (Tab), şərtli dialoqlar (satqın Rüfətdirsə, o, özünü başqa cür aparır), avtomatik yadda saxlama və "Davam et", hədəf işarəsi, köz ikonları | ✅ Hazırdır |
+| M5: Son Ocaq | Fəsil 2: karvansara bazası, şübhəlilərin hamısı bir yerdə, NPC süni intellekti (məqsəd, qorxu, münasibət), sorğu-sual və ittiham | Növbəti |
 | M5: Vertical slice | Közqala tam hekayə xətti ilə, 3 NPC, 1 satqın ssenarisi | |
 | M6+ | Digər bölgələr, bütün sonlar, Steam | |
 

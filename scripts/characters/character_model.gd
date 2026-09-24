@@ -88,6 +88,14 @@ func recolor(from_min: float, from_max: float, to_hue: float, sat_scale := 1.0, 
 	return result
 
 
+## Renders every mesh with one material (e.g. the ember-echo ghost).
+func set_material_all(material: Material) -> void:
+	for mi: MeshInstance3D in scene.find_children("*", "MeshInstance3D", true, false):
+		mi.material_override = material
+		mi.material_overlay = null
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
+
 ## Draws `material` on top of every visible mesh (glow, rim, hit flash).
 func set_overlay(material: Material) -> void:
 	for mi: MeshInstance3D in scene.find_children("*", "MeshInstance3D", true, false):

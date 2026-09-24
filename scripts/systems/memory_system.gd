@@ -73,5 +73,26 @@ func is_burned(id: String) -> bool:
 	return false
 
 
+func to_dict() -> Dictionary:
+	return {"queue": queue.map(func(m): return m["id"]), "burned": burned.map(func(m): return m["id"])}
+
+
+func from_dict(data: Dictionary) -> void:
+	queue.clear()
+	burned.clear()
+	for id in data.get("queue", []):
+		queue.append(_by_id(id))
+	for id in data.get("burned", []):
+		burned.append(_by_id(id))
+	memories_reset.emit()
+
+
+func _by_id(id: String) -> Dictionary:
+	for m in MEMORIES:
+		if m["id"] == id:
+			return m.duplicate()
+	return {}
+
+
 func whisper() -> String:
 	return WHISPERS[clampi(burned.size() - 1, 0, WHISPERS.size() - 1)]

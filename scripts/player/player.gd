@@ -191,6 +191,13 @@ func lie_down() -> void:
 	_model.play_action("Lie_Idle", 1.0, 0.0, true)
 
 
+## Instantly back on his feet with control (resuming a save).
+func wake() -> void:
+	_model.cancel_action()
+	_model.set_locomotion(false)
+	input_locked = false
+
+
 ## Gets up out of the ash; await it before handing control back.
 func stand_up() -> void:
 	_model.play_action("Lie_StandUp", 1.3, 0.1)

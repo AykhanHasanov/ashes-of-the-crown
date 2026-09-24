@@ -13,7 +13,11 @@ var _root: Control
 var _health_fill: ColorRect
 var _health_ratio := 1.0
 var _shown_ratio := 1.0
-var _memory_label: RichTextLabel
+var _embers: Control
+var _marker: Control
+var _marker_target: Variant = null  # Vector3 world position or null
+var _marker_camera: Camera3D
+var _ember_pulse := 0.0
 var _objective: Label
 var _banner: Label
 var _whisper: Label
@@ -63,17 +67,19 @@ func _ready() -> void:
 	_health_fill.position = Vector2(2, 2)
 	_health_fill.size = Vector2(316, 10)
 
-	# Memories
-	_memory_label = RichTextLabel.new()
-	_memory_label.bbcode_enabled = true
-	_memory_label.scroll_active = false
-	_memory_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_memory_label.add_theme_font_size_override("normal_font_size", 17)
-	_memory_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
-	_memory_label.add_theme_constant_override("shadow_offset_x", 2)
-	_memory_label.add_theme_constant_override("shadow_offset_y", 2)
-	_root.add_child(_memory_label)
-	_place(_memory_label, Vector4(0, 1, 0, 1), Vector4(24, -236, 460, -16))
+	# Memories: six ember diamonds under the health bar (names live in the journal)
+	_embers = Control.new()
+	_embers.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(_embers)
+	_place(_embers, Vector4(0, 0, 0, 0), Vector4(24, 64, 200, 84))
+	_embers.draw.connect(_draw_embers)
+
+	# Objective marker: hovers over the target, or clings to the screen edge pointing at it
+	_marker = Control.new()
+	_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(_marker)
+	_marker.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_marker.draw.connect(_draw_marker)
 
 	_objective = _label("", 22, TEXT, HORIZONTAL_ALIGNMENT_CENTER)
 	_place(_objective, Vector4(0.5, 0, 0.5, 0), Vector4(-420, 18, 420, 50))
@@ -87,7 +93,7 @@ func _ready() -> void:
 	_prompt = _label("", 22, GOLD, HORIZONTAL_ALIGNMENT_CENTER)
 	_place(_prompt, Vector4(0.5, 1, 0.5, 1), Vector4(-300, -130, 300, -100))
 
-	var hint := _label("LMB / J — qılınc     RMB / Q — Alov Dalğası (xatirə yandırır)\nSpace — Kül addımı     E — danış     F9 — qrafika     F11 — tam ekran", 14, Color(0.7, 0.66, 0.6, 0.85), HORIZONTAL_ALIGNMENT_RIGHT)
+	var hint := _label("LMB / J — qılınc     RMB / Q — Alov Dalğası (xatirə yandırır)\nSpace — Kül addımı     E — danış     Tab — jurnal     Esc — fasilə", 14, Color(0.7, 0.66, 0.6, 0.85), HORIZONTAL_ALIGNMENT_RIGHT)
 	_place(hint, Vector4(1, 1, 1, 1), Vector4(-640, -60, -20, -12))
 	_info = _label("", 14, Color(0.7, 0.66, 0.6, 0.85), HORIZONTAL_ALIGNMENT_RIGHT)
 	_place(_info, Vector4(1, 0, 1, 0), Vector4(-420, 16, -20, 60))
@@ -142,6 +148,9 @@ func _process(delta: float) -> void:
 	_shown_ratio = lerpf(_shown_ratio, _health_ratio, 1.0 - exp(-10.0 * delta))
 	_health_fill.size.x = 316.0 * _shown_ratio
 	_damage = maxf(_damage - delta * 1.8, 0.0)
+	_ember_pulse += delta
+	_embers.queue_redraw()
+	_marker.queue_redraw()
 	_vignette_mat.set_shader_parameter("damage", _damage)
 	if _boss != null:
 		if is_instance_valid(_boss) and _boss.health > 0.0:
@@ -164,6 +173,41 @@ func set_health(current: float, maximum: float) -> void:
 
 func set_objective(text: String) -> void:
 	_objective.text = text
+
+
+## Points the objective marker at `target` (Vector3) seen through `camera`; null hides it.
+func set_marker(target: Variant, camera: Camera3D = null) -> void:
+	_marker_target = target
+	if camera:
+		_marker_camera = camera
+	_marker.queue_redraw()
+
+
+func _draw_marker() -> void:
+	if _marker_target == null or _marker_camera == null:
+		return
+	var world: Vector3 = _marker_target + Vector3(0, 2.6, 0)
+	var size := _marker.size
+	var behind := _marker_camera.is_position_behind(world)
+	var p := _marker_camera.unproject_position(world)
+	var margin := 48.0
+	var inside := not behind and p.x > margin and p.x < size.x - margin and p.y > margin and p.y < size.y - margin
+	var col := Color(1.0, 0.6, 0.2, 0.55 + 0.35 * sin(_ember_pulse * 3.0))
+	if inside:
+		# Small downward chevron above the target
+		var bob := sin(_ember_pulse * 3.0) * 4.0
+		var tip := p + Vector2(0, bob)
+		_marker.draw_colored_polygon(PackedVector2Array([tip, tip + Vector2(-10, -14), tip + Vector2(10, -14)]), col)
+		return
+	var center := size * 0.5
+	var dir := (p - center).normalized()
+	if behind:
+		dir = -dir
+	var half := center - Vector2(margin, margin)
+	var t := minf(half.x / maxf(absf(dir.x), 0.001), half.y / maxf(absf(dir.y), 0.001))
+	var pos := center + dir * t
+	var side := Vector2(-dir.y, dir.x)
+	_marker.draw_colored_polygon(PackedVector2Array([pos + dir * 16.0, pos - dir * 6.0 + side * 11.0, pos - dir * 6.0 - side * 11.0]), col)
 
 
 func set_prompt(text: String) -> void:
@@ -231,17 +275,28 @@ func _on_memory_burned(memory: Dictionary) -> void:
 
 
 func _refresh_memories() -> void:
-	var s := "[color=#e8b870]XATİRƏLƏR[/color]   [color=#8a817a]Yaddaş Yanğını[/color]\n"
+	_embers.queue_redraw()
+
+
+## Burned memories are grey ash; the one the ember will take next pulses.
+func _draw_embers() -> void:
 	var next := Memory.next_memory()
+	var x := 8.0
 	for m in Memory.MEMORIES:
-		var id: String = m["id"]
-		if Memory.is_burned(id):
-			s += "[color=#5f5852][s]%s[/s]   — kül[/color]\n" % m["title"]
-		elif not next.is_empty() and next["id"] == id:
-			s += "[color=#ff8a3d]» %s   (növbəti)[/color]\n" % m["title"]
+		var c := Vector2(x, 10)
+		var r := 7.0
+		var pts := PackedVector2Array([c + Vector2(0, -r), c + Vector2(r * 0.7, 0), c + Vector2(0, r), c + Vector2(-r * 0.7, 0)])
+		var col: Color
+		if Memory.is_burned(m["id"]):
+			col = Color(0.3, 0.28, 0.27, 0.9)
+		elif not next.is_empty() and next["id"] == m["id"]:
+			col = Color(1.0, 0.55, 0.15).lerp(Color(1.0, 0.85, 0.5), 0.5 + 0.5 * sin(_ember_pulse * 4.0))
+			_embers.draw_circle(c, r + 3.0, Color(1.0, 0.45, 0.1, 0.25))
 		else:
-			s += "[color=#d8cfc4]%s[/color]\n" % m["title"]
-	_memory_label.text = s
+			col = Color(0.95, 0.42, 0.12)
+		_embers.draw_colored_polygon(pts, col)
+		_embers.draw_polyline(pts + PackedVector2Array([pts[0]]), Color(0, 0, 0, 0.7), 1.5)
+		x += 20.0
 
 
 func _label(text: String, size: int, color: Color, align := HORIZONTAL_ALIGNMENT_LEFT, parent: Control = null) -> Label:

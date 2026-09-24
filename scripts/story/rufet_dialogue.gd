@@ -49,3 +49,25 @@ const DATA := {
 	"alarm": {"speaker": "Rüfət", "text": "Dayan... eşidirsən? Kül tərpənir.", "next": "alarm2"},
 	"alarm2": {"speaker": "Rüfət", "text": "Kölgələr qalxır! Qılıncını çək, Ayxan — yaralansan, ocaqların yanına qaç, onların istisi səni sağaldar!", "end": true, "event": "start_waves"},
 }
+
+## After the waves: Rüfət points Ayxan at the ember echoes.
+const AFTER_WAVES := {
+	"start": {"speaker": "Rüfət", "text": "Bitdi... hələlik. Ayxan, bax — kül hələ də közərir. Orada, orada, bir də orada.", "next": "b"},
+	"b": {"speaker": "Rüfət", "text": "Kahinlər deyir ki, böyük od öldüyü yerdə yaddaş qoyur. Sənin közün o yaddaşı oyada bilər. Bəlkə o gecə nə baş verdiyini görərsən.", "next": "c"},
+	"c": {"speaker": "Ayxan", "text": "Onda görəcəyəm. Kim bu şəhəri yandırıbsa, izi külün içindədir.", "end": true, "event": "start_echoes"},
+}
+
+## After all three echoes: what Ayxan tells Rüfət — and how Rüfət takes it.
+const AFTER_ECHOES := {
+	"start": {"speaker": "Rüfət", "text": "Nə gördün? Gözlərin yenə közün rəngini alıb.", "choices": [
+		{"text": "Satqın aramızdadır, Rüfət. İzlər saraydan kiməsə aparır.", "next": "tell"},
+		{"text": "Hələ heç nə deyə bilmərəm.", "next": "silent"},
+	]},
+	"tell": {"branch": {"if": "traitor:rufet", "then": "tell_guilty", "else": "tell_loyal"}},
+	"tell_loyal": {"speaker": "Rüfət", "text": "Deməli, Kül Gecəsi təsadüf deyildi... And olsun, o adamı tapacağıq. Hansı adla çağırılırsa çağırılsın.", "next": "camp"},
+	"tell_guilty": {"speaker": "Rüfət", "text": "...Sübut? Kül yalan danışmağı da bacarır, Ayxan. Közə bu qədər inanma.", "set": "rufet_deflected", "next": "tell_guilty2"},
+	"tell_guilty2": {"speaker": "Ayxan", "text": "(Səsi titrədi. Bir anlıq gözlərini yayındırdı.)", "next": "camp"},
+	"silent": {"speaker": "Rüfət", "text": "Başa düşürəm. Hər şeyi ürəyində saxlama, amma. Tək daşıya bilməzsən.", "next": "camp"},
+	"camp": {"speaker": "Rüfət", "text": "Sağ qalanlar köhnə karvansarada toplaşıb — Son Ocaqda. Sabir də oradadır, Əhliman da, hətta Elvinin adamları da. Satqın, çox güman, onların arasındadır.", "next": "go"},
+	"go": {"speaker": "Ayxan", "text": "Onda Son Ocağa gedirik. Qoy üzlərinə baxım.", "end": true, "event": "chapter_end"},
+}

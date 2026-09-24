@@ -5,7 +5,8 @@ extends Node
 ##   --quality=low|high     force a graphics preset (default: saved value or GPU auto-detect)
 ##   --capture=<path.png>   save a screenshot at --frame and quit
 ##   --frame=<n>            frame number for --capture (default 150)
-##   --demo=<mode>          menu | explore | dialogue | fight | combat | victory | pause
+##   --demo=<mode>          menu | explore | dialogue | fight | combat | victory | pause |
+##                          settings | echoes | echo | journal | chapter_end
 ##                          (anything but "menu" skips the title screen; "combat" also
 ##                          swings and fires the ember before the capture)
 
@@ -123,6 +124,7 @@ func _setup_input() -> void:
 	_bind_keys("attack", [KEY_J])
 	_bind_keys("restart", [KEY_R])
 	_bind_keys("pause", [KEY_ESCAPE, KEY_P])
+	_bind_keys("journal", [KEY_TAB])
 	_bind_keys("toggle_quality", [KEY_F9])
 	_bind_keys("toggle_fps", [KEY_F3])
 	_bind_keys("toggle_fullscreen", [KEY_F11])

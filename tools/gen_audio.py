@@ -10,6 +10,7 @@ import math
 import os
 import random
 import struct
+import sys
 import wave
 
 SR = 44100
@@ -207,13 +208,41 @@ def save(name, s, peak=0.9):
 
 # --- Sound effects -------------------------------------------------------------
 
+def resonant(s, center, q=6.0):
+    """State-variable band-pass; `center` is Hz or a function of time. Higher q = narrower."""
+    out = [0.0] * len(s)
+    low = band = 0.0
+    fn = center if callable(center) else (lambda t: center)
+    damp = 1.0 / q
+    for i, x in enumerate(s):
+        f = 2.0 * math.sin(math.pi * min(fn(i / SR), SR / 6.0) / SR)
+        low += f * band
+        high = x - low - damp * band
+        band += f * high
+        out[i] = band
+    return out
+
+
 def sfx_swing(variant):
-    dur = 0.3
-    lo, hi = [(500, 3800), (420, 3200), (600, 4500)][variant]
-    s = noise(dur)
-    s = lowpass(s, lambda t: lo + (hi - lo) * math.sin(math.pi * min(1.0, t / dur)) ** 2)
-    s = highpass(s, 300.0)
-    return fade(shape(s, 0.07, 0.06, hold=0.05), 0.001, 0.05)
+    """Sword swing: a fast, narrow 'shhk' that sweeps up and back down (the blade
+    passing by) plus a faint steel shimmer — short and sharp, not windy."""
+    dur = 0.22
+    peak = [0.075, 0.065, 0.085][variant]
+    top = [4200.0, 3600.0, 5000.0][variant]
+
+    def sweep(t):
+        k = min(1.0, t / peak) if t < peak else max(0.0, 1.0 - (t - peak) / (dur - peak))
+        return 900.0 + (top - 900.0) * k * k
+
+    whoosh = resonant(noise(dur), sweep, q=5.0)
+    # Envelope peaks exactly when the blade passes the ear
+    env = [math.exp(-((i / SR - peak) / 0.035) ** 2) for i in range(len(whoosh))]
+    out = [w * e for w, e in zip(whoosh, env)]
+    for f, g in ((3150.0, 0.18), (4710.0, 0.12), (6230.0, 0.07)):
+        ring = tone(dur, f * (1.0 + 0.01 * variant), f * 0.97)
+        add(out, [r * g * math.exp(-max(0.0, i / SR - peak * 0.8) / 0.05) * min(1.0, i / SR / (peak * 0.8))
+                  for i, r in enumerate(ring)])
+    return fade(out, 0.001, 0.03)
 
 
 def sfx_hit(variant, heavy=False):
@@ -268,6 +297,22 @@ def sfx_memory_burn():
     breath = bandpass(noise(dur), 1500.0, 5000.0)
     add(out, shape(breath, 0.9, 0.5), 0.0, 0.15)
     return reverb(fade(out, 0.01, 0.3), mix=0.5, size=2.2, feedback=0.84)
+
+
+def sfx_echo():
+    """Ember echo: the past bleeds through — a reversed swell of fire, a low
+    choir-like drone and glassy shimmer, ending in a soft exhale."""
+    dur = 3.2
+    out = silence(dur)
+    swell = lowpass(noise(1.2), lambda t: 200.0 + 2500.0 * (t / 1.2) ** 2)
+    add(out, [x * (i / len(swell)) ** 3 for i, x in enumerate(swell)], 0.0, 0.9)
+    for f, g in ((73.42, 0.6), (110.0, 0.4), (146.83, 0.3), (220.0, 0.15)):
+        v = lowpass(tone(dur - 1.0, f, f * 1.01, kind="saw", vib_rate=0.3, vib_depth=0.003), 700.0)
+        add(out, fade(shape(v, 0.5, 0.9, hold=0.6), 0.02, 0.4), 1.0, g)
+    for f in (1318.5, 1760.0, 2349.3):
+        add(out, fade(shape(tone(dur - 1.1, f, f * 0.985), 0.3, 0.6), 0.01, 0.3), 1.1, 0.06)
+    add(out, shape(bandpass(noise(0.9), 400.0, 2400.0), 0.3, 0.3), dur - 0.9, 0.35)
+    return reverb(fade(out, 0.01, 0.4), mix=0.5, size=2.6, feedback=0.85)
 
 
 def sfx_whisper():
@@ -510,8 +555,17 @@ def sting_defeat():
 
 def main():
     os.makedirs(OUT, exist_ok=True)
+    only = set(sys.argv[1:])
+    if only:
+        # Regenerate just the named groups, e.g.:  python tools/gen_audio.py swing
+        if "swing" in only:
+            for v in range(3):
+                save("swing_%d" % v, sfx_swing(v), peak=0.85)
+        if "echo" in only:
+            save("echo", sfx_echo(), peak=0.7)
+        return
     for v in range(3):
-        save("swing_%d" % v, sfx_swing(v))
+        save("swing_%d" % v, sfx_swing(v), peak=0.85)
         save("hit_%d" % v, sfx_hit(v))
         save("footstep_%d" % v, sfx_footstep(v), peak=0.5)
     save("hit_heavy", sfx_hit(0, heavy=True))
@@ -519,6 +573,7 @@ def main():
     save("nova", sfx_nova())
     save("memory_burn", sfx_memory_burn(), peak=0.7)
     save("whisper", sfx_whisper(), peak=0.6)
+    save("echo", sfx_echo(), peak=0.7)
     save("shade_spawn", sfx_shade_spawn(), peak=0.7)
     save("shade_windup", sfx_shade_windup(), peak=0.6)
     save("shade_death", sfx_shade_death(), peak=0.7)

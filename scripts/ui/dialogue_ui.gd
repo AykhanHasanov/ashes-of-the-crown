@@ -5,7 +5,8 @@ extends CanvasLayer
 ##   speaker, text           — the line to show
 ##   next                    — id of the following node (continue with E / click)
 ##   choices                 — [{text, next?, set?, event?}] Ayxan's answers (1-3 / click)
-##   branch                  — {memory, burned, intact}: jump depending on Yaddaş Yanğını
+##   branch                  — {memory, burned, intact}: jump depending on Yaddaş Yanğını, or
+##                             {if, then, else} with a GameState.check() condition
 ##   set                     — flag emitted through flag_set when the node is shown
 ##   end + event             — closes the dialogue and emits finished(event)
 
@@ -121,7 +122,10 @@ func _show(id: String) -> void:
 	var node: Dictionary = _data[id]
 	if node.has("branch"):
 		var b: Dictionary = node["branch"]
-		_show(b["burned"] if Memory.is_burned(b["memory"]) else b["intact"])
+		if b.has("if"):
+			_show(b["then"] if GameState.check(b["if"]) else b["else"])
+		else:
+			_show(b["burned"] if Memory.is_burned(b["memory"]) else b["intact"])
 		return
 	if node.has("set"):
 		flag_set.emit(node["set"])

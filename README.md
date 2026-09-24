@@ -18,8 +18,9 @@ Mühərrik: **Godot 4.7.2** (Forward+). Bütün səviyyə, personajlar və effek
 | F9 | Qrafika: Aşağı / Yüksək (parametrlərdə də var) |
 | F3 | FPS göstər |
 | F11 | Tam ekran |
-| R | Yenidən başla (son ekranında) |
+| R | Ölümdən sonra: son nöqtədən davam et. Fəslin sonunda: yeni oyun |
 | Esc / P | Fasilə menyusu: davam et, parametrlər, baş menyu, çıxış |
+| Tab | Jurnal: şübhəlilər, sübutlar, xatirələr |
 
 Yaralanmısansa, ocaqların yanında dayan: odun istisi səni sağaldır.
 Düşmənin altında qırmızı halqa böyüyürsə, o, zərbə vurmağa hazırlaşır. Yayın!
