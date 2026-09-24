@@ -1,0 +1,115 @@
+# Ashes of the Crown: Oyun Dizayn Sənədi (GDD)
+
+> Versiya 0.1 · 2026-09-24 · Status: canlı sənəddir, hər mərhələdə yenilənir.
+
+## 1. Bir cümlədə
+
+Kral öldü, paytaxt bir gecədə yandı. Sinəsində Tacın közü yanan sonuncu varis **Ayxan** dağılan səltənəti xilas etməli, sarayda satqını tapmalı və tac qoymalıdır. Hər dəfə közün gücündən istifadə etdikdə isə kim olduğunun bir parçasını itirir.
+
+## 2. Forma
+
+- **Janr:** hekayə əsaslı 3D aksiya-RPG + saray və krallıq idarəetməsi
+- **Kamera:** yuxarıdan, bucaq altında 3D. Dialoqlarda kinematoqrafik yaxın plan
+- **Üslub:** stilizə edilmiş qaranlıq fantaziya. Soyuq ay işığı ilə isti od işığının kontrastı, kül, köz, duman
+- **Platforma:** PC (Windows). Əvvəl itch.io demosu, sonra Steam
+- **Mühərrik:** Godot 4.7.2
+- **Hədəf müddət:** 10–15 saat. Çoxlu təkrar oynanma
+- **Dil:** Azərbaycan dili (əsas), sonra ingilis dili
+
+## 3. Dünya: Atəşan Səltənəti
+
+Qafqaz və İpək Yolu ruhunda uydurma odlar diyarı: atəşgahlar, karvansaralar, neft ocaqları, dağ tayfaları, Xəzər sahilləri.
+
+Min il boyu **Tac**, torpağı canlı saxlayan qədim **İlk Ocağı** içində bağlayan bir qab olub. Amma Tacda **Kül Şahı** adlı bir ruh yaşayır. Bu ruh tacı daşıyan hər kralı yavaş-yavaş içdən yeyir: onların xatirələrini yandırır.
+
+**Kül Gecəsi:** Kral taxt salonunda alova büründü. Paytaxt **Közqala** yandı, Tac əriyib yox oldu. Azad qalan od indi səltənəti külə çevirir: kül fırtınaları qalxır, ölülər **Kül Kölgələri** olaraq geri qayıdır.
+
+### Dərin sirr (bütün oyunlarda sabit)
+
+Satqın kim olursa olsun, sonda həqiqət açılır: **kral yanğını özü istəyirdi.** O, Kül Şahını məhv etmək üçün özünü və şəhəri qurban verdi. Amma Tacın bir közü Ayxanın sinəsinə keçdi, indi Kül Şahı həmin közün içindən yeni qab axtarır.
+
+## 4. Personajlar
+
+| Ad | Rolu | Şübhə səbəbi | Gizli motivi (satqın olduqda) |
+|---|---|---|---|
+| **Ayxan** | Baş qəhrəman. Sonuncu varisdir, sinəsində köz yanır | — | — |
+| **Rüfət** | Uşaqlıq dostu, qan qardaşı, mühafizə rəisi | Yanğın gecəsi postunda deyildi | Sabirin məktubu onu Elvinə bağlayır: taxtı "daha güclü" birinə vermək istəyir |
+| **Sabir** | Qoca vəzir, Ayxanın müəllimi | Hər şeyi bilir, heç nə demir | Kralın planını bilirdi. Közü Ayxana özü yönəltdi |
+| **Şahbaz** | Sərkərdə | Kral onun oğlunu edam etdirmişdi | İntiqam: yanğın gecəsi darvazaları açıq qoydu |
+| **Elvin** | Ayxanın qeyri-qanuni qardaşı, parlaq və iddialı | Özünü varis elan edib | Tacı özü üçün istəyir, Kül Şahı ilə danışıq aparır |
+| **Əhliman** | Közün Ordeninin baş kahini | Yanğını "ilahi hökm" adlandırır | Kül Şahına sitayiş edən gizli təriqətin başçısıdır |
+| **Anar** | Karvan Gildiyasının başçısı | Yanğından sonra qəribə şəkildə varlanıb | Xarici imperiyaya satılıb, Tacın qalığını satmaq istəyir |
+| **Əşrəf** | Qartal Dağları tayfalarının bəyi | Taxtla üç nəsillik qan davası var | Tayfasını azad etmək üçün yanğını fürsət bildi |
+| **İbrahim** | Saray alimi və kimyagər | Yanğından sonra itkin düşüb | Tacın sirrini açan odur. Közü idarə etməyin yolunu bilir, amma bunun qiyməti var |
+
+**Satqın hər oyunda təsadüfi seçilir.** Sübutlar da ona uyğun paylanır. Hər personajın həm satqın, həm də sadiq variantı üçün ayrıca hekayə xətti var.
+
+## 5. Əsas mexanika: Yaddaş Yanğını ⭐
+
+- Ayxanın **6 xatirəsi** var: Rüfətin üzü, anasının adı, Sabirin ilk dərsi, Közqalanın küçələri, atasının səsi, ilk qılıncı.
+- Od gücləri güclüdür, amma hər istifadə **növbədəki xatirəni yandırır**. Növbə ekranda görünür, yəni oyunçu nəyi itirəcəyini bilərək qərar verir.
+- Yanmış xatirənin nəticələri:
+  - Dialoqlar dəyişir (məsələn, "Rüfətin üzü" yanıbsa, Ayxan onu tanımır).
+  - Münasibətlər dəyişir, bəzi seçimlər və sübutlar yox olur.
+  - Köz daha parlaq yanır, Ayxanın zirehi külə çevrilir (vizual göstərici).
+  - Kül Şahının pıçıltısı güclənir.
+- Sonlar yanmış xatirələrin sayından asılıdır.
+
+## 6. Oyun dövrü (tam oyun)
+
+1. **Son Ocaq (baza):** bərpa olunan karvansara. Divan, yoldaşlar, qərarlar
+2. **Ekspedisiya:** bölgəyə səfər. Kəşf, döyüş, sübut, müttəfiq
+3. **Qayıdış və divan:** resurslar, fraksiyalar, siyasi qərarlar
+4. **Dünyanın növbəsi:** kül yayılır, NPC-lər öz planlarını həyata keçirir, laqeyd buraxılan bölgə düşür
+
+## 7. Bölgələr
+
+| Bölgə | Vizual | Mahiyyəti |
+|---|---|---|
+| **Közqala** | Yanmış paytaxt, köz, qızıl xarabalıqlar | Taxt salonunun sirri, satqının izləri |
+| **Neft Çölü** | Alov sütunları, qara göllər, atəşgahlar | Közün Ordeni, Odun tarixi |
+| **Qartal Dağları** | Qar ilə külün qarışığı, qala-kəndlər | Əşrəfin tayfaları, qan davası |
+| **Batmış Liman** | Yarı su altında qalmış şəhər, fırtına | Anarın gildiyası, imperiyanın casusları |
+
+## 8. Döyüş
+
+- Qılınc (kombo), **Kül addımı** (toqquşmadan keçən sürətli qaçış), **Alov Dalğası** (xatirə yandırır). Sonrakı mərhələlərdə yeni od gücləri gələcək.
+- Düşmənlər hücumdan əvvəl xəbərdarlıq edir (gözləri alışır, qolları qalxır). Qılınc zərbəsi adi düşmənin hücumunu kəsir.
+- Ocaqların istisi yaraları sağaldır, yəni ərazinin taktiki mənası var.
+- Yoldaş döyüşdə kömək edir. Satqın yoldaş isə kritik anda arxa çevirə bilər.
+
+## 9. NPC süni intellekti
+
+- Əsas yanaşma "utility AI"dır: hər NPC-nin məqsədi, qorxusu, sirri, sədaqəti və Ayxan haqqında yaddaşı olur.
+- NPC-lər ittifaq qurur, şayiə yayır, plan hazırlayır. Sistem proqnozlaşdırıla bilir, test olunur və internet tələb etmir.
+- İstəyə görə, sonradan dialoqu zənginləşdirmək üçün dil modeli (LLM) qatı əlavə oluna bilər. Oyunun təməli ondan asılı deyil.
+
+## 10. Sonlar
+
+1. **Tacı yenidən alovlandır:** yeni qab olursan, səltənət xilas olur, sən isə özünü itirirsən.
+2. **Odu söndür:** sehr bitir, sən insan qalırsan.
+3. **Odu xalqa payla:** tac yox olur, hər evdə ocaq yanır.
+4. **Kül İmperatoru:** Kül Şahı ilə birləşirsən (qaranlıq son).
+5. **Gizli son:** yalnız bir dəfə də xatirə yandırmadan oyunu bitirənlər üçün açılır.
+
+## 11. İnkişaf yol xəritəsi
+
+| Mərhələ | Məzmun | Status |
+|---|---|---|
+| **M1: Prototip** | Közqala həyəti, Ayxan, Rüfət, dialoq, Yaddaş Yanğını, 3 dalğa, 2 qrafika rejimi | ✅ Hazırdır |
+| M2: Hiss | Səs və musiqi, daha yaxşı animasiyalar, döyüşün tarazlanması, menyu və fasilə | Növbəti |
+| M3: Real vizual | Pulsuz CC0 3D model və animasiya paketləri (Quaternius, KayKit), Közqalanın tam bədii versiyası | |
+| M4: Sistemlər | Satqın sistemi, sübutlar, NPC süni intellekti, Son Ocaq bazası | |
+| M5: Vertical slice | Közqala tam hekayə xətti ilə, 3 NPC, 1 satqın ssenarisi | |
+| M6+ | Digər bölgələr, bütün sonlar, Steam | |
+
+## 12. Prototip (M1): nə var?
+
+Fəsil 1, "Birinci səhər":
+1. Titr ekranı: *Közqala. Kül Gecəsindən üç gün sonra.*
+2. Ayxan yanmış həyətdə oyanır. Tapşırıq: Rüfəti tapmaq.
+3. Rüfətlə budaqlanan dialoq. Onun üzü yanıbsa, dialoq tamam başqa cür gedir. Seçimlər qeydə alınır: `clue_letter`, `rufet_hesitated` və s.
+4. Üç dalğa: Kül Kölgələri, sürətli kölgələr və **Kül Cəngavəri** (boss).
+5. Son ekranı: yanmış xatirələrə və seçimlərə görə mətn dəyişir.
+
+Performans: noutbukda (Intel UHD) "Aşağı" rejimdə ~50 FPS.

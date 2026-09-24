@@ -1,0 +1,9 @@
+# Godot cache
+.godot/
+
+# Debug screenshots produced by --capture
+captures/
+
+# OS noise
+Thumbs.db
+.DS_Store
