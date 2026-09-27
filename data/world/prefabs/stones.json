@@ -4,8 +4,33 @@
 	"icon": "landmark",
 	"discover_radius": 30,
 	"pieces": [
-		{"ring": "n:Rock_1", "radius": 6.0, "count": 7, "s": 3.4, "far": true},
-		{"m": "d:Rock2", "p": [0, 0, 0], "s": 2.6, "c": false}
+		{
+			"ring": "f:rock_moss_b.scn",
+			"radius": 6.0,
+			"count": 7,
+			"s": 1.7,
+			"far": true
+		},
+		{
+			"m": "f:rock_small.scn",
+			"p": [
+				0,
+				0,
+				0
+			],
+			"s": 1.456,
+			"c": false
+		}
 	],
-	"lights": [{"p": [0, 0.8, 0], "kind": "ember", "scale": 0.5}]
+	"lights": [
+		{
+			"p": [
+				0,
+				0.8,
+				0
+			],
+			"kind": "ember",
+			"scale": 0.5
+		}
+	]
 }

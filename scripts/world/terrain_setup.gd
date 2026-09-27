@@ -6,6 +6,7 @@ extends RefCounted
 const TEX_DIR := "res://assets/terrain/"
 const DATA_DIR := "res://world/terrain"
 const FOLIAGE_SHADER := preload("res://shaders/foliage.gdshader")
+const CARD_SHADER := preload("res://shaders/grass_cards.gdshader")
 
 
 ## `world` = data/balance/world.json, `veg` = data/world/vegetation.json (passed in so the
@@ -26,6 +27,9 @@ static func create(high_quality: bool, world: Dictionary, veg: Dictionary) -> Te
 	m.set_shader_param("height_blending", true)
 	m.set_shader_param("macro_variation1", Color(0.93, 0.96, 0.88))
 	m.set_shader_param("macro_variation2", Color(1.0, 0.95, 0.86))
+	# Steep slopes and cliffs: project textures sideways instead of stretching them
+	m.set_shader_param("enable_projection", true)
+	m.set_shader_param("projection_threshold", 0.78)
 	return terrain
 
 
@@ -55,12 +59,28 @@ static func make_assets(high_quality: bool, world: Dictionary, veg: Dictionary) 
 		ma.lod0_range = r[1] if high_quality else r[0]
 		ma.fade_margin = 0.0
 		ma.cast_shadows = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if item["shadows"] and (high_quality or item.has("collide")) else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		if not item["shadows"] and ma.get_mesh(0) != null and ma.get_mesh(0).get_surface_count() == 1:
+		if item.get("procedural", {}).get("kind", "") == "cards":
+			ma.material_override = _card_material(ma, item)
+		elif not item["shadows"] and not item.get("keep_material", false) and ma.get_mesh(0) != null and ma.get_mesh(0).get_surface_count() == 1:
 			# Small foliage sways in the wind and bends away from Ayxan
 			ma.material_override = _foliage_material(ma, item.get("color", []))
 		assets.set_mesh_asset(i, ma)
 		i += 1
 	return assets
+
+
+## Photographed grass and flower cards (grass_cards.gdshader).
+static func _card_material(ma: Terrain3DMeshAsset, item: Dictionary) -> ShaderMaterial:
+	var proc: Dictionary = item["procedural"]
+	var sm := ShaderMaterial.new()
+	sm.shader = CARD_SHADER
+	sm.set_shader_parameter("card_tex", load("res://assets/foliage/cards/%s.png" % proc["texture"]))
+	var mesh: Mesh = ma.get_mesh(0)
+	sm.set_shader_parameter("mesh_height", maxf(mesh.get_aabb().end.y, 0.1) if mesh != null else 0.6)
+	var tint: Array = item.get("color", [1, 1, 1])
+	sm.set_shader_parameter("tint", Color(tint[0], tint[1], tint[2]))
+	sm.set_shader_parameter("dryness", float(proc.get("dryness", 0.25)))
+	return sm
 
 
 static func _foliage_material(ma: Terrain3DMeshAsset, tint: Array) -> ShaderMaterial:

@@ -12,6 +12,7 @@ const PREFIX := {
 	"c:": "res://assets/quaternius/modular_medieval_buildings_pack/",
 	"d:": "res://assets/quaternius/modular_dungeon_pack/",
 	"n:": "res://assets/quaternius/nature_pack/",
+	"f:": "res://assets/foliage/",   # generated trees (tools/gen_trees.gd): f:oak.scn
 	"r:": "res://assets/quaternius/rpg_items_pack/",
 	"s:": "res://assets/quaternius/survival_pack/",
 	"kd:": "res://assets/environment/dungeon/",

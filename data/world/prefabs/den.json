@@ -5,44 +5,44 @@
 	"discover_radius": 35,
 	"pieces": [
 		{
-			"m": "n:Rock_4",
+			"m": "f:rock.scn",
 			"p": [
 				-5,
 				0,
 				-3
 			],
 			"r": 20,
-			"s": 4.2
+			"s": 0.924
 		},
 		{
-			"m": "n:Rock_4",
+			"m": "f:rock.scn",
 			"p": [
 				4,
 				0,
 				-5
 			],
 			"r": 140,
-			"s": 3.8
+			"s": 0.836
 		},
 		{
-			"m": "n:Rock_Moss_2",
+			"m": "f:rock_moss.scn",
 			"p": [
 				6,
 				0,
 				2
 			],
 			"r": 60,
-			"s": 3.6
+			"s": 1.692
 		},
 		{
-			"m": "n:Rock_4",
+			"m": "f:rock.scn",
 			"p": [
 				-1,
 				0,
 				-7
 			],
 			"r": 250,
-			"s": 4.8
+			"s": 1.056
 		},
 		{
 			"m": "d:Bones2",
@@ -78,14 +78,14 @@
 			"c": false
 		},
 		{
-			"m": "n:WoodLog_Moss",
+			"m": "f:log.scn",
 			"p": [
 				-4,
 				0,
 				4
 			],
 			"r": 30,
-			"s": 1.3
+			"s": 1.144
 		}
 	],
 	"actors": [

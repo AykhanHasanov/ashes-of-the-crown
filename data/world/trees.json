@@ -1,0 +1,27 @@
+{
+	"_about": "Generated trees (tools/gen_trees.gd). kind: broadleaf | conifer | dead. Heights in metres, card = assets/foliage/cards/<card>.png, bark = assets/foliage/bark/<bark>_*.jpg. The generator writes assets/foliage/<id>.scn, which vegetation.json then instances.",
+	"trees": {
+		"oak": {"kind": "broadleaf", "seed": 3, "height": 12.5, "trunk_radius": 0.42, "bend": 0.5, "crown_start": 0.3, "crown_radius": 5.6, "crown_height": 8.5,
+			"branches": 8, "cards": 330, "card_size": [2.0, 2.8], "card": "oak_cluster", "bark": "Bark001", "bark_tint": [0.92, 0.88, 0.84], "leaf_tint": [0.78, 0.86, 0.66]},
+		"beech": {"kind": "broadleaf", "seed": 11, "height": 15.0, "trunk_radius": 0.34, "bend": 0.25, "crown_start": 0.38, "crown_radius": 4.4, "crown_height": 9.5,
+			"branches": 9, "cards": 340, "card_size": [1.8, 2.5], "card": "beech_cluster", "bark": "Bark005", "bark_tint": [1.0, 1.0, 1.0], "leaf_tint": [0.82, 0.92, 0.72]},
+		"maple": {"kind": "broadleaf", "seed": 5, "height": 10.0, "trunk_radius": 0.3, "bend": 0.4, "crown_start": 0.34, "crown_radius": 4.2, "crown_height": 6.8,
+			"branches": 7, "cards": 260, "card_size": [1.8, 2.4], "card": "maple_cluster", "bark": "Bark001", "bark_tint": [0.8, 0.76, 0.72], "leaf_tint": [1.0, 0.95, 0.9]},
+		"fir": {"kind": "conifer", "seed": 7, "height": 17.0, "trunk_radius": 0.3, "crown_start": 0.12, "crown_radius": 3.4, "whorl_gap": 0.5, "per_whorl": 7,
+			"card": "fir_branch", "bark": "Bark012", "bark_tint": [0.62, 0.5, 0.44], "leaf_tint": [1.0, 1.1, 0.95]},
+		"fir_young": {"kind": "conifer", "seed": 9, "height": 8.0, "trunk_radius": 0.16, "crown_start": 0.06, "crown_radius": 2.1, "whorl_gap": 0.4, "per_whorl": 6,
+			"card": "fir_branch", "bark": "Bark012", "bark_tint": [0.62, 0.5, 0.44], "leaf_tint": [1.05, 1.15, 1.0]},
+		"great_plane": {"kind": "broadleaf", "seed": 21, "height": 24.0, "trunk_radius": 1.3, "bend": 0.7, "crown_start": 0.22, "crown_radius": 12.0, "crown_height": 16.0,
+			"branches": 11, "cards": 950, "card_size": [3.0, 4.4], "card": "beech_cluster", "bark": "Bark005", "bark_tint": [1.05, 1.02, 0.95], "leaf_tint": [0.86, 0.96, 0.7]},
+		"pomegranate": {"kind": "broadleaf", "seed": 23, "height": 4.2, "trunk_radius": 0.12, "bend": 0.5, "crown_start": 0.25, "crown_radius": 2.2, "crown_height": 3.2,
+			"branches": 6, "cards": 110, "card_size": [1.1, 1.5], "card": "pomegranate_cluster", "bark": "Bark001", "bark_tint": [0.8, 0.74, 0.68], "leaf_tint": [0.8, 0.9, 0.62]},
+		"bush": {"kind": "broadleaf", "seed": 31, "height": 1.8, "trunk_radius": 0.04, "bend": 0.3, "crown_start": 0.05, "crown_radius": 1.3, "crown_height": 1.7,
+			"branches": 5, "cards": 70, "card_size": [0.8, 1.1], "card": "beech_cluster", "bark": "Bark001", "bark_tint": [0.7, 0.66, 0.6], "leaf_tint": [0.72, 0.82, 0.6]},
+		"berry_bush": {"kind": "broadleaf", "seed": 33, "height": 1.5, "trunk_radius": 0.035, "bend": 0.3, "crown_start": 0.05, "crown_radius": 1.1, "crown_height": 1.4,
+			"branches": 5, "cards": 60, "card_size": [0.7, 1.0], "card": "pomegranate_cluster", "bark": "Bark001", "bark_tint": [0.7, 0.66, 0.6], "leaf_tint": [0.75, 0.85, 0.62]},
+		"dead": {"kind": "dead", "seed": 13, "height": 9.0, "trunk_radius": 0.32, "bend": 0.7, "crown_start": 0.35, "crown_radius": 4.0, "crown_height": 5.5,
+			"branches": 7, "bark": "Bark001", "bark_tint": [0.55, 0.52, 0.5], "char": 0.0},
+		"burnt": {"kind": "dead", "seed": 17, "height": 8.0, "trunk_radius": 0.34, "bend": 0.6, "crown_start": 0.4, "crown_radius": 3.2, "crown_height": 4.5,
+			"branches": 5, "bark": "Bark001", "bark_tint": [0.5, 0.48, 0.46], "char": 0.85}
+	}
+}

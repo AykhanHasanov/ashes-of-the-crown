@@ -4,7 +4,7 @@
 	"icon": "grove",
 	"discover_radius": 40,
 	"pieces": [
-		{"grid": "n:CommonTree_Autumn_1", "from": [-12, -10], "to": [12, 10], "step": 6.0, "s": 1.7, "c": false, "trunk": 0.3},
+		{"grid": "f:pomegranate.scn", "from": [-12, -10], "to": [12, 10], "step": 6.0, "s": 1.0, "c": false, "trunk": 0.15},
 		{"m": "v:House_3", "p": [16, 0, -2], "r": 270, "s": 2.2},
 		{"line": "v:Fence", "from": [-16, -14], "to": [13, -14], "step": 1.9, "s": 2.4},
 		{"m": "v:Barrel", "p": [14, 0, 4], "s": 4.5},
