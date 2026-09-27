@@ -50,3 +50,12 @@ godot --headless --path . -s tools/check_anims.gd
 | Maneədən aşma (vault) | Jump_Start + qövs üzrə hərəkət | Faza H |
 | At minmə, dırmaşma | yoxdur | Faza G |
 | Boss/canavarlar (Div, Təpəgöz, ayı) | model yoxdur | Faza D–E: CC0 mənbə axtarışı |
+
+## Faza C əvəzediciləri
+
+| Düşmən | Lazım olan | İndiki həll |
+|---|---|---|
+| Kül Şamanı (insan rig-i) | Spellcast_Summon, Spawn_Ground | Spellcast_Long; doğulma animasiyası yoxdur |
+| Ataman | Taunt, Jump_Chop | Cheer; 2H Chop + uzun hücum qaçışı |
+| Qafqaz bəbiri | pişik animasiyaları (gizlənmə, sıçrayış) | Tülkü klipləri: Gallop_Jump = sıçrayış, Attack = pəncə; gizlənmə transparency ilə |
+| Partlayan Kül | yanan "qızışma" animasiyası | Spellcasting + közlü nüvə və parlama |

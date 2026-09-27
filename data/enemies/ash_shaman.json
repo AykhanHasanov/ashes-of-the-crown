@@ -1,0 +1,137 @@
+{
+	"id": "ash_shaman",
+	"name": "Kül Şamanı",
+	"faction": "ash",
+	"tier": "normal",
+	"role": "support",
+	"xp": 22,
+	"model": {
+		"path": "res://assets/characters/adventurers/Mage.glb",
+		"hidden": [
+			"Spellbook",
+			"Spellbook_open",
+			"1H_Wand"
+		],
+		"scale": 0.82,
+		"recolor": [
+			0.0,
+			1.0,
+			0.03,
+			0.35,
+			0.45
+		],
+		"ash_overlay": 0.7,
+		"glow_eyes": false
+	},
+	"anims": {
+		"idle": "Idle",
+		"walk": "Walking_A",
+		"run": "Running_A",
+		"hit": [
+			"Hit_A",
+			"Hit_B"
+		],
+		"stagger": "Lie_Down",
+		"recover": "Lie_StandUp",
+		"death": "Death_B",
+		"spawn": "",
+		"block": "",
+		"dodge": "Dodge_Backward",
+		"taunt": "Cheer",
+		"surrender": "Sit_Floor_Down",
+		"surrender_idle": "Sit_Floor_Idle"
+	},
+	"stats": {
+		"health": 55,
+		"stance": 34,
+		"speed": 3.0,
+		"run_speed": 4.6,
+		"radius": 0.42,
+		"height": 1.8,
+		"ember": 18
+	},
+	"resist": {
+		"slash": 1.1,
+		"crush": 1.2,
+		"pierce": 1.0,
+		"fire": 0.4
+	},
+	"attacks": [
+		{
+			"id": "resurrect",
+			"clip": "Spellcast_Long",
+			"clip_impact": 0.8,
+			"windup": 2.2,
+			"unstoppable": 0.0,
+			"damage": 0,
+			"stance": 0,
+			"range": 16.0,
+			"arc": 360,
+			"lunge": 6.0,
+			"recovery": 0.8,
+			"weight": 1.0,
+			"cooldown": 14.0,
+			"kind": "resurrect",
+			"windup_clip": "Spellcasting"
+		},
+		{
+			"id": "ward",
+			"clip": "Spellcast_Raise",
+			"clip_impact": 0.6,
+			"windup": 1.3,
+			"unstoppable": 0.0,
+			"damage": 0,
+			"stance": 0,
+			"range": 12.0,
+			"arc": 360,
+			"lunge": 6.0,
+			"recovery": 0.6,
+			"weight": 1.0,
+			"cooldown": 12.0,
+			"kind": "ward",
+			"windup_clip": "Spellcasting",
+			"ward": 30.0,
+			"ward_time": 8.0
+		},
+		{
+			"id": "ash_bolt",
+			"clip": "Spellcast_Shoot",
+			"clip_impact": 0.3,
+			"windup": 1.0,
+			"unstoppable": 0.0,
+			"damage": 10,
+			"stance": 8,
+			"range": 18.0,
+			"arc": 20,
+			"lunge": 6.0,
+			"recovery": 0.7,
+			"weight": 1.0,
+			"cooldown": 2.6,
+			"kind": "ranged",
+			"damage_type": "fire",
+			"burn": 2.0,
+			"min_range": 2.5,
+			"tags": [
+				"ranged"
+			],
+			"projectile": {
+				"speed": 16.0,
+				"gravity": 0.0,
+				"fire": true,
+				"orb": true
+			}
+		}
+	],
+	"behavior": {
+		"preferred_range": 14.0,
+		"wait_range": 14.0,
+		"keep_range": [
+			10.0,
+			18.0
+		],
+		"flank": false,
+		"block_chance": 0.0,
+		"aggression": 0.8,
+		"priority": true
+	}
+}

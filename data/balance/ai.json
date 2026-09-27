@@ -1,0 +1,30 @@
+{
+	"_about": "Düşmən AI balansı (V3 Faza C, spec §4.1, §4.3).",
+	"think": {"full": [0.2, 0.4], "mid": 1.0},
+	"lod": {"full": 40.0, "mid": 120.0},
+	"perception": {
+		"fov": 120.0,
+		"sight": 25.0,
+		"sight_dark": 12.0,
+		"hear_sprint": 15.0,
+		"hear_combat": 30.0,
+		"rise_rate": 1.6,
+		"close_bonus": 3.0,
+		"fall_rate": 0.35,
+		"suspicious": 0.35,
+		"search_time": 8.0,
+		"eye_height": 1.6
+	},
+	"tokens": {"normal": 1, "elite": 2, "boss": 3},
+	"punish": 1.5,
+	"adaptive": {"window": 60.0, "boost": 2.5, "min_events": 3},
+	"levels": {"hp_per_level": 0.12, "dmg_per_level": 0.08, "skull_gap": 5, "player_level": 1},
+	"factions": {
+		"ash": {"night_bonus": 0.2},
+		"bandit": {"morale": true},
+		"beast": {"territorial": true}
+	},
+	"group": {"call_help_radius": 30.0, "help_cooldown": 12.0},
+	"morale": {"flee_below": 0.25, "surrender_chance": 0.35, "leader_loss": 0.35},
+	"territorial": {"warn_range": 14.0, "warn_time": 2.5, "attack_range": 8.0}
+}

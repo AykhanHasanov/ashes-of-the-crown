@@ -1,0 +1,163 @@
+{
+	"id": "ash_giant",
+	"name": "Kül Nəhəngi",
+	"faction": "ash",
+	"tier": "elite",
+	"role": "bruiser",
+	"xp": 90,
+	"model": {
+		"path": "res://assets/characters/skeletons/Skeleton_Warrior.glb",
+		"scale": 1.42,
+		"tint": [
+			0.45,
+			0.38,
+			0.35
+		],
+		"ash_overlay": 0.75,
+		"glow_eyes": true,
+		"weapons": [
+			{
+				"path": "res://assets/characters/skeletons/Skeleton_Axe.gltf",
+				"bone": "handslot.r",
+				"scale": 1.4
+			}
+		]
+	},
+	"anims": {
+		"idle": "Idle",
+		"walk": "Walking_A",
+		"run": "Running_B",
+		"hit": [
+			"Hit_A",
+			"Hit_B"
+		],
+		"stagger": "Lie_Down",
+		"recover": "Lie_StandUp",
+		"death": "Death_C_Skeletons",
+		"spawn": "Spawn_Ground_Skeletons",
+		"block": "",
+		"dodge": "Dodge_Backward",
+		"taunt": "Taunt"
+	},
+	"stats": {
+		"health": 380,
+		"stance": 210,
+		"speed": 2.2,
+		"run_speed": 3.4,
+		"radius": 0.85,
+		"height": 3.1,
+		"ember": 60
+	},
+	"resist": {
+		"slash": 0.9,
+		"crush": 1.2,
+		"pierce": 0.7,
+		"fire": 0.5
+	},
+	"attacks": [
+		{
+			"id": "cleave",
+			"clip": "2H_Melee_Attack_Chop",
+			"clip_impact": 0.55,
+			"windup": 1.15,
+			"unstoppable": 0.45,
+			"damage": 32,
+			"stance": 45,
+			"range": 3.2,
+			"arc": 80,
+			"lunge": 5.0,
+			"recovery": 1.0,
+			"weight": 1.0,
+			"cooldown": 2.4,
+			"unparryable": true,
+			"damage_type": "crush",
+			"tags": [
+				"guard_break"
+			],
+			"guard_break": true
+		},
+		{
+			"id": "sweep",
+			"clip": "2H_Melee_Attack_Slice",
+			"clip_impact": 0.5,
+			"windup": 1.0,
+			"unstoppable": 0.4,
+			"damage": 22,
+			"stance": 30,
+			"range": 3.4,
+			"arc": 210,
+			"lunge": 3.0,
+			"recovery": 0.9,
+			"weight": 1.0,
+			"cooldown": 3.0,
+			"tags": [
+				"sweep"
+			]
+		},
+		{
+			"id": "delayed_chop",
+			"clip": "2H_Melee_Attack_Chop",
+			"clip_impact": 0.55,
+			"windup": 1.9,
+			"unstoppable": 0.6,
+			"damage": 30,
+			"stance": 40,
+			"range": 3.2,
+			"arc": 80,
+			"lunge": 5.0,
+			"recovery": 1.0,
+			"weight": 0.4,
+			"cooldown": 4.0,
+			"tags": [
+				"delayed"
+			],
+			"feint": true
+		},
+		{
+			"id": "slam",
+			"clip": "1H_Melee_Attack_Jump_Chop",
+			"clip_impact": 0.55,
+			"windup": 1.3,
+			"unstoppable": 0.6,
+			"damage": 36,
+			"stance": 60,
+			"range": 7.5,
+			"arc": 360,
+			"lunge": 12.0,
+			"recovery": 1.3,
+			"weight": 0.7,
+			"cooldown": 6.0,
+			"kind": "slam",
+			"radius": 4.8,
+			"unparryable": true,
+			"min_range": 3.5,
+			"damage_type": "crush",
+			"tags": [
+				"leap"
+			]
+		}
+	],
+	"behavior": {
+		"preferred_range": 2.8,
+		"wait_range": 5.0,
+		"flank": false,
+		"block_chance": 0.0,
+		"aggression": 1.0,
+		"knockdown_immune": true
+	},
+	"counters": {
+		"dodge": [
+			"sweep",
+			"delayed"
+		],
+		"block": [
+			"guard_break"
+		],
+		"parry": [
+			"delayed"
+		],
+		"distance": [
+			"leap"
+		]
+	}
+}

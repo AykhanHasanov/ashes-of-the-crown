@@ -35,7 +35,7 @@ func _wait(seconds: float) -> void:
 
 
 func _foe(id: String, ahead: float):
-	var f = mode.spawn_foe(id, player.global_position + player.facing() * ahead)
+	var f = mode.spawn_foe(id, player.global_position + player.facing() * ahead, {"roll": false})
 	f.set_physics_process(false)  # hold still; the test drives it
 	return f
 
@@ -146,9 +146,9 @@ func _lock() -> void:
 	# Lock-on works in camera space
 	var fwd: Vector3 = player.rig.flat_forward()
 	var right: Vector3 = player.rig.flat_right()
-	var near = mode.spawn_foe("wolf", player.global_position + fwd * 5.0)
+	var near = mode.spawn_foe("wolf", player.global_position + fwd * 5.0, {"roll": false})
 	near.set_physics_process(false)
-	var far = mode.spawn_foe("ash_shade", player.global_position + fwd * 10.0 + right * 4.0)
+	var far = mode.spawn_foe("ash_shade", player.global_position + fwd * 10.0 + right * 4.0, {"roll": false})
 	far.set_physics_process(false)
 	await _wait(0.2)
 	player._toggle_lock()

@@ -57,6 +57,24 @@ func fit_length(length: float) -> void:
 		scene.scale *= length / longest
 
 
+## Scales an attached item so its longest side is `length` metres.
+static func fit_item(item: Node3D, length: float) -> void:
+	var box := AABB()
+	var first := true
+	for mi: MeshInstance3D in item.find_children("*", "MeshInstance3D", true, false):
+		var xf := Transform3D()
+		var n: Node = mi
+		while n != item and n != null:
+			xf = (n as Node3D).transform * xf
+			n = n.get_parent()
+		var b: AABB = xf * mi.get_aabb()
+		box = b if first else box.merge(b)
+		first = false
+	var longest := maxf(box.size.x, maxf(box.size.y, box.size.z))
+	if longest > 0.0001:
+		item.scale *= length / longest
+
+
 ## Bounding box of all meshes in this node's local space.
 func bounds() -> AABB:
 	var box := AABB()

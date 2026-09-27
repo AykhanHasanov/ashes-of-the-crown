@@ -150,7 +150,7 @@ func _ready() -> void:
 	_boss_box = Control.new()
 	_boss_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_boss_box)
-	_place(_boss_box, Vector4(0.5, 0, 0.5, 0), Vector4(-300, 60, 300, 104))
+	_place(_boss_box, Vector4(0.5, 1, 0.5, 1), Vector4(-300, -150, 300, -106))   # bottom (spec §4.5)
 	_boss_name = _label("", 18, WHISPER, HORIZONTAL_ALIGNMENT_CENTER, _boss_box)
 	_boss_name.position = Vector2(0, 0)
 	_boss_name.size = Vector2(600, 24)

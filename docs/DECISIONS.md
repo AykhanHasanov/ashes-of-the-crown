@@ -45,3 +45,7 @@ Burada yalnız təsdiqlənmiş qərarlar yazılır. Burada olmayan heç nə qər
 | 2026-09-24 | Ocaq: yandır → dincəl (can və şərbət dolur, düşmənlər qayıdır, save olunur) / səyahət / xəritə. Ölümdən sonra son ocaqda oyanırsan. Sandıqda nar toxumu var (+1 şərbət, maksimum 10) | Claude | Souls-lite dövrü |
 | 2026-09-24 | Açıq dünya testinin öz save faylı var (`user://world_test.json`). Hekayə save-inə toxunmur, Faza H-də birləşəcək | Claude | Hekayə irəliləyişi pozulmasın |
 | 2026-09-24 | Üzmə (stamina −6/s, bitəndə can gedir), 40°-dən dik yamacda sürüşmə, düşmə zərəri (6 m-dən, 15 m-də ölüm), 1 m-ə qədər maneədən aşma | Claude | Spec §2 |
+| 2026-09-27 | Faza C: 3 fraksiyada 12 düşmən tipi və Qafqaz bəbiri (mini-boss). Hamısı data-driven-dir (`data/enemies`). Rollar: tank, flanker, oxçu, dəstək, ağır, lider, gizlənən. Bax: `docs/ENEMIES.md` | Claude | Spec 10 tip istəyirdi. Mövcud modellərlə 12 fərqli yanaşma qurmaq mümkün oldu |
+| 2026-09-27 | Algılama (görmə konusu, eşitmə, axtarış), AI LOD, adaptiv AI (elit və boss), 7 affiks, morale və təslim olma, heyvanlarda ərazi davranışı. Səviyyə formulları spec-dəki kimidir | Claude | Spec §4 |
+| 2026-09-27 | Ayı, çöl donuzu, Albastı və s. üçün model yoxdur. Onlar əfsanəvi varlıqlarla birlikdə Faza G-də əlavə olunacaq. Bəbir Quaternius Tülkü modelindən törədilib (3 m, qızılı rəng, xal shader-i) | Claude | Spec §6.4: "mövcud modellərdən törəmə düzəlt" |
+| 2026-09-27 | Boss zolağı ekranın aşağısına köçdü | Claude | Spec §4.5 |

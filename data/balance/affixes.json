@@ -1,0 +1,16 @@
+{
+	"_about": "Elit affikslər (spec §4.4). Adi düşmən 6%, elit 30% ehtimalla 1–2 affiks alır. 'prefix' adın qarşısına gəlir, 'suffix' arxasına.",
+	"chance": {"normal": 0.06, "elite": 0.3, "boss": 0.0},
+	"second_chance": 0.35,
+	"xp_mult": 2.0,
+	"affixes": [
+		{"id": "flaming", "prefix": "Alovlu", "color": [1.0, 0.45, 0.1], "trail_every": 0.45, "trail_life": 3.5, "trail_dps": 6.0, "burn": 3.0},
+		{"id": "thick", "prefix": "Qalın", "color": [0.75, 0.7, 0.55], "health": 1.6, "stance": 1.5, "scale": 1.12},
+		{"id": "fast", "prefix": "Sürətli", "color": [0.55, 0.9, 1.0], "speed": 1.25, "attack_speed": 1.25},
+		{"id": "summoner", "prefix": "Çağıran", "color": [0.7, 0.5, 1.0], "at": 0.5, "count": 2},
+		{"id": "vengeful", "prefix": "Qisasçı", "color": [1.0, 0.2, 0.15], "delay": 2.0, "radius": 3.6, "damage": 30},
+		{"id": "unshakable", "prefix": "Sarsılmaz", "color": [0.85, 0.85, 0.95]},
+		{"id": "ash_eye", "suffix": "Kül Şahının Gözü", "color": [1.0, 0.3, 0.05]}
+	],
+	"summon_by_faction": {"ash": "ash_shade", "bandit": "bandit_sword", "beast": "wolf"}
+}
