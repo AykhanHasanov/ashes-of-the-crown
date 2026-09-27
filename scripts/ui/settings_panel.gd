@@ -31,11 +31,13 @@ func _ready() -> void:
 
 	_slider(grid, "Müzik", Settings.music_volume, func(v: float): Settings.music_volume = v)
 	_slider(grid, "Ses efektleri", Settings.sfx_volume, func(v: float): Settings.sfx_volume = v)
+	_slider(grid, "Konuşma sesi", Settings.voice_volume, func(v: float): Settings.voice_volume = v)
 	_slider(grid, "Ekran sarsıntısı", Settings.screen_shake, func(v: float): Settings.screen_shake = v)
 	_choice(grid, "Qrafika", ["Düşük (dizüstü)", "Yüksek"], 1 if Settings.is_high() else 0,
 		func(i: int): Settings.quality = Settings.Quality.HIGH if i == 1 else Settings.Quality.LOW)
 	_toggle(grid, "Tam ekran", Settings.fullscreen, func(on: bool): Settings.fullscreen = on)
 	_toggle(grid, "Hasar sayıları", Settings.damage_numbers, func(on: bool): Settings.damage_numbers = on)
+	_toggle(grid, "Altyazılar", Settings.subtitles, func(on: bool): Settings.subtitles = on)
 	_label(grid, "Kontroller")
 	var keys_button := Button.new()
 	keys_button.text = "Tuşlar…"

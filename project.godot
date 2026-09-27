@@ -18,6 +18,7 @@ Memory="*res://scripts/systems/memory_system.gd"
 GameState="*res://scripts/systems/game_state.gd"
 Fx="*res://scripts/systems/fx.gd"
 Audio="*res://scripts/systems/audio.gd"
+Barks="*res://scripts/systems/barks.gd"
 
 [display]
 

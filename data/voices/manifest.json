@@ -1,0 +1,1524 @@
+{
+	"enemies": {
+		"ash_shade": [
+			"ash",
+			"ash_wraith"
+		],
+		"ash_runner": [
+			"ash",
+			"ash_wraith"
+		],
+		"ash_archer": [
+			"ash"
+		],
+		"ash_bomber": [
+			"ash_bomber"
+		],
+		"ash_shaman": [
+			"shaman"
+		],
+		"ash_giant": [
+			"giant"
+		],
+		"bandit_sword": [
+			"bandit_a",
+			"bandit_b",
+			"bandit_c"
+		],
+		"bandit_shield": [
+			"bandit_a",
+			"bandit_c"
+		],
+		"bandit_archer": [
+			"bandit_b",
+			"bandit_a"
+		],
+		"bandit_spear": [
+			"bandit_c",
+			"bandit_b"
+		],
+		"bandit_ataman": [
+			"ataman"
+		],
+		"wolf": [
+			"wolf"
+		],
+		"leopard": [
+			"leopard"
+		]
+	},
+	"profiles": {
+		"bandit_a": {
+			"spot": [
+				{
+					"file": "res://assets/audio/voice/bandit_a/spot_0.wav",
+					"text": "Hey! Kim var orada?"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/spot_1.wav",
+					"text": "Bir yabancı! Silahlara!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/spot_2.wav",
+					"text": "İşte orada!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/spot_3.wav",
+					"text": "Sen de kimsin be?"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/spot_4.wav",
+					"text": "Yakalayın şunu!"
+				}
+			],
+			"suspicious": [
+				{
+					"file": "res://assets/audio/voice/bandit_a/suspicious_0.wav",
+					"text": "Bir şey duydum..."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/suspicious_1.wav",
+					"text": "Kim var orada?"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/suspicious_2.wav",
+					"text": "Gölgelerde bir şey kıpırdadı..."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/suspicious_3.wav",
+					"text": "Rüzgâr mı bu?"
+				}
+			],
+			"search": [
+				{
+					"file": "res://assets/audio/voice/bandit_a/search_0.wav",
+					"text": "Nereye kayboldu?"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/search_1.wav",
+					"text": "Çık ortaya!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/search_2.wav",
+					"text": "Buralarda bir yerde..."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/search_3.wav",
+					"text": "Saklanamazsın, biliyorum burada olduğunu!"
+				}
+			],
+			"give_up": [
+				{
+					"file": "res://assets/audio/voice/bandit_a/give_up_0.wav",
+					"text": "Kaçtı... Boş ver."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/give_up_1.wav",
+					"text": "Rüzgârdı herhalde."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/give_up_2.wav",
+					"text": "Neyse, nöbete dönüyorum."
+				}
+			],
+			"attack": [
+				{
+					"file": "res://assets/audio/voice/bandit_a/attack_0.wav",
+					"text": "Al bunu!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/attack_1.wav",
+					"text": "Geber!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/attack_2.wav",
+					"text": "Öl artık!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/attack_3.wav",
+					"text": "Seni öldüreceğim!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/attack_4.wav",
+					"text": "Kafanı keseceğim!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/attack_5.wav",
+					"text": "Hah!"
+				}
+			],
+			"taunt": [
+				{
+					"file": "res://assets/audio/voice/bandit_a/taunt_0.wav",
+					"text": "Kan kaybediyorsun!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/taunt_1.wav",
+					"text": "Diz çök!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/taunt_2.wav",
+					"text": "Bitti senin işin!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/taunt_3.wav",
+					"text": "Şerbet mi içiyorsun? Son yudumun olsun!"
+				}
+			],
+			"hurt": [
+				{
+					"file": "res://assets/audio/voice/bandit_a/hurt_0.wav",
+					"text": "Ah!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/hurt_1.wav",
+					"text": "Lanet olsun!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/hurt_2.wav",
+					"text": "Kahretsin!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/hurt_3.wav",
+					"text": "Argh!"
+				}
+			],
+			"death": [
+				{
+					"file": "res://assets/audio/voice/bandit_a/death_0.wav",
+					"text": "Hayır..."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/death_1.wav",
+					"text": "Anne..."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/death_2.wav",
+					"text": "Ben... daha..."
+				}
+			],
+			"call_help": [
+				{
+					"file": "res://assets/audio/voice/bandit_a/call_help_0.wav",
+					"text": "Buraya! Yardım edin!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/call_help_1.wav",
+					"text": "Herkes buraya!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/call_help_2.wav",
+					"text": "Saldırı var! Kalkın!"
+				}
+			],
+			"ally_died": [
+				{
+					"file": "res://assets/audio/voice/bandit_a/ally_died_0.wav",
+					"text": "Onu öldürdü!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/ally_died_1.wav",
+					"text": "Kardeşimi öldürdü!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/ally_died_2.wav",
+					"text": "Bunun hesabını vereceksin!"
+				}
+			],
+			"flee": [
+				{
+					"file": "res://assets/audio/voice/bandit_a/flee_0.wav",
+					"text": "Ben kaçıyorum!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/flee_1.wav",
+					"text": "Bu iş için bana para vermediler!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/flee_2.wav",
+					"text": "Canımı kurtarayım!"
+				}
+			],
+			"surrender": [
+				{
+					"file": "res://assets/audio/voice/bandit_a/surrender_0.wav",
+					"text": "Teslim oluyorum! Canımı bağışla!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/surrender_1.wav",
+					"text": "Dur! Yeter! Teslim!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/surrender_2.wav",
+					"text": "Öldürme beni, yalvarırım!"
+				}
+			],
+			"spared": [
+				{
+					"file": "res://assets/audio/voice/bandit_a/spared_0.wav",
+					"text": "Sağ ol... Bunu unutmayacağım."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/spared_1.wav",
+					"text": "Bir daha karşına çıkmam, yemin ederim!"
+				}
+			],
+			"victory": [
+				{
+					"file": "res://assets/audio/voice/bandit_a/victory_0.wav",
+					"text": "İşte bu kadar."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/victory_1.wav",
+					"text": "Biri daha gitti."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/victory_2.wav",
+					"text": "Üstünü arayın!"
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/bandit_a/idle_0.wav",
+					"text": "Bu gece çok soğuk..."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/idle_1.wav",
+					"text": "Kül yine yağıyor."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/idle_2.wav",
+					"text": "Reis ganimeti yine kendine ayırdı."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/idle_3.wav",
+					"text": "Közkale yandığından beri yollar boş."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/idle_4.wav",
+					"text": "Gölgeleri gördün mü? Ölüler yürüyor diyorlar."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_a/idle_5.wav",
+					"text": "Nöbet sende, ben biraz kestireceğim."
+				}
+			]
+		},
+		"bandit_b": {
+			"spot": [
+				{
+					"file": "res://assets/audio/voice/bandit_b/spot_0.wav",
+					"text": "Hey! Kim var orada?"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/spot_1.wav",
+					"text": "Bir yabancı! Silahlara!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/spot_2.wav",
+					"text": "İşte orada!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/spot_3.wav",
+					"text": "Sen de kimsin be?"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/spot_4.wav",
+					"text": "Yakalayın şunu!"
+				}
+			],
+			"suspicious": [
+				{
+					"file": "res://assets/audio/voice/bandit_b/suspicious_0.wav",
+					"text": "Bir şey duydum..."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/suspicious_1.wav",
+					"text": "Kim var orada?"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/suspicious_2.wav",
+					"text": "Gölgelerde bir şey kıpırdadı..."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/suspicious_3.wav",
+					"text": "Rüzgâr mı bu?"
+				}
+			],
+			"search": [
+				{
+					"file": "res://assets/audio/voice/bandit_b/search_0.wav",
+					"text": "Nereye kayboldu?"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/search_1.wav",
+					"text": "Çık ortaya!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/search_2.wav",
+					"text": "Buralarda bir yerde..."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/search_3.wav",
+					"text": "Saklanamazsın, biliyorum burada olduğunu!"
+				}
+			],
+			"give_up": [
+				{
+					"file": "res://assets/audio/voice/bandit_b/give_up_0.wav",
+					"text": "Kaçtı... Boş ver."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/give_up_1.wav",
+					"text": "Rüzgârdı herhalde."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/give_up_2.wav",
+					"text": "Neyse, nöbete dönüyorum."
+				}
+			],
+			"attack": [
+				{
+					"file": "res://assets/audio/voice/bandit_b/attack_0.wav",
+					"text": "Al bunu!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/attack_1.wav",
+					"text": "Geber!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/attack_2.wav",
+					"text": "Öl artık!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/attack_3.wav",
+					"text": "Seni öldüreceğim!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/attack_4.wav",
+					"text": "Kafanı keseceğim!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/attack_5.wav",
+					"text": "Hah!"
+				}
+			],
+			"taunt": [
+				{
+					"file": "res://assets/audio/voice/bandit_b/taunt_0.wav",
+					"text": "Kan kaybediyorsun!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/taunt_1.wav",
+					"text": "Diz çök!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/taunt_2.wav",
+					"text": "Bitti senin işin!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/taunt_3.wav",
+					"text": "Şerbet mi içiyorsun? Son yudumun olsun!"
+				}
+			],
+			"hurt": [
+				{
+					"file": "res://assets/audio/voice/bandit_b/hurt_0.wav",
+					"text": "Ah!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/hurt_1.wav",
+					"text": "Lanet olsun!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/hurt_2.wav",
+					"text": "Kahretsin!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/hurt_3.wav",
+					"text": "Argh!"
+				}
+			],
+			"death": [
+				{
+					"file": "res://assets/audio/voice/bandit_b/death_0.wav",
+					"text": "Hayır..."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/death_1.wav",
+					"text": "Anne..."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/death_2.wav",
+					"text": "Ben... daha..."
+				}
+			],
+			"call_help": [
+				{
+					"file": "res://assets/audio/voice/bandit_b/call_help_0.wav",
+					"text": "Buraya! Yardım edin!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/call_help_1.wav",
+					"text": "Herkes buraya!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/call_help_2.wav",
+					"text": "Saldırı var! Kalkın!"
+				}
+			],
+			"ally_died": [
+				{
+					"file": "res://assets/audio/voice/bandit_b/ally_died_0.wav",
+					"text": "Onu öldürdü!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/ally_died_1.wav",
+					"text": "Kardeşimi öldürdü!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/ally_died_2.wav",
+					"text": "Bunun hesabını vereceksin!"
+				}
+			],
+			"flee": [
+				{
+					"file": "res://assets/audio/voice/bandit_b/flee_0.wav",
+					"text": "Ben kaçıyorum!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/flee_1.wav",
+					"text": "Bu iş için bana para vermediler!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/flee_2.wav",
+					"text": "Canımı kurtarayım!"
+				}
+			],
+			"surrender": [
+				{
+					"file": "res://assets/audio/voice/bandit_b/surrender_0.wav",
+					"text": "Teslim oluyorum! Canımı bağışla!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/surrender_1.wav",
+					"text": "Dur! Yeter! Teslim!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/surrender_2.wav",
+					"text": "Öldürme beni, yalvarırım!"
+				}
+			],
+			"spared": [
+				{
+					"file": "res://assets/audio/voice/bandit_b/spared_0.wav",
+					"text": "Sağ ol... Bunu unutmayacağım."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/spared_1.wav",
+					"text": "Bir daha karşına çıkmam, yemin ederim!"
+				}
+			],
+			"victory": [
+				{
+					"file": "res://assets/audio/voice/bandit_b/victory_0.wav",
+					"text": "İşte bu kadar."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/victory_1.wav",
+					"text": "Biri daha gitti."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/victory_2.wav",
+					"text": "Üstünü arayın!"
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/bandit_b/idle_0.wav",
+					"text": "Bu gece çok soğuk..."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/idle_1.wav",
+					"text": "Kül yine yağıyor."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/idle_2.wav",
+					"text": "Reis ganimeti yine kendine ayırdı."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/idle_3.wav",
+					"text": "Közkale yandığından beri yollar boş."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/idle_4.wav",
+					"text": "Gölgeleri gördün mü? Ölüler yürüyor diyorlar."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_b/idle_5.wav",
+					"text": "Nöbet sende, ben biraz kestireceğim."
+				}
+			]
+		},
+		"bandit_c": {
+			"spot": [
+				{
+					"file": "res://assets/audio/voice/bandit_c/spot_0.wav",
+					"text": "Hey! Kim var orada?"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/spot_1.wav",
+					"text": "Bir yabancı! Silahlara!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/spot_2.wav",
+					"text": "İşte orada!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/spot_3.wav",
+					"text": "Sen de kimsin be?"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/spot_4.wav",
+					"text": "Yakalayın şunu!"
+				}
+			],
+			"suspicious": [
+				{
+					"file": "res://assets/audio/voice/bandit_c/suspicious_0.wav",
+					"text": "Bir şey duydum..."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/suspicious_1.wav",
+					"text": "Kim var orada?"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/suspicious_2.wav",
+					"text": "Gölgelerde bir şey kıpırdadı..."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/suspicious_3.wav",
+					"text": "Rüzgâr mı bu?"
+				}
+			],
+			"search": [
+				{
+					"file": "res://assets/audio/voice/bandit_c/search_0.wav",
+					"text": "Nereye kayboldu?"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/search_1.wav",
+					"text": "Çık ortaya!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/search_2.wav",
+					"text": "Buralarda bir yerde..."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/search_3.wav",
+					"text": "Saklanamazsın, biliyorum burada olduğunu!"
+				}
+			],
+			"give_up": [
+				{
+					"file": "res://assets/audio/voice/bandit_c/give_up_0.wav",
+					"text": "Kaçtı... Boş ver."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/give_up_1.wav",
+					"text": "Rüzgârdı herhalde."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/give_up_2.wav",
+					"text": "Neyse, nöbete dönüyorum."
+				}
+			],
+			"attack": [
+				{
+					"file": "res://assets/audio/voice/bandit_c/attack_0.wav",
+					"text": "Al bunu!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/attack_1.wav",
+					"text": "Geber!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/attack_2.wav",
+					"text": "Öl artık!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/attack_3.wav",
+					"text": "Seni öldüreceğim!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/attack_4.wav",
+					"text": "Kafanı keseceğim!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/attack_5.wav",
+					"text": "Hah!"
+				}
+			],
+			"taunt": [
+				{
+					"file": "res://assets/audio/voice/bandit_c/taunt_0.wav",
+					"text": "Kan kaybediyorsun!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/taunt_1.wav",
+					"text": "Diz çök!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/taunt_2.wav",
+					"text": "Bitti senin işin!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/taunt_3.wav",
+					"text": "Şerbet mi içiyorsun? Son yudumun olsun!"
+				}
+			],
+			"hurt": [
+				{
+					"file": "res://assets/audio/voice/bandit_c/hurt_0.wav",
+					"text": "Ah!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/hurt_1.wav",
+					"text": "Lanet olsun!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/hurt_2.wav",
+					"text": "Kahretsin!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/hurt_3.wav",
+					"text": "Argh!"
+				}
+			],
+			"death": [
+				{
+					"file": "res://assets/audio/voice/bandit_c/death_0.wav",
+					"text": "Hayır..."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/death_1.wav",
+					"text": "Anne..."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/death_2.wav",
+					"text": "Ben... daha..."
+				}
+			],
+			"call_help": [
+				{
+					"file": "res://assets/audio/voice/bandit_c/call_help_0.wav",
+					"text": "Buraya! Yardım edin!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/call_help_1.wav",
+					"text": "Herkes buraya!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/call_help_2.wav",
+					"text": "Saldırı var! Kalkın!"
+				}
+			],
+			"ally_died": [
+				{
+					"file": "res://assets/audio/voice/bandit_c/ally_died_0.wav",
+					"text": "Onu öldürdü!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/ally_died_1.wav",
+					"text": "Kardeşimi öldürdü!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/ally_died_2.wav",
+					"text": "Bunun hesabını vereceksin!"
+				}
+			],
+			"flee": [
+				{
+					"file": "res://assets/audio/voice/bandit_c/flee_0.wav",
+					"text": "Ben kaçıyorum!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/flee_1.wav",
+					"text": "Bu iş için bana para vermediler!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/flee_2.wav",
+					"text": "Canımı kurtarayım!"
+				}
+			],
+			"surrender": [
+				{
+					"file": "res://assets/audio/voice/bandit_c/surrender_0.wav",
+					"text": "Teslim oluyorum! Canımı bağışla!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/surrender_1.wav",
+					"text": "Dur! Yeter! Teslim!"
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/surrender_2.wav",
+					"text": "Öldürme beni, yalvarırım!"
+				}
+			],
+			"spared": [
+				{
+					"file": "res://assets/audio/voice/bandit_c/spared_0.wav",
+					"text": "Sağ ol... Bunu unutmayacağım."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/spared_1.wav",
+					"text": "Bir daha karşına çıkmam, yemin ederim!"
+				}
+			],
+			"victory": [
+				{
+					"file": "res://assets/audio/voice/bandit_c/victory_0.wav",
+					"text": "İşte bu kadar."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/victory_1.wav",
+					"text": "Biri daha gitti."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/victory_2.wav",
+					"text": "Üstünü arayın!"
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/bandit_c/idle_0.wav",
+					"text": "Bu gece çok soğuk..."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/idle_1.wav",
+					"text": "Kül yine yağıyor."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/idle_2.wav",
+					"text": "Reis ganimeti yine kendine ayırdı."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/idle_3.wav",
+					"text": "Közkale yandığından beri yollar boş."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/idle_4.wav",
+					"text": "Gölgeleri gördün mü? Ölüler yürüyor diyorlar."
+				},
+				{
+					"file": "res://assets/audio/voice/bandit_c/idle_5.wav",
+					"text": "Nöbet sende, ben biraz kestireceğim."
+				}
+			]
+		},
+		"ataman": {
+			"spot": [
+				{
+					"file": "res://assets/audio/voice/ataman/spot_0.wav",
+					"text": "Ayağımıza bir av geldi!"
+				},
+				{
+					"file": "res://assets/audio/voice/ataman/spot_1.wav",
+					"text": "Kim cesaret eder benim toprağıma girmeye?"
+				}
+			],
+			"war_cry": [
+				{
+					"file": "res://assets/audio/voice/ataman/war_cry_0.wav",
+					"text": "Kesin şunu!"
+				},
+				{
+					"file": "res://assets/audio/voice/ataman/war_cry_1.wav",
+					"text": "Haydi aslanlarım, parçalayın onu!"
+				},
+				{
+					"file": "res://assets/audio/voice/ataman/war_cry_2.wav",
+					"text": "Ne duruyorsunuz? Saldırın!"
+				}
+			],
+			"attack": [
+				{
+					"file": "res://assets/audio/voice/ataman/attack_0.wav",
+					"text": "Bu balta seni ikiye bölecek!"
+				},
+				{
+					"file": "res://assets/audio/voice/ataman/attack_1.wav",
+					"text": "Öl!"
+				},
+				{
+					"file": "res://assets/audio/voice/ataman/attack_2.wav",
+					"text": "Başını kaleme asacağım!"
+				}
+			],
+			"taunt": [
+				{
+					"file": "res://assets/audio/voice/ataman/taunt_0.wav",
+					"text": "Şehzade miymiş? Tacın küle döndü, sen de döneceksin!"
+				},
+				{
+					"file": "res://assets/audio/voice/ataman/taunt_1.wav",
+					"text": "Babanın tahtı yandı, sıra sende!"
+				}
+			],
+			"hurt": [
+				{
+					"file": "res://assets/audio/voice/ataman/hurt_0.wav",
+					"text": "Hıh... Fena değilsin."
+				},
+				{
+					"file": "res://assets/audio/voice/ataman/hurt_1.wav",
+					"text": "Argh!"
+				}
+			],
+			"death": [
+				{
+					"file": "res://assets/audio/voice/ataman/death_0.wav",
+					"text": "Bu... olamaz..."
+				},
+				{
+					"file": "res://assets/audio/voice/ataman/death_1.wav",
+					"text": "Adamlarım... kaçın..."
+				}
+			],
+			"call_help": [
+				{
+					"file": "res://assets/audio/voice/ataman/call_help_0.wav",
+					"text": "Herkes silah başına!"
+				}
+			],
+			"victory": [
+				{
+					"file": "res://assets/audio/voice/ataman/victory_0.wav",
+					"text": "Kalenin kapısına asın onu!"
+				}
+			],
+			"search": [
+				{
+					"file": "res://assets/audio/voice/ataman/search_0.wav",
+					"text": "Kaçmasına izin vermeyin!"
+				}
+			],
+			"give_up": [
+				{
+					"file": "res://assets/audio/voice/ataman/give_up_0.wav",
+					"text": "Tavşan gibi kaçtı. Bırakın."
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/ataman/idle_0.wav",
+					"text": "Bu kale artık benim."
+				},
+				{
+					"file": "res://assets/audio/voice/ataman/idle_1.wav",
+					"text": "Kış gelmeden kervanlara bir baskın daha."
+				}
+			]
+		},
+		"ash": {
+			"spot": [
+				{
+					"file": "res://assets/audio/voice/ash/spot_0.wav",
+					"text": "Közün... taşıyıcısı..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash/spot_1.wav",
+					"text": "Sıcaklık... bir sıcaklık..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash/spot_2.wav",
+					"text": "Yaşayan biri..."
+				}
+			],
+			"suspicious": [
+				{
+					"file": "res://assets/audio/voice/ash/suspicious_0.wav",
+					"text": "Nerede... nerede o ateş..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash/suspicious_1.wav",
+					"text": "Kokusunu alıyorum..."
+				}
+			],
+			"search": [
+				{
+					"file": "res://assets/audio/voice/ash/search_0.wav",
+					"text": "Gel... gel bize..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash/search_1.wav",
+					"text": "Saklanma... bizden..."
+				}
+			],
+			"give_up": [
+				{
+					"file": "res://assets/audio/voice/ash/give_up_0.wav",
+					"text": "Ateş... söndü..."
+				}
+			],
+			"attack": [
+				{
+					"file": "res://assets/audio/voice/ash/attack_0.wav",
+					"text": "Küle dön!"
+				},
+				{
+					"file": "res://assets/audio/voice/ash/attack_1.wav",
+					"text": "Soğu..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash/attack_2.wav",
+					"text": "Bizimle... uyu..."
+				}
+			],
+			"taunt": [
+				{
+					"file": "res://assets/audio/voice/ash/taunt_0.wav",
+					"text": "Taç seni bekliyor..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash/taunt_1.wav",
+					"text": "Şah seni çağırıyor..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash/taunt_2.wav",
+					"text": "Hatıraların... bizim olacak..."
+				}
+			],
+			"death": [
+				{
+					"file": "res://assets/audio/voice/ash/death_0.wav",
+					"text": "Nihayet... sessizlik..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash/death_1.wav",
+					"text": "Tekrar... küle..."
+				}
+			],
+			"call_help": [
+				{
+					"file": "res://assets/audio/voice/ash/call_help_0.wav",
+					"text": "Kalkın... kalkın..."
+				}
+			],
+			"victory": [
+				{
+					"file": "res://assets/audio/voice/ash/victory_0.wav",
+					"text": "Bir kıvılcım daha... söndü..."
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/ash/idle_0.wav",
+					"text": "Közkale... yanıyor..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash/idle_1.wav",
+					"text": "Oğlumun adı... neydi..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash/idle_2.wav",
+					"text": "Soğuk... çok soğuk..."
+				}
+			]
+		},
+		"ash_wraith": {
+			"spot": [
+				{
+					"file": "res://assets/audio/voice/ash_wraith/spot_0.wav",
+					"text": "Közün... taşıyıcısı..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash_wraith/spot_1.wav",
+					"text": "Sıcaklık... bir sıcaklık..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash_wraith/spot_2.wav",
+					"text": "Yaşayan biri..."
+				}
+			],
+			"suspicious": [
+				{
+					"file": "res://assets/audio/voice/ash_wraith/suspicious_0.wav",
+					"text": "Nerede... nerede o ateş..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash_wraith/suspicious_1.wav",
+					"text": "Kokusunu alıyorum..."
+				}
+			],
+			"search": [
+				{
+					"file": "res://assets/audio/voice/ash_wraith/search_0.wav",
+					"text": "Gel... gel bize..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash_wraith/search_1.wav",
+					"text": "Saklanma... bizden..."
+				}
+			],
+			"give_up": [
+				{
+					"file": "res://assets/audio/voice/ash_wraith/give_up_0.wav",
+					"text": "Ateş... söndü..."
+				}
+			],
+			"attack": [
+				{
+					"file": "res://assets/audio/voice/ash_wraith/attack_0.wav",
+					"text": "Küle dön!"
+				},
+				{
+					"file": "res://assets/audio/voice/ash_wraith/attack_1.wav",
+					"text": "Soğu..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash_wraith/attack_2.wav",
+					"text": "Bizimle... uyu..."
+				}
+			],
+			"taunt": [
+				{
+					"file": "res://assets/audio/voice/ash_wraith/taunt_0.wav",
+					"text": "Taç seni bekliyor..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash_wraith/taunt_1.wav",
+					"text": "Şah seni çağırıyor..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash_wraith/taunt_2.wav",
+					"text": "Hatıraların... bizim olacak..."
+				}
+			],
+			"death": [
+				{
+					"file": "res://assets/audio/voice/ash_wraith/death_0.wav",
+					"text": "Nihayet... sessizlik..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash_wraith/death_1.wav",
+					"text": "Tekrar... küle..."
+				}
+			],
+			"call_help": [
+				{
+					"file": "res://assets/audio/voice/ash_wraith/call_help_0.wav",
+					"text": "Kalkın... kalkın..."
+				}
+			],
+			"victory": [
+				{
+					"file": "res://assets/audio/voice/ash_wraith/victory_0.wav",
+					"text": "Bir kıvılcım daha... söndü..."
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/ash_wraith/idle_0.wav",
+					"text": "Közkale... yanıyor..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash_wraith/idle_1.wav",
+					"text": "Oğlumun adı... neydi..."
+				},
+				{
+					"file": "res://assets/audio/voice/ash_wraith/idle_2.wav",
+					"text": "Soğuk... çok soğuk..."
+				}
+			]
+		},
+		"ash_bomber": {
+			"spot": [
+				{
+					"file": "res://assets/audio/voice/ash_bomber/spot_0.wav",
+					"text": "Sıcacık... sıcacık bir beden..."
+				}
+			],
+			"explode": [
+				{
+					"file": "res://assets/audio/voice/ash_bomber/explode_0.wav",
+					"text": "Seninle... birlikte... yanacağız!"
+				},
+				{
+					"file": "res://assets/audio/voice/ash_bomber/explode_1.wav",
+					"text": "Sarıl bana!"
+				}
+			],
+			"death": [
+				{
+					"file": "res://assets/audio/voice/ash_bomber/death_0.wav",
+					"text": "Hah... ha..."
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/ash_bomber/idle_0.wav",
+					"text": "Yanmak... ne güzeldi..."
+				}
+			]
+		},
+		"shaman": {
+			"spot": [
+				{
+					"file": "res://assets/audio/voice/shaman/spot_0.wav",
+					"text": "Ateşin çocuğu geldi!"
+				},
+				{
+					"file": "res://assets/audio/voice/shaman/spot_1.wav",
+					"text": "Şah'ın aradığı o!"
+				}
+			],
+			"resurrect": [
+				{
+					"file": "res://assets/audio/voice/shaman/resurrect_0.wav",
+					"text": "Kalk! Kalk ve yeniden savaş!"
+				},
+				{
+					"file": "res://assets/audio/voice/shaman/resurrect_1.wav",
+					"text": "Kül seni geri çağırıyor!"
+				}
+			],
+			"ward": [
+				{
+					"file": "res://assets/audio/voice/shaman/ward_0.wav",
+					"text": "Kül kalkanı üzerinize!"
+				},
+				{
+					"file": "res://assets/audio/voice/shaman/ward_1.wav",
+					"text": "Sizi koruyorum, kardeşlerim!"
+				}
+			],
+			"attack": [
+				{
+					"file": "res://assets/audio/voice/shaman/attack_0.wav",
+					"text": "Yan!"
+				},
+				{
+					"file": "res://assets/audio/voice/shaman/attack_1.wav",
+					"text": "Kül yağmuru!"
+				}
+			],
+			"hurt": [
+				{
+					"file": "res://assets/audio/voice/shaman/hurt_0.wav",
+					"text": "Ah!"
+				}
+			],
+			"death": [
+				{
+					"file": "res://assets/audio/voice/shaman/death_0.wav",
+					"text": "Şah... beni... affet..."
+				}
+			],
+			"taunt": [
+				{
+					"file": "res://assets/audio/voice/shaman/taunt_0.wav",
+					"text": "Hatıraların seni terk edecek!"
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/shaman/idle_0.wav",
+					"text": "Külden doğduk... küle döneceğiz..."
+				}
+			]
+		},
+		"giant": {
+			"spot": [
+				{
+					"file": "res://assets/audio/voice/giant/spot_0.wav",
+					"text": "SICAKLIK... YAŞAYAN..."
+				}
+			],
+			"attack": [
+				{
+					"file": "res://assets/audio/voice/giant/attack_0.wav",
+					"text": "EZİLECEKSİN!"
+				},
+				{
+					"file": "res://assets/audio/voice/giant/attack_1.wav",
+					"text": "HAAAH!"
+				}
+			],
+			"taunt": [
+				{
+					"file": "res://assets/audio/voice/giant/taunt_0.wav",
+					"text": "KÜÇÜK... KIVILCIM..."
+				}
+			],
+			"death": [
+				{
+					"file": "res://assets/audio/voice/giant/death_0.wav",
+					"text": "KÜÜÜL... BENİ... ALIYOR..."
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/giant/idle_0.wav",
+					"text": "TAHT... KORUNMALI..."
+				}
+			]
+		},
+		"wolf": {
+			"spot": [
+				{
+					"file": "res://assets/audio/voice/wolf/growl_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/growl_1.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/growl_2.wav",
+					"text": ""
+				}
+			],
+			"warn": [
+				{
+					"file": "res://assets/audio/voice/wolf/growl_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/growl_1.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/growl_2.wav",
+					"text": ""
+				}
+			],
+			"suspicious": [
+				{
+					"file": "res://assets/audio/voice/wolf/growl_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/growl_1.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/growl_2.wav",
+					"text": ""
+				}
+			],
+			"attack": [
+				{
+					"file": "res://assets/audio/voice/wolf/snarl_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/snarl_1.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/snarl_2.wav",
+					"text": ""
+				}
+			],
+			"hurt": [
+				{
+					"file": "res://assets/audio/voice/wolf/yelp_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/yelp_1.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/yelp_2.wav",
+					"text": ""
+				}
+			],
+			"death": [
+				{
+					"file": "res://assets/audio/voice/wolf/death_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/death_1.wav",
+					"text": ""
+				}
+			],
+			"call_help": [
+				{
+					"file": "res://assets/audio/voice/wolf/howl_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/howl_1.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/howl_2.wav",
+					"text": ""
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/wolf/howl_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/howl_1.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/howl_2.wav",
+					"text": ""
+				}
+			],
+			"flee": [
+				{
+					"file": "res://assets/audio/voice/wolf/yelp_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/yelp_1.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/yelp_2.wav",
+					"text": ""
+				}
+			],
+			"victory": [
+				{
+					"file": "res://assets/audio/voice/wolf/howl_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/howl_1.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/howl_2.wav",
+					"text": ""
+				}
+			],
+			"search": [
+				{
+					"file": "res://assets/audio/voice/wolf/growl_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/growl_1.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/wolf/growl_2.wav",
+					"text": ""
+				}
+			]
+		},
+		"leopard": {
+			"spot": [
+				{
+					"file": "res://assets/audio/voice/leopard/growl_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/leopard/growl_1.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/leopard/growl_2.wav",
+					"text": ""
+				}
+			],
+			"warn": [
+				{
+					"file": "res://assets/audio/voice/leopard/growl_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/leopard/growl_1.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/leopard/growl_2.wav",
+					"text": ""
+				}
+			],
+			"attack": [
+				{
+					"file": "res://assets/audio/voice/leopard/snarl_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/leopard/snarl_1.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/leopard/snarl_2.wav",
+					"text": ""
+				}
+			],
+			"hurt": [
+				{
+					"file": "res://assets/audio/voice/leopard/hiss_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/leopard/hiss_1.wav",
+					"text": ""
+				}
+			],
+			"death": [
+				{
+					"file": "res://assets/audio/voice/leopard/death_0.wav",
+					"text": ""
+				}
+			],
+			"phase": [
+				{
+					"file": "res://assets/audio/voice/leopard/roar_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/leopard/roar_1.wav",
+					"text": ""
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/leopard/roar_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/leopard/roar_1.wav",
+					"text": ""
+				}
+			],
+			"taunt": [
+				{
+					"file": "res://assets/audio/voice/leopard/growl_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/leopard/growl_1.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/leopard/growl_2.wav",
+					"text": ""
+				}
+			],
+			"victory": [
+				{
+					"file": "res://assets/audio/voice/leopard/roar_0.wav",
+					"text": ""
+				},
+				{
+					"file": "res://assets/audio/voice/leopard/roar_1.wav",
+					"text": ""
+				}
+			]
+		}
+	}
+}

@@ -25,6 +25,8 @@ const PATH := "user://settings.cfg"
 var quality: Quality = Quality.LOW
 var music_volume := 0.8
 var sfx_volume := 0.9
+var voice_volume := 1.0
+var subtitles := true
 var screen_shake := 1.0
 var fullscreen := false
 var damage_numbers := false
@@ -54,6 +56,8 @@ func apply() -> void:
 	if capture_path == "" and DisplayServer.window_get_mode() != mode:
 		DisplayServer.window_set_mode(mode)
 	Audio.set_volumes(music_volume, sfx_volume)
+	if has_node("/root/Barks"):
+		get_node("/root/Barks").set_volume(voice_volume)
 	changed.emit()
 
 
@@ -63,6 +67,8 @@ func save() -> void:
 	cfg.set_value("video", "fullscreen", fullscreen)
 	cfg.set_value("audio", "music", music_volume)
 	cfg.set_value("audio", "sfx", sfx_volume)
+	cfg.set_value("audio", "voice", voice_volume)
+	cfg.set_value("game", "subtitles", subtitles)
 	cfg.set_value("game", "screen_shake", screen_shake)
 	cfg.set_value("game", "damage_numbers", damage_numbers)
 	cfg.save(PATH)
@@ -94,6 +100,8 @@ func _load() -> void:
 	fullscreen = cfg.get_value("video", "fullscreen", fullscreen)
 	music_volume = cfg.get_value("audio", "music", music_volume)
 	sfx_volume = cfg.get_value("audio", "sfx", sfx_volume)
+	voice_volume = cfg.get_value("audio", "voice", voice_volume)
+	subtitles = cfg.get_value("game", "subtitles", subtitles)
 	screen_shake = cfg.get_value("game", "screen_shake", screen_shake)
 	damage_numbers = cfg.get_value("game", "damage_numbers", damage_numbers)
 
