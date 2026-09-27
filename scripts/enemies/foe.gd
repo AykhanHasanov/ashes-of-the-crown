@@ -25,6 +25,7 @@ signal engaged(foe: Node)
 
 const CharacterModel := preload("res://scripts/characters/character_model.gd")
 const Human := preload("res://scripts/characters/human.gd")
+const Fur := preload("res://scripts/characters/fur.gd")
 const Effects := preload("res://scripts/world/effects.gd")
 const Melee := preload("res://scripts/combat/melee.gd")
 const Perception := preload("res://scripts/enemies/perception.gd")
@@ -234,6 +235,8 @@ func _build_model() -> void:
 	if m.has("recolor") and m["recolor"].size() == 5:
 		var r: Array = m["recolor"]
 		_model.recolor(r[0], r[1], r[2], r[3], r[4])
+	if m.has("fur"):
+		Fur.apply(_model.scene, m["fur"])   # smooth, furred animals instead of facets
 	if m.has("weapon"):
 		_model.attach(m["weapon"], "handslot.r")
 	for w in m.get("weapons", []):

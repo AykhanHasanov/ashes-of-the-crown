@@ -12,7 +12,13 @@
 			"AnimalArmature|Idle",
 			"AnimalArmature|Walk",
 			"AnimalArmature|Gallop"
-		]
+		],
+		"fur": {
+			"length": 0.045,
+			"density": 230,
+			"shells": 10,
+			"droop": 0.015
+		}
 	},
 	"anims": {
 		"idle": "AnimalArmature|Idle",
