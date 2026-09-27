@@ -100,8 +100,8 @@ func _draw_wheel() -> void:
 		_canvas.draw_string_outline(font, pos + Vector2(-w * 0.5, r + 22.0), it["title"], HORIZONTAL_ALIGNMENT_LEFT, -1, size, 6, Color(0, 0, 0, 0.9))
 		_canvas.draw_string(font, pos + Vector2(-w * 0.5, r + 22.0), it["title"], HORIZONTAL_ALIGNMENT_LEFT, -1, size, UITheme.GOLD if on else UITheme.TEXT)
 	# Centre: what the chosen memory will cost
-	var head := "Bir xatirə seç" if selected == "" else "Yandır: " + _title_of(selected)
-	var sub := "Buraxsan — ləğv" if selected == "" else _cost_of(selected)
+	var head := "Bir hatıra seç" if selected == "" else "Yak: " + _title_of(selected)
+	var sub := "Bırakırsan — iptal" if selected == "" else _cost_of(selected)
 	_centered(font, center + Vector2(0, -6), head, 24, UITheme.GOLD)
 	_centered(font, center + Vector2(0, 24), sub, 17, UITheme.MUTED)
 
@@ -150,14 +150,14 @@ func _build_confirm() -> void:
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 16)
 	_confirm.add_child(box)
-	var text := UITheme.title("Bu güc seçdiyin xatirəni əbədi yandıracaq.\nDavam?", 24)
+	var text := UITheme.title("Bu güç seçtiğin hatırayı sonsuza dek yakacak.\nDevam mı?", 24)
 	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(text)
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 20)
 	box.add_child(row)
-	for pair in [["Hə, yandır", true], ["Yox", false]]:
+	for pair in [["Evet, yak", true], ["Yox", false]]:
 		var b := Button.new()
 		b.text = pair[0]
 		b.custom_minimum_size = Vector2(180, 48)

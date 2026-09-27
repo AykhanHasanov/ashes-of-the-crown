@@ -24,7 +24,7 @@ const WAVES := [
 ]
 const ALL := ["ash_shade", "ash_runner", "ash_archer", "ash_bomber", "ash_shaman", "ash_giant",
 	"bandit_sword", "bandit_shield", "bandit_archer", "bandit_spear", "bandit_ataman", "wolf", "leopard"]
-const HINT := "LMB yüngül · F ağır · RMB blok/parry · Space yayınma · Shift qaçış · C kilid\nE infaz/ocaq · R şərbət · Q köz · 1-3 silah · F10 debug"
+const HINT := "LMB hafif · F ağır · RMB blok/savuşturma · Space kaçış · Shift koşu · C kilit\nE infaz/ocak · R şerbet · Q köz · 1-3 silah · F10 debug"
 
 var debug
 var _wave := 0
@@ -61,8 +61,8 @@ func _begin(_mode: String) -> void:
 	GameState.set_flag("wave_confirmed")
 	set_controls(true)
 	player.wake()
-	hud.set_objective("Test arenası — ocaqda [E] ilə növbəti dalğanı başlat")
-	hud.banner("Döyüş nüvəsi · Faza A")
+	hud.set_objective("Test arenası — ocakta [E] ile sıradaki dalgayı başlat")
+	hud.banner("Savaş çekirdeği")
 	match Settings.demo:
 		"arena_fight":
 			_start_wave()
@@ -123,7 +123,7 @@ func _tick(_delta: float) -> void:
 			restart_mode = ""
 			get_tree().reload_current_scene()
 		return
-	if _resting and near_prompt(level.hearth, 3.0, "[E]  Ocaqda dincəl — şərbət dolur, növbəti dalğa"):
+	if _resting and near_prompt(level.hearth, 3.0, "[E]  Ocakta dinlen — şerbet dolar, sıradaki dalga"):
 		_rest()
 	elif not _resting:
 		hud.set_prompt(_execution_prompt())
@@ -159,8 +159,8 @@ func _start_wave() -> void:
 	player.begin_encounter()
 	var kinds: Array = WAVES[_wave % WAVES.size()]
 	_wave += 1
-	hud.set_objective("Dalğa %d" % _wave)
-	hud.banner("Dalğa %d" % _wave)
+	hud.set_objective("Dalga %d" % _wave)
+	hud.banner("Dalga %d" % _wave)
 	Audio.play("horn", -4.0, 0.0)
 	Audio.music("battle", 1.0)
 	var points: Array = level.spawn_points.duplicate()
@@ -202,7 +202,7 @@ func _on_killed() -> void:
 		_resting = true
 		Fx.slowmo(0.25, 0.8)
 		Audio.music("ambient", 3.0)
-		hud.set_objective("Dalğa təmizləndi — ocaqda [E] ilə dincəl")
+		hud.set_objective("Dalga temizlendi — ocakta [E] ile dinlen")
 
 
 func _marker_target() -> Variant:
@@ -213,40 +213,40 @@ func _on_player_died() -> void:
 	Audio.music("", 1.0)
 	Audio.play("sting_defeat", -2.0, 0.0)
 	await get_tree().create_timer(1.2).timeout
-	hud.show_card("KÖZ SÖNDÜ", "Arenada yıxıldın (dalğa %d)." % _wave, "[R] — yenidən   ·   [Esc] — menyu", 0.75)
+	hud.show_card("KÖZ SÖNDÜ", "Arenada düştün (dalga %d)." % _wave, "[R] — yeniden   ·   [Esc] — menü", 0.75)
 
 
 func _build_debug() -> void:
-	debug.section("Düşmən çağır")
+	debug.section("Düşman çağır")
 	for id in ALL:
 		debug.button(DataDB.enemy(id)["name"], func():
 			_resting = false
 			spawn_foe(id, player.global_position + player.facing() * 7.0 + Vector3(randf_range(-2, 2), 0, randf_range(-2, 2)), {"roll": false}))
-	debug.section("Affiksli düşmən")
+	debug.section("Özellikli düşman")
 	for a in ["flaming", "thick", "fast", "summoner", "vengeful", "unshakable", "ash_eye"]:
 		var aff: String = a
-		debug.button(DataDB.balance("affixes")["affixes"].filter(func(d): return d["id"] == aff)[0].get("prefix", "Göz") + " kölgə", func():
+		debug.button(DataDB.balance("affixes")["affixes"].filter(func(d): return d["id"] == aff)[0].get("prefix", "Göz") + " gölge", func():
 			_resting = false
 			spawn_foe("ash_shade", player.global_position + player.facing() * 7.0, {"affixes": [aff]}))
-	debug.button("Səviyyə 8 quldur (☠)", func():
+	debug.button("Seviye 8 haydut (☠)", func():
 		_resting = false
 		spawn_foe("bandit_sword", player.global_position + player.facing() * 7.0, {"level": 8, "roll": false}))
-	debug.button("Hamısını öldür", func():
+	debug.button("Hepsini öldür", func():
 		for e in get_tree().get_nodes_in_group("enemies"):
 			var h = e.Hit.new().setup(player, 9999.0, "slash", 0.0, Vector3.ZERO)
 			e.receive_hit(h))
 	debug.section("Silah")
 	for id in ["sword", "sword_shield", "mace"]:
 		debug.button(DataDB.weapon(id)["name"], func(): player.equip(id))
-	debug.section("Oyunçu")
-	debug.button("Tam can + şərbət", func():
+	debug.section("Oyuncu")
+	debug.button("Tam can + şerbet", func():
 		player.heal(player.max_health)
 		player.refill_flasks())
 	debug.button("Köz 100", func(): player.gain_ember(100.0))
-	debug.button("Canı 10-a endir", func():
+	debug.button("Canı 10'a indir", func():
 		player.health = 10.0
 		player.health_changed.emit(player.health, player.max_health))
-	debug.section("Xatirələr")
+	debug.section("Hatıralar")
 	for m in Memory.MEMORIES:
-		debug.button("Yandır: " + m["title"], func(): Memory.burn(m["id"]))
-	debug.button("Hamısını bərpa et", func(): Memory.reset())
+		debug.button("Yak: " + m["title"], func(): Memory.burn(m["id"]))
+	debug.button("Hepsini geri getir", func(): Memory.reset())

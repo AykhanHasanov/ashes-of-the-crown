@@ -216,7 +216,7 @@ func _affixes() -> void:
 	var base: float = DataDB.enemy("ash_shade")["stats"]["health"]
 	var thick = mode.spawn_foe("ash_shade", Vector3(-6, 0.1, -6), {"affixes": ["thick"]})
 	_check("Qalın: +60% health", absf(thick.max_health - base * 1.6) < 0.1, "%.0f" % thick.max_health)
-	_check("affix names are prefixed", thick.display_name.begins_with("Qalın"), thick.display_name)
+	_check("affix names are prefixed", thick.display_name.begins_with("Kalın"), thick.display_name)
 	var fast = mode.spawn_foe("ash_shade", Vector3(-3, 0.1, -6), {"affixes": ["fast"]})
 	_check("Sürətli: +25% speed", absf(fast._speed - float(DataDB.enemy("ash_shade")["stats"]["speed"]) * 1.25) < 0.01)
 	var hard = mode.spawn_foe("ash_shade", Vector3(0, 0.1, -6), {"affixes": ["unshakable"]})

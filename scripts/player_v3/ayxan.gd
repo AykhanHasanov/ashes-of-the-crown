@@ -630,7 +630,7 @@ func _defend(hit) -> String:
 	habits.record("block")
 	if hit.guard_break:
 		_drain_stamina(999.0)   # a guard-breaker empties the guard in one blow
-		Fx.notify("Müdafiə qırıldı!")
+		Fx.notify("Savunma kırıldı!")
 	else:
 		_drain_stamina(hit.damage * factor * 1.6)
 	Audio.play("block", -2.0, 0.1)
@@ -857,7 +857,7 @@ func _tick_ember(delta: float) -> void:
 func _ember_strike() -> void:
 	var e: Dictionary = _cfg["ember"]
 	if ember < e["strike_cost"]:
-		Fx.notify("Köz kifayət etmir...")
+		Fx.notify("Köz yetmiyor...")
 		return
 	_end_attack()
 	_strike_cd = e["strike_cooldown"]
@@ -883,7 +883,7 @@ func _open_wheel() -> void:
 		_fire_down_ms = -1
 		_model.play_action("Spellcast_Raise", 2.8, 0.05)
 		Audio.play("whisper", -2.0, 0.0)
-		Fx.notify("...hə-hə... heç nə qalmayıb, balaca şah...")
+		Fx.notify("...he he... hiçbir şey kalmadı, küçük şah...")
 		return
 	_end_attack()
 	_enter(S.MOVE)
@@ -961,7 +961,7 @@ func _perfect_dodge() -> void:
 	Fx.ash_trail(global_position)
 	gain_ember(d["perfect_ember"])
 	Audio.play("perfect_dodge", -4.0, 0.05)
-	Fx.notify("Mükəmməl yayınma")
+	Fx.notify("Kusursuz kaçış")
 
 
 func begin_encounter() -> void:
@@ -983,7 +983,7 @@ func _check_offer() -> void:
 		Fx.fire_nova(global_position, 3.0)
 		Audio.play("memory_burn", -2.0, 0.0)
 		if not m.is_empty():
-			Fx.notify("Kül Şahı «%s» xatirəsini seçdi." % m["title"])
+			Fx.notify("Kül Şahı «%s» hatırasını seçti." % m["title"])
 
 
 func _refresh_burn_look() -> void:

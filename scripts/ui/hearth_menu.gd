@@ -45,16 +45,16 @@ func open(hearth: Dictionary, others: Array) -> void:
 	_title = UITheme.title(hearth["name"], 28)
 	_box.add_child(_title)
 	_sub = Label.new()
-	_sub.text = "Ocağın istisi. Kül burada yatır."
+	_sub.text = "Ocağın sıcaklığı. Kül burada uyuyor."
 	_sub.add_theme_color_override("font_color", UITheme.MUTED)
 	_sub.add_theme_font_size_override("font_size", 16)
 	_box.add_child(_sub)
-	var first := _button("Dincəl", func():
+	var first := _button("Dinlen", func():
 		close()
 		rest_requested.emit())
 	if not others.is_empty():
 		var travel_label := Label.new()
-		travel_label.text = "Səyahət:"
+		travel_label.text = "Yolculuk:"
 		travel_label.add_theme_font_size_override("font_size", 18)
 		travel_label.add_theme_color_override("font_color", UITheme.GOLD)
 		_box.add_child(travel_label)
@@ -63,10 +63,10 @@ func open(hearth: Dictionary, others: Array) -> void:
 			_button("  → " + o["name"], func():
 				close()
 				travel_requested.emit(id))
-	_button("Xəritə", func():
+	_button("Harita", func():
 		close()
 		map_requested.emit())
-	_button("Qalx", close)
+	_button("Kalk", close)
 	is_open = true
 	_panel.visible = true
 	get_tree().paused = true

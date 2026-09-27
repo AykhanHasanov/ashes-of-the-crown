@@ -1068,7 +1068,7 @@ func _war_cry() -> void:
 			o.grant_buff(float(a["damage_mult"]), float(a["stance_mult"]), float(a["buff_time"]))
 			o._flash = 1.0
 	Audio.play("horn", -6.0, 0.05, global_position)
-	Fx.notify(display_name + " döyüş nərəsi çəkdi!")
+	Fx.notify(display_name + " savaş narası attı!")
 
 
 ## Seconds until this enemy's blow lands (for perfect dodges); INF when not attacking.
@@ -1131,7 +1131,7 @@ func _check_phase() -> void:
 	_speed *= float(ph.get("speed", 1.0))
 	_run_speed *= float(ph.get("speed", 1.0))
 	_atk_speed *= float(ph.get("attack_speed", 1.0))
-	Fx.notify(ph.get("banner", display_name + " qəzəbləndi!"))
+	Fx.notify(ph.get("banner", display_name + " öfkelendi!"))
 	Fx.shake(0.5)
 	_flash = 1.0
 
@@ -1161,7 +1161,7 @@ func _check_summoner() -> void:
 	var clip: String = data["anims"].get("taunt", "")
 	if clip != "":
 		_model.play_action(clip, 1.4, 0.05)
-	Fx.notify(display_name + " kömək çağırdı!")
+	Fx.notify(display_name + " yardım çağırdı!")
 
 
 # --- Morale -----------------------------------------------------------------------------------
@@ -1172,7 +1172,7 @@ func _morale_break() -> void:
 	if randf() < float(_ai["morale"]["surrender_chance"]):
 		_surrender()
 	else:
-		Fx.notify(display_name + " qaçır!")
+		Fx.notify(display_name + " kaçıyor!")
 		_enter(S.FLEE)
 
 
@@ -1186,7 +1186,7 @@ func _surrender() -> void:
 	if a.get("surrender", "") != "":
 		_model.play_action(a["surrender"], 1.0, 0.1, true)
 	_show_icon("🏳", Color(0.95, 0.95, 0.9), 9999.0)
-	Fx.notify(display_name + " təslim oldu")
+	Fx.notify(display_name + " teslim oldu")
 	_enter(S.SURRENDER)
 
 
@@ -1345,7 +1345,7 @@ func _break() -> void:
 			if _state == S.BROKEN:
 				_model.anim.speed_scale = 0.0)
 	Audio.play("hit_heavy", -4.0, 0.1, global_position)
-	Fx.notify("Duruşu qırıldı — [E] infaz")
+	Fx.notify("Duruşu kırıldı — [E] infaz")
 	_enter(S.BROKEN)
 
 
@@ -1400,7 +1400,7 @@ func _on_died(_hit) -> void:
 		for o in get_tree().get_nodes_in_group("enemies"):
 			if o.faction == faction and o.global_position.distance_to(global_position) < 30.0 and o.has_method("_leader_fell"):
 				o._leader_fell()
-		Fx.notify("Ataman düşdü! Quldurlar sarsıldı.")
+		Fx.notify("Reis düştü! Haydutlar sarsıldı.")
 	if affixes.has("vengeful"):
 		_vengeance()
 	if _target_ok() and target.has_method("on_enemy_killed"):

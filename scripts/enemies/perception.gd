@@ -5,7 +5,7 @@ extends RefCounted
 ## When Ayxan is lost the enemy searches his last known spot for 8 s, then gives up.
 
 enum { CALM, SUSPICIOUS, COMBAT, SEARCH }
-const NAMES := ["sakit", "şübhəli", "döyüş", "axtarış"]
+const NAMES := ["sakit", "şüpheli", "savaş", "arıyor"]
 
 var foe                       # the Foe that owns this
 var cfg: Dictionary           # data/balance/ai.json → perception
@@ -14,7 +14,7 @@ var awareness := 0.0
 var last_known := Vector3.ZERO
 var sees := false
 var hears := false
-var always_sees := false      # "Kül Şahının gözü"
+var always_sees := false      # "Kül Şahı'nın gözü"
 var visibility := Callable()  # world light/fog 0..1 (1 = clear day)
 var _lost_t := 0.0
 var _search_t := 0.0

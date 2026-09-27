@@ -16,7 +16,7 @@ const HearthMenu := preload("res://scripts/ui/hearth_menu.gd")
 const Interactable := preload("res://scripts/world/interactable.gd")
 const AiOverlay := preload("res://scripts/debug/ai_overlay.gd")
 
-const HINT := "WASD hərəkət · Shift qaçış · Space yayınma · LMB/F zərbə · RMB blok · C kilid\nE istifadə · R şərbət · M xəritə · F10 debug · F6 streaming · F3 FPS"
+const HINT := "WASD hareket · Shift koşu · Space kaçış · LMB/F saldırı · RMB blok · C kilit\nE kullan · R şerbet · M harita · F10 debug · F6 streaming · F3 FPS"
 const AUTOSAVE_SECONDS := 300.0
 
 var debug
@@ -102,8 +102,8 @@ func _begin(_mode: String) -> void:
 	if GameState.world_has("hearths", "hearth_west"):
 		hud.set_objective("")
 	else:
-		hud.set_objective("Aşırım ocağını yandır [E]")
-	hud.title_card("KÜR VADİSİ", "Közqaladan o yana — Faza B", 2.2)
+		hud.set_objective("Geçit Ocağı'nı yak [E]")
+	hud.title_card("KÜR VADİSİ", "Közkale'nin ötesinde", 2.2)
 	_demo_setup()
 
 
@@ -168,7 +168,7 @@ func _discover() -> void:
 		var pp := Vector3(p["pos"][0], p["pos"][1], p["pos"][2])
 		if Vector2(pos.x, pos.z).distance_to(Vector2(pp.x, pp.z)) < r:
 			GameState.world_add("discovered", p["id"])
-			Fx.notify("Kəşf edildi: " + p["name"])
+			Fx.notify("Keşfedildi: " + p["name"])
 			Audio.play("memory_burn", -14.0, 0.0)
 
 
@@ -188,11 +188,11 @@ func _interact() -> void:
 		return
 	for f in _foes.values():
 		if is_instance_valid(f) and f.surrendered and not f.dead and player.global_position.distance_to(f.global_position) < 2.8:
-			hud.set_prompt("[E]  Burax (təslim oldu)   ·   vur — öldür")
+			hud.set_prompt("[E]  Serbest bırak (teslim oldu)   ·   vur — öldür")
 			if Input.is_action_just_pressed("interact"):
 				f.spare()
 				GameState.world_add("killed", f.spawn_key)
-				Fx.notify("Quldur buraxıldı. Ordu (Faza F) açılanda təslim olanları sıralarına ala biləcəksən.")
+				Fx.notify("Haydut serbest bırakıldı. Ordu açıldığında teslim olanları saflarına katabileceksin.")
 			return
 	if best == null:
 		hud.set_prompt("")
@@ -229,7 +229,7 @@ func _use(it) -> void:
 				Fx.fire_nova(it.global_position, 3.0)
 				Fx.shake(0.3)
 				Audio.play("memory_burn", -4.0, 0.0)
-				hud.banner("Ocaq yandı — " + it.poi["name"])
+				hud.banner("Ocak yandı — " + it.poi["name"])
 				if hud._objective.text != "":
 					hud.set_objective("")
 				_last_hearth = id
@@ -247,10 +247,10 @@ func _use(it) -> void:
 					player.max_flasks = mini(player.max_flasks + 1, int(DataDB.balance("combat")["flask"]["max_charges"]))
 					player.refill_flasks()
 					GameState.world["max_flasks"] = player.max_flasks
-					Fx.notify("Nar toxumu: nar şərbəti +1 (%d)" % player.max_flasks)
+					Fx.notify("Nar tohumu: Nar Şerbeti +1 (%d)" % player.max_flasks)
 				_:
 					player.gain_ember(40.0)
-					Fx.notify("Köz qırıntıları: köz +40")
+					Fx.notify("Köz kırıntıları: köz +40")
 			_save()
 		"echo":
 			GameState.world_add("echoes", it.key)
@@ -272,7 +272,7 @@ func _rest() -> void:
 	for p in level.meta["pois"]:
 		if level.streamer.is_full(p["id"]):
 			level.streamer.spawn_actors(p)
-	hud.banner("Dincəldin. Kül yenə qalxdı.")
+	hud.banner("Dinlendin. Kül yine kalktı.")
 	Fx.fire_nova(player.global_position, 2.0)
 	_save()
 
@@ -310,7 +310,7 @@ func _on_player_died() -> void:
 	Audio.music("", 1.0)
 	Audio.play("sting_defeat", -2.0, 0.0)
 	await get_tree().create_timer(1.2).timeout
-	hud.show_card("KÖZ SÖNDÜ", "Son ocağında oyanacaqsan.", "[R] — oyan", 0.75)
+	hud.show_card("KÖZ SÖNDÜ", "Son ocağında uyanacaksın.", "[R] — uyan", 0.75)
 
 
 func _respawn() -> void:
@@ -408,7 +408,7 @@ func _on_hour(_h: int) -> void:
 		return
 	_was_night = night
 	if night:
-		Fx.notify("Gecə düşdü. Kölgələr qalxır.")
+		Fx.notify("Gece çöktü. Gölgeler kalkıyor.")
 		for p in level.meta["pois"]:
 			if level.streamer.is_full(p["id"]):
 				level.streamer.spawn_actors(p)
@@ -449,7 +449,7 @@ func _update_compass() -> void:
 			list.append({"bearing": Compass.bearing(pos, pp), "dist": dist, "label": p["name"], "kind": "place"})
 	if world_map.marker != null:
 		var m: Vector3 = world_map.marker
-		list.append({"bearing": Compass.bearing(pos, m), "dist": Vector2(pos.x, pos.z).distance_to(Vector2(m.x, m.z)), "label": "İşarə", "kind": "marker"})
+		list.append({"bearing": Compass.bearing(pos, m), "dist": Vector2(pos.x, pos.z).distance_to(Vector2(m.x, m.z)), "label": "İşaret", "kind": "marker"})
 	if not GameState.world_has("hearths", "hearth_west"):
 		var h: Dictionary = level.streamer.poi_by_id("hearth_west")
 		var hp := Vector3(h["pos"][0], 0, h["pos"][2])
@@ -461,7 +461,7 @@ func _update_stream_label() -> void:
 	var c: Dictionary = level.streamer.loaded_count()
 	var st: Dictionary = level.streamer.stats
 	var cell: Vector2i = level.streamer.cell_of(player.global_position)
-	_stream_label.text = "STREAMING (F6)\nhüceyrə %d,%d  ·  tam %d  ·  vizual %d  ·  ağac kolliziyası %d  ·  gözləyən %d\nson yükləmə: thread %.1f ms, əsas %.1f ms, növbə %d, cəmi %d\nFPS %d  ·  draw calls %d  ·  primitivlər %dk  ·  obyektlər %d\nsaat %s  ·  hava: %s  ·  düşmən %d  ·  mövqe (%.0f, %.1f, %.0f)" % [
+	_stream_label.text = "STREAMING (F6)\nhücre %d,%d  ·  tam %d  ·  görsel %d  ·  ağaç çarpışması %d  ·  bekleyen %d\nson yükleme: thread %.1f ms, ana %.1f ms, kuyruk %d, toplam %d\nFPS %d  ·  draw calls %d  ·  primitif %dk  ·  nesne %d\nsaat %s  ·  hava: %s  ·  düşman %d  ·  konum (%.0f, %.1f, %.0f)" % [
 		cell.x, cell.y, c["full"], c["visual"], c["trees"], c["pending"],
 		st["worker_ms"], st["last_ms"], st["jobs"], st["loads"],
 		Engine.get_frames_per_second(),
@@ -480,28 +480,28 @@ func _build_debug() -> void:
 		var id: String = p["id"]
 		debug.button(p["name"], func(): _teleport(id))
 	debug.section("Vaxt")
-	for pair in [["Səhər 06:00", 6.0], ["Günorta 12:00", 12.0], ["Axşam 19:00", 19.0], ["Gecə 00:00", 0.0]]:
+	for pair in [["Sabah 06:00", 6.0], ["Öğle 12:00", 12.0], ["Akşam 19:00", 19.0], ["Gece 00:00", 0.0]]:
 		var h: float = pair[1]
 		debug.button(pair[0], func(): level.day_night.set_hour(h))
-	debug.button("Vaxtı dayandır / davam", func(): level.day_night.paused = not level.day_night.paused)
+	debug.button("Zamanı durdur / devam", func(): level.day_night.paused = not level.day_night.paused)
 	debug.section("Hava")
 	for s in ["clear", "cloudy", "rain", "fog"]:
 		var state: String = s
 		debug.button(level.weather.NAMES[s], func(): level.weather.set_state(state, true))
 	debug.section("Dünya")
-	debug.button("Bütün ocaqları yandır", func():
+	debug.button("Tüm ocakları yak", func():
 		for p in level.hearth_pois():
 			GameState.world_add("hearths", p["id"])
 		level.refresh_braziers()
 		for it in get_tree().get_nodes_in_group("interactables"):
 			it.refresh())
-	debug.button("Xəritəni tam aç", func():
+	debug.button("Haritayı tamamen aç", func():
 		for p in level.meta["pois"]:
 			GameState.world_add("discovered", p["id"])
 		world_map.fog.fill(1))
-	debug.button("Dincəl (düşmənlər qayıdır)", _rest)
-	debug.section("Oyunçu")
-	debug.button("Tam can + şərbət", func():
+	debug.button("Dinlen (düşmanlar geri döner)", _rest)
+	debug.section("Oyuncu")
+	debug.button("Tam can + şerbet", func():
 		player.heal(player.max_health)
 		player.refill_flasks())
 	debug.button("Köz 100", func(): player.gain_ember(100.0))

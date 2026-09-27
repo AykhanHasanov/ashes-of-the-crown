@@ -58,7 +58,7 @@ func _intro() -> void:
 	phase = Phase.INTRO
 	set_controls(false)
 	player.input_locked = true
-	await hud.title_card("SON OCAQ", "Kül Gecəsindən dörd gün sonra.", 3.0)
+	await hud.title_card("SON OCAK", "Kül Gecesi'nden dört gün sonra.", 3.0)
 	player.input_locked = false
 	set_controls(true)
 	_explore()
@@ -66,14 +66,14 @@ func _intro() -> void:
 
 func _explore() -> void:
 	phase = Phase.EXPLORE
-	hud.set_objective("Sağ qalanlarla tanış ol")
+	hud.set_objective("Hayatta kalanlarla tanış")
 
 
 func _tick(_delta: float) -> void:
 	match phase:
 		Phase.EXPLORE:
 			var s = _nearest_survivor(TALK_RANGE)
-			if s != null and near_prompt(s.global_position, TALK_RANGE, "[E]  %s ilə danış" % s.display_name):
+			if s != null and near_prompt(s.global_position, TALK_RANGE, "[E]  %s ile konuş" % s.display_name):
 				_talk_to(s)
 			elif s == null:
 				hud.set_prompt("")
@@ -104,7 +104,7 @@ func _talk_to(s) -> void:
 	var p: Dictionary = Survivors.PEOPLE[s.id]
 	var greet: String = p["greet"]
 	if s.id == "rufet" and Memory.is_burned("rufet_face"):
-		greet = "Ayxan. Yenə məni tanımırsan, eləmi? Eybi yox. Mən buradayam."
+		greet = "Ayxan. Yine beni tanımıyorsun, değil mi? Önemli değil. Ben buradayım."
 	talk_with(s, {"start": {"speaker": s.display_name, "text": greet, "end": true, "event": "talk_end"}}, false)
 
 
@@ -122,4 +122,4 @@ func _on_player_died() -> void:
 	Audio.music("", 1.0)
 	Audio.play("sting_defeat", -2.0, 0.0)
 	await get_tree().create_timer(1.2).timeout
-	hud.show_card("KÖZ SÖNDÜ", "Son Ocaq qaranlığa qərq oldu.", "[R] — son nöqtədən davam et   ·   [Esc] — menyu", 0.75)
+	hud.show_card("KÖZ SÖNDÜ", "Son Ocak karanlığa gömüldü.", "[R] — son noktadan devam et   ·   [Esc] — menü", 0.75)

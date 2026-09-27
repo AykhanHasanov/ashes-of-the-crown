@@ -56,11 +56,11 @@ func is_used() -> bool:
 func prompt() -> String:
 	match kind:
 		"hearth":
-			return "[E]  Ocağa otur" if is_used() else "[E]  Ocağı yandır — %s" % poi["name"]
+			return "[E]  Ocağın başına otur" if is_used() else "[E]  Ocağı yak — %s" % poi["name"]
 		"chest":
 			return "" if is_used() else "[E]  Sandığı aç"
 		"echo":
-			return "[E]  Daşa toxun" if not is_used() else "[E]  Yenidən oxu"
+			return "[E]  Taşa dokun" if not is_used() else "[E]  Yeniden oku"
 	return ""
 
 

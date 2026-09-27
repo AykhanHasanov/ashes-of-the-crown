@@ -28,7 +28,7 @@
 
 	"river": {
 		"id": "kur_arm",
-		"name": "Kür qolu",
+		"name": "Kür kolu",
 		"points": [[172, -20], [186, 70], [164, 150], [196, 225], [226, 290], [248, 350], [228, 420], [258, 470], [276, 540]],
 		"level_start": 14.0,
 		"level_end": 6.2,
@@ -55,18 +55,18 @@
 	],
 
 	"pois": [
-		{"id": "hearth_west", "type": "hearth", "name": "Aşırım ocağı", "pos": [128, 298], "flatten": 14.0, "start": true},
-		{"id": "hearth_north", "type": "hearth", "name": "Qarağac ocağı", "pos": [312, 150], "flatten": 14.0},
-		{"id": "kurkend", "type": "village", "name": "Kürkənd", "pos": [304, 342], "flatten": 46.0, "landmark": true},
-		{"id": "qaragac_fort", "type": "castle", "name": "Qarağac qalası", "pos": [395, 106], "flatten": 34.0, "landmark": true},
-		{"id": "qoca_cinar", "type": "great_tree", "name": "Qoca Çinar", "pos": [258, 224], "flatten": 10.0, "landmark": true},
-		{"id": "old_atashgah", "type": "ruins", "name": "Köhnə atəşgah", "pos": [116, 150], "flatten": 20.0, "landmark": true},
-		{"id": "wolf_den", "type": "den", "name": "Canavar yuvası", "pos": [446, 468], "flatten": 14.0},
-		{"id": "nar_bagi", "type": "grove", "name": "Nar bağı", "pos": [318, 446], "flatten": 20.0},
-		{"id": "watchtower", "type": "watchtower", "name": "Gözətçi qülləsi", "pos": [168, 446], "flatten": 12.0, "landmark": true},
-		{"id": "island_cache", "type": "chest", "name": "Adadakı sandıq", "pos": [412, 386], "flatten": 0.0},
-		{"id": "bridge_echo", "type": "echo", "name": "Körpü daşı", "pos": [0, 0], "at_bridge": true},
-		{"id": "bebir_yali", "type": "lair", "name": "Bəbir yalı", "pos": [452, 212], "flatten": 16.0}
+		{"id": "hearth_west", "type": "hearth", "name": "Geçit Ocağı", "pos": [128, 298], "flatten": 14.0, "start": true},
+		{"id": "hearth_north", "type": "hearth", "name": "Karaağaç Ocağı", "pos": [312, 150], "flatten": 14.0},
+		{"id": "kurkend", "type": "village", "name": "Kürköy", "pos": [304, 342], "flatten": 46.0, "landmark": true},
+		{"id": "qaragac_fort", "type": "castle", "name": "Karaağaç Kalesi", "pos": [395, 106], "flatten": 34.0, "landmark": true},
+		{"id": "qoca_cinar", "type": "great_tree", "name": "Koca Çınar", "pos": [258, 224], "flatten": 10.0, "landmark": true},
+		{"id": "old_atashgah", "type": "ruins", "name": "Eski Ateşgâh", "pos": [116, 150], "flatten": 20.0, "landmark": true},
+		{"id": "wolf_den", "type": "den", "name": "Kurt İni", "pos": [446, 468], "flatten": 14.0},
+		{"id": "nar_bagi", "type": "grove", "name": "Nar Bahçesi", "pos": [318, 446], "flatten": 20.0},
+		{"id": "watchtower", "type": "watchtower", "name": "Gözcü Kulesi", "pos": [168, 446], "flatten": 12.0, "landmark": true},
+		{"id": "island_cache", "type": "chest", "name": "Adadaki Sandık", "pos": [412, 386], "flatten": 0.0},
+		{"id": "bridge_echo", "type": "echo", "name": "Köprü Taşı", "pos": [0, 0], "at_bridge": true},
+		{"id": "bebir_yali", "type": "lair", "name": "Pars Yatağı", "pos": [452, 212], "flatten": 16.0}
 	],
 
 	"roads": [
@@ -80,6 +80,6 @@
 	],
 
 	"landmarks_far": [
-		{"id": "kozqala_smoke", "name": "Közqala", "pos": [-260, 300], "kind": "smoke_column"}
+		{"id": "kozqala_smoke", "name": "Közkale", "pos": [-260, 300], "kind": "smoke_column"}
 	]
 }

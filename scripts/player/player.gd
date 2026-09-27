@@ -347,7 +347,7 @@ func ember_strike() -> void:
 	if not _can_act() or _strike_cd > 0.0:
 		return
 	if ember < Balance.STRIKE_COST:
-		Fx.notify("Köz kifayət etmir...")
+		Fx.notify("Köz yetmiyor...")
 		return
 	if _attack_step >= 0:
 		_end_attack()
@@ -382,7 +382,7 @@ func _open_wheel() -> void:
 		_fire_down_ms = -1
 		_model.play_action("Spellcast_Raise", 2.8, 0.05)
 		Audio.play("whisper", -2.0, 0.0)
-		Fx.notify("...hə-hə... heç nə qalmayıb, balaca şah...")
+		Fx.notify("...he he... hiçbir şey kalmadı, küçük şah...")
 		return
 	if _attack_step >= 0:
 		_end_attack()
@@ -486,7 +486,7 @@ func _perfect_dodge() -> void:
 	Fx.ash_trail(global_position)
 	gain_ember(Balance.PERFECT_EMBER)
 	Audio.play("memory_burn", -14.0, 0.2)
-	Fx.notify("Mükəmməl yayınma")
+	Fx.notify("Kusursuz kaçış")
 
 
 func take_damage(amount: float, knock := Vector3.ZERO) -> void:
@@ -526,7 +526,7 @@ func _maybe_offer() -> void:
 		Fx.fire_nova(global_position, 3.0)
 		Audio.play("memory_burn", -2.0, 0.0)
 		if not m.is_empty():
-			Fx.notify("Kül Şahı «%s» xatirəsini seçdi." % m["title"])
+			Fx.notify("Kül Şahı «%s» hatırasını seçti." % m["title"])
 
 
 func heal(amount: float) -> void:

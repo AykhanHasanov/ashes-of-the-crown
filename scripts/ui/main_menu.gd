@@ -42,23 +42,23 @@ func _ready() -> void:
 	_menu.position = Vector2(90, 150)
 
 	_menu.add_child(UITheme.title("ASHES OF THE CROWN", 60))
-	_menu.add_child(UITheme.title("Tacın Külləri", 28, UITheme.EMBER))
+	_menu.add_child(UITheme.title("Tacın Külleri", 28, UITheme.EMBER))
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(0, 40)
 	_menu.add_child(gap)
 	if GameState.has_save():
-		_button("Davam et", _on_continue)
+		_button("Devam et", _on_continue)
 	_button("Yeni oyun", _on_new_game)
-	_button("Kür Vadisi (açıq dünya, V3 test)", func():
+	_button("Kür Vadisi (açık dünya, V3 test)", func():
 		get_tree().paused = false
 		get_tree().change_scene_to_file("res://scenes/world.tscn"))
-	_button("Döyüş arenası (V3 test)", func():
+	_button("Savaş arenası (V3 test)", func():
 		get_tree().paused = false
 		get_tree().change_scene_to_file("res://scenes/arena.tscn"))
-	_button("Parametrlər", _on_settings)
-	_button("Çıxış", func(): get_tree().quit())
+	_button("Ayarlar", _on_settings)
+	_button("Çıkış", func(): get_tree().quit())
 
-	var footer := UITheme.title("Prototip · Fəsil 1: Birinci səhər", 15, UITheme.MUTED)
+	var footer := UITheme.title("Prototip · Bölüm 1: İlk sabah", 15, UITheme.MUTED)
 	_root.add_child(footer)
 	footer.anchor_top = 1.0
 	footer.anchor_bottom = 1.0

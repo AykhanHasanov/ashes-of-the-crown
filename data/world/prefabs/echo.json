@@ -7,5 +7,5 @@
 		{"m": "n:Rock_1", "p": [0, 0, 0], "r": 15, "s": 2.8}
 	],
 	"lights": [{"p": [0, 1.4, 0], "kind": "ember", "scale": 0.4}],
-	"interact": [{"kind": "echo", "p": [0, 0, 1.2], "text": "Daşa kral möhürü vurulub: «Bu körpünü Atəşan xalqı üçün Şahbaz tikdi». Möhürün üstündən kimsə qılıncla xətt çəkib."}]
+	"interact": [{"kind": "echo", "p": [0, 0, 1.2], "text": "Taşa kral mührü basılmış: «Bu köprüyü Ateşan halkı için Şahbaz yaptırdı». Mührün üstünü biri kılıçla çizmiş."}]
 }

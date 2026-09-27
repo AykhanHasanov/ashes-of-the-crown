@@ -1,7 +1,7 @@
 extends CanvasLayer
 ## F10 debug panel (spec V3 §15). Scenes register sections and buttons:
 ##   debug.section("Düşmən")
-##   debug.button("Canavar", func(): ...)
+##   debug.button("Kurt", func(): ...)
 ## It does not pause the game, so effects can be watched live.
 
 const UITheme := preload("res://scripts/ui/ui_theme.gd")
@@ -42,7 +42,7 @@ func section(title: String) -> void:
 
 func button(label: String, action: Callable) -> void:
 	if _row == null:
-		section("Ümumi")
+		section("Genel")
 	var b := Button.new()
 	b.text = label
 	b.add_theme_font_size_override("font_size", 14)

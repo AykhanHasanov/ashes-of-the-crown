@@ -70,7 +70,7 @@ func _discovery_and_hearth() -> void:
 	_check("the hearth streams in with its interactable", it != null)
 	if it == null:
 		return
-	_check("a cold hearth asks to be lit", it.prompt().contains("yandır"), it.prompt())
+	_check("a cold hearth asks to be lit", it.prompt().contains("yak"), it.prompt())
 	mode._use(it)
 	_check("lighting marks it lit and saved in the world state", GameState.world_has("hearths", "hearth_west"))
 	_check("a lit hearth heals like a brazier", mode.level.braziers.size() == 1)

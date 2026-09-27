@@ -36,5 +36,5 @@
 		{"p": [0, 1.2, 12], "kind": "fire", "scale": 0.9},
 		{"p": [-26, 2.0, 3], "kind": "forge", "scale": 0.6}
 	],
-	"interact": [{"kind": "echo", "p": [2.5, 0, -2], "text": "Quyunun daşına cızılıb: «Kür bizi yedirdi, Kül bizi aparmasın». Altında uşaq əli ilə çəkilmiş bir ocaq şəkli var."}]
+	"interact": [{"kind": "echo", "p": [2.5, 0, -2], "text": "Kuyunun taşına kazınmış: «Kür bizi doyurdu, Kül bizi götürmesin». Altında bir çocuk elinden çıkma bir ocak resmi var."}]
 }

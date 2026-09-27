@@ -3,7 +3,7 @@ extends Label
 ## nearest enemies, state, perception, AI LOD, the chosen action, top utility scores,
 ## token use and the adaptive counter weights of elites and bosses.
 
-const STATES := ["doğulur", "hərəkət", "hazırlıq", "zərbə", "bərpa", "blok", "zədə", "sersəm", "qırıq", "infaz", "ölü", "yayınma", "təslim", "qaçış", "xəbərdarlıq"]
+const STATES := ["doğuyor", "hareket", "hazırlık", "vuruş", "toparlanma", "blok", "yara", "sersem", "kırık", "infaz", "ölü", "kaçış", "teslim", "kaçıyor", "uyarı"]
 const LODS := ["tam", "orta", "donmuş"]
 
 var player: Node3D
@@ -32,9 +32,9 @@ func _process(_delta: float) -> void:
 	if player.get("habits") != null:
 		var c: Dictionary = player.habits.counts()
 		var w: Dictionary = player.habits.weights()
-		lines.append("Ayxanın vərdişləri (60 s):  yayınma %d (%.0f%%)  ·  blok %d (%.0f%%)  ·  parry %d (%.0f%%)  ·  məsafə %d (%.0f%%)" % [
+		lines.append("Ayxan'ın alışkanlıkları (60 sn):  kaçış %d (%.0f%%)  ·  blok %d (%.0f%%)  ·  savuşturma %d (%.0f%%)  ·  mesafe %d (%.0f%%)" % [
 			c["dodge"], w["dodge"] * 100.0, c["block"], w["block"] * 100.0, c["parry"], w["parry"] * 100.0, c["distance"], w["distance"] * 100.0])
-		lines.append("tokenlər: %d / %d" % [player.get("_tokens_used"), player.get("token_budget")])
+		lines.append("tokenler: %d / %d" % [player.get("_tokens_used"), player.get("token_budget")])
 	var foes: Array = []
 	for f in get_tree().get_nodes_in_group("combatants"):
 		if f.has_method("xp_value") and not f.dead:
@@ -42,9 +42,9 @@ func _process(_delta: float) -> void:
 	foes.sort_custom(func(a, b): return a.global_position.distance_to(player.global_position) < b.global_position.distance_to(player.global_position))
 	for f in foes.slice(0, 6):
 		var d: float = f.global_position.distance_to(player.global_position)
-		var per := "həmişə döyüş"
+		var per := "hep savaşta"
 		if f.perception != null:
-			per = "%s %.0f%%%s" % [f.perception.NAMES[f.perception.state], f.perception.awareness * 100.0, " (görür)" if f.perception.sees else (" (eşidir)" if f.perception.hears else "")]
+			per = "%s %.0f%%%s" % [f.perception.NAMES[f.perception.state], f.perception.awareness * 100.0, " (görüyor)" if f.perception.sees else (" (duyuyor)" if f.perception.hears else "")]
 		lines.append("")
 		lines.append("%s  [%s, L%d]  %.0f m  —  %s  ·  %s  ·  LOD %s%s" % [
 			f.display_name, f.tier, f.level, d, STATES[f._state], per, LODS[f.lod], "  ·  TOKEN" if f._has_token else ""])
@@ -55,12 +55,12 @@ func _process(_delta: float) -> void:
 		var top: PackedStringArray = []
 		for s in scores.slice(0, 4):
 			top.append("%s %.2f" % [s[0], s[1]])
-		lines.append("    hərəkət: %s   |   xallar: %s" % [f._action, ", ".join(top)])
+		lines.append("    eylem: %s   |   puanlar: %s" % [f._action, ", ".join(top)])
 		if not f.adaptive_weights.is_empty():
 			var aw: PackedStringArray = []
 			for tag in f.adaptive_weights:
 				aw.append("%s ×%.2f" % [tag, f.adaptive_weights[tag]])
-			lines.append("    adaptiv cavab: " + ", ".join(aw))
+			lines.append("    uyarlanan cevap: " + ", ".join(aw))
 		if not f.affixes.is_empty():
-			lines.append("    affikslər: " + ", ".join(f.affixes) + "   ·   XP %.0f" % f.xp_value(int(player.get("level"))))
+			lines.append("    özellikler: " + ", ".join(f.affixes) + "   ·   XP %.0f" % f.xp_value(int(player.get("level"))))
 	text = "\n".join(lines)

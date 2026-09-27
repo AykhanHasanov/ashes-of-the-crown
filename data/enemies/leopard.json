@@ -1,6 +1,6 @@
 {
 	"id": "leopard",
-	"name": "Qafqaz bəbiri",
+	"name": "Kafkas Parsı",
 	"faction": "beast",
 	"tier": "boss",
 	"role": "stalker",
@@ -155,7 +155,7 @@
 				"at": 0.5,
 				"speed": 1.25,
 				"attack_speed": 1.2,
-				"banner": "Bəbir qəzəbləndi!"
+				"banner": "Pars öfkelendi!"
 			}
 		]
 	},

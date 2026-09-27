@@ -1,5 +1,5 @@
 extends "res://scripts/chapter_base.gd"
-## Chapter 1 "Birinci səhər" (also hosts the title screen): Ayxan rises from the
+## Chapter 1 "İlk sabah" (also hosts the title screen): Ayxan rises from the
 ## ash → Rüfət → three waves of ash shades → three Kül əks-sədaları (ember echoes)
 ## that replay the king's last night → back to Rüfət → chapter end,
 ## from where Enter leads on to Chapter 2 (Son Ocaq).
@@ -20,9 +20,9 @@ const GHOST_MODEL := "res://assets/characters/adventurers/Rogue_Hooded.glb"
 enum Phase { MENU, INTRO, FIND_RUFET, DIALOGUE, WAVES, AFTERMATH, ECHOES, VISION, RETURN, CHAPTER_END, DEFEAT }
 
 const WAVES := [
-	{"normal": 4, "fast": 0, "elite": 0, "title": "Kül Kölgələri qalxır!"},
-	{"normal": 3, "fast": 4, "elite": 0, "title": "Külün altından daha çoxu gəlir..."},
-	{"normal": 3, "fast": 1, "elite": 1, "title": "Kül Cəngavəri — Tacın keçmiş keşikçisi"},
+	{"normal": 4, "fast": 0, "elite": 0, "title": "Kül Gölgeleri kalkıyor!"},
+	{"normal": 3, "fast": 4, "elite": 0, "title": "Külün altından daha fazlası geliyor..."},
+	{"normal": 3, "fast": 1, "elite": 1, "title": "Kül Şövalyesi — Tacın eski muhafızı"},
 ]
 const ECHO_RANGE := 2.4
 const NORMAL_SATURATION := 1.08
@@ -155,7 +155,7 @@ func _intro() -> void:
 	phase = Phase.INTRO
 	set_controls(false)
 	player.lie_down()
-	await hud.title_card("ASHES OF THE CROWN", "Közqala. Kül Gecəsindən üç gün sonra.", 3.2)
+	await hud.title_card("ASHES OF THE CROWN", "Közkale. Kül Gecesi'nden üç gün sonra.", 3.2)
 	await player.stand_up()
 	set_controls(true)
 	_find_rufet()
@@ -163,20 +163,20 @@ func _intro() -> void:
 
 func _find_rufet() -> void:
 	phase = Phase.FIND_RUFET
-	hud.set_objective("Rüfəti tap — o, cənub darvazasındakı ocağın yanındadır")
+	hud.set_objective("Rüfet'i bul — güney kapısındaki ocağın yanında")
 
 
 func _tick(delta: float) -> void:
 	match phase:
 		Phase.FIND_RUFET:
-			if near_prompt(rufet.global_position, TALK_RANGE, "[E]  Rüfətlə danış"):
+			if near_prompt(rufet.global_position, TALK_RANGE, "[E]  Rüfet'le konuş"):
 				_talk(RufetDialogue.DATA)
 		Phase.RETURN:
-			if near_prompt(rufet.global_position, TALK_RANGE, "[E]  Rüfətə gördüklərini danış"):
+			if near_prompt(rufet.global_position, TALK_RANGE, "[E]  Rüfet'e gördüklerini anlat"):
 				_talk(RufetDialogue.AFTER_ECHOES)
 		Phase.ECHOES:
 			var spot = _nearest_echo()
-			if spot != null and near_prompt(spot.global_position, ECHO_RANGE, "[E]  Kül əks-sədasına toxun"):
+			if spot != null and near_prompt(spot.global_position, ECHO_RANGE, "[E]  Kül yankısına dokun"):
 				_play_echo(spot)
 			elif spot == null:
 				hud.set_prompt("")
@@ -247,7 +247,7 @@ func _start_wave(i: int, close := false) -> void:
 	var w: Dictionary = WAVES[i]
 	if i == 0:
 		player.begin_encounter()  # the wave block is one fight for Kül Şahı's offer
-	hud.set_objective("Dalğa %d / %d" % [i + 1, WAVES.size()])
+	hud.set_objective("Dalga %d / %d" % [i + 1, WAVES.size()])
 	hud.banner(w["title"])
 	Fx.shake(0.35)
 	Audio.play("horn", -3.0, 0.0)
@@ -302,7 +302,7 @@ func _after_waves() -> void:
 	hud.set_objective("")
 	Audio.music("ambient", 4.0)
 	Audio.play("sting_victory", -2.0, 0.0)
-	hud.banner("Kül yatdı. Közqala susur.")
+	hud.banner("Kül dindi. Közkale susuyor.")
 	save_checkpoint("echoes")
 	await get_tree().create_timer(2.5).timeout
 	if phase == Phase.AFTERMATH:
@@ -336,7 +336,7 @@ func _update_echo_objective() -> void:
 	for s in _echoes:
 		if s.done:
 			found += 1
-	hud.set_objective("Kül əks-sədalarını araşdır   (%d / 3)" % found)
+	hud.set_objective("Kül yankılarını araştır   (%d / 3)" % found)
 
 
 func _nearest_echo():
@@ -392,8 +392,8 @@ func _play_echo(spot) -> void:
 	await get_tree().create_timer(1.4).timeout
 	var words: String = KingEchoes.SILENT if Memory.is_burned("father_voice") else "Kral: \"%s\"" % info["words"]
 	dialogue.start({
-		"start": {"speaker": "Kül əks-sədası · " + spot.place, "text": info["scene"], "next": "t"},
-		"t": {"speaker": "Kül əks-sədası · " + spot.place, "text": words, "end": true, "event": "echo_done"},
+		"start": {"speaker": "Kül yankısı · " + spot.place, "text": info["scene"], "next": "t"},
+		"t": {"speaker": "Kül yankısı · " + spot.place, "text": words, "end": true, "event": "echo_done"},
 	})
 
 
@@ -408,7 +408,7 @@ func _finish_echo() -> void:
 	tw.tween_callback(ghost.queue_free)
 	create_tween().tween_property(level.env, "adjustment_saturation", NORMAL_SATURATION, 1.5)
 	Audio.play("memory_burn", -8.0, 0.1)
-	hud.banner("%s — kralın son gecəsindən bir an" % spot.place)
+	hud.banner("%s — kralın son gecesinden bir an" % spot.place)
 	set_controls(true)
 	if GameState.echoes_seen.size() >= KingEchoes.ECHOES.size():
 		save_checkpoint("return")
@@ -421,7 +421,7 @@ func _finish_echo() -> void:
 
 func _begin_return() -> void:
 	phase = Phase.RETURN
-	hud.set_objective("Rüfətin yanına qayıt")
+	hud.set_objective("Rüfet'in yanına dön")
 
 
 # --- Endings -----------------------------------------------------------------------
@@ -433,7 +433,7 @@ func _on_player_died() -> void:
 	Audio.music("", 1.0)
 	Audio.play("sting_defeat", -2.0, 0.0)
 	await get_tree().create_timer(1.2).timeout
-	hud.show_card("KÖZ SÖNDÜ", "Ayxan külün içində yıxıldı.", "[R] — son nöqtədən davam et   ·   [Esc] — menyu", 0.75)
+	hud.show_card("KÖZ SÖNDÜ", "Ayxan külün içine yığıldı.", "[R] — son noktadan devam et   ·   [Esc] — menü", 0.75)
 
 
 func _chapter_end() -> void:
@@ -446,19 +446,19 @@ func _chapter_end() -> void:
 	Audio.play("sting_victory", -2.0, 0.0)
 
 	var lines := PackedStringArray()
-	lines.append("Görülən əks-sədalar: %d / %d" % [GameState.echoes_seen.size(), KingEchoes.ECHOES.size()])
+	lines.append("Görülen yankılar: %d / %d" % [GameState.echoes_seen.size(), KingEchoes.ECHOES.size()])
 	var burned: int = Memory.burned.size()
-	lines.append("Yanmış xatirələr: %d / %d" % [burned, Memory.MEMORIES.size()])
+	lines.append("Yanan hatıralar: %d / %d" % [burned, Memory.MEMORIES.size()])
 	if Memory.is_burned("rufet_face"):
-		lines.append("Rüfəti tanımırsan, amma o səni tanıyır.")
+		lines.append("Rüfet'i tanımıyorsun, ama o seni tanıyor.")
 	else:
-		lines.append("Rüfət yanındadır. Onun üzü hələ də yadındadır.")
+		lines.append("Rüfet yanında. Yüzünü hâlâ hatırlıyorsun.")
 	if burned >= 4:
-		lines.append("\"...yaxınlaşırsan, Ayxan. Tac səni gözləyir...\"  — Kül Şahı")
+		lines.append("\"...yaklaşıyorsun, Ayxan. Taç seni bekliyor...\"  — Kül Şahı")
 	lines.append("")
-	lines.append("[Enter] — Fəsil 2: Son Ocaq   ·   [R] — yeni oyun   ·   [Esc] — menyu")
+	lines.append("[Enter] — Bölüm 2: Son Ocak   ·   [R] — yeni oyun   ·   [Esc] — menü")
 	await get_tree().create_timer(1.2).timeout
-	hud.show_card("FƏSİL 1 BİTDİ", "Birinci səhər", "\n".join(lines), 0.82)
+	hud.show_card("BÖLÜM 1 SONA ERDİ", "İlk sabah", "\n".join(lines), 0.82)
 
 
 # --- Debug capture -----------------------------------------------------------------

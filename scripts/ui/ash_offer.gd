@@ -34,10 +34,10 @@ func _ready() -> void:
 	box.offset_left = -360
 	box.offset_right = 360
 	box.offset_top = -80
-	var whisper := UITheme.title("\"Bir xatirə ver... və yaşa.\"", 34, Color(0.95, 0.35, 0.22))
+	var whisper := UITheme.title("\"Bir hatıra ver... ve yaşa.\"", 34, Color(0.95, 0.35, 0.22))
 	whisper.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(whisper)
-	var hint := UITheme.title("[E] — qəbul et   ·   Kül Şahı özü seçəcək", 20, UITheme.TEXT)
+	var hint := UITheme.title("[E] — kabul et   ·   Kül Şahı kendisi seçecek", 20, UITheme.TEXT)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(hint)
 	var back := ColorRect.new()

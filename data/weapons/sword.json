@@ -1,6 +1,6 @@
 {
 	"id": "sword",
-	"name": "Qılınc",
+	"name": "Kılıç",
 	"damage_type": "slash",
 	"grip": "1h",
 	"model": {"donor": "res://assets/characters/adventurers/Knight.glb", "node": "1H_Sword"},

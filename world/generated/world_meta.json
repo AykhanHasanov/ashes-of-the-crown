@@ -40,7 +40,7 @@
 		{
 			"id": "kozqala_smoke",
 			"kind": "smoke_column",
-			"name": "Közqala",
+			"name": "Közkale",
 			"pos": [
 				-260.0,
 				300.0
@@ -65,7 +65,7 @@
 		"vegetation stump: 15",
 		"vegetation log: 9",
 		"vegetation fern: 680",
-		"generated in 3746 ms: 13 POIs, 7 roads, 1 bridges, 597 trees"
+		"generated in 3696 ms: 13 POIs, 7 roads, 1 bridges, 597 trees"
 	],
 	"name": "Kür Vadisi",
 	"pois": [
@@ -73,7 +73,7 @@
 			"flatten": 14.0,
 			"id": "hearth_west",
 			"major": true,
-			"name": "Aşırım ocağı",
+			"name": "Geçit Ocağı",
 			"pos": [
 				128.0,
 				10.12,
@@ -86,7 +86,7 @@
 			"flatten": 14.0,
 			"id": "hearth_north",
 			"major": true,
-			"name": "Qarağac ocağı",
+			"name": "Karaağaç Ocağı",
 			"pos": [
 				312.0,
 				8.86,
@@ -99,7 +99,7 @@
 			"id": "kurkend",
 			"landmark": true,
 			"major": true,
-			"name": "Kürkənd",
+			"name": "Kürköy",
 			"pos": [
 				304.0,
 				13.55,
@@ -112,7 +112,7 @@
 			"id": "qaragac_fort",
 			"landmark": true,
 			"major": true,
-			"name": "Qarağac qalası",
+			"name": "Karaağaç Kalesi",
 			"pos": [
 				395.0,
 				31.61,
@@ -125,7 +125,7 @@
 			"id": "qoca_cinar",
 			"landmark": true,
 			"major": true,
-			"name": "Qoca Çinar",
+			"name": "Koca Çınar",
 			"pos": [
 				258.0,
 				14.68,
@@ -138,7 +138,7 @@
 			"id": "old_atashgah",
 			"landmark": true,
 			"major": true,
-			"name": "Köhnə atəşgah",
+			"name": "Eski Ateşgâh",
 			"pos": [
 				116.0,
 				20.74,
@@ -150,7 +150,7 @@
 			"flatten": 14.0,
 			"id": "wolf_den",
 			"major": true,
-			"name": "Canavar yuvası",
+			"name": "Kurt İni",
 			"pos": [
 				446.0,
 				11.38,
@@ -162,7 +162,7 @@
 			"flatten": 20.0,
 			"id": "nar_bagi",
 			"major": true,
-			"name": "Nar bağı",
+			"name": "Nar Bahçesi",
 			"pos": [
 				318.0,
 				9.5,
@@ -175,7 +175,7 @@
 			"id": "watchtower",
 			"landmark": true,
 			"major": true,
-			"name": "Gözətçi qülləsi",
+			"name": "Gözcü Kulesi",
 			"pos": [
 				168.0,
 				15.32,
@@ -187,7 +187,7 @@
 			"flatten": 0.0,
 			"id": "island_cache",
 			"major": true,
-			"name": "Adadakı sandıq",
+			"name": "Adadaki Sandık",
 			"pos": [
 				412.0,
 				8.16,
@@ -199,7 +199,7 @@
 			"flatten": 0.0,
 			"id": "bridge_echo",
 			"major": true,
-			"name": "Körpü daşı",
+			"name": "Köprü Taşı",
 			"pos": [
 				234.92,
 				12.41,
@@ -211,7 +211,7 @@
 			"flatten": 16.0,
 			"id": "bebir_yali",
 			"major": true,
-			"name": "Bəbir yalı",
+			"name": "Pars Yatağı",
 			"pos": [
 				452.0,
 				10.33,
@@ -223,7 +223,7 @@
 			"flatten": 9.0,
 			"id": "camp_1",
 			"major": false,
-			"name": "Tərk edilmiş düşərgə",
+			"name": "Terk edilmiş kamp",
 			"pos": [
 				212.0,
 				17.35,
@@ -234,7 +234,7 @@
 	],
 	"river": {
 		"bank": 13.0,
-		"name": "Kür qolu",
+		"name": "Kür kolu",
 		"points": [
 			[
 				172.0,

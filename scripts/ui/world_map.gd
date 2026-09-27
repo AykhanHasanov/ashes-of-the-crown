@@ -172,10 +172,10 @@ func _draw_map() -> void:
 	var title := "KÜR VADİSİ"
 	var tw := font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, 30).x
 	_canvas.draw_string(font, Vector2(r.get_center().x - tw * 0.5, 58), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 30, UITheme.GOLD)
-	var help := "[M] bağla   ·   Sağ klik — işarə qoy / sil" + ("   ·   Yanan ocağa klik — səyahət" if travel_mode else "")
+	var help := "[M] kapat   ·   Sağ tık — işaret koy / sil" + ("   ·   Yanan ocağa tıkla — yolculuk" if travel_mode else "")
 	var hw := font.get_string_size(help, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
 	_canvas.draw_string(font, Vector2(r.get_center().x - hw * 0.5, r.end.y + 38), help, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, UITheme.MUTED)
-	var pct := "Kəşf: %d%%" % int(explored_fraction() * 100.0)
+	var pct := "Keşif: %d%%" % int(explored_fraction() * 100.0)
 	_canvas.draw_string(font, Vector2(r.end.x - 110, 58), pct, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, UITheme.MUTED)
 
 	_hover = ""
@@ -218,7 +218,7 @@ func _draw_map() -> void:
 		_canvas.draw_colored_polygon(pts, Color(0.75, 0.08, 0.05))
 	# Travel hint under the cursor
 	if travel_mode and _hover != "" and GameState.world_has("hearths", _hover):
-		_canvas.draw_string(font, mouse + Vector2(14, -10), "Səyahət et", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, UITheme.EMBER)
+		_canvas.draw_string(font, mouse + Vector2(14, -10), "Yolculuk et", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, UITheme.EMBER)
 
 
 func _on_input(event: InputEvent) -> void:

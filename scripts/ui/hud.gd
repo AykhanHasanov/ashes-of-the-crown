@@ -140,7 +140,7 @@ func _ready() -> void:
 	_prompt = _label("", 22, GOLD, HORIZONTAL_ALIGNMENT_CENTER)
 	_place(_prompt, Vector4(0.5, 1, 0.5, 1), Vector4(-300, -130, 300, -100))
 
-	_hint = _label("LMB / J — qılınc     RMB / Q — Köz Zərbəsi  ·  basılı saxla — Alov Dalğası\nSpace — Kül addımı     E — danış     Tab — jurnal     Esc — fasilə", 14, Color(0.7, 0.66, 0.6, 0.85), HORIZONTAL_ALIGNMENT_RIGHT)
+	_hint = _label("LMB / J — kılıç     RMB / Q — Köz Darbesi  ·  basılı tut — Alev Dalgası\nSpace — Kül adımı     E — konuş     Tab — günlük     Esc — duraklat", 14, Color(0.7, 0.66, 0.6, 0.85), HORIZONTAL_ALIGNMENT_RIGHT)
 	_place(_hint, Vector4(0.25, 1, 1, 1), Vector4(0, -60, -20, -12))
 	_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_info = _label("", 14, Color(0.7, 0.66, 0.6, 0.85), HORIZONTAL_ALIGNMENT_RIGHT)
@@ -211,8 +211,8 @@ func _process(delta: float) -> void:
 		else:
 			_boss = null
 			_boss_box.visible = false
-	var quality := "Yüksək" if Settings.is_high() else "Aşağı"
-	_info.text = "Qrafika: %s (F9)" % quality
+	var quality := "Yüksek" if Settings.is_high() else "Düşük"
+	_info.text = "Grafik: %s (F9)" % quality
 	if Settings.show_fps:
 		_info.text += "\nFPS: %d" % Engine.get_frames_per_second()
 
@@ -229,7 +229,7 @@ func set_stamina(current: float, maximum: float) -> void:
 
 
 func set_flasks(current: int, maximum: int) -> void:
-	_flasks.text = "Nar şərbəti  %d / %d   [R]" % [current, maximum]
+	_flasks.text = "Nar Şerbeti  %d / %d   [R]" % [current, maximum]
 
 
 func set_hint(text: String) -> void:
