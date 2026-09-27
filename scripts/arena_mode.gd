@@ -1,8 +1,8 @@
 extends "res://scripts/chapter_base.gd"
-## V3 phase A test arena: the new third-person combat against the three test
-## enemies (Kül Kölgəsi, Qalxanlı quldur, Canavar). Waves keep coming; resting at
-## the hearth (E) refills flasks, heals and starts the next wave. F10 opens the
-## debug panel: spawn any enemy, switch weapons, burn or restore memories.
+## V3 test arena: third-person combat against every enemy type of Faza C. Eight waves
+## (the last one is the Qafqaz bəbiri); resting at the hearth (E) refills flasks,
+## heals and starts the next wave. F10: spawn any enemy (plain or with affixes),
+## switch weapons, burn or restore memories. F4: AI overlay.
 
 const Arena := preload("res://scripts/world/arena.gd")
 const Ayxan := preload("res://scripts/player_v3/ayxan.gd")
@@ -10,14 +10,20 @@ const TPCamera := preload("res://scripts/camera/third_person_camera.gd")
 const Foe := preload("res://scripts/enemies/foe.gd")
 const SelfTest := preload("res://scripts/debug/combat_selftest.gd")
 const DebugMenu := preload("res://scripts/debug/debug_menu.gd")
+const AiOverlay := preload("res://scripts/debug/ai_overlay.gd")
 
 const WAVES := [
-	["ash_shade", "ash_shade"],
-	["wolf", "wolf", "wolf"],
-	["bandit_shield", "ash_shade", "ash_shade"],
-	["bandit_shield", "wolf", "wolf", "ash_shade"],
-	["bandit_shield", "bandit_shield", "ash_shade", "wolf", "wolf"],
+	["ash_shade", "ash_shade", "ash_runner"],
+	["wolf", "wolf", "wolf", "wolf"],
+	["bandit_shield", "bandit_sword", "bandit_archer"],
+	["ash_shade", "ash_shade", "ash_archer", "ash_shaman"],
+	["ash_bomber", "ash_bomber", "ash_runner", "ash_runner"],
+	["bandit_ataman", "bandit_spear", "bandit_sword", "bandit_archer"],
+	["ash_giant", "ash_shade", "ash_archer"],
+	["leopard"],
 ]
+const ALL := ["ash_shade", "ash_runner", "ash_archer", "ash_bomber", "ash_shaman", "ash_giant",
+	"bandit_sword", "bandit_shield", "bandit_archer", "bandit_spear", "bandit_ataman", "wolf", "leopard"]
 const HINT := "LMB yüngül · F ağır · RMB blok/parry · Space yayınma · Shift qaçış · C kilid\nE infaz/ocaq · R şərbət · Q köz · 1-3 silah · F10 debug"
 
 var debug
@@ -44,6 +50,10 @@ func _setup() -> void:
 	debug = DebugMenu.new()
 	add_child(debug)
 	_build_debug()
+	var overlay = AiOverlay.new()
+	overlay.player = player
+	hud._root.add_child(overlay)
+	overlay.visible = Settings.demo == "arena_wave"
 
 
 func _begin(_mode: String) -> void:
@@ -66,6 +76,41 @@ func _begin(_mode: String) -> void:
 			t.player = player
 			add_child(t)
 			t.run()
+		"ai_selftest":
+			var ai = load("res://scripts/debug/ai_selftest.gd").new()
+			ai.mode = self
+			ai.player = player
+			add_child(ai)
+			ai.run()
+		"ai_bomber":
+			var ab = load("res://scripts/debug/ai_selftest.gd").new()
+			ab.mode = self
+			ab.player = player
+			add_child(ab)
+			ab.run_bomber_loop()
+		"arena_all":
+			# Line-up of every enemy type, frozen for the capture
+			for i in ALL.size():
+				var ang := deg_to_rad(-70.0 + 140.0 * i / (ALL.size() - 1))
+				var f = spawn_foe(ALL[i], player.global_position + Vector3(sin(ang), 0, -cos(ang)) * 11.0, {"roll": false})
+				f.get_node(".").set_meta("showcase", true)
+			get_tree().create_timer(1.6).timeout.connect(func():
+				for e in get_tree().get_nodes_in_group("enemies"):
+					e.set_physics_process(false)
+					e._model.look_at(player.global_position, Vector3.UP)
+					e._model.rotation.x = 0.0
+					e._model.rotation.y += PI
+					e._model.cancel_action()
+					e._model.play_loop(e.data["anims"]["idle"]))
+		"arena_boss":
+			var boss = spawn_foe("leopard", player.global_position + Vector3(3.5, 0, -5), {"roll": false})
+			get_tree().create_timer(0.8).timeout.connect(func(): boss.set_physics_process(false))
+		"arena_wave":
+			_wave = 6
+			_start_wave()
+			player.make_invulnerable(60.0)
+			for i in 6:
+				player.habits.record("dodge")
 		"arena_wolves":
 			for i in 3:
 				_spawn("wolf", player.global_position + Vector3(-4 + i * 4, 0, -7))
@@ -128,15 +173,27 @@ func _spawn(id: String, at: Vector3) -> void:
 	spawn_foe(id, at)
 
 
-func spawn_foe(id: String, at: Vector3):
+func spawn_foe(id: String, at: Vector3, opts := {}):
 	var f = Foe.new()
-	f.configure(id)
+	f.configure(id, int(opts.get("level", 1)), opts)
 	add_child(f)
 	f.global_position = at
 	f.target = player
 	_alive += 1
 	f.killed.connect(func(_x): _on_killed())
+	f.summon_requested.connect(func(eid: String, pos: Vector3, lv: int, o: Dictionary):
+		var o2 := o.duplicate()
+		o2["level"] = lv
+		spawn_foe(eid, pos, o2))
+	f.engaged.connect(_on_engaged)
 	return f
+
+
+func _on_engaged(f) -> void:
+	if f.tier == "boss":
+		hud.track_boss(f)
+		Audio.music("battle", 0.5)
+		hud.banner(f.display_name)
 
 
 func _on_killed() -> void:
@@ -161,10 +218,19 @@ func _on_player_died() -> void:
 
 func _build_debug() -> void:
 	debug.section("Düşmən çağır")
-	for id in ["ash_shade", "bandit_shield", "wolf"]:
+	for id in ALL:
 		debug.button(DataDB.enemy(id)["name"], func():
 			_resting = false
-			_spawn(id, player.global_position + player.facing() * 6.0 + Vector3(randf_range(-2, 2), 0, randf_range(-2, 2))))
+			spawn_foe(id, player.global_position + player.facing() * 7.0 + Vector3(randf_range(-2, 2), 0, randf_range(-2, 2)), {"roll": false}))
+	debug.section("Affiksli düşmən")
+	for a in ["flaming", "thick", "fast", "summoner", "vengeful", "unshakable", "ash_eye"]:
+		var aff: String = a
+		debug.button(DataDB.balance("affixes")["affixes"].filter(func(d): return d["id"] == aff)[0].get("prefix", "Göz") + " kölgə", func():
+			_resting = false
+			spawn_foe("ash_shade", player.global_position + player.facing() * 7.0, {"affixes": [aff]}))
+	debug.button("Səviyyə 8 quldur (☠)", func():
+		_resting = false
+		spawn_foe("bandit_sword", player.global_position + player.facing() * 7.0, {"level": 8, "roll": false}))
 	debug.button("Hamısını öldür", func():
 		for e in get_tree().get_nodes_in_group("enemies"):
 			var h = e.Hit.new().setup(player, 9999.0, "slash", 0.0, Vector3.ZERO)

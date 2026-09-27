@@ -24,6 +24,7 @@ const CharacterModel := preload("res://scripts/characters/character_model.gd")
 const Effects := preload("res://scripts/world/effects.gd")
 const Melee := preload("res://scripts/combat/melee.gd")
 const OVERLAY := preload("res://shaders/ash_overlay.gdshader")
+const PlayerHabits := preload("res://scripts/combat/player_habits.gd")
 const MODEL_PATH := "res://assets/characters/adventurers/Rogue_Hooded.glb"
 const HIDDEN := ["Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Knife", "Throwable"]
 const MAX_HEALTH := 120.0
@@ -44,6 +45,10 @@ var lock_target = null
 var last_hurt_ms := -100000
 ## Open world: returns the water surface height at a point, or -1000 when dry.
 var water_query := Callable()
+## Adaptive AI reads these (spec §4.1); noise wakes enemies that hear the fight.
+var habits := PlayerHabits.new()
+var level := 1
+var last_noise_ms := -100000
 
 var _cfg: Dictionary
 var _state := S.MOVE
@@ -87,6 +92,8 @@ var _vault_from := Vector3.ZERO
 var _vault_to := Vector3.ZERO
 var _slide_t := 0.0
 var _water_level := -1000.0
+var _habit_t := 0.0
+var _burn_fx: Node3D
 
 
 func _ready() -> void:
@@ -246,6 +253,9 @@ func _physics_process(delta: float) -> void:
 	_strike_cd -= delta
 	_wave_cd -= delta
 	tick_stance(delta)
+	tick_statuses(delta)
+	_update_burn_fx()
+	_sample_distance_habit(delta)
 	_flash = maxf(_flash - delta * 4.0, 0.0)
 	_overlay.set_shader_parameter("hit_flash", _flash)
 	_tick_stamina(delta)
@@ -422,6 +432,8 @@ func _begin_dodge() -> void:
 	_end_attack()
 	_dodge_dir = _move_dir.normalized() if _move_dir.length() > 0.1 else -_facing
 	make_invulnerable(d["invuln"])
+	if _enemies_near(12.0):
+		habits.record("dodge")
 	var clip := "Dodge_Forward"
 	if _lock_valid():
 		var local := _dodge_dir.dot(_facing)
@@ -498,6 +510,7 @@ func _do_charge(delta: float) -> void:
 
 
 func _start_attack(a: Dictionary, kind: String) -> void:
+	last_noise_ms = Time.get_ticks_msec()
 	_attack = a
 	_attack_kind = kind
 	_impact_done = false
@@ -614,7 +627,12 @@ func _defend(hit) -> String:
 		return "parried"
 	var st: Dictionary = _cfg["stamina"]
 	var factor: float = st["shield_block_cost_factor"] if weapon.get("shield") is Dictionary else st["block_cost_factor"]
-	_drain_stamina(hit.damage * factor * 1.6)
+	habits.record("block")
+	if hit.guard_break:
+		_drain_stamina(999.0)   # a guard-breaker empties the guard in one blow
+		Fx.notify("Müdafiə qırıldı!")
+	else:
+		_drain_stamina(hit.damage * factor * 1.6)
 	Audio.play("block", -2.0, 0.1)
 	Fx.hit_spark(global_position + Vector3(0, 1.2, 0) + _facing * 0.5)
 	velocity += hit.knock * 0.4
@@ -630,6 +648,7 @@ func _defend(hit) -> String:
 
 func _parry(hit) -> void:
 	var p: Dictionary = _cfg["parry"]
+	habits.record("parry")
 	Audio.play("parry", 0.0, 0.05)
 	Fx.hit_spark(global_position + Vector3(0, 1.3, 0) + _facing * 0.7, true)
 	Fx.slowmo(p["slowmo_scale"], p["slowmo_time"])
@@ -722,6 +741,7 @@ func refill_flasks() -> void:
 
 func _on_hurt(hit, _amount: float) -> void:
 	last_hurt_ms = Time.get_ticks_msec()
+	last_noise_ms = last_hurt_ms
 	_flash = 1.0
 	Audio.play("player_hurt", -2.0, 0.08)
 	Fx.shake(0.4)
@@ -1285,6 +1305,48 @@ func _do_vault(_delta: float) -> void:
 
 func is_swimming() -> bool:
 	return _state == S.SWIM
+
+
+## Heard up to hear_sprint metres away.
+func is_sprinting_now() -> bool:
+	return _is_sprinting()
+
+
+func is_down() -> bool:
+	return _state in [S.KNOCKDOWN, S.DEAD]
+
+
+func is_blocking() -> bool:
+	return _state == S.BLOCK
+
+
+## Keeping his distance while enemies are after him counts as a habit, once a second.
+func _sample_distance_habit(delta: float) -> void:
+	_habit_t -= delta
+	if _habit_t > 0.0:
+		return
+	_habit_t = 1.0
+	var nearest := INF
+	var engaged := false
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if e.has_method("is_engaged") and e.is_engaged():
+			engaged = true
+			nearest = minf(nearest, global_position.distance_to(e.global_position))
+	if engaged and nearest > 6.0 and nearest < 30.0:
+		habits.record("distance")
+
+
+func _update_burn_fx() -> void:
+	var burning := has_status("burn")
+	if burning and _burn_fx == null:
+		_burn_fx = Effects.fire(0.6, 14)
+		_burn_fx.position = Vector3(0, 0.9, 0)
+		add_child(_burn_fx)
+	elif not burning and _burn_fx != null:
+		_burn_fx.queue_free()
+		_burn_fx = null
+	if burning:
+		_flash = maxf(_flash, 0.25)
 
 
 # --- Attack tokens (budget others draw from) -------------------------------------------------------

@@ -65,7 +65,8 @@
 		{"id": "nar_bagi", "type": "grove", "name": "Nar bağı", "pos": [318, 446], "flatten": 20.0},
 		{"id": "watchtower", "type": "watchtower", "name": "Gözətçi qülləsi", "pos": [168, 446], "flatten": 12.0, "landmark": true},
 		{"id": "island_cache", "type": "chest", "name": "Adadakı sandıq", "pos": [412, 386], "flatten": 0.0},
-		{"id": "bridge_echo", "type": "echo", "name": "Körpü daşı", "pos": [0, 0], "at_bridge": true}
+		{"id": "bridge_echo", "type": "echo", "name": "Körpü daşı", "pos": [0, 0], "at_bridge": true},
+		{"id": "bebir_yali", "type": "lair", "name": "Bəbir yalı", "pos": [452, 212], "flatten": 16.0}
 	],
 
 	"roads": [

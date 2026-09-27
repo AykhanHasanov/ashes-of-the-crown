@@ -1,0 +1,116 @@
+{
+	"id": "bandit_archer",
+	"name": "Quldur oxçu",
+	"faction": "bandit",
+	"tier": "normal",
+	"role": "ranged",
+	"xp": 15,
+	"model": {
+		"path": "res://assets/characters/adventurers/Rogue.glb",
+		"hidden": [
+			"Knife_Offhand",
+			"2H_Crossbow",
+			"Knife",
+			"Throwable"
+		],
+		"scale": 0.82,
+		"recolor": [
+			0.3,
+			0.7,
+			0.1,
+			0.55,
+			0.6
+		]
+	},
+	"anims": {
+		"idle": "Idle",
+		"walk": "Walking_A",
+		"run": "Running_A",
+		"hit": [
+			"Hit_A",
+			"Hit_B"
+		],
+		"stagger": "Lie_Down",
+		"recover": "Lie_StandUp",
+		"death": "Death_A",
+		"spawn": "",
+		"block": "",
+		"dodge": "Dodge_Backward",
+		"taunt": "Cheer",
+		"surrender": "Sit_Floor_Down",
+		"surrender_idle": "Sit_Floor_Idle"
+	},
+	"stats": {
+		"health": 48,
+		"stance": 34,
+		"speed": 3.3,
+		"run_speed": 5.0,
+		"radius": 0.42,
+		"height": 1.8,
+		"ember": 10
+	},
+	"resist": {
+		"slash": 1.0,
+		"crush": 1.0,
+		"pierce": 1.15,
+		"fire": 1.1
+	},
+	"attacks": [
+		{
+			"id": "bolt",
+			"clip": "1H_Ranged_Shoot",
+			"clip_impact": 0.1,
+			"windup": 0.95,
+			"unstoppable": 0.0,
+			"damage": 12,
+			"stance": 10,
+			"range": 26.0,
+			"arc": 20,
+			"lunge": 6.0,
+			"recovery": 0.9,
+			"weight": 1.0,
+			"cooldown": 2.0,
+			"kind": "ranged",
+			"windup_clip": "1H_Ranged_Aiming",
+			"damage_type": "pierce",
+			"min_range": 3.5,
+			"tags": [
+				"ranged"
+			],
+			"projectile": {
+				"speed": 34.0,
+				"gravity": 4.0,
+				"model": "res://assets/quaternius/medieval_weapons_pack/Arrow.glb",
+				"fire": false
+			}
+		},
+		{
+			"id": "kick",
+			"clip": "Unarmed_Melee_Attack_Kick",
+			"clip_impact": 0.35,
+			"windup": 0.45,
+			"unstoppable": 0.0,
+			"damage": 6,
+			"stance": 28,
+			"range": 1.7,
+			"arc": 80,
+			"lunge": 4.0,
+			"recovery": 0.5,
+			"weight": 0.7,
+			"cooldown": 2.5
+		}
+	],
+	"behavior": {
+		"preferred_range": 15.0,
+		"wait_range": 15.0,
+		"keep_range": [
+			9.0,
+			22.0
+		],
+		"high_ground": true,
+		"flank": false,
+		"block_chance": 0.0,
+		"aggression": 1.0,
+		"can_dodge": 0.3
+	}
+}

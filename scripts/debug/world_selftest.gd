@@ -173,7 +173,7 @@ func _streaming_and_enemies() -> void:
 	_check("far guards stay on the ground (no terrain collider there)", grounded)
 	if guards.size() > 0:
 		var g = mode._foes[guards[0]]
-		player.global_position = g.global_position + Vector3(4, 1, 0)
+		player.global_position = g.global_position + g.forward() * 4.0 + Vector3(0, 1, 0)
 		await _wait(1.0)
 		_check("coming close wakes the guard", g.aggro, "state %d dist %.1f y %.1f/%.1f" % [g._state, g.global_position.distance_to(player.global_position), g.global_position.y, player.global_position.y])
 		g.global_position = g.home + Vector3(60, 0, 0)

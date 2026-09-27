@@ -1,0 +1,82 @@
+{
+	"id": "lair",
+	"_about": "Bəbir yalı: meşədə qayalıq, Qafqaz bəbirinin yuvası (mini-boss). Yaxınlaşanda döyüş başlayır.",
+	"icon": "boss",
+	"discover_radius": 40,
+	"pieces": [
+		{
+			"ring": "n:Rock_4",
+			"radius": 13.0,
+			"count": 7,
+			"s": 4.5,
+			"skip": [
+				1
+			],
+			"far": true
+		},
+		{
+			"m": "n:Rock_Moss_2",
+			"p": [
+				4,
+				0,
+				-3
+			],
+			"r": 40,
+			"s": 3.5
+		},
+		{
+			"m": "d:Bones",
+			"p": [
+				-2,
+				0,
+				2
+			],
+			"r": 20,
+			"s": 1.2,
+			"c": false
+		},
+		{
+			"m": "r:Skull",
+			"p": [
+				1,
+				0.2,
+				-1
+			],
+			"r": 120,
+			"s": 0.5,
+			"c": false
+		},
+		{
+			"m": "n:WoodLog_Moss",
+			"p": [
+				-6,
+				0,
+				-4
+			],
+			"r": 70,
+			"s": 1.5
+		}
+	],
+	"actors": [
+		{
+			"enemy": "leopard",
+			"p": [
+				0,
+				0,
+				0
+			],
+			"level": 5
+		}
+	],
+	"interact": [
+		{
+			"kind": "chest",
+			"p": [
+				-4,
+				0,
+				5
+			],
+			"reward": "flask_seed"
+		}
+	]
+}

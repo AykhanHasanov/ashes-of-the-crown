@@ -37,6 +37,8 @@ var offer
 var _frame := 0
 var _fps_sum := 0.0
 var _fps_count := 0
+var _phys_sum := 0.0
+var _proc_sum := 0.0
 var _hearth_hint_shown := false
 
 
@@ -138,6 +140,8 @@ func _process(delta: float) -> void:
 	if _frame > 30:
 		_fps_sum += Engine.get_frames_per_second()
 		_fps_count += 1
+		_phys_sum += Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS)
+		_proc_sum += Performance.get_monitor(Performance.TIME_PROCESS)
 	_update_hearths(delta)
 	hud.set_marker(_marker_target(), rig.camera)
 	_tick(delta)
@@ -262,7 +266,7 @@ func _capture() -> void:
 		int(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000.0),
 		Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
 		int(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0),
-		Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
-		Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
+		_proc_sum / maxf(_fps_count, 1) * 1000.0,
+		_phys_sum / maxf(_fps_count, 1) * 1000.0,
 		Performance.get_monitor(Performance.OBJECT_NODE_COUNT)])
 	get_tree().quit()

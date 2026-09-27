@@ -1,0 +1,82 @@
+{
+	"id": "ash_bomber",
+	"name": "Partlayan Kül",
+	"faction": "ash",
+	"tier": "normal",
+	"role": "charger",
+	"xp": 10,
+	"model": {
+		"path": "res://assets/characters/skeletons/Skeleton_Minion.glb",
+		"scale": 0.78,
+		"tint": [
+			0.35,
+			0.25,
+			0.2
+		],
+		"ash_overlay": 1.0,
+		"glow_eyes": true,
+		"ember_core": true
+	},
+	"anims": {
+		"idle": "Idle",
+		"walk": "Walking_D_Skeletons",
+		"run": "Running_A",
+		"hit": [
+			"Hit_A",
+			"Hit_B"
+		],
+		"stagger": "Lie_Down",
+		"recover": "Lie_StandUp",
+		"death": "Death_C_Skeletons",
+		"spawn": "Spawn_Ground_Skeletons",
+		"block": "",
+		"dodge": "Dodge_Backward",
+		"taunt": "Taunt"
+	},
+	"stats": {
+		"health": 28,
+		"stance": 18,
+		"speed": 4.2,
+		"run_speed": 6.4,
+		"radius": 0.42,
+		"height": 1.7,
+		"ember": 6
+	},
+	"resist": {
+		"slash": 1.0,
+		"crush": 1.3,
+		"pierce": 0.8,
+		"fire": 0.5
+	},
+	"attacks": [
+		{
+			"id": "explode",
+			"clip": "Spellcast_Long",
+			"clip_impact": 0.9,
+			"windup": 2.0,
+			"unstoppable": 1.0,
+			"damage": 38,
+			"stance": 60,
+			"range": 2.4,
+			"arc": 360,
+			"lunge": 0.0,
+			"recovery": 0.0,
+			"weight": 1.0,
+			"cooldown": 99.0,
+			"kind": "explode",
+			"windup_clip": "Spellcasting",
+			"radius": 3.8,
+			"damage_type": "fire",
+			"burn": 2.0,
+			"unparryable": true
+		}
+	],
+	"behavior": {
+		"preferred_range": 1.5,
+		"wait_range": 1.5,
+		"flank": false,
+		"block_chance": 0.0,
+		"aggression": 2.5,
+		"ignores_tokens": true
+	}
+}

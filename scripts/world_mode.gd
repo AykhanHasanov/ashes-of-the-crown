@@ -14,6 +14,7 @@ const Compass := preload("res://scripts/ui/compass.gd")
 const WorldMap := preload("res://scripts/ui/world_map.gd")
 const HearthMenu := preload("res://scripts/ui/hearth_menu.gd")
 const Interactable := preload("res://scripts/world/interactable.gd")
+const AiOverlay := preload("res://scripts/debug/ai_overlay.gd")
 
 const HINT := "WASD hərəkət · Shift qaçış · Space yayınma · LMB/F zərbə · RMB blok · C kilid\nE istifadə · R şərbət · M xəritə · F10 debug · F6 streaming · F3 FPS"
 const AUTOSAVE_SECONDS := 300.0
@@ -75,6 +76,9 @@ func _setup() -> void:
 	_stream_label.visible = false
 	hud._root.add_child(_stream_label)
 	level.day_night.hour_changed.connect(_on_hour)
+	var overlay = AiOverlay.new()
+	overlay.player = player
+	hud._root.add_child(overlay)
 	Audio.music("ambient", 3.0)
 
 
@@ -182,6 +186,14 @@ func _interact() -> void:
 	if exec != "":
 		hud.set_prompt(exec)
 		return
+	for f in _foes.values():
+		if is_instance_valid(f) and f.surrendered and not f.dead and player.global_position.distance_to(f.global_position) < 2.8:
+			hud.set_prompt("[E]  Burax (təslim oldu)   ·   vur — öldür")
+			if Input.is_action_just_pressed("interact"):
+				f.spare()
+				GameState.world_add("killed", f.spawn_key)
+				Fx.notify("Quldur buraxıldı. Ordu (Faza F) açılanda təslim olanları sıralarına ala biləcəksən.")
+			return
 	if best == null:
 		hud.set_prompt("")
 		return
@@ -334,17 +346,45 @@ func _on_actor_requested(_poi: Dictionary, actor: Dictionary, key: String, pos: 
 		return
 	if _foes.has(key) and is_instance_valid(_foes[key]):
 		return
+	var f = _spawn(actor["enemy"], pos, int(actor.get("level", 1)), {"roll": true})
+	f.spawn_key = key
+	_foes[key] = f
+	f.killed.connect(func(_x): _on_foe_killed(key))
+
+
+## Any enemy in the world: perception tuned by light and fog, night bonus for ash,
+## summons (shamans, "Çağıran") and boss bars wired up.
+func _spawn(id: String, pos: Vector3, lv: int, opts: Dictionary):
+	var o := opts.duplicate()
+	o["night"] = level.day_night.is_night()
 	var f = Foe.new()
-	f.configure(actor["enemy"], int(actor.get("level", 1)))
+	f.configure(id, lv, o)
 	f.aggro_range = 16.0
 	f.home = pos
-	f.spawn_key = key
 	f.ground_query = level.height_at
+	f.world_visibility = _visibility
 	add_child(f)
 	f.global_position = pos
 	f.target = player
-	_foes[key] = f
-	f.killed.connect(func(_x): _on_foe_killed(key))
+	f.summon_requested.connect(func(eid: String, p: Vector3, l: int, so: Dictionary):
+		var h = _spawn(eid, p, l, so)
+		h.alarm(player.global_position))
+	f.engaged.connect(_on_engaged)
+	return f
+
+
+## 1 on a clear day, towards 0 at night and in fog (sight 25 m → 12 m).
+func _visibility() -> float:
+	var n: float = level.day_night.night_amount()
+	var fog: float = level.weather._cur["fog"] + level.weather.forest_fog * 0.5
+	return clampf((1.0 - n * 0.85) * (1.0 - fog * 0.6), 0.0, 1.0)
+
+
+func _on_engaged(f) -> void:
+	if f.tier == "boss":
+		hud.track_boss(f)
+		hud.banner(f.display_name)
+		Audio.music("battle", 0.5)
 
 
 func _on_foe_killed(key: String) -> void:
@@ -496,6 +536,11 @@ func _demo_setup() -> void:
 			_demo_view(Vector3(290, 0, 380), Vector3(304, 14, 342), 12.0)
 		"world_castle":
 			_demo_view(Vector3(318, 0, 168), Vector3(395, 40, 106), 11.0)
+		"world_fort":
+			_demo_view(Vector3(372, 0, 104), Vector3(395, 36, 106), 11.0)
+			var overlay = hud._root.get_children().filter(func(n): return n.get_script() == AiOverlay)
+			if not overlay.is_empty():
+				overlay[0].visible = true
 		"world_hearth":
 			GameState.world_add("hearths", "hearth_west")
 			level.day_night.set_hour(20.2)

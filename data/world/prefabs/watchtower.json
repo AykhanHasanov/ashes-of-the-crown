@@ -4,15 +4,97 @@
 	"icon": "tower",
 	"discover_radius": 45,
 	"pieces": [
-		{"m": "c:WatchTowerWRoof", "p": [0, 0, 0], "s": 4.0, "far": true},
-		{"m": "s:Bonfire", "p": [5, 0, 4], "s": 1.0, "c": false},
-		{"m": "kd:box_stacked", "p": [-4, 0, 4], "r": 25, "s": 1.0},
-		{"m": "s:WoodenTorch_Fire", "p": [3, 0, -3], "s": 1.0, "c": false}
+		{
+			"m": "c:WatchTowerWRoof",
+			"p": [
+				0,
+				0,
+				0
+			],
+			"s": 4.0,
+			"far": true
+		},
+		{
+			"m": "s:Bonfire",
+			"p": [
+				5,
+				0,
+				4
+			],
+			"s": 1.0,
+			"c": false
+		},
+		{
+			"m": "kd:box_stacked",
+			"p": [
+				-4,
+				0,
+				4
+			],
+			"r": 25,
+			"s": 1.0
+		},
+		{
+			"m": "s:WoodenTorch_Fire",
+			"p": [
+				3,
+				0,
+				-3
+			],
+			"s": 1.0,
+			"c": false
+		}
 	],
-	"lights": [{"p": [3, 2.8, -3], "kind": "torch", "scale": 0.5}],
+	"lights": [
+		{
+			"p": [
+				3,
+				2.8,
+				-3
+			],
+			"kind": "torch",
+			"scale": 0.5
+		}
+	],
 	"actors": [
-		{"enemy": "bandit_shield", "p": [4, 0, 2], "level": 1},
-		{"enemy": "ash_shade", "p": [-3, 0, 6], "level": 1, "night_only": true}
+		{
+			"enemy": "bandit_archer",
+			"p": [
+				4,
+				0,
+				2
+			],
+			"level": 2
+		},
+		{
+			"enemy": "bandit_spear",
+			"p": [
+				-3,
+				0,
+				3
+			],
+			"level": 2
+		},
+		{
+			"enemy": "ash_runner",
+			"p": [
+				-3,
+				0,
+				6
+			],
+			"level": 2,
+			"night_only": true
+		}
 	],
-	"interact": [{"kind": "chest", "p": [-2.5, 0, -3.5], "reward": "ember"}]
+	"interact": [
+		{
+			"kind": "chest",
+			"p": [
+				-2.5,
+				0,
+				-3.5
+			],
+			"reward": "ember"
+		}
+	]
 }

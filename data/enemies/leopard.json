@@ -1,0 +1,177 @@
+{
+	"id": "leopard",
+	"name": "Qafqaz bəbiri",
+	"faction": "beast",
+	"tier": "boss",
+	"role": "stalker",
+	"xp": 400,
+	"model": {
+		"path": "res://assets/quaternius/animals_pack/Fox.glb",
+		"length": 3.0,
+		"face_z": 1,
+		"ash_overlay": 0.0,
+		"glow_eyes": false,
+		"spots": true,
+		"loop": [
+			"AnimalArmature|Idle",
+			"AnimalArmature|Walk",
+			"AnimalArmature|Gallop",
+			"AnimalArmature|Idle_2_HeadLow"
+		],
+		"tint": [
+			1.05,
+			1.3,
+			0.62
+		]
+	},
+	"anims": {
+		"idle": "AnimalArmature|Idle",
+		"walk": "AnimalArmature|Walk",
+		"run": "AnimalArmature|Gallop",
+		"hit": [
+			"AnimalArmature|Idle_HitReact_Left",
+			"AnimalArmature|Idle_HitReact_Right"
+		],
+		"stagger": "AnimalArmature|Death",
+		"stagger_hold_at": 0.55,
+		"recover": "AnimalArmature|Jump_ToIdle",
+		"death": "AnimalArmature|Death",
+		"spawn": "",
+		"block": "",
+		"taunt": "AnimalArmature|Idle_2_HeadLow",
+		"warn": "AnimalArmature|Idle_2_HeadLow"
+	},
+	"stats": {
+		"health": 540,
+		"stance": 230,
+		"speed": 4.6,
+		"run_speed": 9.0,
+		"radius": 0.6,
+		"height": 1.3,
+		"ember": 120
+	},
+	"resist": {
+		"slash": 1.2,
+		"crush": 0.9,
+		"pierce": 1.0,
+		"fire": 1.2
+	},
+	"attacks": [
+		{
+			"id": "claw",
+			"clip": "AnimalArmature|Attack",
+			"clip_impact": 0.5,
+			"windup": 0.42,
+			"unstoppable": 0.0,
+			"damage": 14,
+			"stance": 14,
+			"range": 2.4,
+			"arc": 110,
+			"lunge": 8.0,
+			"recovery": 0.35,
+			"weight": 1.0,
+			"cooldown": 0.8
+		},
+		{
+			"id": "double_claw",
+			"clip": "AnimalArmature|Attack",
+			"clip_impact": 0.5,
+			"windup": 0.75,
+			"unstoppable": 0.0,
+			"damage": 22,
+			"stance": 24,
+			"range": 2.4,
+			"arc": 110,
+			"lunge": 9.0,
+			"recovery": 0.55,
+			"weight": 1.0,
+			"cooldown": 2.2,
+			"tags": [
+				"delayed"
+			],
+			"feint": true
+		},
+		{
+			"id": "pounce",
+			"clip": "AnimalArmature|Gallop_Jump",
+			"clip_impact": 0.45,
+			"windup": 0.75,
+			"unstoppable": 0.0,
+			"damage": 30,
+			"stance": 45,
+			"range": 14.0,
+			"arc": 60,
+			"lunge": 24.0,
+			"recovery": 0.8,
+			"weight": 1.0,
+			"cooldown": 4.5,
+			"kind": "pounce",
+			"min_range": 6.0,
+			"unparryable": true,
+			"tags": [
+				"leap"
+			]
+		},
+		{
+			"id": "rake",
+			"clip": "AnimalArmature|Attack",
+			"clip_impact": 0.5,
+			"windup": 0.6,
+			"unstoppable": 0.0,
+			"damage": 18,
+			"stance": 20,
+			"range": 2.6,
+			"arc": 200,
+			"lunge": 5.0,
+			"recovery": 0.6,
+			"weight": 1.0,
+			"cooldown": 3.5,
+			"tags": [
+				"sweep"
+			]
+		}
+	],
+	"behavior": {
+		"preferred_range": 2.2,
+		"wait_range": 10.0,
+		"flank": true,
+		"block_chance": 0.0,
+		"aggression": 1.3,
+		"can_dodge": 0.5,
+		"stealth": {
+			"after_attacks": 3,
+			"time": [
+				3.0,
+				5.0
+			],
+			"alpha": 0.25,
+			"phase2_time": [
+				2.0,
+				3.5
+			]
+		},
+		"phases": [
+			{
+				"at": 0.5,
+				"speed": 1.25,
+				"attack_speed": 1.2,
+				"banner": "Bəbir qəzəbləndi!"
+			}
+		]
+	},
+	"counters": {
+		"dodge": [
+			"delayed",
+			"sweep"
+		],
+		"block": [
+			"leap"
+		],
+		"parry": [
+			"delayed"
+		],
+		"distance": [
+			"leap"
+		]
+	}
+}

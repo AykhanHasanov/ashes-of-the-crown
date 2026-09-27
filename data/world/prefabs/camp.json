@@ -4,15 +4,95 @@
 	"icon": "camp",
 	"discover_radius": 30,
 	"pieces": [
-		{"m": "s:Tent", "p": [-3, 0, -2], "r": 20, "s": 0.26},
-		{"m": "s:Bonfire", "p": [2, 0, 2], "s": 1.0, "c": false},
-		{"m": "kd:barrel_small", "p": [4, 0, -2], "s": 1.0},
-		{"m": "kd:box_large", "p": [5, 0, -0.5], "r": 30, "s": 1.0},
-		{"m": "n:WoodLog", "p": [1, 0, 4.5], "r": 90, "s": 1.2, "c": false}
+		{
+			"m": "s:Tent",
+			"p": [
+				-3,
+				0,
+				-2
+			],
+			"r": 20,
+			"s": 0.26
+		},
+		{
+			"m": "s:Bonfire",
+			"p": [
+				2,
+				0,
+				2
+			],
+			"s": 1.0,
+			"c": false
+		},
+		{
+			"m": "kd:barrel_small",
+			"p": [
+				4,
+				0,
+				-2
+			],
+			"s": 1.0
+		},
+		{
+			"m": "kd:box_large",
+			"p": [
+				5,
+				0,
+				-0.5
+			],
+			"r": 30,
+			"s": 1.0
+		},
+		{
+			"m": "n:WoodLog",
+			"p": [
+				1,
+				0,
+				4.5
+			],
+			"r": 90,
+			"s": 1.2,
+			"c": false
+		}
 	],
 	"actors": [
-		{"enemy": "bandit_shield", "p": [2, 0, -1], "level": 1},
-		{"enemy": "ash_shade", "p": [-1, 0, 3], "level": 1}
+		{
+			"enemy": "bandit_sword",
+			"p": [
+				2,
+				0,
+				-1
+			],
+			"level": 2
+		},
+		{
+			"enemy": "bandit_archer",
+			"p": [
+				-2,
+				0,
+				3
+			],
+			"level": 2
+		},
+		{
+			"enemy": "bandit_shield",
+			"p": [
+				4,
+				0,
+				2
+			],
+			"level": 2
+		}
 	],
-	"interact": [{"kind": "chest", "p": [-5, 0, 2], "reward": "ember"}]
+	"interact": [
+		{
+			"kind": "chest",
+			"p": [
+				-5,
+				0,
+				2
+			],
+			"reward": "ember"
+		}
+	]
 }

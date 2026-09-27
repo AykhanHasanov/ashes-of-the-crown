@@ -11,6 +11,8 @@ var heavy := false             # knocks small foes down, bigger hit reactions
 var parryable := true
 var blockable := true
 var execution := false
+var burn := 0.0                # seconds of burning applied on a landed blow
+var guard_break := false       # a blocked guard-breaker empties the defender's stamina
 
 
 ## Fills the common fields; returns self so it chains: Hit.new().setup(...).

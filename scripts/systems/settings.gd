@@ -155,6 +155,7 @@ func _setup_input() -> void:
 	_bind_keys("debug_menu", [KEY_F10])
 	_bind_keys("map", [KEY_M])
 	_bind_keys("debug_stream", [KEY_F6])
+	_bind_keys("debug_ai", [KEY_F4])
 	_bind_keys("continue", [KEY_ENTER, KEY_KP_ENTER])
 	for i in 9:
 		_bind_keys("choice_%d" % (i + 1), [KEY_1 + i])

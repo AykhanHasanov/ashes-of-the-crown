@@ -49,7 +49,7 @@ func _collect(v, out: Array, key := "") -> void:
 	elif v is Array:
 		for x in v:
 			_collect(x, out, key)
-	elif v is String and v != "" and (key.contains("clip") or key in ["idle", "walk", "run", "hit", "stagger", "recover", "death", "spawn", "block", "move", "strafe", "back"]):
+	elif v is String and v != "" and (key.contains("clip") or key in ["idle", "walk", "run", "hit", "stagger", "recover", "death", "spawn", "block", "move", "strafe", "back", "taunt", "dodge", "surrender", "surrender_idle", "warn"]):
 		if not out.has(v):
 			out.append(v)
 

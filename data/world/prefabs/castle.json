@@ -4,33 +4,304 @@
 	"icon": "castle",
 	"discover_radius": 70,
 	"pieces": [
-		{"m": "c:Tower", "p": [-18, 0, -18], "s": 4.0, "far": true},
-		{"m": "c:Tower", "p": [18, 0, -18], "s": 4.0, "far": true},
-		{"m": "c:Tower", "p": [-18, 0, 18], "s": 4.0, "far": true},
-		{"m": "c:Tower", "p": [18, 0, 18], "s": 4.0, "far": true},
-		{"line": "c:TallWall", "from": [-15, -18], "to": [15, -18], "step": 6.0, "s": 4.0, "far": true},
-		{"line": "c:TallWall", "from": [-15, 18], "to": [15, 18], "step": 6.0, "s": 4.0, "far": true},
-		{"line": "c:TallWall", "from": [18, -15], "to": [18, 15], "step": 6.0, "s": 4.0, "far": true},
-		{"line": "c:TallWall", "from": [-18, -15], "to": [-18, 15], "step": 6.0, "s": 4.0, "far": true, "gate": "c:TallWallEntrance"},
-		{"m": "c:LargeSquareTower", "p": [6, 0, -6], "s": 4.2, "far": true},
-		{"m": "c:Banner", "p": [-18, 17.2, -18], "r": 45, "s": 3.0, "c": false, "far": true, "snap": false},
-		{"m": "c:Banner", "p": [18, 17.2, 18], "r": 225, "s": 3.0, "c": false, "far": true, "snap": false},
-		{"m": "s:Tent", "p": [-6, 0, 8], "r": 70, "s": 0.32},
-		{"m": "s:Bonfire_Fire", "p": [-4, 0, -2], "s": 1.1, "c": false},
-		{"m": "kd:crates_stacked", "p": [10, 0, 10], "r": 20, "s": 1.0},
-		{"m": "kd:barrel_large", "p": [12.5, 0, 9], "s": 1.0},
-		{"m": "kd:sword_shield_broken", "p": [-9, 0, -8], "r": 60, "s": 1.2, "c": false},
-		{"m": "c:Target", "p": [10, 0, -14], "r": 180, "s": 3.2},
-		{"m": "c:Dummy", "p": [4, 0, -13], "r": 180, "s": 2.4}
+		{
+			"m": "c:Tower",
+			"p": [
+				-18,
+				0,
+				-18
+			],
+			"s": 4.0,
+			"far": true
+		},
+		{
+			"m": "c:Tower",
+			"p": [
+				18,
+				0,
+				-18
+			],
+			"s": 4.0,
+			"far": true
+		},
+		{
+			"m": "c:Tower",
+			"p": [
+				-18,
+				0,
+				18
+			],
+			"s": 4.0,
+			"far": true
+		},
+		{
+			"m": "c:Tower",
+			"p": [
+				18,
+				0,
+				18
+			],
+			"s": 4.0,
+			"far": true
+		},
+		{
+			"line": "c:TallWall",
+			"from": [
+				-15,
+				-18
+			],
+			"to": [
+				15,
+				-18
+			],
+			"step": 6.0,
+			"s": 4.0,
+			"far": true
+		},
+		{
+			"line": "c:TallWall",
+			"from": [
+				-15,
+				18
+			],
+			"to": [
+				15,
+				18
+			],
+			"step": 6.0,
+			"s": 4.0,
+			"far": true
+		},
+		{
+			"line": "c:TallWall",
+			"from": [
+				18,
+				-15
+			],
+			"to": [
+				18,
+				15
+			],
+			"step": 6.0,
+			"s": 4.0,
+			"far": true
+		},
+		{
+			"line": "c:TallWall",
+			"from": [
+				-18,
+				-15
+			],
+			"to": [
+				-18,
+				15
+			],
+			"step": 6.0,
+			"s": 4.0,
+			"far": true,
+			"gate": "c:TallWallEntrance"
+		},
+		{
+			"m": "c:LargeSquareTower",
+			"p": [
+				6,
+				0,
+				-6
+			],
+			"s": 4.2,
+			"far": true
+		},
+		{
+			"m": "c:Banner",
+			"p": [
+				-18,
+				17.2,
+				-18
+			],
+			"r": 45,
+			"s": 3.0,
+			"c": false,
+			"far": true,
+			"snap": false
+		},
+		{
+			"m": "c:Banner",
+			"p": [
+				18,
+				17.2,
+				18
+			],
+			"r": 225,
+			"s": 3.0,
+			"c": false,
+			"far": true,
+			"snap": false
+		},
+		{
+			"m": "s:Tent",
+			"p": [
+				-6,
+				0,
+				8
+			],
+			"r": 70,
+			"s": 0.32
+		},
+		{
+			"m": "s:Bonfire_Fire",
+			"p": [
+				-4,
+				0,
+				-2
+			],
+			"s": 1.1,
+			"c": false
+		},
+		{
+			"m": "kd:crates_stacked",
+			"p": [
+				10,
+				0,
+				10
+			],
+			"r": 20,
+			"s": 1.0
+		},
+		{
+			"m": "kd:barrel_large",
+			"p": [
+				12.5,
+				0,
+				9
+			],
+			"s": 1.0
+		},
+		{
+			"m": "kd:sword_shield_broken",
+			"p": [
+				-9,
+				0,
+				-8
+			],
+			"r": 60,
+			"s": 1.2,
+			"c": false
+		},
+		{
+			"m": "c:Target",
+			"p": [
+				10,
+				0,
+				-14
+			],
+			"r": 180,
+			"s": 3.2
+		},
+		{
+			"m": "c:Dummy",
+			"p": [
+				4,
+				0,
+				-13
+			],
+			"r": 180,
+			"s": 2.4
+		}
 	],
 	"lights": [
-		{"p": [-4, 1.0, -2], "kind": "fire", "scale": 0.8}
+		{
+			"p": [
+				-4,
+				1.0,
+				-2
+			],
+			"kind": "fire",
+			"scale": 0.8
+		}
 	],
 	"actors": [
-		{"enemy": "bandit_shield", "p": [-6, 0, -4], "level": 2},
-		{"enemy": "bandit_shield", "p": [2, 0, 6], "level": 2},
-		{"enemy": "bandit_shield", "p": [-22, 0, 3], "level": 2},
-		{"enemy": "wolf", "p": [-10, 0, 10], "level": 2}
+		{
+			"enemy": "bandit_ataman",
+			"p": [
+				2,
+				0,
+				-2
+			],
+			"level": 4
+		},
+		{
+			"enemy": "bandit_shield",
+			"p": [
+				-6,
+				0,
+				-4
+			],
+			"level": 3
+		},
+		{
+			"enemy": "bandit_shield",
+			"p": [
+				-22,
+				0,
+				3
+			],
+			"level": 3
+		},
+		{
+			"enemy": "bandit_archer",
+			"p": [
+				10,
+				0,
+				-12
+			],
+			"level": 3
+		},
+		{
+			"enemy": "bandit_archer",
+			"p": [
+				-10,
+				0,
+				12
+			],
+			"level": 3
+		},
+		{
+			"enemy": "bandit_spear",
+			"p": [
+				2,
+				0,
+				6
+			],
+			"level": 3
+		},
+		{
+			"enemy": "bandit_sword",
+			"p": [
+				-24,
+				0,
+				-4
+			],
+			"level": 3
+		},
+		{
+			"enemy": "wolf",
+			"p": [
+				-10,
+				0,
+				10
+			],
+			"level": 2
+		}
 	],
-	"interact": [{"kind": "chest", "p": [9, 0, -1], "reward": "flask_seed"}]
+	"interact": [
+		{
+			"kind": "chest",
+			"p": [
+				9,
+				0,
+				-1
+			],
+			"reward": "flask_seed"
+		}
+	]
 }
