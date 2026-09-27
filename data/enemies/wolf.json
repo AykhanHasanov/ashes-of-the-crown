@@ -1,6 +1,6 @@
 {
 	"id": "wolf",
-	"name": "Canavar",
+	"name": "Kurt",
 	"faction": "beast",
 	"model": {
 		"path": "res://assets/quaternius/animals_pack/Wolf.glb",

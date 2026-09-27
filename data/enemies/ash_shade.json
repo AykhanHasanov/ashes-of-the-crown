@@ -1,6 +1,6 @@
 {
 	"id": "ash_shade",
-	"name": "Kül Kölgəsi",
+	"name": "Kül Gölgesi",
 	"faction": "ash",
 	"model": {
 		"path": "res://assets/characters/skeletons/Skeleton_Minion.glb",

@@ -37,15 +37,15 @@ func _ready() -> void:
 	_buttons = VBoxContainer.new()
 	_buttons.add_theme_constant_override("separation", 12)
 	_panel.add_child(_buttons)
-	var heading := UITheme.title("FASİLƏ", 34)
+	var heading := UITheme.title("DURAKLATILDI", 34)
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_buttons.add_child(heading)
-	_button("Davam et", close)
-	_button("Parametrlər", _open_settings)
-	_button("Baş menyu", func():
+	_button("Devam et", close)
+	_button("Ayarlar", _open_settings)
+	_button("Ana menü", func():
 		close()
 		main_menu_requested.emit())
-	_button("Oyundan çıx", func(): get_tree().quit())
+	_button("Oyundan çık", func(): get_tree().quit())
 
 	_settings = SettingsPanel.new()
 	_settings.visible = false

@@ -121,13 +121,13 @@ func _parse_args() -> void:
 
 ## Actions the player may rebind, with their Azerbaijani labels (settings → Düymələr).
 const REBINDABLE := [
-	["move_up", "İrəli"], ["move_down", "Geri"], ["move_left", "Sola"], ["move_right", "Sağa"],
-	["attack", "Yüngül zərbə"], ["heavy", "Ağır zərbə (basılı: yüklə)"], ["block", "Blok / parry"],
-	["dash", "Kül addımı"], ["sprint", "Qaçış"], ["jump", "Tullanma"],
-	["ember_power", "Köz / Alov Dalğası"], ["lock_on", "Hədəfə kilidlən"],
-	["drink", "Nar şərbəti"], ["interact", "Danış / toxun / infaz"],
-	["skill_1", "Slot 1"], ["skill_2", "Slot 2"], ["skill_3", "Slot 3"], ["skill_4", "Slot 4"],
-	["journal", "Jurnal"], ["map", "Xəritə"], ["pause", "Fasilə"],
+	["move_up", "İleri"], ["move_down", "Geri"], ["move_left", "Sola"], ["move_right", "Sağa"],
+	["attack", "Hafif saldırı"], ["heavy", "Ağır saldırı (basılı: yükle)"], ["block", "Blok / savuşturma"],
+	["dash", "Kül adımı"], ["sprint", "Koşu"], ["jump", "Zıplama"],
+	["ember_power", "Köz / Alev Dalgası"], ["lock_on", "Hedefe kilitlen"],
+	["drink", "Nar Şerbeti"], ["interact", "Konuş / dokun / infaz"],
+	["skill_1", "Yuva 1"], ["skill_2", "Yuva 2"], ["skill_3", "Yuva 3"], ["skill_4", "Yuva 4"],
+	["journal", "Günlük"], ["map", "Harita"], ["pause", "Duraklat"],
 ]
 const INPUT_PATH := "user://input.cfg"
 
@@ -277,16 +277,16 @@ func event_label(event: InputEvent) -> String:
 	if event is InputEventMouseButton:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
-				return "Sol klik"
+				return "Sol tık"
 			MOUSE_BUTTON_RIGHT:
-				return "Sağ klik"
+				return "Sağ tık"
 			MOUSE_BUTTON_MIDDLE:
-				return "Orta düymə"
+				return "Orta tuş"
 			MOUSE_BUTTON_WHEEL_UP:
-				return "Çarx yuxarı"
+				return "Tekerlek yukarı"
 			MOUSE_BUTTON_WHEEL_DOWN:
-				return "Çarx aşağı"
-		return "Siçan %d" % event.button_index
+				return "Tekerlek aşağı"
+		return "Fare %d" % event.button_index
 	return "?"
 
 

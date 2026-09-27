@@ -9,30 +9,30 @@ signal memory_burned(memory: Dictionary)
 signal memories_reset
 
 const MEMORIES := [
-	{"id": "rufet_face", "title": "Rüfətin üzü", "text": "Çay kənarında qan qardaşı olduğumuz gün onun gülüşü.",
-		"cost": "Rüfəti tanımayacaqsan."},
-	{"id": "mother_name", "title": "Anamın adı", "text": "Hər gecə laylamı oxuyan səs. Onun adı...",
-		"cost": "Ocaqların istisi daha zəif sağaldacaq."},
-	{"id": "sabir_lesson", "title": "Sabirin ilk dərsi", "text": "\"Tac başa deyil, çiyinə qoyulur, şahzadəm.\"",
-		"cost": "Mükəmməl yayınma çətinləşəcək."},
-	{"id": "kozqala_streets", "title": "Közqalanın küçələri", "text": "Bazarın ədviyyat qoxusu, karvansaranın zəngləri.",
-		"cost": "Yol göstərən işarələr sönəcək."},
-	{"id": "father_voice", "title": "Atamın səsi", "text": "Kral olmazdan əvvəl, sadəcə ata olduğu illər.",
-		"cost": "Əks-sədalar susacaq."},
-	{"id": "first_sword", "title": "İlk qılıncım", "text": "Şahbazın mənə bağışladığı taxta qılınc.",
-		"cost": "Güclü zərbən zəifləyəcək."},
+	{"id": "rufet_face", "title": "Rüfet'in yüzü", "text": "Nehir kıyısında kan kardeşi olduğumuz gün onun gülüşü.",
+		"cost": "Rüfet'i tanımayacaksın."},
+	{"id": "mother_name", "title": "Annemin adı", "text": "Her gece ninnimi söyleyen ses. Onun adı...",
+		"cost": "Ocakların sıcaklığı daha zayıf iyileştirecek."},
+	{"id": "sabir_lesson", "title": "Sabir'in ilk dersi", "text": "\"Taç başa değil, omuza konur, şehzadem.\"",
+		"cost": "Kusursuz kaçış zorlaşacak."},
+	{"id": "kozqala_streets", "title": "Közkale'nin sokakları", "text": "Çarşının baharat kokusu, kervansarayın çanları.",
+		"cost": "Yol gösteren işaretler sönecek."},
+	{"id": "father_voice", "title": "Babamın sesi", "text": "Kral olmadan önce, sadece bir baba olduğu yıllar.",
+		"cost": "Yankılar susacak."},
+	{"id": "first_sword", "title": "İlk kılıcım", "text": "Şahbaz'ın bana hediye ettiği tahta kılıç.",
+		"cost": "Ağır darben zayıflayacak."},
 ]
 
 ## Kül Şahı grows louder with every burned memory.
 const WHISPERS := [
-	"...bir az da, balaca şah...",
-	"...xatirələr yalnız yükdür...",
-	"...onların üzü sənə nə verdi ki?...",
-	"...atanı da belə yedim. Yavaş-yavaş...",
-	"...tac səni gözləyir. MƏN səni gözləyirəm...",
-	"...Ayxan kim idi?...",
+	"...biraz daha, küçük şah...",
+	"...hatıralar sadece yüktür...",
+	"...onların yüzü sana ne verdi ki?...",
+	"...babanı da böyle yedim. Yavaş yavaş...",
+	"...taç seni bekliyor. BEN seni bekliyorum...",
+	"...Ayxan kimdi?...",
 ]
-const GIFT_WHISPER := "...başqasının acısı da dadlıdır..."
+const GIFT_WHISPER := "...başkasının acısı da lezzetli..."
 
 var burned: Array[Dictionary] = []
 var gifted: Array[Dictionary] = []

@@ -1,6 +1,6 @@
 {
 	"id": "bandit_shield",
-	"name": "Qalxanlı quldur",
+	"name": "Kalkanlı Haydut",
 	"faction": "bandit",
 	"model": {
 		"path": "res://assets/characters/adventurers/Barbarian.glb",

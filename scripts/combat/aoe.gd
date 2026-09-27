@@ -1,6 +1,6 @@
 extends Node3D
 ## Area effects: explosions and ground slams (instant), and burning ground left by
-## "Alovlu" enemies (lingering). Only combatants hostile to the source are hurt.
+## "Alevli" enemies (lingering). Only combatants hostile to the source are hurt.
 
 const Effects := preload("res://scripts/world/effects.gd")
 const Hit := preload("res://scripts/combat/hit.gd")

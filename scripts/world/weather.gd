@@ -5,7 +5,7 @@ extends Node3D
 
 signal changed(state: String)
 
-const NAMES := {"clear": "Aydın", "cloudy": "Buludlu", "rain": "Yağış", "fog": "Duman"}
+const NAMES := {"clear": "Açık", "cloudy": "Bulutlu", "rain": "Yağmur", "fog": "Sisli"}
 
 var state := "clear"
 var day_night            # scripts/world/day_night.gd

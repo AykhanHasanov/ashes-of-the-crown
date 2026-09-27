@@ -7,9 +7,9 @@
 	"road_clearance": 6.0,
 	"edge_margin": 60.0,
 	"types": [
-		{"type": "camp", "name": "Tərk edilmiş düşərgə", "weight": 1.0, "biomes": ["meadow", "forest", "riverside"], "flatten": 9.0},
-		{"type": "stones", "name": "Daş dairəsi", "weight": 0.8, "biomes": ["meadow", "farmland"], "flatten": 8.0},
-		{"type": "graves", "name": "Köhnə məzarlıq", "weight": 0.8, "biomes": ["forest", "meadow"], "flatten": 8.0},
-		{"type": "chest", "name": "Gizli sandıq", "weight": 0.6, "biomes": ["forest", "riverside", "meadow"], "flatten": 3.0}
+		{"type": "camp", "name": "Terk edilmiş kamp", "weight": 1.0, "biomes": ["meadow", "forest", "riverside"], "flatten": 9.0},
+		{"type": "stones", "name": "Taş çemberi", "weight": 0.8, "biomes": ["meadow", "farmland"], "flatten": 8.0},
+		{"type": "graves", "name": "Eski mezarlık", "weight": 0.8, "biomes": ["forest", "meadow"], "flatten": 8.0},
+		{"type": "chest", "name": "Gizli sandık", "weight": 0.6, "biomes": ["forest", "riverside", "meadow"], "flatten": 3.0}
 	]
 }

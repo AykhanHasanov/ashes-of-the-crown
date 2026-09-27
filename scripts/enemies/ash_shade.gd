@@ -22,7 +22,7 @@ const WAIT_RING := 3.4
 enum State { RISING, CHASE, WINDUP, LUNGE, RECOVER, WHIRL_WINDUP, DEAD }
 
 var kind := "normal"
-var display_name := "Kül Kölgəsi"
+var display_name := "Kül Gölgesi"
 var max_health := 40.0
 var health := 40.0
 var damage := 12.0
@@ -68,7 +68,7 @@ func configure(k: String) -> void:
 		"elite":
 			_model_file = "Skeleton_Warrior.glb"
 			_weapon_file = "Skeleton_Axe.gltf"
-			display_name = "Kül Cəngavəri"
+			display_name = "Kül Şövalyesi"
 			radius = 0.75
 	health = max_health
 

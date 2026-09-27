@@ -225,7 +225,7 @@ func _update_hearths(delta: float) -> void:
 			player.heal(Balance.HEARTH_HEAL * (5.0 / 9.0 if Memory.is_burned("mother_name") else 1.0) * delta)
 			if not _hearth_hint_shown:
 				_hearth_hint_shown = true
-				hud.banner("Ocağın istisi yaralarını sağaldır")
+				hud.banner("Ocağın sıcaklığı yaralarını iyileştiriyor")
 			return
 
 

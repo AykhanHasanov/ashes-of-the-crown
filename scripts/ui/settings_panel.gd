@@ -7,7 +7,7 @@ signal closed
 const UITheme := preload("res://scripts/ui/ui_theme.gd")
 
 var _main: Control          # sliders and toggles
-var _keys: Control          # the "Düymələr" page
+var _keys: Control          # the "Tuşlar" page
 var _key_buttons := {}      # action -> Button
 var _waiting := ""          # action waiting for a new input
 
@@ -18,7 +18,7 @@ func _ready() -> void:
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 18)
 	add_child(box)
-	var heading := UITheme.title("PARAMETRLƏR", 30)
+	var heading := UITheme.title("AYARLAR", 30)
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(heading)
 
@@ -29,16 +29,16 @@ func _ready() -> void:
 	box.add_child(grid)
 	_main = grid
 
-	_slider(grid, "Musiqi", Settings.music_volume, func(v: float): Settings.music_volume = v)
-	_slider(grid, "Səs effektləri", Settings.sfx_volume, func(v: float): Settings.sfx_volume = v)
-	_slider(grid, "Ekran silkələnməsi", Settings.screen_shake, func(v: float): Settings.screen_shake = v)
-	_choice(grid, "Qrafika", ["Aşağı (noutbuk)", "Yüksək"], 1 if Settings.is_high() else 0,
+	_slider(grid, "Müzik", Settings.music_volume, func(v: float): Settings.music_volume = v)
+	_slider(grid, "Ses efektleri", Settings.sfx_volume, func(v: float): Settings.sfx_volume = v)
+	_slider(grid, "Ekran sarsıntısı", Settings.screen_shake, func(v: float): Settings.screen_shake = v)
+	_choice(grid, "Qrafika", ["Düşük (dizüstü)", "Yüksek"], 1 if Settings.is_high() else 0,
 		func(i: int): Settings.quality = Settings.Quality.HIGH if i == 1 else Settings.Quality.LOW)
 	_toggle(grid, "Tam ekran", Settings.fullscreen, func(on: bool): Settings.fullscreen = on)
-	_toggle(grid, "Zərbə rəqəmləri", Settings.damage_numbers, func(on: bool): Settings.damage_numbers = on)
-	_label(grid, "İdarəetmə")
+	_toggle(grid, "Hasar sayıları", Settings.damage_numbers, func(on: bool): Settings.damage_numbers = on)
+	_label(grid, "Kontroller")
 	var keys_button := Button.new()
-	keys_button.text = "Düymələr…"
+	keys_button.text = "Tuşlar…"
 	keys_button.custom_minimum_size = Vector2(300, 44)
 	keys_button.pressed.connect(func(): _show_keys(true))
 	grid.add_child(keys_button)
@@ -103,8 +103,8 @@ func _build_keys() -> Control:
 	var page := VBoxContainer.new()
 	page.add_theme_constant_override("separation", 10)
 	var note := Label.new()
-	note.text = "Dəyişmək üçün düyməyə klikləyin, sonra yeni düyməni basın (Esc — imtina).
-Gamepad düymələri ayrıca işləyir və dəyişmir."
+	note.text = "Değiştirmek için bir tuşa tıklayın, sonra yeni tuşa basın (Esc — iptal).
+Gamepad tuşları ayrı çalışır ve değişmez."
 	note.add_theme_font_size_override("font_size", 15)
 	note.modulate = Color(1, 1, 1, 0.7)
 	page.add_child(note)
@@ -133,7 +133,7 @@ Gamepad düymələri ayrıca işləyir və dəyişmir."
 		grid.add_child(b)
 		_key_buttons[action] = b
 	var reset := Button.new()
-	reset.text = "Standarta qaytar"
+	reset.text = "Varsayılana dön"
 	reset.custom_minimum_size = Vector2(260, 42)
 	reset.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	reset.pressed.connect(func():
@@ -148,7 +148,7 @@ func _refresh_keys() -> void:
 	for action in _key_buttons:
 		var b: Button = _key_buttons[action]
 		if action == _waiting:
-			b.text = "…düyməni basın…"
+			b.text = "…bir tuşa basın…"
 			continue
 		var names := []
 		for e in Settings.pc_events(action):

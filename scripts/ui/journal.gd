@@ -32,7 +32,7 @@ func _ready() -> void:
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 14)
 	panel.add_child(box)
-	var heading := UITheme.title("JURNAL", 32)
+	var heading := UITheme.title("GÜNLÜK", 32)
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(heading)
 
@@ -42,7 +42,7 @@ func _ready() -> void:
 	_memories = _column(cols, 420)
 	_echoes = _column(cols, 440)
 
-	var hint := UITheme.title("Tab / Esc — bağla", 15, UITheme.MUTED)
+	var hint := UITheme.title("Tab / Esc — kapat", 15, UITheme.MUTED)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	box.add_child(hint)
 	visible = false
@@ -90,7 +90,7 @@ func _column(parent: Control, width: float) -> RichTextLabel:
 
 
 func _refresh() -> void:
-	var m := "[color=#e8b870][font_size=22]XATİRƏLƏR[/font_size][/color]\n"
+	var m := "[color=#e8b870][font_size=22]HATIRALAR[/font_size][/color]\n"
 	for mem in Memory.MEMORIES:
 		if Memory.is_burned(mem["id"]):
 			m += "[color=#5f5852][s]%s[/s] — kül[/color]\n" % mem["title"]
@@ -98,9 +98,9 @@ func _refresh() -> void:
 			m += "%s\n[color=#9a9088][i]%s[/i][/color]\n[color=#c07a50]Yanarsa: %s[/color]\n" % [mem["title"], mem["text"], mem["cost"]]
 	_memories.text = m
 
-	var e := "[color=#e8b870][font_size=22]ƏKS-SƏDALAR[/font_size][/color]\n"
+	var e := "[color=#e8b870][font_size=22]YANKILAR[/font_size][/color]\n"
 	if GameState.echoes_seen.is_empty():
-		e += "[color=#9a9088]Hələ heç bir əks-səda görməmisən.[/color]\n"
+		e += "[color=#9a9088]Henüz hiçbir yankı görmedin.[/color]\n"
 	for i in GameState.echoes_seen:
 		var echo: Dictionary = KingEchoes.ECHOES[i]
 		e += "[color=#ffb070]• %s[/color]\n[color=#b8aea4][i]%s[/i][/color]\n" % [echo["place"], echo["scene"]]

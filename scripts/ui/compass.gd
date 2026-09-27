@@ -7,7 +7,7 @@ const UITheme := preload("res://scripts/ui/ui_theme.gd")
 const WIDTH := 620.0
 const HEIGHT := 40.0
 const SPAN := deg_to_rad(110.0)     # visible arc
-const CARDINALS := [[0.0, "ŞİMAL"], [90.0, "ŞƏRQ"], [180.0, "CƏNUB"], [270.0, "QƏRB"]]
+const CARDINALS := [[0.0, "KUZEY"], [90.0, "DOĞU"], [180.0, "GÜNEY"], [270.0, "BATI"]]
 const COLORS := {
 	"hearth": Color(1.0, 0.55, 0.22), "hearth_cold": Color(0.6, 0.5, 0.42),
 	"place": Color(0.92, 0.84, 0.66), "marker": Color(0.45, 0.8, 1.0),
