@@ -168,6 +168,10 @@ def fx(x, name):
         y = fft_filter(x, lo=90, gains=[(0, 0), (250, 1.5), (2500, 3), (6000, 1), (12000, -4)])
         y = drive(y, 1.8)
         return reverb(y, 0.12, 0.8, 0.18, 5000)
+    if name == "villager":
+        # Plain folk outdoors: a little warmth and presence, a short open-air slap-back
+        y = fft_filter(x, lo=85, gains=[(0, 0), (220, 1.0), (3000, 1.5), (11000, -3)])
+        return reverb(y, 0.08, 0.5, 0.1, 6500)
     if name == "bandit_old":
         y = fft_filter(x, lo=80, hi=7000, gains=[(0, 0), (180, 2.5), (2000, 2)])
         y = drive(y, 2.4)

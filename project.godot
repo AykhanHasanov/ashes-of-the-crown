@@ -45,3 +45,7 @@ foliage_density={
 "type": "float",
 "value": 1.0
 }
+window_light={
+"type": "float",
+"value": 0.0
+}

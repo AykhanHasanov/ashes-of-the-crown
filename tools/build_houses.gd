@@ -9,6 +9,7 @@ extends SceneTree
 const KIT := "res://assets/village_mk/%s.gltf"
 const OUT := "res://assets/buildings/"
 const STOREY := 3.0
+var WINDOW: ShaderMaterial
 ## Wall modules per family: [plain, door, wide window, thin window]
 const FAMILY := {
 	"UnevenBrick": ["Wall_UnevenBrick_Straight", "Wall_UnevenBrick_Door_Round", "Wall_UnevenBrick_Window_Wide_Round", "Wall_UnevenBrick_Window_Thin_Round"],
@@ -21,12 +22,14 @@ var _cache := {}
 
 
 func _init() -> void:
+	WINDOW = ShaderMaterial.new()
+	WINDOW.shader = load("res://shaders/window_glow.gdshader")
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT))
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/world/houses.json"))
 	for id in data["houses"]:
 		var house := _assemble(data["houses"][id])
 		var mesh := _merge(house)
-		_save(id, mesh)
+		_save(id, mesh, house.get_meta("chimney", null))
 		house.free()
 	for k in _cache:
 		(_cache[k] as Node).free()
@@ -80,6 +83,7 @@ func _assemble(cfg: Dictionary) -> Node3D:
 	_put(root, "Roof_Front_Brick%d" % (w * 2), Vector3(0, top, -hd), PI)
 	if cfg.get("chimney", false):
 		_put(root, "Prop_Chimney", Vector3(hw * 0.45, top + 0.6, -hd * 0.45), 0.0)
+		root.set_meta("chimney", Vector3(hw * 0.45, top + 0.6 + 3.1, -hd * 0.45))
 	return root
 
 
@@ -119,15 +123,20 @@ func _merge(house: Node3D) -> ArrayMesh:
 	for mat in tools:
 		var st: SurfaceTool = tools[mat]
 		st.index()
-		im.add_surface(Mesh.PRIMITIVE_TRIANGLES, st.commit_to_arrays(), [], {}, mats[mat])
+		var m: Material = mats[mat]
+		if mat == "MI_WindowGlass":
+			m = WINDOW   # lit from inside at night
+		im.add_surface(Mesh.PRIMITIVE_TRIANGLES, st.commit_to_arrays(), [], {}, m)
 	im.generate_lods(25.0, 60.0, [])
 	return im.get_mesh()
 
 
-func _save(id: String, mesh: ArrayMesh) -> void:
+func _save(id: String, mesh: ArrayMesh, chimney) -> void:
 	var root := MeshInstance3D.new()
 	root.name = id
 	root.mesh = mesh
+	if chimney != null:
+		root.set_meta("chimney", chimney)   # the world puts hearth smoke here
 	var scene := PackedScene.new()
 	scene.pack(root)
 	var err := ResourceSaver.save(scene, OUT + id + ".scn")

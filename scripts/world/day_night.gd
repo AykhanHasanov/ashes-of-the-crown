@@ -148,6 +148,11 @@ func _apply() -> void:
 	# Mist: heavy around sunrise (5-8), lighter at dusk, a trace at noon
 	var dawn := clampf(1.0 - absf(hour - 6.5) / 2.0, 0.0, 1.0)
 	var dusk := clampf(1.0 - absf(hour - 19.5) / 2.0, 0.0, 1.0)
+	# Lamps in the houses: lit from dusk till the small hours, most of them out by 2 am
+	var lamps := clampf((n - 0.15) * 2.5, 0.0, 1.0)
+	if hour > 1.5 and hour < 6.0:
+		lamps *= 0.25
+	RenderingServer.global_shader_parameter_set("window_light", lamps)
 	env.fog_height_density = 0.005 + dawn * 0.035 + dusk * 0.012 + n * 0.012 + weather_fog * 0.03
 
 
