@@ -1,0 +1,24 @@
+keys,tr
+MEMORY_RUFET_FACE_NAME,Rüfet'in yüzü
+MEMORY_RUFET_FACE_DESC,Nehir kıyısında kan kardeşi olduğumuz gün onun gülüşü.
+MEMORY_RUFET_FACE_COST,Rüfet'i tanımayacaksın.
+MEMORY_MOTHER_NAME_NAME,Annemin adı
+MEMORY_MOTHER_NAME_DESC,Her gece ninnimi söyleyen ses. Onun adı...
+MEMORY_MOTHER_NAME_COST,Ocakların sıcaklığı daha zayıf iyileştirecek.
+MEMORY_SABIR_LESSON_NAME,Sabir'in ilk dersi
+MEMORY_SABIR_LESSON_DESC,"""Taç başa değil, omuza konur, şehzadem."""
+MEMORY_SABIR_LESSON_COST,Kusursuz kaçış zorlaşacak.
+MEMORY_KOZQALA_STREETS_NAME,Közkale'nin sokakları
+MEMORY_KOZQALA_STREETS_DESC,"Çarşının baharat kokusu, kervansarayın çanları."
+MEMORY_KOZQALA_STREETS_COST,Yol gösteren işaretler sönecek.
+MEMORY_FATHER_VOICE_NAME,Babamın sesi
+MEMORY_FATHER_VOICE_DESC,"Kral olmadan önce, sadece bir baba olduğu yıllar."
+MEMORY_FATHER_VOICE_COST,Yankılar susacak.
+MEMORY_FIRST_SWORD_NAME,İlk kılıcım
+MEMORY_FIRST_SWORD_DESC,Şahbaz'ın bana hediye ettiği tahta kılıç.
+MEMORY_FIRST_SWORD_COST,Ağır darben zayıflayacak.
+MENU_OVERWRITE_TITLE,Kayıt yuvaları dolu
+MENU_OVERWRITE_BODY,Boş kayıt yuvası kalmadı. Yeni oyun %s üzerine yazılacak (son oynama: %s). Bu kayıt geri gelmez.
+MENU_SLOT_NAME,Yuva %d
+MENU_OVERWRITE_CONFIRM,Üzerine yaz
+MENU_CANCEL,Vazgeç

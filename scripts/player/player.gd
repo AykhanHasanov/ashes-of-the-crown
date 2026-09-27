@@ -120,8 +120,8 @@ func _ready() -> void:
 	hero.position = Vector3(0, 4.0, 0.8)
 	add_child(hero)
 
-	Memory.memory_burned.connect(_on_memory_burned)
-	Memory.memories_reset.connect(_refresh_burn_look)
+	EventBus.memory_burned.connect(_on_memory_burned)
+	EventBus.state_replaced.connect(_refresh_burn_look)
 	health_changed.emit.call_deferred(health, MAX_HEALTH)
 	ember_changed.emit.call_deferred(ember, Balance.EMBER_MAX)
 
@@ -395,12 +395,12 @@ func _release_wheel() -> void:
 	Fx.release_time("radial")
 	if id == "":
 		return
-	if not GameState.flags.has("wave_confirmed"):
+	if not WorldState.has_flag(&"wave_confirmed"):
 		radial.ask_confirm()
 		var ok: bool = await radial.confirmed
 		if not ok:
 			return
-		GameState.set_flag("wave_confirmed")
+		WorldState.set_flag(&"wave_confirmed")
 	cast_wave(id)
 
 
@@ -525,8 +525,8 @@ func _maybe_offer() -> void:
 		health_changed.emit(health, MAX_HEALTH)
 		Fx.fire_nova(global_position, 3.0)
 		Audio.play("memory_burn", -2.0, 0.0)
-		if not m.is_empty():
-			Fx.notify("Kül Şahı «%s» hatırasını seçti." % m["title"])
+		if m != null:
+			Fx.notify("Kül Şahı «%s» hatırasını seçti." % tr(m.display_name_key))
 
 
 func heal(amount: float) -> void:
@@ -548,14 +548,14 @@ func _die() -> void:
 	died.emit()
 
 
-func _on_memory_burned(_memory: Dictionary) -> void:
+func _on_memory_burned(_id: StringName) -> void:
 	_refresh_burn_look()
 
 
 ## The ember feeds on what Ayxan forgets: it burns brighter, his clothes turn to ash.
 func _refresh_burn_look() -> void:
-	var n := Memory.burned.size()
-	var t := float(n) / Memory.MEMORIES.size()
+	var n := Memory.burned_count()
+	var t := float(n) / maxi(Memory.all().size(), 1)
 	_ember_light.light_energy = 1.2 + n * 0.45
 	_ember_light.omni_range = 3.5 + n * 0.4
 	_ember_mat.emission_energy_multiplier = 3.0 + n * 1.5

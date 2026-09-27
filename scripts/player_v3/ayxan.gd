@@ -140,8 +140,8 @@ func _ready() -> void:
 	_model.set_overlay(_overlay)
 	_make_ember()
 	equip("sword")
-	Memory.memory_burned.connect(func(_m): _refresh_burn_look())
-	Memory.memories_reset.connect(_refresh_burn_look)
+	EventBus.memory_burned.connect(func(_id: StringName): _refresh_burn_look())
+	EventBus.state_replaced.connect(_refresh_burn_look)
 	_emit_all.call_deferred()
 
 
@@ -616,7 +616,7 @@ func _parry_window() -> float:
 	var p: Dictionary = _cfg["parry"]
 	var w: float = p["shield_window"] if weapon.get("shield") is Dictionary else p["window"]
 	w += float(weapon.get("parry_window_bonus", 0.0))
-	if Memory.is_burned("sabir_lesson"):
+	if WorldState.has_burned(&"sabir_lesson"):
 		w *= 0.5
 	return w
 
@@ -728,7 +728,7 @@ func _do_drink(delta: float) -> void:
 		_heal_done = true
 		flasks -= 1
 		var frac: float = f["heal_fraction"]
-		if Memory.is_burned("mother_name"):
+		if WorldState.has_burned(&"mother_name"):
 			frac = 0.3
 		heal(max_health * frac)
 		flasks_changed.emit(flasks, max_flasks)
@@ -902,12 +902,12 @@ func _release_wheel() -> void:
 	Fx.release_time("radial")
 	if id == "":
 		return
-	if not GameState.flags.has("wave_confirmed"):
+	if not WorldState.has_flag(&"wave_confirmed"):
 		radial.ask_confirm()
 		var ok: bool = await radial.confirmed
 		if not ok:
 			return
-		GameState.set_flag("wave_confirmed")
+		WorldState.set_flag(&"wave_confirmed")
 	cast_wave(id)
 
 
@@ -949,7 +949,7 @@ func _do_cast(delta: float) -> void:
 
 func _is_perfect_dodge() -> bool:
 	var window: float = _cfg["dodge"]["perfect_window"]
-	if Memory.is_burned("sabir_lesson"):
+	if WorldState.has_burned(&"sabir_lesson"):
 		window *= 0.5
 	for c in get_tree().get_nodes_in_group("combatants"):
 		if c == self or c.dead or not is_hostile(c) or not c.has_method("time_to_strike"):
@@ -988,13 +988,13 @@ func _check_offer() -> void:
 		health_changed.emit(health, max_health)
 		Fx.fire_nova(global_position, 3.0)
 		Audio.play("memory_burn", -2.0, 0.0)
-		if not m.is_empty():
-			Fx.notify("Kül Şahı «%s» hatırasını seçti." % m["title"])
+		if m != null:
+			Fx.notify("Kül Şahı «%s» hatırasını seçti." % tr(m.display_name_key))
 
 
 func _refresh_burn_look() -> void:
-	var n := Memory.burned.size()
-	var t := float(n) / Memory.MEMORIES.size()
+	var n := Memory.burned_count()
+	var t := float(n) / maxi(Memory.all().size(), 1)
 	_ember_light.light_energy = 1.0 + n * 0.45
 	_overlay.set_shader_parameter("intensity", t * 0.9)
 	for m in _cloth:

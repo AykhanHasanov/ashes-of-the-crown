@@ -91,20 +91,20 @@ func _column(parent: Control, width: float) -> RichTextLabel:
 
 func _refresh() -> void:
 	var m := "[color=#e8b870][font_size=22]HATIRALAR[/font_size][/color]\n"
-	for mem in Memory.MEMORIES:
-		if Memory.is_burned(mem["id"]):
-			m += "[color=#5f5852][s]%s[/s] — kül[/color]\n" % mem["title"]
+	for mem in Memory.all():
+		if WorldState.has_burned(mem.id):
+			m += "[color=#5f5852][s]%s[/s] — kül[/color]\n" % tr(mem.display_name_key)
 		else:
-			m += "%s\n[color=#9a9088][i]%s[/i][/color]\n[color=#c07a50]Yanarsa: %s[/color]\n" % [mem["title"], mem["text"], mem["cost"]]
+			m += "%s\n[color=#9a9088][i]%s[/i][/color]\n[color=#c07a50]Yanarsa: %s[/color]\n" % [tr(mem.display_name_key), tr(mem.description_key), tr(mem.cost_key)]
 	_memories.text = m
 
 	var e := "[color=#e8b870][font_size=22]YANKILAR[/font_size][/color]\n"
-	if GameState.echoes_seen.is_empty():
+	if WorldState.echoes_seen().is_empty():
 		e += "[color=#9a9088]Henüz hiçbir yankı görmedin.[/color]\n"
-	for i in GameState.echoes_seen:
+	for i in WorldState.echoes_seen():
 		var echo: Dictionary = KingEchoes.ECHOES[i]
 		e += "[color=#ffb070]• %s[/color]\n[color=#b8aea4][i]%s[/i][/color]\n" % [echo["place"], echo["scene"]]
-		if Memory.is_burned("father_voice"):
+		if WorldState.has_burned(&"father_voice"):
 			e += "[color=#7a716a]%s[/color]\n" % KingEchoes.SILENT
 		else:
 			e += "[color=#e8d8c8]Kral: \"%s\"[/color]\n" % echo["words"]

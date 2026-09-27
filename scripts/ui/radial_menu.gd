@@ -34,7 +34,7 @@ func _ready() -> void:
 func open() -> void:
 	_items.clear()
 	for m in Memory.unburned():
-		_items.append({"id": m["id"], "title": m["title"], "cost": m["cost"], "gifted": false})
+		_items.append({"id": m.id, "title": tr(m.display_name_key), "cost": tr(m.cost_key), "gifted": false})
 	for g in Memory.gifted:
 		_items.append({"id": g["id"], "title": g["title"], "cost": g.get("cost", ""), "gifted": true})
 	is_open = true

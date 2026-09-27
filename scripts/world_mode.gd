@@ -56,6 +56,7 @@ func _setup() -> void:
 	level.streamer.actor_requested.connect(_on_actor_requested)
 	level.streamer.actors_released.connect(_on_actors_released)
 	level.streamer.poi_full.connect(_on_poi_full)
+	EventBus.saving.connect(_on_world_saving)
 	# Deer herds graze away from settlements
 	var wild := Wildlife.new()
 	wild.height_at = level.height_at
@@ -97,23 +98,44 @@ func _setup() -> void:
 
 
 func _begin(_mode: String) -> void:
-	var continuing := Settings.demo == "" and GameState.load_game(GameState.WORLD_TEST_PATH)
-	if not continuing:
-		GameState.new_game()
-	var w: Dictionary = GameState.world
-	world_map.fog_from_string(w.get("fog", ""))
-	if w.has("max_flasks"):
-		player.max_flasks = int(w["max_flasks"])
+	if Settings.demo != "":
+		WorldState.new_game()   # in memory only: SaveManager never writes during a --demo
+	elif not WorldState.session_active:
+		# Started straight from the editor/command line: newest slot, else a new game
+		var slot := SaveManager.most_recent_slot()
+		if slot == 0 or not SaveManager.load_slot(slot):
+			SaveManager.active_slot = SaveManager.first_empty_slot()
+			WorldState.new_game()
+	WorldState.set_region(&"kur_vadisi")
+	_apply_saved_state()
+
+
+## Puts the saved player stats, clock, map and last hearth back into the running world.
+func _apply_saved_state() -> void:
+	world_map.fog_from_string(String(WorldState.get_world_value(&"fog", "")))
+	var max_flasks: Variant = WorldState.get_player_stat(&"max_flasks")
+	if max_flasks != null:
+		player.max_flasks = int(max_flasks)
 		player.refill_flasks()
-	if w.has("hour"):
-		level.day_night.set_hour(float(w["hour"]))
-	_last_hearth = w.get("last_hearth", "")
-	if continuing and _last_hearth != "":
+	var weapon_id: Variant = WorldState.get_player_stat(&"weapon")
+	if weapon_id != null and String(weapon_id) != "" and String(weapon_id) != String(player.weapon.get("id", "")):
+		player.equip(String(weapon_id))
+	var hp: Variant = WorldState.get_player_stat(&"health")
+	if hp != null and float(hp) > 0.0:
+		player.health = minf(float(hp), player.max_health)
+		player.health_changed.emit(player.health, player.max_health)
+	var fire: Variant = WorldState.get_player_stat(&"fire")
+	if fire != null:
+		player.ember = float(fire)
+		player.ember_changed.emit(player.ember, DataDB.balance("combat")["ember"]["max"])
+	level.day_night.set_hour(WorldState.get_time_of_day())
+	_last_hearth = String(WorldState.get_world_value(&"last_hearth", ""))
+	if _last_hearth != "":
 		_place_at_hearth(_last_hearth)
 	level.refresh_braziers()
 	set_controls(true)
 	player.wake()
-	if GameState.world_has("hearths", "hearth_west"):
+	if WorldState.has_world_entry("hearths", "hearth_west"):
 		hud.set_objective("")
 	else:
 		hud.set_objective("Geçit Ocağı'nı yak [E]")
@@ -172,16 +194,15 @@ func _in_combat() -> bool:
 
 func _discover() -> void:
 	var pos: Vector3 = player.global_position
-	if world_map.reveal(pos, DataDB.balance("world")["map"]["reveal_radius"]):
-		GameState.world["fog"] = world_map.fog_to_string()
+	world_map.reveal(pos, DataDB.balance("world")["map"]["reveal_radius"])   # written to WorldState on save
 	for p in level.meta["pois"]:
-		if GameState.world_has("discovered", p["id"]):
+		if WorldState.has_world_entry("discovered", p["id"]):
 			continue
 		var prefab: Dictionary = DataDB.prefab(p["type"])
 		var r: float = prefab.get("discover_radius", 35.0)
 		var pp := Vector3(p["pos"][0], p["pos"][1], p["pos"][2])
 		if Vector2(pos.x, pos.z).distance_to(Vector2(pp.x, pp.z)) < r:
-			GameState.world_add("discovered", p["id"])
+			WorldState.add_world_entry("discovered", p["id"])
 			Fx.notify("Keşfedildi: " + p["name"])
 			Audio.play("memory_burn", -14.0, 0.0)
 
@@ -205,7 +226,7 @@ func _interact() -> void:
 			hud.set_prompt("[E]  Serbest bırak (teslim oldu)   ·   vur — öldür")
 			if Input.is_action_just_pressed("interact"):
 				f.spare()
-				GameState.world_add("killed", f.spawn_key)
+				WorldState.add_world_entry("killed", f.spawn_key)
 				Fx.notify("Haydut serbest bırakıldı. Ordu açıldığında teslim olanları saflarına katabileceksin.")
 			return
 	if best == null:
@@ -235,9 +256,9 @@ func _use(it) -> void:
 	match it.kind:
 		"hearth":
 			var id: String = it.hearth_id()
-			if not GameState.world_has("hearths", id):
-				GameState.world_add("hearths", id)
-				GameState.world_add("discovered", id)
+			if not WorldState.has_world_entry("hearths", id):
+				WorldState.add_world_entry("hearths", id)
+				WorldState.add_world_entry("discovered", id)
 				it.refresh()
 				level.refresh_braziers()
 				Fx.fire_nova(it.global_position, 3.0)
@@ -250,24 +271,24 @@ func _use(it) -> void:
 				_save()
 			else:
 				_last_hearth = id
-				var others: Array = level.hearth_pois().filter(func(p): return p["id"] != id and GameState.world_has("hearths", p["id"]))
+				var others: Array = level.hearth_pois().filter(func(p): return p["id"] != id and WorldState.has_world_entry("hearths", p["id"]))
 				hearth_menu.open(it.poi, others)
 		"chest":
-			GameState.world_add("chests", it.key)
+			WorldState.add_world_entry("chests", it.key)
 			it.open_chest()
 			Audio.play("drink", -6.0, 0.0)
 			match it.data.get("reward", "ember"):
 				"flask_seed":
 					player.max_flasks = mini(player.max_flasks + 1, int(DataDB.balance("combat")["flask"]["max_charges"]))
 					player.refill_flasks()
-					GameState.world["max_flasks"] = player.max_flasks
+					WorldState.set_player_stats({"max_flasks": player.max_flasks})
 					Fx.notify("Nar tohumu: Nar Şerbeti +1 (%d)" % player.max_flasks)
 				_:
 					player.gain_ember(40.0)
 					Fx.notify("Köz kırıntıları: köz +40")
 			_save()
 		"echo":
-			GameState.world_add("echoes", it.key)
+			WorldState.add_world_entry("echoes", it.key)
 			hud.show_whisper(it.data["text"])
 			Audio.play("memory_burn", -10.0, 0.0)
 
@@ -278,7 +299,7 @@ func _rest() -> void:
 	player.heal(player.max_health)
 	player.refill_flasks()
 	# Everything you killed comes back, like the ash always does
-	GameState.world["killed"] = []
+	WorldState.clear_world_list(&"killed")
 	for f in _foes.values():
 		if is_instance_valid(f):
 			f.queue_free()
@@ -288,7 +309,7 @@ func _rest() -> void:
 			level.streamer.spawn_actors(p)
 	hud.banner("Dinlendin. Kül yine kalktı.")
 	Fx.fire_nova(player.global_position, 2.0)
-	_save()
+	EventBus.checkpoint_rested.emit(StringName(_last_hearth))   # SaveManager autosaves
 
 
 func _travel_to(id: String) -> void:
@@ -347,17 +368,20 @@ func _respawn() -> void:
 
 
 func _save() -> void:
-	GameState.world["hour"] = level.day_night.hour
-	GameState.world["last_hearth"] = _last_hearth
-	GameState.world["fog"] = world_map.fog_to_string()
-	if Settings.demo == "":
-		GameState.save_game(GameState.WORLD_TEST_PATH)
+	SaveManager.save()
+
+
+## Just before a save is written: the clock, last hearth and map fog into WorldState.
+func _on_world_saving(_slot: int) -> void:
+	WorldState.set_time_of_day(level.day_night.hour)
+	WorldState.set_world_value(&"last_hearth", _last_hearth)
+	WorldState.set_world_value(&"fog", world_map.fog_to_string())
 
 
 # --- Enemies -----------------------------------------------------------------------------------
 
 func _on_actor_requested(_poi: Dictionary, actor: Dictionary, key: String, pos: Vector3) -> void:
-	if GameState.world_has("killed", key):
+	if WorldState.has_world_entry("killed", key):
 		return
 	if actor.get("night_only", false) and not level.day_night.is_night():
 		return
@@ -405,7 +429,7 @@ func _on_engaged(f) -> void:
 
 
 func _on_foe_killed(key: String) -> void:
-	GameState.world_add("killed", key)
+	WorldState.add_world_entry("killed", key)
 	_foes.erase(key)
 
 
@@ -451,6 +475,7 @@ func _on_actors_released(poi_id: String) -> void:
 
 ## Night-only foes rise at dusk and sink back at dawn.
 func _on_hour(_h: int) -> void:
+	WorldState.set_time_of_day(level.day_night.hour)   # emits time_of_day_changed on a new phase
 	var night: bool = level.day_night.is_night()
 	if night == _was_night:
 		return
@@ -489,16 +514,16 @@ func _update_compass() -> void:
 		var pp := Vector3(p["pos"][0], p["pos"][1], p["pos"][2])
 		var dist := Vector2(pos.x, pos.z).distance_to(Vector2(pp.x, pp.z))
 		var is_hearth: bool = p["type"] == "hearth"
-		var known := GameState.world_has("discovered", p["id"])
-		if is_hearth and (known or GameState.world_has("hearths", p["id"])):
+		var known := WorldState.has_world_entry("discovered", p["id"])
+		if is_hearth and (known or WorldState.has_world_entry("hearths", p["id"])):
 			list.append({"bearing": Compass.bearing(pos, pp), "dist": dist, "label": p["name"],
-				"kind": "hearth" if GameState.world_has("hearths", p["id"]) else "hearth_cold"})
+				"kind": "hearth" if WorldState.has_world_entry("hearths", p["id"]) else "hearth_cold"})
 		elif known and dist < 400.0 and dist > 12.0:
 			list.append({"bearing": Compass.bearing(pos, pp), "dist": dist, "label": p["name"], "kind": "place"})
 	if world_map.marker != null:
 		var m: Vector3 = world_map.marker
 		list.append({"bearing": Compass.bearing(pos, m), "dist": Vector2(pos.x, pos.z).distance_to(Vector2(m.x, m.z)), "label": "İşaret", "kind": "marker"})
-	if not GameState.world_has("hearths", "hearth_west"):
+	if not WorldState.has_world_entry("hearths", "hearth_west"):
 		var h: Dictionary = level.streamer.poi_by_id("hearth_west")
 		var hp := Vector3(h["pos"][0], 0, h["pos"][2])
 		list.append({"bearing": Compass.bearing(pos, hp), "dist": Vector2(pos.x, pos.z).distance_to(Vector2(hp.x, hp.z)), "label": "Ocaq", "kind": "objective"})
@@ -539,13 +564,13 @@ func _build_debug() -> void:
 	debug.section("Dünya")
 	debug.button("Tüm ocakları yak", func():
 		for p in level.hearth_pois():
-			GameState.world_add("hearths", p["id"])
+			WorldState.add_world_entry("hearths", p["id"])
 		level.refresh_braziers()
 		for it in get_tree().get_nodes_in_group("interactables"):
 			it.refresh())
 	debug.button("Haritayı tamamen aç", func():
 		for p in level.meta["pois"]:
-			GameState.world_add("discovered", p["id"])
+			WorldState.add_world_entry("discovered", p["id"])
 		world_map.fog.fill(1))
 	debug.button("Dinlen (düşmanlar geri döner)", _rest)
 	debug.section("Oyuncu")
@@ -608,7 +633,7 @@ func _demo_setup() -> void:
 			if not overlay.is_empty():
 				overlay[0].visible = true
 		"world_hearth":
-			GameState.world_add("hearths", "hearth_west")
+			WorldState.add_world_entry("hearths", "hearth_west")
 			level.day_night.set_hour(20.2)
 			_demo_view(Vector3(118, 0, 318), Vector3(128, 12, 298), 11.0)
 			get_tree().create_timer(0.8).timeout.connect(func():
@@ -631,8 +656,8 @@ func _demo_setup() -> void:
 			_demo_view(Vector3(160, 0, 260), Vector3(258, 25, 224), 11.0)
 		"world_map":
 			for p in level.meta["pois"]:
-				GameState.world_add("discovered", p["id"])
-			GameState.world_add("hearths", "hearth_west")
+				WorldState.add_world_entry("discovered", p["id"])
+			WorldState.add_world_entry("hearths", "hearth_west")
 			world_map.reveal(Vector3(256, 0, 256), 200.0)
 			process_mode = Node.PROCESS_MODE_ALWAYS
 			get_tree().create_timer(1.0).timeout.connect(func(): world_map.open(false))

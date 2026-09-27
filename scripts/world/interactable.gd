@@ -1,7 +1,7 @@
 extends Node3D
 ## Something Ayxan can use with [E] in the open world: a hearth (light it, rest, fast
 ## travel), a chest (nar toxumu = +1 flask, or ember), an echo stone (lore). Its
-## saved state lives in GameState.world, keyed by `key` / the POI id.
+## saved state lives in WorldState's world section, keyed by `key` / the POI id.
 
 const Effects := preload("res://scripts/world/effects.gd")
 const CHEST_CLOSED := "res://assets/quaternius/rpg_items_pack/Chest_Closed.glb"
@@ -45,11 +45,11 @@ func hearth_id() -> String:
 func is_used() -> bool:
 	match kind:
 		"hearth":
-			return GameState.world_has("hearths", hearth_id())
+			return WorldState.has_world_entry("hearths", hearth_id())
 		"chest":
-			return GameState.world_has("chests", key)
+			return WorldState.has_world_entry("chests", key)
 		"echo":
-			return GameState.world_has("echoes", key)
+			return WorldState.has_world_entry("echoes", key)
 	return false
 
 

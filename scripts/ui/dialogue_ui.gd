@@ -6,9 +6,9 @@ extends CanvasLayer
 ##   next                    — id of the following node (continue with E / click)
 ##   choices                 — [{text, next?, set?, event?}] Ayxan's answers (1-3 / click)
 ##   branch                  — {memory, burned, intact}: jump depending on Yaddaş Yanğını, or
-##                             {if, then, else} with a GameState.check() condition
+##                             {if, then, else} with a WorldState.check() condition
 ##   set                     — flag emitted through flag_set when the node is shown
-##   do                      — [GameState.apply() actions] run when a node is shown or a choice taken
+##   do                      — [WorldState.apply() actions] run when a node is shown or a choice taken
 ##   end + event             — closes the dialogue and emits finished(event)
 
 signal finished(event: String)
@@ -124,14 +124,14 @@ func _show(id: String) -> void:
 	if node.has("branch"):
 		var b: Dictionary = node["branch"]
 		if b.has("if"):
-			_show(b["then"] if GameState.check(b["if"]) else b["else"])
+			_show(b["then"] if WorldState.check(b["if"]) else b["else"])
 		else:
-			_show(b["burned"] if Memory.is_burned(b["memory"]) else b["intact"])
+			_show(b["burned"] if WorldState.has_burned(StringName(b["memory"])) else b["intact"])
 		return
 	if node.has("set"):
 		flag_set.emit(node["set"])
 	for action in node.get("do", []):
-		GameState.apply(action)
+		WorldState.apply(action)
 	_node = node
 	Audio.play("ui_click", -12.0, 0.05)
 	var speaker: String = node.get("speaker", "")
@@ -189,7 +189,7 @@ func _choose(i: int) -> void:
 	if c.has("set"):
 		flag_set.emit(c["set"])
 	for action in c.get("do", []):
-		GameState.apply(action)
+		WorldState.apply(action)
 	if c.has("next"):
 		_show(c["next"])
 	else:

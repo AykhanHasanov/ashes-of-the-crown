@@ -65,14 +65,14 @@ func _discovery_and_hearth() -> void:
 	var h: Dictionary = mode.level.streamer.poi_by_id("hearth_west")
 	_put(Vector3(h["pos"][0] + 2.0, 0, h["pos"][2] + 2.0))
 	await _wait(1.5)
-	_check("walking up to a place discovers it", GameState.world_has("discovered", "hearth_west"))
+	_check("walking up to a place discovers it", WorldState.has_world_entry("discovered", "hearth_west"))
 	var it = _interactable("hearth", "hearth_west")
 	_check("the hearth streams in with its interactable", it != null)
 	if it == null:
 		return
 	_check("a cold hearth asks to be lit", it.prompt().contains("yak"), it.prompt())
 	mode._use(it)
-	_check("lighting marks it lit and saved in the world state", GameState.world_has("hearths", "hearth_west"))
+	_check("lighting marks it lit and saved in the world state", WorldState.has_world_entry("hearths", "hearth_west"))
 	_check("a lit hearth heals like a brazier", mode.level.braziers.size() == 1)
 	_check("the prompt now offers a seat", it.prompt().contains("otur"), it.prompt())
 
@@ -189,7 +189,7 @@ func _streaming_and_enemies() -> void:
 
 func _travel() -> void:
 	_reset()
-	GameState.world_add("hearths", "hearth_north")
+	WorldState.add_world_entry("hearths", "hearth_north")
 	await mode._travel_to("hearth_north")
 	await _wait(0.5)
 	var h: Dictionary = mode.level.streamer.poi_by_id("hearth_north")
@@ -199,11 +199,12 @@ func _travel() -> void:
 
 
 func _save_data() -> void:
-	mode._save()
-	var w: Dictionary = GameState.world
-	_check("world state holds hearths, chests and fog", w.get("hearths", []).size() >= 2 and w.get("chests", []).size() >= 1 and w.get("fog", "") != "")
+	# A --demo never writes a file; run the pre-save hook that copies live values in
+	mode._on_world_saving(0)
+	var fog := String(WorldState.get_world_value(&"fog", ""))
+	_check("world state holds hearths, chests and fog", WorldState.world_list(&"hearths").size() >= 2 and WorldState.world_list(&"chests").size() >= 1 and fog != "")
 	var fresh = load("res://scripts/ui/world_map.gd").new()
 	fresh.setup(mode.level.meta, 16.0)
-	fresh.fog_from_string(w["fog"])
+	fresh.fog_from_string(fog)
 	_check("map fog survives a save round trip", fresh.explored_fraction() > 0.0 and absf(fresh.explored_fraction() - mode.world_map.explored_fraction()) < 0.001)
 	fresh.free()
