@@ -10,6 +10,9 @@ const SettingsPanel := preload("res://scripts/ui/settings_panel.gd")
 var _root: Control
 var _menu: VBoxContainer
 var _settings: PanelContainer
+var _confirm: PanelContainer
+var _confirm_text: Label
+var _confirm_slot := 0
 var _starting := false
 
 
@@ -46,12 +49,16 @@ func _ready() -> void:
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(0, 40)
 	_menu.add_child(gap)
-	if GameState.has_save():
+	if SaveManager.has_any_save():
 		_button("Devam et", _on_continue)
 	_button("Yeni oyun", _on_new_game)
-	_button("Kür Vadisi (açık dünya, V3 test)", func():
+	# The open world plays the most recent slot; without a save there is nothing to enter
+	var world := _button("Kür Vadisi (açık dünya, V3 test)", func():
+		if not SaveManager.load_slot(SaveManager.most_recent_slot()):
+			return
 		get_tree().paused = false
 		get_tree().change_scene_to_file("res://scenes/world.tscn"))
+	world.disabled = SaveManager.most_recent_slot() == 0
 	_button("Savaş arenası (V3 test)", func():
 		get_tree().paused = false
 		get_tree().change_scene_to_file("res://scenes/arena.tscn"))
@@ -73,13 +80,14 @@ func _ready() -> void:
 	_settings.visible = false
 	_settings.closed.connect(_on_settings_closed)
 	center.add_child(_settings)
+	_build_confirm(center)
 
 	_root.modulate.a = 0.0
 	create_tween().tween_property(_root, "modulate:a", 1.0, 1.5)
 	_focus_first.call_deferred()
 
 
-func _button(text: String, action: Callable) -> void:
+func _button(text: String, action: Callable) -> Button:
 	var b := Button.new()
 	b.text = text
 	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -87,6 +95,7 @@ func _button(text: String, action: Callable) -> void:
 	b.pressed.connect(action)
 	b.focus_entered.connect(func(): Audio.play("ui_click", -14.0, 0.05))
 	_menu.add_child(b)
+	return b
 
 
 func _focus_first() -> void:
@@ -96,8 +105,64 @@ func _focus_first() -> void:
 			return
 
 
+## A new game takes the first empty slot. With every slot full it asks before
+## overwriting the one played longest ago — a save is never replaced silently.
 func _on_new_game() -> void:
-	_leave(new_game)
+	var slot := SaveManager.first_empty_slot()
+	if slot > 0:
+		SaveManager.active_slot = slot
+		_leave(new_game)
+		return
+	_confirm_slot = SaveManager.oldest_slot()
+	var info := SaveManager.slot_info(_confirm_slot)
+	_confirm_text.text = tr("MENU_OVERWRITE_BODY") % [tr("MENU_SLOT_NAME") % _confirm_slot, SaveManager.format_time(int(info["last_saved_timestamp"]))]
+	_menu.visible = false
+	_confirm.visible = true
+	_confirm.get_node("Box/Buttons/Cancel").grab_focus()
+
+
+func _build_confirm(parent: Control) -> void:
+	_confirm = PanelContainer.new()
+	_confirm.visible = false
+	parent.add_child(_confirm)
+	var box := VBoxContainer.new()
+	box.name = "Box"
+	box.add_theme_constant_override("separation", 18)
+	_confirm.add_child(box)
+	box.add_child(UITheme.title(tr("MENU_OVERWRITE_TITLE"), 30))
+	_confirm_text = Label.new()
+	_confirm_text.custom_minimum_size = Vector2(520, 0)
+	_confirm_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(_confirm_text)
+	var row := HBoxContainer.new()
+	row.name = "Buttons"
+	row.add_theme_constant_override("separation", 16)
+	box.add_child(row)
+	var ok := Button.new()
+	ok.text = tr("MENU_OVERWRITE_CONFIRM")
+	ok.custom_minimum_size = Vector2(200, 50)
+	ok.pressed.connect(func():
+		_confirm.visible = false
+		SaveManager.active_slot = _confirm_slot
+		_leave(new_game))
+	row.add_child(ok)
+	var cancel := Button.new()
+	cancel.name = "Cancel"
+	cancel.text = tr("MENU_CANCEL")
+	cancel.custom_minimum_size = Vector2(200, 50)
+	cancel.pressed.connect(_cancel_confirm)
+	row.add_child(cancel)
+
+
+func _cancel_confirm() -> void:
+	_confirm.visible = false
+	_menu.visible = true
+	_focus_first()
+
+
+## True while the overwrite question is on screen (for the tests).
+func is_confirming() -> bool:
+	return _confirm.visible
 
 
 func _on_continue() -> void:

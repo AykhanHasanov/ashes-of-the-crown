@@ -37,8 +37,8 @@ func _setup() -> void:
 
 func _begin(mode: String) -> void:
 	if Settings.demo != "":
-		GameState.new_game()
-		GameState.chapter = 2
+		WorldState.new_game()   # in memory only: SaveManager never writes during a --demo
+		WorldState.set_chapter(2)
 		set_controls(true)
 		player.wake()
 		if Settings.demo == "c2_talk":
@@ -50,7 +50,8 @@ func _begin(mode: String) -> void:
 			_explore()
 		return
 	if mode == "checkpoint":
-		GameState.load_game()
+		SaveManager.load_slot(SaveManager.active_slot)   # after a death: back to the saved checkpoint
+	WorldState.set_region(&"son_ocaq")
 	_intro()
 
 
@@ -103,7 +104,7 @@ func _talk_to(s) -> void:
 	hud.set_objective("")
 	var p: Dictionary = Survivors.PEOPLE[s.id]
 	var greet: String = p["greet"]
-	if s.id == "rufet" and Memory.is_burned("rufet_face"):
+	if s.id == "rufet" and WorldState.has_burned(&"rufet_face"):
 		greet = "Ayxan. Yine beni tanımıyorsun, değil mi? Önemli değil. Ben buradayım."
 	talk_with(s, {"start": {"speaker": s.display_name, "text": greet, "end": true, "event": "talk_end"}}, false)
 

@@ -36,7 +36,8 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 | `scenes/` | Root-only scenes. Everything else is built in code by the scene's script |
 | `scripts/` | Code, grouped by domain. Mode scripts sit at the root and extend `chapter_base.gd` |
 | `scripts/<domain>/` | `camera/`, `characters/`, `combat/`, `core/`, `debug/`, `enemies/`, `npc/`, `player_v3/` (current player), `player/` (V2, legacy), `story/`, `systems/` (autoloads), `ui/`, `world/`, `world/gen/` |
-| `data/` | **All tunable numbers and content as JSON**, loaded through `DataDB`. Balance, enemies, weapons, looks, voices, world layout, prefabs, trees, houses, villagers |
+| `data/` | **All tunable numbers and content as data**, loaded through `DataDB` (JSON) or registries (`.tres`, e.g. `data/memories/`). Balance, enemies, weapons, looks, voices, world layout, prefabs, trees, houses, villagers, memories |
+| `localization/` | `strings.csv` (translation keys → Turkish). Imported to `strings.tr.translation`, registered in Project Settings → Localization |
 | `shaders/` | `.gdshader` and `.gdshaderinc` |
 | `tools/` | Headless generators and checks (`godot --headless --path . -s tools/<x>.gd`) and Python generators |
 | `assets/` | Third-party and generated assets. **Keep the `.import` files in git**: they carry the import settings |
@@ -63,15 +64,53 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 
 1. **Static typing wherever possible:** `var x: float`, `func f(a: int) -> void`, `:=` when the type is inferable. Variant values (JSON, `Dictionary.get`) need explicit types; `:=` on a Variant is a parse error.
 2. **Signals over direct node references.** Emit events upward and let owners wire children. Do not reach across the tree with `get_node("/root/…")` or hand every system a reference to every other one. New cross-system events go through a central event bus.
-3. **No game state stored in scenes or nodes.** Anything that must survive a save, an unload or a scene change lives in the central state system (today `GameState`; after the redesign `WorldState`). Nodes are views that read state and emit events. Streamed POIs, NPCs and enemies are freed and rebuilt at any time.
+3. **No game state stored in scenes or nodes.** Anything that must survive a save, an unload or a scene change lives in `WorldState` (see *State & Save*). Nodes are views that read state and emit events. Streamed POIs, NPCs and enemies are freed and rebuilt at any time.
 4. **Content and numbers in data, not code.** Add JSON under `data/` and read it through `DataDB`. Do not add constants to `systems/balance.gd` (legacy).
 5. **Language.**
-   - Code, comments, commit messages and docs meant for tools: **English**.
-   - Chat with the owner: **Azerbaijani**.
-   - **Player-facing text: currently Türkiye Türkçesi.** This was the owner's decision on 2026-09-27 (`docs/DECISIONS.md`) and every in-game string and voice line is Turkish today. A later instruction asked for Azerbaijani player-facing text. **Confirm with the owner before writing new player-facing strings in either language, and update this line.**
+   - Player-facing text uses translation keys via `tr()`, defined in `localization/strings.csv`. **Current language: Turkish (text and voice). New text must never be hardcoded.** Only the memories and the save-slot dialog use keys so far; moving the remaining legacy strings is a separate task.
+   - Code, comments and commit messages: English.
+   - Chat with the owner: Azerbaijani.
 6. **Keep the tests green.** Run the three self-tests before merging (see below). Add checks for new systems to the relevant self-test.
 7. **Git.** Work on a `v3/<topic>` branch, commit per stage, merge to `main` with `--no-ff` after the tests pass, then `git push` (remote: private `github.com/AykhanHasanov/ashes-of-the-crown`). End commit messages with the attribution line the harness provides.
 8. **Assets.** CC0 (or clearly licensed) only. Record the source in a `CREDITS` file. Before downloading, state the file, source and size (the owner has given blanket approval).
+
+## State & Save
+
+**Autoloads:** `EventBus` (signals only), `WorldState` (all persistent state) and `SaveManager` (all file I/O). Load order: `DataDB`, `Settings`, `EventBus`, `WorldState`, `SaveManager`, `Memory`, `Fx`, `Audio`, `Barks`.
+
+**WorldState**
+- It is the single source of truth. Sections:
+  - `meta`
+  - `player`: stats, region, position, burned memories
+  - `inventory`
+  - `flags`
+  - `story`: chapter, checkpoint, echoes seen
+  - `npcs`: reserved for the NPC model
+  - `world`: clock, day, hub stage, open-world progress
+- **Never mutate its dictionaries.** Use the typed accessors (`set_flag`, `burn_memory`, `add_item`, `set_player_stats`, `add_world_entry`, ...).
+- Every mutation emits its `EventBus` signal. The signal list and who emits each one are in the header of `scripts/systems/event_bus.gd`.
+- **One fact, one owner.** Story progress lives in `story` and must never be mirrored in `flags`. The same rule holds for every other value: never store it in two places.
+- **Live values stay on nodes and are copied in only at save time.** This covers health, flasks, fire, clock, fog and position. On `EventBus.saving(slot)` the active mode writes them through the accessors. Do not write them every frame.
+
+**Contexts**
+- `STORY` is the real game.
+- `SANDBOX` is the dev arena. `begin_sandbox()` swaps in a deep copy of the state and `end_sandbox()` discards it. The arena enters the sandbox in `_enter_tree` and leaves it in `_exit_tree`, and SaveManager refuses to write while it runs.
+- Debug `--demo` runs play in memory and never save either.
+
+**SaveManager**
+- Slots `user://saves/slot_1..3.json`.
+- Atomic write: `.tmp`, then the old file becomes `.bak`, then the temp file is renamed into place. Loading falls back to `.bak`.
+- `meta.save_version` with a `_migrate_step()` chain. v0 is the old `GameState` format. **Add a step for every schema change; never break old saves.**
+- Autosaves on `EventBus.checkpoint_rested` (ocaq rest, story checkpoint) and `region_changed`.
+- New game takes the first empty slot and never overwrites without the menu's confirmation.
+- The old two-file saves were imported once into slot 1; the originals are kept as `*.migrated`.
+
+**Memories**
+- Defined as data: `MemoryDefinition` resources in `data/memories/*.tres`, looked up through `scripts/core/memory_registry.gd` by permanent id.
+- Burned state is WorldState's. `Memory` (the autoload) is only the rules layer.
+- Refer to memories by id (`&"mother_name"`), never by title.
+
+**Tests:** `"$G" --headless --path . res://scenes/tests/state_test.tscn`. It uses its own save folders.
 
 ## Running and testing
 
@@ -103,5 +142,7 @@ Set `G="C:/Users/User/Documents/games/_tools/godot/Godot_v4.7.2-stable_win64_con
 - `res://scenes/tree_lab.tscn`: `TREE_LAB_IDS`, `TREE_LAB_DIST`.
 
 **Content pipelines:** see `docs/WORLD_PIPELINE.md` for the cards → trees → foliage bake → houses → world order.
+
+**State and save tests:** `"$G" --headless --path . res://scenes/tests/state_test.tscn`. **Animation isolation:** `"$G" --headless --path . -s tools/test_anim_isolation.gd`.
 
 **Known tool issue:** `tools/check_scripts.gd` reports false failures, because autoloads do not exist in `-s` mode. Use the self-tests or run a scene to check scripts.

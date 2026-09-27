@@ -65,7 +65,7 @@ func _ready() -> void:
 	dialogue = DialogueUI.new()
 	add_child(dialogue)
 	dialogue.finished.connect(_on_dialogue_finished)
-	dialogue.flag_set.connect(GameState.set_flag)
+	dialogue.flag_set.connect(func(f): WorldState.set_flag(StringName(f)))
 	pause_menu = PauseMenu.new()
 	add_child(pause_menu)
 	pause_menu.main_menu_requested.connect(to_main_menu)
@@ -88,6 +88,7 @@ func _ready() -> void:
 		player.weapon_changed.connect(hud.set_weapon)
 		player.lock_changed.connect(hud.set_lock)
 	player.died.connect(_on_player_died)
+	EventBus.saving.connect(_on_saving)
 	Settings.changed.connect(_apply_quality)
 	_apply_quality()
 	_setup()
@@ -164,10 +165,26 @@ func to_main_menu() -> void:
 	go_to_chapter(1, "")
 
 
+## Records the story checkpoint and asks for an autosave (SaveManager never writes during
+## a debug --demo or in the sandbox, so captures cannot overwrite the player's save).
 func save_checkpoint(checkpoint: String) -> void:
-	GameState.checkpoint = checkpoint
-	if Settings.demo == "":  # debug captures must never overwrite the player's save
-		GameState.save_game()
+	WorldState.set_checkpoint(checkpoint)
+	EventBus.checkpoint_rested.emit(StringName(checkpoint))
+
+
+## Just before a save is written: copy Ayxan's live values into WorldState.
+func _on_saving(_slot: int) -> void:
+	if not is_instance_valid(player):
+		return
+	var max_hp: Variant = player.get("max_health")
+	var stats := {"health": player.health, "max_health": max_hp if max_hp != null else player.MAX_HEALTH, "fire": player.ember}
+	if "flasks" in player:
+		stats["flasks"] = player.flasks
+		stats["max_flasks"] = player.max_flasks
+	if "weapon" in player and player.weapon is Dictionary and player.weapon.has("id"):
+		stats["weapon"] = player.weapon["id"]
+	WorldState.set_player_stats(stats)
+	WorldState.set_player_position(player.global_position)
 
 
 func set_controls(on: bool) -> void:
@@ -223,7 +240,7 @@ func _update_hearths(delta: float) -> void:
 			return
 	for h in level.braziers:
 		if player.global_position.distance_to(h) < Balance.HEARTH_RANGE:
-			player.heal(Balance.HEARTH_HEAL * (5.0 / 9.0 if Memory.is_burned("mother_name") else 1.0) * delta)
+			player.heal(Balance.HEARTH_HEAL * (5.0 / 9.0 if WorldState.has_burned(&"mother_name") else 1.0) * delta)
 			if not _hearth_hint_shown:
 				_hearth_hint_shown = true
 				hud.banner("Ocağın sıcaklığı yaralarını iyileştiriyor")

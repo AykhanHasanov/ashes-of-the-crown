@@ -181,9 +181,9 @@ func _draw_map() -> void:
 	_hover = ""
 	var mouse := _canvas.get_local_mouse_position()
 	for p in pois:
-		var known := GameState.world_has("discovered", p["id"])
+		var known := WorldState.has_world_entry("discovered", p["id"])
 		var is_hearth: bool = p["type"] == "hearth"
-		var lit := is_hearth and GameState.world_has("hearths", p["id"])
+		var lit := is_hearth and WorldState.has_world_entry("hearths", p["id"])
 		if not known and not lit:
 			continue
 		var s := _to_screen(Vector3(p["pos"][0], 0, p["pos"][2]))
@@ -217,7 +217,7 @@ func _draw_map() -> void:
 			pts.append(ps + v.rotated(ang))
 		_canvas.draw_colored_polygon(pts, Color(0.75, 0.08, 0.05))
 	# Travel hint under the cursor
-	if travel_mode and _hover != "" and GameState.world_has("hearths", _hover):
+	if travel_mode and _hover != "" and WorldState.has_world_entry("hearths", _hover):
 		_canvas.draw_string(font, mouse + Vector2(14, -10), "Yolculuk et", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, UITheme.EMBER)
 
 
@@ -233,7 +233,7 @@ func _on_input(event: InputEvent) -> void:
 		marker_changed.emit(marker)
 		Audio.play("ui_click", -8.0, 0.0)
 	elif event.button_index == MOUSE_BUTTON_LEFT and travel_mode and _hover != "":
-		if GameState.world_has("hearths", _hover):
+		if WorldState.has_world_entry("hearths", _hover):
 			var id := _hover
 			close()
 			travel_requested.emit(id)

@@ -56,9 +56,19 @@ func _setup() -> void:
 	overlay.visible = Settings.demo == "arena_wave"
 
 
+## The arena is a dev sandbox: it plays on a throwaway copy of WorldState, so nothing
+## done here reaches the real game state or a save file (SaveManager refuses to write).
+func _enter_tree() -> void:
+	WorldState.begin_sandbox()
+
+
+func _exit_tree() -> void:
+	WorldState.end_sandbox()
+
+
 func _begin(_mode: String) -> void:
-	GameState.new_game()
-	GameState.set_flag("wave_confirmed")
+	WorldState.new_game()   # resets only the sandbox copy
+	WorldState.set_flag(&"wave_confirmed")
 	set_controls(true)
 	player.wake()
 	hud.set_objective("Test arenası — ocakta [E] ile sıradaki dalgayı başlat")
@@ -250,6 +260,6 @@ func _build_debug() -> void:
 		player.health = 10.0
 		player.health_changed.emit(player.health, player.max_health))
 	debug.section("Hatıralar")
-	for m in Memory.MEMORIES:
-		debug.button("Yak: " + m["title"], func(): Memory.burn(m["id"]))
-	debug.button("Hepsini geri getir", func(): Memory.reset())
+	for m in Memory.all():
+		debug.button("Yak: " + tr(m.display_name_key), func(): Memory.burn(m.id))
+	debug.button("Hepsini geri getir", func(): WorldState.clear_burned_memories())

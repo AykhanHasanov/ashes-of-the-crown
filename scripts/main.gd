@@ -53,7 +53,7 @@ func _setup() -> void:
 
 func _begin(mode: String) -> void:
 	if Settings.demo != "" and Settings.demo != "menu":
-		GameState.new_game()
+		WorldState.new_game()   # in memory only: SaveManager never writes during a --demo
 		set_controls(true)
 	match Settings.demo:
 		"menu":
@@ -74,14 +74,14 @@ func _begin(mode: String) -> void:
 		"echoes", "echo":
 			_resume("echoes")
 		"journal":
-			GameState.echoes_seen = [0, 1]
+			WorldState.set_echoes_seen([0, 1])
 			_resume("echoes")
 			process_mode = Node.PROCESS_MODE_ALWAYS
 		"chapter_end", "victory":
-			GameState.echoes_seen = [0, 1, 2]
+			WorldState.set_echoes_seen([0, 1, 2])
 			_resume("chapter_end")
 		_:
-			if mode == "checkpoint" and GameState.load_game():
+			if mode == "checkpoint" and SaveManager.load_slot(SaveManager.active_slot if SaveManager.active_slot > 0 else SaveManager.most_recent_slot()):
 				_continue_save()
 			elif mode == "fresh":
 				_start_new_game()
@@ -95,13 +95,15 @@ func _begin(mode: String) -> void:
 func _menu() -> void:
 	phase = Phase.MENU
 	hud.visible = false
+	WorldState.session_active = false
+	SaveManager.import_legacy_saves()   # once: folds the old two-file saves into slot 1
 	player.lie_down()
 	rig.orbit(Vector3(0, 1.5, 0), 27.0)
 	var menu = MainMenu.new()
 	add_child(menu)
 	menu.new_game.connect(_start_new_game)
 	menu.continue_game.connect(func():
-		if GameState.load_game():
+		if SaveManager.load_slot(SaveManager.most_recent_slot()):
 			_leave_menu()
 			_continue_save()
 		else:
@@ -109,10 +111,14 @@ func _menu() -> void:
 
 
 func _continue_save() -> void:
-	if GameState.chapter != 1:
-		go_to_chapter(GameState.chapter)
+	if WorldState.get_region() == &"kur_vadisi":
+		restart_mode = "checkpoint"
+		get_tree().change_scene_to_file("res://scenes/world.tscn")
 		return
-	_resume(GameState.checkpoint)
+	if WorldState.get_chapter() != 1:
+		go_to_chapter(WorldState.get_chapter())
+		return
+	_resume(WorldState.get_checkpoint())
 
 
 func _leave_menu() -> void:
@@ -122,7 +128,8 @@ func _leave_menu() -> void:
 
 func _start_new_game() -> void:
 	_leave_menu()
-	GameState.new_game()
+	WorldState.new_game()   # the menu has already chosen SaveManager.active_slot
+	WorldState.set_region(&"kozqala")
 	save_checkpoint("start")
 	_intro()
 
@@ -193,7 +200,7 @@ func _tick(delta: float) -> void:
 				get_tree().reload_current_scene()
 		Phase.CHAPTER_END:
 			if Input.is_action_just_pressed("continue"):
-				GameState.chapter = 2
+				WorldState.set_chapter(2)
 				save_checkpoint("c2_start")
 				go_to_chapter(2)
 			elif Input.is_action_just_pressed("restart"):
@@ -326,7 +333,7 @@ func _spawn_echoes() -> void:
 		spot.place = KingEchoes.ECHOES[i]["place"]
 		add_child(spot)
 		spot.global_position = KingEchoes.ECHOES[i]["pos"]
-		if GameState.echoes_seen.has(i):
+		if i in WorldState.echoes_seen():
 			spot.extinguish()
 		_echoes.append(spot)
 
@@ -390,7 +397,7 @@ func _play_echo(spot) -> void:
 	create_tween().tween_method(func(v: float): _ghost_mat.set_shader_parameter("alpha", v), 0.0, 1.0, 1.2)
 
 	await get_tree().create_timer(1.4).timeout
-	var words: String = KingEchoes.SILENT if Memory.is_burned("father_voice") else "Kral: \"%s\"" % info["words"]
+	var words: String = KingEchoes.SILENT if WorldState.has_burned(&"father_voice") else "Kral: \"%s\"" % info["words"]
 	dialogue.start({
 		"start": {"speaker": "Kül yankısı · " + spot.place, "text": info["scene"], "next": "t"},
 		"t": {"speaker": "Kül yankısı · " + spot.place, "text": words, "end": true, "event": "echo_done"},
@@ -399,8 +406,7 @@ func _play_echo(spot) -> void:
 
 func _finish_echo() -> void:
 	var spot = _active_echo
-	if not GameState.echoes_seen.has(spot.index):
-		GameState.echoes_seen.append(spot.index)
+	WorldState.mark_echo_seen(spot.index)
 	spot.extinguish()
 	var ghost = _ghost
 	var tw := create_tween()
@@ -410,7 +416,7 @@ func _finish_echo() -> void:
 	Audio.play("memory_burn", -8.0, 0.1)
 	hud.banner("%s — kralın son gecesinden bir an" % spot.place)
 	set_controls(true)
-	if GameState.echoes_seen.size() >= KingEchoes.ECHOES.size():
+	if WorldState.echoes_seen().size() >= KingEchoes.ECHOES.size():
 		save_checkpoint("return")
 		_begin_return()
 	else:
@@ -446,10 +452,10 @@ func _chapter_end() -> void:
 	Audio.play("sting_victory", -2.0, 0.0)
 
 	var lines := PackedStringArray()
-	lines.append("Görülen yankılar: %d / %d" % [GameState.echoes_seen.size(), KingEchoes.ECHOES.size()])
-	var burned: int = Memory.burned.size()
-	lines.append("Yanan hatıralar: %d / %d" % [burned, Memory.MEMORIES.size()])
-	if Memory.is_burned("rufet_face"):
+	lines.append("Görülen yankılar: %d / %d" % [WorldState.echoes_seen().size(), KingEchoes.ECHOES.size()])
+	var burned: int = Memory.burned_count()
+	lines.append("Yanan hatıralar: %d / %d" % [burned, Memory.all().size()])
+	if WorldState.has_burned(&"rufet_face"):
 		lines.append("Rüfet'i tanımıyorsun, ama o seni tanıyor.")
 	else:
 		lines.append("Rüfet yanında. Yüzünü hâlâ hatırlıyorsun.")

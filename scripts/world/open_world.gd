@@ -144,7 +144,7 @@ func hearth_pois() -> Array:
 func refresh_braziers() -> void:
 	braziers.clear()
 	for p in hearth_pois():
-		if GameState.world_has("hearths", p["id"]):
+		if WorldState.has_world_entry("hearths", p["id"]):
 			braziers.append(Vector3(p["pos"][0], p["pos"][1], p["pos"][2]))
 
 

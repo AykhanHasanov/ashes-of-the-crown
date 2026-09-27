@@ -186,8 +186,8 @@ func _ready() -> void:
 	_card_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_card.visible = false
 
-	Memory.memory_burned.connect(_on_memory_burned)
-	Memory.memories_reset.connect(_refresh_memories)
+	EventBus.memory_burned.connect(_on_memory_burned)
+	EventBus.state_replaced.connect(_refresh_memories)
 	Fx.notified.connect(show_whisper)
 	_refresh_memories()
 
@@ -370,9 +370,9 @@ func _set_card(title: String, sub: String, body: String, darkness: float) -> voi
 	_card.visible = true
 
 
-func _on_memory_burned(memory: Dictionary) -> void:
+func _on_memory_burned(id: StringName) -> void:
 	_refresh_memories()
-	show_whisper("«%s» yandı.\n%s" % [memory["title"], Memory.whisper()])
+	show_whisper("«%s» yandı.\n%s" % [tr(Memory.MemoryRegistry.get_def(id).display_name_key), Memory.whisper()])
 
 
 func _refresh_memories() -> void:
@@ -383,8 +383,8 @@ func _refresh_memories() -> void:
 ## memories gifted by survivors as a smaller row underneath.
 func _draw_embers() -> void:
 	var x := 10.0
-	for m in Memory.MEMORIES:
-		_diamond(Vector2(x, 12), 9.0, Color(0.3, 0.28, 0.27, 0.9) if Memory.is_burned(m["id"]) else Color(0.95, 0.42, 0.12))
+	for m in Memory.all():
+		_diamond(Vector2(x, 12), 9.0, Color(0.3, 0.28, 0.27, 0.9) if WorldState.has_burned(m.id) else Color(0.95, 0.42, 0.12))
 		x += 24.0
 	x = 8.0
 	for g in Memory.gifted:
