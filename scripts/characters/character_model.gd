@@ -25,6 +25,7 @@ var action := ""
 var hold_last := false
 
 var _locomotion := ""
+var _loops: Array = []
 
 
 func setup(path: String, hidden: Array, model_scale: float, extra_loops: Array = []) -> void:
@@ -34,16 +35,13 @@ func setup(path: String, hidden: Array, model_scale: float, extra_loops: Array =
 	add_child(scene)
 	anim = scene.find_children("*", "AnimationPlayer", true, false)[0]
 	skeleton = scene.find_children("*", "Skeleton3D", true, false)[0]
-	for n in extra_loops:
-		if anim.has_animation(n):
-			anim.get_animation(n).loop_mode = Animation.LOOP_LINEAR
+	# Which clips loop is remembered here, not written into the model's animations:
+	# every instance of the same glTF shares them (see _with_loop)
+	_loops = LOOPING + extra_loops
 	for mi in scene.find_children("*", "MeshInstance3D", true, false):
 		if mi.name in hidden:
 			mi.visible = false
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-	for n in LOOPING:
-		if anim.has_animation(n):
-			anim.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	anim.animation_finished.connect(_on_finished)
 	set_locomotion(false)
 
@@ -115,7 +113,7 @@ func play_loop(clip: String, speed := 1.0, blend := 0.18) -> void:
 	anim.speed_scale = speed
 	if _locomotion != clip:
 		_locomotion = clip
-		anim.play(clip, blend)
+		anim.play(_with_loop(clip, Animation.LOOP_LINEAR) if clip in _loops else clip, blend)
 
 
 func mesh(mesh_name: String) -> MeshInstance3D:
@@ -238,12 +236,30 @@ func set_idle(clip: String) -> void:
 func play_action(clip: String, speed := 1.0, blend := 0.08, hold := false) -> void:
 	if not anim.has_animation(clip):
 		return
-	action = clip
+	action = _with_loop(clip, Animation.LOOP_NONE)
 	hold_last = hold
 	_locomotion = ""
 	anim.speed_scale = speed
-	anim.play(clip, blend)
+	anim.play(action, blend)
 	anim.seek(0.0, true)
+
+
+## An imported model's animations are shared by every instance of that glTF, so they are
+## never edited here. When this character needs a clip with another loop mode than the
+## shared one, it gets its own copy of just that clip (in a per-instance "local" library).
+func _with_loop(clip: String, mode: Animation.LoopMode) -> String:
+	var a := anim.get_animation(clip)
+	if a == null or a.loop_mode == mode:
+		return clip
+	if not anim.has_animation_library("local"):
+		anim.add_animation_library("local", AnimationLibrary.new())
+	var lib := anim.get_animation_library("local")
+	var key := clip + ("_once" if mode == Animation.LOOP_NONE else "_loop")
+	if not lib.has_animation(key):
+		var copy: Animation = a.duplicate()   # per-instance copy: only its loop mode differs
+		copy.loop_mode = mode
+		lib.add_animation(key, copy)
+	return "local/" + key
 
 
 ## Ends the current one-shot early (combo cancel, stagger).
