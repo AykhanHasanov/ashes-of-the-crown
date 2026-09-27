@@ -3,7 +3,7 @@
 	"name": "Kılıç",
 	"damage_type": "slash",
 	"grip": "1h",
-	"model": {"donor": "res://assets/characters/adventurers/Knight.glb", "node": "1H_Sword"},
+	"model": {"path": "res://assets/props_mk/Sword_Bronze.gltf", "length": 1.0, "rotation": [0, 0, 0]},
 	"shield": false,
 	"hitstop": "light",
 	"locomotion": {"idle": "Idle", "run": "Running_A"},

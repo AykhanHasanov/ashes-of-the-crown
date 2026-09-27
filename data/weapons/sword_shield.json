@@ -3,8 +3,8 @@
 	"name": "Kılıç ve kalkan",
 	"damage_type": "slash",
 	"grip": "1h",
-	"model": {"donor": "res://assets/characters/adventurers/Knight.glb", "node": "1H_Sword"},
-	"shield": {"donor": "res://assets/characters/adventurers/Knight.glb", "node": "Round_Shield"},
+	"model": {"path": "res://assets/props_mk/Sword_Bronze.gltf", "length": 1.0, "rotation": [0, 0, 0]},
+	"shield": {"path": "res://assets/props_mk/Shield_Wooden.gltf"},
 	"hitstop": "light",
 	"locomotion": {"idle": "Idle", "run": "Running_A"},
 	"light": [
