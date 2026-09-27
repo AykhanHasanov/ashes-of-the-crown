@@ -16,6 +16,7 @@ const HearthMenu := preload("res://scripts/ui/hearth_menu.gd")
 const Interactable := preload("res://scripts/world/interactable.gd")
 const AiOverlay := preload("res://scripts/debug/ai_overlay.gd")
 const Villager := preload("res://scripts/npc/villager.gd")
+const Wildlife := preload("res://scripts/world/wildlife.gd")
 const Effects := preload("res://scripts/world/effects.gd")
 
 const HINT := "WASD hareket · Shift koşu · Space kaçış · LMB/F saldırı · RMB blok · C kilit\nE kullan · R şerbet · M harita · F10 debug · F6 streaming · F3 FPS"
@@ -55,6 +56,15 @@ func _setup() -> void:
 	level.streamer.actor_requested.connect(_on_actor_requested)
 	level.streamer.actors_released.connect(_on_actors_released)
 	level.streamer.poi_full.connect(_on_poi_full)
+	# Deer herds graze away from settlements
+	var wild := Wildlife.new()
+	wild.height_at = level.height_at
+	wild.water_at = level.water.surface_at
+	wild.player = player
+	for p in level.meta["pois"]:
+		if p["type"] in ["village", "castle", "camp", "grove", "hearth", "den", "lair", "ruins"]:
+			wild.avoid.append([Vector3(p["pos"][0], 0, p["pos"][2]), 70.0])
+	level.add_child(wild)
 	hud.set_hint(HINT)
 	hud._place(hud._objective, Vector4(0.5, 0, 0.5, 0), Vector4(-420, 64, 420, 96))
 	compass = Compass.new()
@@ -576,6 +586,16 @@ func _demo_setup() -> void:
 			# The village at work: stalls, forge, water carrier, the patrol (10:30)
 			level.day_night.set_hour(10.5)
 			_demo_view(Vector3(300, 0, 362), Vector3(304, 14.5, 344), 12.0)
+		"world_deer":
+			# Stand still in a meadow until a herd shows up, then look at it
+			level.day_night.set_hour(9.0)
+			get_tree().create_timer(2.5).timeout.connect(func():
+				for w in level.get_children():
+					if w is Wildlife and not w._herds.is_empty():
+						var a = w._herds[0]["animals"][0]["node"]
+						var at: Vector3 = a.global_position
+						player.global_position = at + Vector3(0, 0.5, 34)
+						_demo_view(player.global_position, at + Vector3(0, 1, 0), 10.0))
 		"world_evening":
 			# Villagers round the fire, the guard's lantern (20:30)
 			level.day_night.set_hour(20.5)
