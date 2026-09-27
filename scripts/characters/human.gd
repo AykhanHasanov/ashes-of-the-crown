@@ -79,6 +79,58 @@ static func build(spec: Dictionary) -> Node3D:
 	return h
 
 
+static var _looks: Dictionary = {}
+static var _warm: Array = []
+
+
+## Loads every file a human can need (outfits, heads, hair, the animation library and
+## the enemies' weapons) once, at level start, and keeps them cached: the first bandit
+## to appear mid-fight would otherwise stall the game while its textures load from disk.
+static func warm_up() -> void:
+	if not _warm.is_empty():
+		return
+	var paths: Array = [LIB, BASE["male"], BASE["female"]]
+	for o in ["Male_Ranger", "Male_Peasant", "Female_Ranger", "Female_Peasant"]:
+		paths.append(OUTFITS % o)
+	for g in ["male", "female"]:
+		paths.append("res://assets/chars/heads/%s_head.res" % g)
+		paths.append("res://assets/chars/heads/%s_skin.res" % g)
+	for f in DirAccess.get_files_at("res://assets/chars/hair"):
+		if f.ends_with(".gltf"):
+			paths.append("res://assets/chars/hair/" + f)
+	paths.append("res://assets/chars/base/T_Eye_Brown.png")
+	for f in DirAccess.get_files_at("res://data/enemies"):
+		var d = JSON.parse_string(FileAccess.get_file_as_string("res://data/enemies/" + f))
+		if d is Dictionary and d.get("model", {}).has("human"):
+			for w in d["model"].get("weapons", []):
+				if w.has("path"):
+					paths.append(w["path"])
+	for p in paths:
+		if ResourceLoader.exists(p):
+			_warm.append(load(p))
+
+
+## Builds a spec from JSON: {"look": "bandit", ...overrides}. A look with variants picks
+## one with `rng`; [r, g, b] colour arrays become Colors.
+static func spec_from_json(d: Dictionary, rng: RandomNumberGenerator) -> Dictionary:
+	if _looks.is_empty():
+		_looks = JSON.parse_string(FileAccess.get_file_as_string("res://data/looks.json"))
+	var looks := _looks
+	var spec := {}
+	if d.has("look"):
+		var look = looks[d["look"]]
+		if look is Array:
+			look = look[rng.randi() % look.size()]
+		spec.merge(look, true)
+	spec.merge(d, true)
+	spec.erase("look")
+	for k in ["hair_color", "tint", "skin_tint"]:
+		if spec.get(k) is Array:
+			var c: Array = spec[k]
+			spec[k] = Color(c[0], c[1], c[2])
+	return spec
+
+
 func setup_human(spec: Dictionary) -> void:
 	var outfit: String = spec.get("outfit", "Male_Ranger")
 	var gender: String = spec.get("gender", "female" if outfit.begins_with("Female") else "male")

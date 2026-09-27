@@ -3,19 +3,19 @@
 	"name": "Kalkanlı Haydut",
 	"faction": "bandit",
 	"model": {
-		"path": "res://assets/characters/adventurers/Barbarian.glb",
-		"hidden": [
-			"1H_Axe_Offhand",
-			"Mug",
-			"2H_Axe"
-		],
-		"scale": 0.82,
-		"recolor": [
-			0.0,
-			1.0,
-			0.07,
-			0.6,
-			0.55
+		"human": {
+			"look": "bandit"
+		},
+		"weapons": [
+			{
+				"path": "res://assets/props_mk/Axe_Bronze.gltf",
+				"bone": "handslot.r"
+			},
+			{
+				"path": "res://assets/props_mk/Shield_Wooden.gltf",
+				"bone": "handslot.l",
+				"shield": true
+			}
 		],
 		"ash_overlay": 0.0,
 		"glow_eyes": false

@@ -44,6 +44,7 @@ var _hearth_hint_shown := false
 
 func _ready() -> void:
 	Fx.reset_time()
+	preload("res://scripts/characters/human.gd").warm_up()
 	level = _make_level()
 	add_child(level)
 	level.build()

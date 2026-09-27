@@ -6,22 +6,19 @@
 	"role": "bruiser",
 	"xp": 90,
 	"model": {
-		"path": "res://assets/characters/skeletons/Skeleton_Warrior.glb",
-		"scale": 1.42,
-		"tint": [
-			0.45,
-			0.38,
-			0.35
-		],
-		"ash_overlay": 0.75,
-		"glow_eyes": true,
+		"human": {
+			"look": "ash",
+			"scale": 1.62
+		},
 		"weapons": [
 			{
-				"path": "res://assets/characters/skeletons/Skeleton_Axe.gltf",
+				"path": "res://assets/quaternius/medieval_weapons_pack/Axe_Double.glb",
 				"bone": "handslot.r",
-				"scale": 1.4
+				"length": 1.3
 			}
-		]
+		],
+		"ash_overlay": 0.75,
+		"glow_eyes": true
 	},
 	"anims": {
 		"idle": "Idle",

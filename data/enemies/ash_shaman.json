@@ -6,20 +6,9 @@
 	"role": "support",
 	"xp": 22,
 	"model": {
-		"path": "res://assets/characters/adventurers/Mage.glb",
-		"hidden": [
-			"Spellbook",
-			"Spellbook_open",
-			"1H_Wand"
-		],
-		"scale": 0.82,
-		"recolor": [
-			0.0,
-			1.0,
-			0.03,
-			0.35,
-			0.45
-		],
+		"human": {
+			"look": "ash_shaman"
+		},
 		"ash_overlay": 0.7,
 		"glow_eyes": false
 	},

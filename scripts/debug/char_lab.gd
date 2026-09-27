@@ -47,8 +47,20 @@ func _ready() -> void:
 		{"outfit": "Female_Ranger", "hood": true},
 		{"outfit": "Female_Peasant", "hair": "Hair_Long"},
 	]
+	# CHAR_LAB_LOOKS=ash,bandit,... builds looks from data/looks.json; CHAR_LAB_OVERLAY=0.6 adds the ember overlay
+	var rng := RandomNumberGenerator.new()
+	var looks := OS.get_environment("CHAR_LAB_LOOKS")
+	if looks != "":
+		specs.clear()
+		for l in looks.split(","):
+			specs.append(Human.spec_from_json({"look": l}, rng))
 	for i in 4:
 		var c: Node3D = Human.build(specs[i])
+		if OS.get_environment("CHAR_LAB_OVERLAY") != "":
+			var ov := ShaderMaterial.new()
+			ov.shader = preload("res://shaders/ash_overlay.gdshader")
+			ov.set_shader_parameter("intensity", float(OS.get_environment("CHAR_LAB_OVERLAY")))
+			c.set_overlay(ov)
 		c.position = Vector3(-3.0 + i * 2.0, 0, 0)
 		c.rotation.y = PI   # face the camera
 		add_child(c)

@@ -3,13 +3,14 @@
 	"name": "Kül Gölgesi",
 	"faction": "ash",
 	"model": {
-		"path": "res://assets/characters/skeletons/Skeleton_Minion.glb",
-		"weapon": "res://assets/characters/skeletons/Skeleton_Blade.gltf",
-		"scale": 0.82,
-		"tint": [
-			0.55,
-			0.48,
-			0.45
+		"human": {
+			"look": "ash"
+		},
+		"weapons": [
+			{
+				"path": "res://assets/props_mk/Sword_Bronze.gltf",
+				"bone": "handslot.r"
+			}
 		],
 		"ash_overlay": 0.6,
 		"glow_eyes": true

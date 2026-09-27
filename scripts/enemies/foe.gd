@@ -24,6 +24,7 @@ signal summon_requested(enemy_id: String, pos: Vector3, enemy_level: int, opts: 
 signal engaged(foe: Node)
 
 const CharacterModel := preload("res://scripts/characters/character_model.gd")
+const Human := preload("res://scripts/characters/human.gd")
 const Effects := preload("res://scripts/world/effects.gd")
 const Melee := preload("res://scripts/combat/melee.gd")
 const Perception := preload("res://scripts/enemies/perception.gd")
@@ -217,9 +218,14 @@ func _ready() -> void:
 
 func _build_model() -> void:
 	var m: Dictionary = data["model"]
-	_model = CharacterModel.new()
-	add_child(_model)
-	_model.setup(m["path"], m.get("hidden", []), float(m.get("scale", 1.0)), m.get("loop", []))
+	if m.has("human"):
+		# Realistic human (V3 realism): look, outfit and colours come from data/looks.json
+		_model = Human.build(Human.spec_from_json(m["human"], _rng))
+		add_child(_model)
+	else:
+		_model = CharacterModel.new()
+		add_child(_model)
+		_model.setup(m["path"], m.get("hidden", []), float(m.get("scale", 1.0)), m.get("loop", []))
 	if m.has("length"):
 		_model.fit_length(m["length"])
 	if m.has("tint"):
@@ -236,7 +242,10 @@ func _build_model() -> void:
 			item = _model.borrow(w["donor"], w["node"], w.get("bone", "handslot.r"))
 		else:
 			var rot: Array = w.get("rotation", [0, 0, 0])
-			item = _model.attach(w["path"], w.get("bone", "handslot.r"), Vector3(rot[0], rot[1], rot[2]))
+			if _model is Human:
+				item = _model.attach(w["path"], w.get("bone", "handslot.r"), Vector3(rot[0], rot[1], rot[2]), w.get("shield", false))
+			else:
+				item = _model.attach(w["path"], w.get("bone", "handslot.r"), Vector3(rot[0], rot[1], rot[2]))
 			if w.has("length"):
 				CharacterModel.fit_item(item, float(w["length"]))
 		if item != null and w.has("scale"):

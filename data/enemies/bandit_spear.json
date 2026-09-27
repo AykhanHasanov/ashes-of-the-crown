@@ -6,35 +6,14 @@
 	"role": "bruiser",
 	"xp": 17,
 	"model": {
-		"path": "res://assets/characters/adventurers/Knight.glb",
-		"hidden": [
-			"1H_Sword_Offhand",
-			"Badge_Shield",
-			"Rectangle_Shield",
-			"Round_Shield",
-			"Spike_Shield",
-			"1H_Sword",
-			"2H_Sword",
-			"Knight_Helmet"
-		],
-		"scale": 0.82,
-		"recolor": [
-			0.0,
-			1.0,
-			0.08,
-			0.55,
-			0.55
-		],
+		"human": {
+			"look": "bandit"
+		},
 		"weapons": [
 			{
 				"path": "res://assets/quaternius/medieval_weapons_pack/Spear.glb",
 				"bone": "handslot.r",
-				"length": 2.5,
-				"rotation": [
-					0,
-					0,
-					0
-				]
+				"length": 2.1
 			}
 		]
 	},
