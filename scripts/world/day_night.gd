@@ -148,7 +148,7 @@ func _apply() -> void:
 	# Mist: heavy around sunrise (5-8), lighter at dusk, a trace at noon
 	var dawn := clampf(1.0 - absf(hour - 6.5) / 2.0, 0.0, 1.0)
 	var dusk := clampf(1.0 - absf(hour - 19.5) / 2.0, 0.0, 1.0)
-	env.fog_height_density = 0.012 + dawn * 0.09 + dusk * 0.04 + n * 0.03 + weather_fog * 0.05
+	env.fog_height_density = 0.005 + dawn * 0.035 + dusk * 0.012 + n * 0.012 + weather_fog * 0.03
 
 
 ## Interpolates the KEYS table at hour h.

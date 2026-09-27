@@ -92,8 +92,12 @@ func _broadleaf(leaves: bool) -> void:
 		radii.append(maxf(r0 * (1.0 - 0.8 * t) * flare, 0.03))
 	crown_center.x = trunk[10].x
 	crown_center.z = trunk[10].z
-	_tube(trunk, radii, 12, 2.0, r0, [0, 1])
-	_tube(_every_other(trunk), _every_other(radii), 6, 2.0, r0, [2])
+	var lite: bool = cfg.get("lite", false)   # bushes: the leaves hide the wood, keep it cheap
+	if lite:
+		_tube(_every_other(trunk), _every_other(radii), 5, 1.0, r0, [0, 1, 2])
+	else:
+		_tube(trunk, radii, 12, 2.0, r0, [0, 1])
+		_tube(_every_other(trunk), _every_other(radii), 6, 2.0, r0, [2])
 	# Primary branches, spread round the trunk by the golden angle
 	var n: int = cfg["branches"]
 	var start: float = cfg["crown_start"]
@@ -106,8 +110,11 @@ func _broadleaf(leaves: bool) -> void:
 		var dir := Vector3(cos(az) * cos(elev), sin(elev), sin(az) * cos(elev))
 		var length := _to_crown_edge(base, dir) * rng.randf_range(0.82, 0.98)
 		var br := _branch(base, dir, length, _radius_at(radii, t) * 0.55, 0.06, 7)
-		_tube(br[0], br[1], 7, 1.0, 0.12, [0])
-		_tube(br[0], br[1], 4, 1.0, 0.12, [1, 2])
+		if lite:
+			_tube(br[0], br[1], 3, 1.0, 0.12, [0, 1])
+		else:
+			_tube(br[0], br[1], 7, 1.0, 0.12, [0])
+			_tube(br[0], br[1], 4, 1.0, 0.12, [1, 2])
 		tips.append(br)
 		# Secondary shoots
 		for k in 3:
@@ -117,7 +124,8 @@ func _broadleaf(leaves: bool) -> void:
 			var sdir := (dir * 0.6 + side * 0.7 + Vector3.UP * rng.randf_range(0.1, 0.5)).normalized()
 			var sl := length * rng.randf_range(0.32, 0.5) * (1.0 - ts * 0.4)
 			var sbr := _branch(sb, sdir, sl, _radius_at(br[1], ts) * 0.55, 0.12, 4)
-			_tube(sbr[0], sbr[1], 5, 1.0, 0.07, [0] if leaves else [0, 1])
+			if not lite:
+				_tube(sbr[0], sbr[1], 5, 1.0, 0.07, [0] if leaves else [0, 1])
 			tips.append(sbr)
 			if not leaves:
 				# Dead trees: one more level of bare twigs for a gnarled silhouette

@@ -8,7 +8,7 @@
 				0.8,
 				1.25
 			],
-			"spacing": 0.85,
+			"spacing": 0.8,
 			"chance": {
 				"meadow": 0.95,
 				"riverside": 0.8,
@@ -31,7 +31,7 @@
 				"kind": "cards",
 				"texture": "grass_clump",
 				"count": 3,
-				"width": 0.9,
+				"width": 1.1,
 				"height": 0.55,
 				"dryness": 0.2
 			}
