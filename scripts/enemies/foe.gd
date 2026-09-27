@@ -51,7 +51,7 @@ var risen := false
 
 # Open world
 var home := Vector3.ZERO
-var aggro_range := 0.0       # 0 = always hunting (arena); >0 = perception on
+var aggro_range := 0.0       # 0 = always hunting (no perception); >0 = perception on
 var leash := 42.0
 var aggro := true
 var spawn_key := ""
@@ -205,7 +205,7 @@ func _ready() -> void:
 		perception.visibility = world_visibility
 		perception.always_sees = affixes.has("ash_eye")
 	if aggro_range <= 0.0:
-		# The arena: hunting from the first frame
+		# No perception: hunting from the first frame
 		_engaged_once = true
 		engaged.emit.call_deferred(self)
 	var spawn: String = data["anims"].get("spawn", "")

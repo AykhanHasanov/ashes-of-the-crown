@@ -26,8 +26,7 @@ func _run() -> void:
 	_memory_survives()
 	_corrupt_files()
 	_backup_fallback()
-	await _arena_isolation()
-	await _new_game_slots()
+	await _menu_cases()
 	_legacy_import()
 	_wipe(TEST_DIR)
 	_wipe(LEGACY_DIR)
@@ -137,61 +136,80 @@ func _backup_fallback() -> void:
 	_check("a missing main file falls back to its .bak", SaveManager.load_slot(3) and WorldState.get_flag(&"version") == 1)
 
 
-func _arena_isolation() -> void:
+func _menu_cases() -> void:
+	# No save at all: Continue is greyed out, New Game takes slot 1
 	_wipe(TEST_DIR)
-	_fill_state()
-	SaveManager.active_slot = 1
-	SaveManager.save(1)
-	WorldState.session_active = false   # no playtime ticking while we compare
-	var before := WorldState.to_dict()
-	var file_before := FileAccess.get_file_as_string(TEST_DIR + "slot_1.json")
-	var listing_before := DirAccess.get_files_at(TEST_DIR)
-	var arena: Node = load("res://scenes/arena.tscn").instantiate()
-	get_tree().root.add_child(arena)
-	await _frames(20)
-	_check("the arena runs in a sandbox", WorldState.is_sandbox())
-	# Everything the arena could do to the state
-	Memory.burn(&"first_sword")
-	WorldState.set_flag(&"arena_flag")
-	WorldState.set_player_stats({"health": 1.0, "level": 9})
-	WorldState.add_item(&"arena_item")
-	WorldState.clear_burned_memories()
-	WorldState.set_region(&"arena")
-	EventBus.checkpoint_rested.emit(&"arena_hearth")
-	_check("SaveManager refuses to save in the sandbox", not SaveManager.save(1))
-	arena.queue_free()
-	await _frames(5)
-	_check("leaving the arena ends the sandbox", not WorldState.is_sandbox())
-	_check("the arena left WorldState exactly as it was", _deep_equal(WorldState.to_dict(), before))
-	_check("the arena never touched the save file", FileAccess.get_file_as_string(TEST_DIR + "slot_1.json") == file_before)
-	_check("the arena created no save files", DirAccess.get_files_at(TEST_DIR) == listing_before)
-
-
-func _new_game_slots() -> void:
-	_wipe(TEST_DIR)
-	WorldState.new_game()
-	SaveManager.save(1)
-	var menu = MainMenu.new()
-	add_child(menu)
-	await _frames(2)
+	var menu = await _open_menu()
+	_check("no save: Continue is disabled", menu._continue.disabled and not menu._new.disabled)
+	menu._on_continue()
+	_check("no save: pressing Continue does nothing", not menu._starting)
 	SaveManager.active_slot = 0
 	menu._on_new_game()
-	_check("new game takes the first empty slot", SaveManager.active_slot == 2 and not menu.is_confirming())
+	_check("no save: New Game takes slot 1 without asking", SaveManager.active_slot == 1 and not menu.is_confirming())
 	menu.queue_free()
-	for s in [2, 3]:
-		SaveManager.save(s)
-	var files := _slot_files()
-	menu = MainMenu.new()
-	add_child(menu)
-	await _frames(2)
+
+	# Some saves: Continue loads the most recently written slot
+	_wipe(TEST_DIR)
+	_write_slot(1, 1, 1000)
+	_write_slot(3, 3, 3000)
+	_write_slot(2, 2, 2000)
+	menu = await _open_menu()
+	_check("some saves: Continue is enabled", not menu._continue.disabled)
+	WorldState.new_game()
+	menu._on_continue()
+	_check("Continue loads the most recently written slot", WorldState.get_flag(&"slot") == 3 and SaveManager.active_slot == 3 and menu._starting)
+	menu.queue_free()
+	_wipe(TEST_DIR)
+	_write_slot(1, 1, 1000)
+	menu = await _open_menu()
 	SaveManager.active_slot = 0
 	menu._on_new_game()
-	_check("all slots full: new game asks before overwriting", menu.is_confirming() and SaveManager.active_slot == 0)
-	_check("the question names the slot and its last-played time", menu._confirm_text.text.contains(tr("MENU_SLOT_NAME") % SaveManager.oldest_slot()) and menu._confirm_text.text.contains(":"))
+	_check("some saves: New Game takes the first empty slot", SaveManager.active_slot == 2 and not menu.is_confirming())
+	menu.queue_free()
+
+	# Continue falls back to the .bak of the newest slot
+	_wipe(TEST_DIR)
+	_write_slot(2, 20, 5000)
+	_write(TEST_DIR + "slot_2.json.bak", _slot_text(21, 4000))
+	_write(TEST_DIR + "slot_2.json", "{ broken")
+	menu = await _open_menu()
+	WorldState.new_game()
+	menu._on_continue()
+	_check("Continue falls back to the slot's .bak", WorldState.get_flag(&"slot") == 21 and menu._starting)
+	menu.queue_free()
+
+	# Every file of the only slot broken: the menu stays and says so
+	_wipe(TEST_DIR)
+	_write(TEST_DIR + "slot_1.json", "garbage")
+	_write(TEST_DIR + "slot_1.json.bak", "garbage")
+	menu = await _open_menu()
+	_check("unreadable save: Continue is disabled", menu._continue.disabled)
+	_write(TEST_DIR + "slot_2.json", _slot_text(2, 100))
+	menu.refresh()
+	_write(TEST_DIR + "slot_2.json", "garbage")   # breaks after the menu opened
+	menu._on_continue()
+	_check("a failed Continue keeps the menu, shows why, starts nothing", not menu._starting and menu._status.visible and menu._status.text == tr("MENU_LOAD_FAILED"))
+	menu.queue_free()
+
+	# All slots full: New Game asks, naming the slot and its time; Cancel changes nothing
+	_wipe(TEST_DIR)
+	for s in [1, 2, 3]:
+		_write_slot(s, s, 1000 * s)
+	var files := _slot_files()
+	menu = await _open_menu()
+	SaveManager.active_slot = 0
+	menu._on_new_game()
+	_check("all slots full: New Game asks before overwriting", menu.is_confirming() and SaveManager.active_slot == 0)
+	_check("the question names the oldest slot and its last-played time", menu._confirm_text.text.contains(tr("MENU_SLOT_NAME") % 1)
+		and menu._confirm_text.text.contains(SaveManager.format_time(1000)))
 	menu._cancel_confirm()
 	await _frames(2)
-	_check("cancel returns to the menu and overwrites nothing", not menu.is_confirming() and menu._menu.visible and SaveManager.active_slot == 0 and _slot_files() == files)
+	_check("Cancel returns to the menu and overwrites nothing", not menu.is_confirming() and menu._menu.visible and SaveManager.active_slot == 0 and _slot_files() == files)
+	menu._on_new_game()
+	menu._confirm.get_node("Box/Buttons").get_child(0).emit_signal("pressed")
+	_check("confirming picks the oldest slot for the new game", SaveManager.active_slot == 1 and menu._starting)
 	menu.queue_free()
+	_check("the menu shows only its two choices", _menu_buttons(await _open_menu()) == [tr("MENU_CONTINUE"), tr("MENU_NEW_GAME")])
 
 
 func _legacy_import() -> void:
@@ -275,6 +293,34 @@ func _with_version(d: Dictionary, v: int) -> Dictionary:
 func _read_flag(path: String, key: String) -> Variant:
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
 	return int(d["flags"][key]) if d is Dictionary else null
+
+
+func _open_menu() -> Node:
+	var menu = MainMenu.new()
+	add_child(menu)
+	await _frames(2)
+	return menu
+
+
+func _menu_buttons(menu: Node) -> Array:
+	var out: Array = []
+	for c in menu._menu.get_children():
+		if c is Button:
+			out.append(c.text)
+	menu.queue_free()
+	return out
+
+
+## A save file whose flag "slot" = `marker`, written `stamp` seconds after the epoch.
+func _slot_text(marker: int, stamp: int) -> String:
+	var d := WorldState.default_state()
+	d["flags"]["slot"] = marker
+	d["meta"]["last_saved_timestamp"] = stamp
+	return JSON.stringify(d)
+
+
+func _write_slot(slot: int, marker: int, stamp: int) -> void:
+	_write(TEST_DIR + "slot_%d.json" % slot, _slot_text(marker, stamp))
 
 
 func _slot_files() -> Dictionary:

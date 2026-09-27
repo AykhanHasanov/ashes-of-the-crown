@@ -13,7 +13,7 @@ extends Node
 ## slot 1 once, logs what could not be carried over and renames them *.migrated.
 ##
 ## Autosaves (to the active slot) on EventBus.checkpoint_rested and region_changed.
-## Never writes while WorldState is a sandbox or a debug --demo is running.
+## Never writes while a debug --demo is running.
 
 const SLOTS := 3
 
@@ -109,7 +109,7 @@ static func format_time(unix: int) -> String:
 # --- Saving --------------------------------------------------------------------------------------
 
 func can_save() -> bool:
-	return active_slot > 0 and not WorldState.is_sandbox() and (Settings.demo == "" or allow_in_demo)
+	return active_slot > 0 and (Settings.demo == "" or allow_in_demo)
 
 
 func autosave() -> void:
@@ -123,9 +123,6 @@ func save(slot := -1) -> bool:
 		slot = active_slot
 	if slot < 1 or slot > SLOTS:
 		push_warning("SaveManager: no slot to save to")
-		return false
-	if WorldState.is_sandbox():
-		push_warning("SaveManager: refusing to save a sandbox state")
 		return false
 	if Settings.demo != "" and not allow_in_demo:
 		return false
