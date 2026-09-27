@@ -364,10 +364,10 @@ func play_loop(clip: String, speed := 1.0, blend := 0.18) -> void:
 	anim.speed_scale = speed * float(m[2])
 	if _locomotion != m[0]:
 		_locomotion = m[0]
-		var a := anim.get_animation(m[0])
-		if m[0] in LOOPING:
-			a.loop_mode = Animation.LOOP_LINEAR
-		anim.play(m[0], blend)
+		var clip_name: String = m[0]
+		if clip_name in LOOPING:
+			clip_name = _with_loop(clip_name, Animation.LOOP_LINEAR)
+		anim.play(clip_name, blend)
 
 
 func set_locomotion(moving: bool, speed_scale := 1.0) -> void:
@@ -387,13 +387,30 @@ func play_action(clip: String, speed := 1.0, blend := 0.08, hold := false) -> vo
 	var m := _map(clip)
 	if m[0] == "":
 		return
-	action = m[0]
+	action = _with_loop(m[0], Animation.LOOP_NONE)
 	hold_last = hold
 	_locomotion = ""
-	anim.get_animation(m[0]).loop_mode = Animation.LOOP_NONE
 	anim.speed_scale = speed * float(m[1])
-	anim.play(m[0], blend)
+	anim.play(action, blend)
 	anim.seek(0.0, true)
+
+
+## The animation library is one resource shared by every human, so its clips are never
+## edited here. When this character needs a clip with another loop mode than the shared
+## one, it gets its own copy of just that clip (in a per-instance "local" library).
+func _with_loop(clip: String, mode: Animation.LoopMode) -> String:
+	var a := anim.get_animation(clip)
+	if a == null or a.loop_mode == mode:
+		return clip
+	if not anim.has_animation_library("local"):
+		anim.add_animation_library("local", AnimationLibrary.new())
+	var lib := anim.get_animation_library("local")
+	var key := clip + ("_once" if mode == Animation.LOOP_NONE else "_loop")
+	if not lib.has_animation(key):
+		var copy: Animation = a.duplicate()   # per-instance copy: only its loop mode differs
+		copy.loop_mode = mode
+		lib.add_animation(key, copy)
+	return "local/" + key
 
 
 func cancel_action() -> void:
