@@ -13,7 +13,7 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
   - A soulslike loop: "Xatirə" is collected from enemies (currency + level), dropped on death and lost on a second death, and each loss makes the night deeper (4 stages).
   - Redeemable enemies can be purified with a 3 s ritual after a stagger.
   - Aggressive combat: rally (win health back by attacking) and hit-stop.
-  - The fight zone becomes a hidden dev test arena.
+  - The old wave-based fight zone (arena) has been removed completely.
 - **Before the redesign:** tag `pre-redesign-v0`. The redesign plan and the per-file keep/change/archive list are in `AUDIT.md`.
 
 ## Tech stack
@@ -92,10 +92,7 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 - **One fact, one owner.** Story progress lives in `story` and must never be mirrored in `flags`. The same rule holds for every other value: never store it in two places.
 - **Live values stay on nodes and are copied in only at save time.** This covers health, flasks, fire, clock, fog and position. On `EventBus.saving(slot)` the active mode writes them through the accessors. Do not write them every frame.
 
-**Contexts**
-- `STORY` is the real game.
-- `SANDBOX` is the dev arena. `begin_sandbox()` swaps in a deep copy of the state and `end_sandbox()` discards it. The arena enters the sandbox in `_enter_tree` and leaves it in `_exit_tree`, and SaveManager refuses to write while it runs.
-- Debug `--demo` runs play in memory and never save either.
+**Debug runs:** a `--demo` plays in memory; SaveManager never writes during one.
 
 **SaveManager**
 - Slots `user://saves/slot_1..3.json`.
@@ -110,27 +107,28 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 - Burned state is WorldState's. `Memory` (the autoload) is only the rules layer.
 - Refer to memories by id (`&"mother_name"`), never by title.
 
-**Tests:** `"$G" --headless --path . res://scenes/tests/state_test.tscn`. It uses its own save folders.
+**Tests:** `"$G" --headless --path . res://scenes/tests/state_test.tscn` covers state, saves, migration and every main-menu case. It uses its own save folders.
+
+**Removed with the arena:** the combat self-test (19 checks) and the AI self-test (41 checks) lived in the arena. Combat and enemy AI currently have **no automated tests**; they should get a test scene of their own in the world.
 
 ## Running and testing
 
 Set `G="C:/Users/User/Documents/games/_tools/godot/Godot_v4.7.2-stable_win64_console.exe"` and run from the project root.
 
+**Main menu** (`scripts/ui/main_menu.gd`, shown by `main.gd`): two choices only, both from translation keys.
+- *Continue* (`MENU_CONTINUE`) loads the most recently written slot. It falls back to the slot's `.bak`, is greyed out when no slot can be read, and on a failed load stays on the menu with `MENU_LOAD_FAILED` (it never starts a new game instead). A save whose region is `kur_vadisi` continues in the open world, otherwise in its chapter.
+- *New Game* (`MENU_NEW_GAME`) takes the first empty slot, or asks before overwriting the oldest one (`MENU_OVERWRITE_*`). It then starts Chapter 1.
+- There are no Settings or Quit entries on the title. Both are in the in-game pause menu (Esc).
+
 **Main story (Chapter 1 → 2)**
-- Play: `"$G" --path .`. The title screen opens; choose *Yeni oyun* or *Devam et*.
+- Play: `"$G" --path .` opens the title screen.
 - Jump straight in: `"$G" --path . -- --demo=<mode>`. See the `settings.gd` header for the demo list (menu, explore, dialogue, fight…).
 - Chapter 2 directly: `"$G" --path . res://scenes/chapter2.tscn`.
 
 **Open world (Kür Vadisi)**
-- Play: `"$G" --path . res://scenes/world.tscn` (or the menu button *Kür Vadisi*).
+- The open world has no menu entry and no story path leads there yet. It is reached by *Continue* on a save made in the world, or from the command line: `"$G" --path . res://scenes/world.tscn` (loads the newest slot, or starts a new game in the first empty one).
 - Self-test: `"$G" --path . res://scenes/world.tscn -- --demo=world_selftest` (28 checks).
 - Views: `--demo=world_village | world_square | world_evening | world_deer | world_forest | world_dusk | world_night | world_rain | world_lake`.
-
-**Fight zone (arena)**
-- Play: `"$G" --path . res://scenes/arena.tscn` (or the menu button *Savaş arenası*).
-- Combat self-test: `"$G" --path . res://scenes/arena.tscn -- --demo=arena_selftest` (19 checks).
-- AI self-test: `-- --demo=ai_selftest`.
-- Views: `--demo=arena_fight | arena_all | arena_boss | arena_wolves`.
 
 **Common flags and hotkeys**
 - `--capture=captures/x.png --frame=240` saves a screenshot and quits. It also prints a `PROFILE` line (fps, draw calls, primitives, VRAM).

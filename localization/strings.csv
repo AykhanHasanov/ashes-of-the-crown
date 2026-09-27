@@ -22,3 +22,9 @@ MENU_OVERWRITE_BODY,Boş kayıt yuvası kalmadı. Yeni oyun %s üzerine yazılac
 MENU_SLOT_NAME,Yuva %d
 MENU_OVERWRITE_CONFIRM,Üzerine yaz
 MENU_CANCEL,Vazgeç
+MENU_TITLE,ASHES OF THE CROWN
+MENU_SUBTITLE,Tacın Külleri
+MENU_CONTINUE,Devam et
+MENU_NEW_GAME,Yeni oyun
+MENU_LOAD_FAILED,Kayıt yüklenemedi: dosya bozuk. Başka bir kayıt yoksa yeni oyun başlatabilirsin.
+MENU_FOOTER,Prototip · Bölüm 1: İlk sabah

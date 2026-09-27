@@ -15,14 +15,8 @@ extends Node
 ##   npcs       npc_id -> Dictionary (reserved for the NPC model)
 ##   world      time_of_day (hour), day_count, hub_stage, and open-world progress:
 ##              hearths / chests / echoes / discovered / killed (id lists), fog, last_hearth
-##
-## Context: STORY is the real game. SANDBOX (the dev arena) runs on a disposable deep copy:
-## begin_sandbox() swaps the copy in, end_sandbox() throws it away and restores the real
-## state untouched. SaveManager refuses to write while in SANDBOX.
 
 const MemoryRegistry := preload("res://scripts/core/memory_registry.gd")
-
-enum Context { STORY, SANDBOX }
 
 const SAVE_VERSION := 1
 const WORLD_LISTS := ["hearths", "chests", "echoes", "discovered", "killed"]
@@ -30,15 +24,12 @@ const INT_STATS := ["flasks", "max_flasks", "level"]
 const FLOAT_STATS := ["health", "max_health", "fire"]
 const STRING_STATS := ["weapon"]
 
-var context := Context.STORY
 ## True once a game is running (new game or load); playtime counts only then.
 var session_active := false
 
-# Built at declaration, not in _ready: a main scene's _enter_tree (the arena starting its
-# sandbox) runs before any autoload's _ready.
+# Built at declaration, not in _ready: a main scene's _enter_tree runs before any
+# autoload's _ready, and must already find a valid state.
 var _state: Dictionary = default_state()
-var _real: Dictionary = {}     # the STORY state, parked while a sandbox runs
-var _real_session := false
 
 
 func _ready() -> void:
@@ -46,7 +37,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if session_active and context == Context.STORY:
+	if session_active:
 		_state["meta"]["playtime"] = float(_state["meta"]["playtime"]) + delta
 
 
@@ -68,33 +59,7 @@ static func default_state() -> Dictionary:
 
 func new_game() -> void:
 	_state = default_state()
-	if context == Context.STORY:
-		session_active = true
-	EventBus.state_replaced.emit()
-
-
-func is_sandbox() -> bool:
-	return context == Context.SANDBOX
-
-
-## The dev arena plays on a copy; nothing it does reaches the real state or a save.
-func begin_sandbox() -> void:
-	if context == Context.SANDBOX:
-		return
-	_real = _state
-	_real_session = session_active
-	_state = _state.duplicate(true)
-	context = Context.SANDBOX
-	EventBus.state_replaced.emit()
-
-
-func end_sandbox() -> void:
-	if context != Context.SANDBOX:
-		return
-	_state = _real
-	_real = {}
-	session_active = _real_session
-	context = Context.STORY
+	session_active = true
 	EventBus.state_replaced.emit()
 
 
@@ -110,8 +75,7 @@ func from_dict(data: Variant) -> bool:
 	if clean.is_empty():
 		return false
 	_state = clean
-	if context == Context.STORY:
-		session_active = true
+	session_active = true
 	EventBus.state_replaced.emit()
 	return true
 
@@ -285,11 +249,6 @@ func burned_memories() -> Array[StringName]:
 		out.append(StringName(id))
 	return out
 
-
-## Brings every memory back. Only the dev arena's sandbox uses this.
-func clear_burned_memories() -> void:
-	_state["player"]["burned_memories"] = []
-	EventBus.state_replaced.emit()
 
 
 # --- Player --------------------------------------------------------------------------------------

@@ -1,15 +1,22 @@
 extends CanvasLayer
-## Title screen shown over the slowly orbiting courtyard: new game, settings, quit.
+## Title screen shown over the slowly orbiting courtyard. Two choices only:
+##   Continue — loads the most recently written save slot (SaveManager falls back to its
+##              .bak); greyed out when there is no save. If loading fails the menu stays
+##              and says so — it never starts a new game in the player's place.
+##   New Game — the first empty slot; with every slot full it asks before overwriting the
+##              one played longest ago (naming it and its last-played time).
+## All text comes from translation keys (localization/strings.csv).
 
 signal new_game
-signal continue_game
+signal continue_game   # emitted after the slot has been loaded into WorldState
 
 const UITheme := preload("res://scripts/ui/ui_theme.gd")
-const SettingsPanel := preload("res://scripts/ui/settings_panel.gd")
 
 var _root: Control
 var _menu: VBoxContainer
-var _settings: PanelContainer
+var _continue: Button
+var _new: Button
+var _status: Label
 var _confirm: PanelContainer
 var _confirm_text: Label
 var _confirm_slot := 0
@@ -44,28 +51,19 @@ func _ready() -> void:
 	_root.add_child(_menu)
 	_menu.position = Vector2(90, 150)
 
-	_menu.add_child(UITheme.title("ASHES OF THE CROWN", 60))
-	_menu.add_child(UITheme.title("Tacın Külleri", 28, UITheme.EMBER))
+	_menu.add_child(UITheme.title(tr("MENU_TITLE"), 60))
+	_menu.add_child(UITheme.title(tr("MENU_SUBTITLE"), 28, UITheme.EMBER))
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(0, 40)
 	_menu.add_child(gap)
-	if SaveManager.has_any_save():
-		_button("Devam et", _on_continue)
-	_button("Yeni oyun", _on_new_game)
-	# The open world plays the most recent slot; without a save there is nothing to enter
-	var world := _button("Kür Vadisi (açık dünya, V3 test)", func():
-		if not SaveManager.load_slot(SaveManager.most_recent_slot()):
-			return
-		get_tree().paused = false
-		get_tree().change_scene_to_file("res://scenes/world.tscn"))
-	world.disabled = SaveManager.most_recent_slot() == 0
-	_button("Savaş arenası (V3 test)", func():
-		get_tree().paused = false
-		get_tree().change_scene_to_file("res://scenes/arena.tscn"))
-	_button("Ayarlar", _on_settings)
-	_button("Çıkış", func(): get_tree().quit())
+	_continue = _button(tr("MENU_CONTINUE"), _on_continue)
+	_new = _button(tr("MENU_NEW_GAME"), _on_new_game)
+	_status = UITheme.title("", 17, UITheme.EMBER)
+	_status.visible = false
+	_menu.add_child(_status)
+	refresh()
 
-	var footer := UITheme.title("Prototip · Bölüm 1: İlk sabah", 15, UITheme.MUTED)
+	var footer := UITheme.title(tr("MENU_FOOTER"), 15, UITheme.MUTED)
 	_root.add_child(footer)
 	footer.anchor_top = 1.0
 	footer.anchor_bottom = 1.0
@@ -76,15 +74,16 @@ func _ready() -> void:
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_settings = SettingsPanel.new()
-	_settings.visible = false
-	_settings.closed.connect(_on_settings_closed)
-	center.add_child(_settings)
 	_build_confirm(center)
 
 	_root.modulate.a = 0.0
 	create_tween().tween_property(_root, "modulate:a", 1.0, 1.5)
 	_focus_first.call_deferred()
+
+
+## Greys out Continue when no slot can be read.
+func refresh() -> void:
+	_continue.disabled = SaveManager.most_recent_slot() == 0
 
 
 func _button(text: String, action: Callable) -> Button:
@@ -100,14 +99,28 @@ func _button(text: String, action: Callable) -> Button:
 
 func _focus_first() -> void:
 	for c in _menu.get_children():
-		if c is Button:
+		if c is Button and not c.disabled:
 			c.grab_focus()
 			return
+
+
+func _on_continue() -> void:
+	if _starting or _continue.disabled:
+		return
+	if not SaveManager.load_slot(SaveManager.most_recent_slot()):
+		_status.text = tr("MENU_LOAD_FAILED")
+		_status.visible = true
+		refresh()
+		_focus_first()
+		return
+	_leave(continue_game)
 
 
 ## A new game takes the first empty slot. With every slot full it asks before
 ## overwriting the one played longest ago — a save is never replaced silently.
 func _on_new_game() -> void:
+	if _starting:
+		return
 	var slot := SaveManager.first_empty_slot()
 	if slot > 0:
 		SaveManager.active_slot = slot
@@ -165,10 +178,6 @@ func is_confirming() -> bool:
 	return _confirm.visible
 
 
-func _on_continue() -> void:
-	_leave(continue_game)
-
-
 func _leave(result: Signal) -> void:
 	if _starting:
 		return
@@ -179,14 +188,3 @@ func _leave(result: Signal) -> void:
 	await tw.finished
 	result.emit()
 	queue_free()
-
-
-func _on_settings() -> void:
-	Audio.play("ui_select", -8.0, 0.0)
-	_menu.visible = false
-	_settings.open()
-
-
-func _on_settings_closed() -> void:
-	_menu.visible = true
-	_focus_first()

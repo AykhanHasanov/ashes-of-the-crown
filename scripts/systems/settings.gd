@@ -10,8 +10,6 @@ extends Node
 ##                          radial | offer | strike | whirl | unstoppable (self-test)
 ##                          (Chapter 2 scene, run with scenes/chapter2.tscn as the scene:)
 ##                          c2 | c2_talk
-##                          (V3 arena, scenes/arena.tscn:)
-##                          arena_fight | arena_lock | arena_wolves | arena_selftest
 ##                          (V3 open world, scenes/world.tscn: see world_mode.gd _demo_setup)
 ##                          (anything but "menu" skips the title screen; "combat" also
 ##                          swings and fires the ember before the capture)

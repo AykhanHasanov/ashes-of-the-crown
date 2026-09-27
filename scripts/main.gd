@@ -102,12 +102,9 @@ func _menu() -> void:
 	var menu = MainMenu.new()
 	add_child(menu)
 	menu.new_game.connect(_start_new_game)
-	menu.continue_game.connect(func():
-		if SaveManager.load_slot(SaveManager.most_recent_slot()):
-			_leave_menu()
-			_continue_save()
-		else:
-			_start_new_game())
+	menu.continue_game.connect(func():   # the menu has already loaded the slot
+		_leave_menu()
+		_continue_save())
 
 
 func _continue_save() -> void:

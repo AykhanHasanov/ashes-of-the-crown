@@ -12,7 +12,7 @@ extends Node
 ##   story_changed(field)                     WorldState chapter / checkpoint / echoes setters
 ##   world_changed(key)                       WorldState world-section setters (hearths, chests, fog, hub_stage...)
 ##   npc_changed(npc_id)                      WorldState.set_npc (reserved for the NPC model)
-##   state_replaced()                         WorldState: new game, load, sandbox begin/end — re-read everything
+##   state_replaced()                         WorldState: new game or load — re-read everything
 ##
 ## Moments (emitted by gameplay / mode scripts):
 ##   checkpoint_rested(checkpoint_id)         the mode, when Ayxan rests at an ocaq or reaches a story

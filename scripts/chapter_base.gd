@@ -166,7 +166,7 @@ func to_main_menu() -> void:
 
 
 ## Records the story checkpoint and asks for an autosave (SaveManager never writes during
-## a debug --demo or in the sandbox, so captures cannot overwrite the player's save).
+## a debug --demo, so captures cannot overwrite the player's save).
 func save_checkpoint(checkpoint: String) -> void:
 	WorldState.set_checkpoint(checkpoint)
 	EventBus.checkpoint_rested.emit(StringName(checkpoint))
