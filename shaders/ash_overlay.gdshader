@@ -18,8 +18,13 @@ void vertex() {
 }
 
 void fragment() {
-	float n = vnoise3(lpos * scale + vec3(0.0, -TIME * 0.6, 0.0));
-	float cracks = smoothstep(0.66, 0.72, n) * (0.6 + 0.4 * sin(TIME * 3.0 + lpos.y * 8.0));
-	float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
-	ALBEDO = ember_color.rgb * (cracks * 1.8 + fres * 1.1) * intensity + flash_color.rgb * hit_flash * 1.5;
+	// Thin glowing veins (ridged noise: bright where the noise crosses its midline), two
+	// octaves so they branch, drifting slowly upward like heat through charred skin.
+	vec3 p = lpos * scale + vec3(0.0, -TIME * 0.25, 0.0);
+	float r1 = 1.0 - abs(vnoise3(p) - 0.5) * 2.0;
+	float r2 = 1.0 - abs(vnoise3(p * 2.3 + 7.1) - 0.5) * 2.0;
+	float veins = max(smoothstep(0.93, 0.98, r1), smoothstep(0.95, 0.99, r2) * 0.6);
+	float pulse = 0.65 + 0.35 * sin(TIME * 2.2 + lpos.y * 5.0);
+	float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 4.0);
+	ALBEDO = ember_color.rgb * (veins * 2.4 * pulse + fres * 0.7) * intensity + flash_color.rgb * hit_flash * 1.5;
 }

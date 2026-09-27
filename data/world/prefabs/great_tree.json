@@ -4,11 +4,67 @@
 	"icon": "landmark",
 	"discover_radius": 40,
 	"pieces": [
-		{"m": "n:CommonTree_1", "p": [0, -0.4, 0], "r": 30, "s": 9.5, "c": false, "far": true, "trunk": 1.9},
-		{"ring": "n:Rock_Moss_2", "radius": 7.0, "count": 5, "s": 2.2, "c": false},
-		{"m": "n:Flowers", "p": [4, 0, 5], "s": 1.2, "c": false},
-		{"m": "n:Flowers", "p": [-5, 0, 3], "s": 1.1, "c": false},
-		{"m": "v:Bench_2", "p": [0, 0, 6.5], "r": 180, "s": 2.4, "c": false}
+		{
+			"m": "f:great_plane.scn",
+			"p": [
+				0,
+				-0.3,
+				0
+			],
+			"r": 30,
+			"s": 1.0,
+			"c": false,
+			"far": true,
+			"trunk": 1.5
+		},
+		{
+			"ring": "f:rock_moss.scn",
+			"radius": 7.0,
+			"count": 5,
+			"s": 1.034,
+			"c": false
+		},
+		{
+			"m": "f:fern.scn",
+			"p": [
+				4,
+				0,
+				5
+			],
+			"s": 1.2,
+			"c": false
+		},
+		{
+			"m": "f:fern.scn",
+			"p": [
+				-5,
+				0,
+				3
+			],
+			"s": 1.1,
+			"c": false
+		},
+		{
+			"m": "pm:Bench.gltf",
+			"p": [
+				0,
+				0,
+				6.5
+			],
+			"r": 180,
+			"s": 1.0,
+			"c": false
+		}
 	],
-	"interact": [{"kind": "echo", "p": [0, 0, 5.2], "text": "Çınarın gövdesine yüzlerce isim kazınmış. En yenisi hâlâ ağarıyor: «Ayxan + ...». Gerisini kül silmiş."}]
+	"interact": [
+		{
+			"kind": "echo",
+			"p": [
+				0,
+				0,
+				5.2
+			],
+			"text": "Çınarın gövdesine yüzlerce isim kazınmış. En yenisi hâlâ ağarıyor: «Ayxan + ...». Gerisini kül silmiş."
+		}
+	]
 }

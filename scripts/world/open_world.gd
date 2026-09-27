@@ -11,6 +11,7 @@ const Weather := preload("res://scripts/world/weather.gd")
 const Water := preload("res://scripts/world/water.gd")
 const Streamer := preload("res://scripts/world/cell_streamer.gd")
 const Effects := preload("res://scripts/world/effects.gd")
+const Birds := preload("res://scripts/world/birds.gd")
 const META := "res://world/generated/world_meta.json"
 
 var meta: Dictionary
@@ -77,6 +78,10 @@ func build() -> void:
 	_make_far_landmarks()
 	_make_bridges()
 	refresh_braziers()
+	var birds := Birds.new()
+	birds.clock = day_night
+	birds.height_at = height_at
+	add_child(birds)
 
 
 ## Terrain3D 1.0.2 was built for Godot 4.4–4.6. On 4.7 two things break for regions

@@ -1,0 +1,1 @@
+Poly Haven models (CC0 1.0, https://polyhaven.com): rock_07, rock_09, rock_face_01, rock_moss_set_01, rock_moss_set_02, shrub_03, shrub_04, fern_02, tree_stump_01, dead_tree_trunk.

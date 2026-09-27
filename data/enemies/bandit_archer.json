@@ -6,20 +6,15 @@
 	"role": "ranged",
 	"xp": 15,
 	"model": {
-		"path": "res://assets/characters/adventurers/Rogue.glb",
-		"hidden": [
-			"Knife_Offhand",
-			"2H_Crossbow",
-			"Knife",
-			"Throwable"
-		],
-		"scale": 0.82,
-		"recolor": [
-			0.3,
-			0.7,
-			0.1,
-			0.55,
-			0.6
+		"human": {
+			"look": "bandit_archer"
+		},
+		"weapons": [
+			{
+				"path": "res://assets/quaternius/medieval_weapons_pack/Bow_Wooden.glb",
+				"bone": "handslot.r",
+				"length": 1.25
+			}
 		]
 	},
 	"anims": {

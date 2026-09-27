@@ -4,7 +4,27 @@
 	"icon": "chest",
 	"discover_radius": 20,
 	"pieces": [
-		{"m": "n:Rock_Moss_2", "p": [-1.8, 0, -1.2], "r": 30, "s": 1.6, "c": false}
+		{
+			"m": "f:rock_moss.scn",
+			"p": [
+				-1.8,
+				0,
+				-1.2
+			],
+			"r": 30,
+			"s": 0.752,
+			"c": false
+		}
 	],
-	"interact": [{"kind": "chest", "p": [0, 0, 0], "reward": "flask_seed"}]
+	"interact": [
+		{
+			"kind": "chest",
+			"p": [
+				0,
+				0,
+				0
+			],
+			"reward": "flask_seed"
+		}
+	]
 }

@@ -1519,6 +1519,270 @@
 					"text": ""
 				}
 			]
+		},
+		"villager_m": {
+			"greet": [
+				{
+					"file": "res://assets/audio/voice/villager_m/greet_0.wav",
+					"text": "Hoş geldin yolcu. Kürköy'de ekmek de var, dert de."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_m/greet_1.wav",
+					"text": "Selam sana. Yolun açık olsun."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_m/greet_2.wav",
+					"text": "Sen Ayxan'sın, değil mi? Ocağı yakan sensin diyorlar."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_m/greet_3.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_m/greet_4.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_m/greet_5.wav",
+					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/villager_m/idle_0.wav",
+					"text": "Bu yıl nar erken kızardı..."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_m/idle_1.wav",
+					"text": "Ah, belim... Yaşlandık be."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_m/idle_2.wav",
+					"text": "Rüzgâr yine külü getiriyor."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_m/idle_3.wav",
+					"text": "Akşama çorba var, ocak başında."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_m/idle_4.wav",
+					"text": "Kür'ün suyu çekildi, balık da azaldı."
+				}
+			],
+			"flee": [
+				{
+					"file": "res://assets/audio/voice/villager_m/flee_0.wav",
+					"text": "Kaçın! Gölgeler geldi!"
+				},
+				{
+					"file": "res://assets/audio/voice/villager_m/flee_1.wav",
+					"text": "Kapıları kapatın, çabuk!"
+				},
+				{
+					"file": "res://assets/audio/voice/villager_m/flee_2.wav",
+					"text": "Eyvah! Saklanın!"
+				}
+			],
+			"night": [
+				{
+					"file": "res://assets/audio/voice/villager_m/night_0.wav",
+					"text": "Gece oldu, içeri girelim. Gölgeler gece daha açtır."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_m/night_1.wav",
+					"text": "Geç oldu. Kapımı kilitleyeceğim."
+				}
+			]
+		},
+		"villager_old": {
+			"greet": [
+				{
+					"file": "res://assets/audio/voice/villager_old/greet_0.wav",
+					"text": "Hoş geldin yolcu. Kürköy'de ekmek de var, dert de."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_old/greet_1.wav",
+					"text": "Selam sana. Yolun açık olsun."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_old/greet_2.wav",
+					"text": "Sen Ayxan'sın, değil mi? Ocağı yakan sensin diyorlar."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_old/greet_3.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_old/greet_4.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_old/greet_5.wav",
+					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/villager_old/idle_0.wav",
+					"text": "Bu yıl nar erken kızardı..."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_old/idle_1.wav",
+					"text": "Ah, belim... Yaşlandık be."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_old/idle_2.wav",
+					"text": "Rüzgâr yine külü getiriyor."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_old/idle_3.wav",
+					"text": "Akşama çorba var, ocak başında."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_old/idle_4.wav",
+					"text": "Kür'ün suyu çekildi, balık da azaldı."
+				}
+			],
+			"flee": [
+				{
+					"file": "res://assets/audio/voice/villager_old/flee_0.wav",
+					"text": "Kaçın! Gölgeler geldi!"
+				},
+				{
+					"file": "res://assets/audio/voice/villager_old/flee_1.wav",
+					"text": "Kapıları kapatın, çabuk!"
+				},
+				{
+					"file": "res://assets/audio/voice/villager_old/flee_2.wav",
+					"text": "Eyvah! Saklanın!"
+				}
+			],
+			"night": [
+				{
+					"file": "res://assets/audio/voice/villager_old/night_0.wav",
+					"text": "Gece oldu, içeri girelim. Gölgeler gece daha açtır."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_old/night_1.wav",
+					"text": "Geç oldu. Kapımı kilitleyeceğim."
+				}
+			]
+		},
+		"villager_f": {
+			"greet": [
+				{
+					"file": "res://assets/audio/voice/villager_f/greet_0.wav",
+					"text": "Hoş geldin yolcu. Kürköy'de ekmek de var, dert de."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_f/greet_1.wav",
+					"text": "Selam sana. Yolun açık olsun."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_f/greet_2.wav",
+					"text": "Sen Ayxan'sın, değil mi? Ocağı yakan sensin diyorlar."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_f/greet_3.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_f/greet_4.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_f/greet_5.wav",
+					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/villager_f/idle_0.wav",
+					"text": "Bu yıl nar erken kızardı..."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_f/idle_1.wav",
+					"text": "Ah, belim... Yaşlandık be."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_f/idle_2.wav",
+					"text": "Rüzgâr yine külü getiriyor."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_f/idle_3.wav",
+					"text": "Akşama çorba var, ocak başında."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_f/idle_4.wav",
+					"text": "Kür'ün suyu çekildi, balık da azaldı."
+				}
+			],
+			"flee": [
+				{
+					"file": "res://assets/audio/voice/villager_f/flee_0.wav",
+					"text": "Kaçın! Gölgeler geldi!"
+				},
+				{
+					"file": "res://assets/audio/voice/villager_f/flee_1.wav",
+					"text": "Kapıları kapatın, çabuk!"
+				},
+				{
+					"file": "res://assets/audio/voice/villager_f/flee_2.wav",
+					"text": "Eyvah! Saklanın!"
+				}
+			],
+			"night": [
+				{
+					"file": "res://assets/audio/voice/villager_f/night_0.wav",
+					"text": "Gece oldu, içeri girelim. Gölgeler gece daha açtır."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_f/night_1.wav",
+					"text": "Geç oldu. Kapımı kilitleyeceğim."
+				}
+			]
+		},
+		"guard": {
+			"greet": [
+				{
+					"file": "res://assets/audio/voice/guard/greet_0.wav",
+					"text": "Silahın kınında kalsın yolcu. Burada huzur var."
+				},
+				{
+					"file": "res://assets/audio/voice/guard/greet_1.wav",
+					"text": "Kürköy'e hoş geldin. Belaya bulaşma."
+				},
+				{
+					"file": "res://assets/audio/voice/guard/greet_2.wav",
+					"text": "Ocağı yakan sen misin? Sağ ol, kardeş."
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/guard/idle_0.wav",
+					"text": "Fenerim yandıkça köy uyur."
+				},
+				{
+					"file": "res://assets/audio/voice/guard/idle_1.wav",
+					"text": "Gece nöbeti uzun olur..."
+				},
+				{
+					"file": "res://assets/audio/voice/guard/idle_2.wav",
+					"text": "Ormandan uluma geliyor. Kurtlar yakın."
+				}
+			],
+			"flee": [
+				{
+					"file": "res://assets/audio/voice/guard/flee_0.wav",
+					"text": "Herkes içeri! Ben tutarım onları!"
+				}
+			],
+			"night": [
+				{
+					"file": "res://assets/audio/voice/guard/night_0.wav",
+					"text": "Gece dolaşma yolcu. Kül gölgeleri karanlığı sever."
+				}
+			]
 		}
 	}
 }

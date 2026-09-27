@@ -50,8 +50,9 @@ func _ready() -> void:
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
-	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.tonemap_white = 6.0
+	# AgX: filmic highlight roll-off and natural colour (no neon greens or orange skin)
+	env.tonemap_mode = Environment.TONE_MAPPER_AGX
+	env.tonemap_exposure = 1.05
 	env.fog_enabled = true
 	env.fog_mode = Environment.FOG_MODE_EXPONENTIAL
 	env.fog_sky_affect = 0.35
@@ -61,8 +62,11 @@ func _ready() -> void:
 	env.glow_bloom = 0.05
 	env.glow_hdr_threshold = 1.1
 	env.adjustment_enabled = true
-	env.adjustment_saturation = 1.08
-	env.adjustment_contrast = 1.05
+	env.adjustment_saturation = 0.95
+	env.adjustment_contrast = 1.08
+	# Valley mist: fog that pools below the hills (cheap height fog, thick at dawn and dusk)
+	env.fog_height = 16.0
+	env.fog_height_density = 0.02
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
@@ -117,7 +121,8 @@ func _apply() -> void:
 	var dir := moon_dir if use_moon else sun_dir
 	light.look_at_from_position(Vector3.ZERO, -dir, Vector3.UP if absf(dir.y) < 0.99 else Vector3.FORWARD)
 	light.light_color = k[3]
-	light.light_energy = float(k[4]) * lerpf(1.0, weather_sun, 0.9 if not use_moon else 0.5)
+	# Strong sun over a dimmer sky fill: shadows keep their depth (the old flat look)
+	light.light_energy = float(k[4]) * (1.0 if use_moon else 1.55) * lerpf(1.0, weather_sun, 0.9 if not use_moon else 0.5)
 	light.shadow_opacity = lerpf(1.0, 0.35, 1.0 - weather_sun) * (0.6 if use_moon else 1.0)
 
 	var top: Color = k[1]
@@ -136,10 +141,19 @@ func _apply() -> void:
 	sky_mat.set_shader_parameter("cloud_darkness", weather_dark)
 	sky_mat.set_shader_parameter("ember_pulse", 0.8 + 0.2 * sin(_t * 1.3) + 0.08 * sin(_t * 5.1))
 
-	env.ambient_light_energy = float(k[5]) * lerpf(0.75, 1.0, weather_sun)
+	env.ambient_light_energy = float(k[5]) * 0.72 * lerpf(0.75, 1.0, weather_sun)
 	var fog: Color = k[6]
 	env.fog_light_color = fog.lerp(grey, weather_dark * 0.6)
 	env.fog_density = 0.0016 + weather_fog * 0.012 + n * 0.0015
+	# Mist: heavy around sunrise (5-8), lighter at dusk, a trace at noon
+	var dawn := clampf(1.0 - absf(hour - 6.5) / 2.0, 0.0, 1.0)
+	var dusk := clampf(1.0 - absf(hour - 19.5) / 2.0, 0.0, 1.0)
+	# Lamps in the houses: lit from dusk till the small hours, most of them out by 2 am
+	var lamps := clampf((n - 0.15) * 2.5, 0.0, 1.0)
+	if hour > 1.5 and hour < 6.0:
+		lamps *= 0.25
+	RenderingServer.global_shader_parameter_set("window_light", lamps)
+	env.fog_height_density = 0.005 + dawn * 0.035 + dusk * 0.012 + n * 0.012 + weather_fog * 0.03
 
 
 ## Interpolates the KEYS table at hour h.

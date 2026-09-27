@@ -3,12 +3,12 @@
 	"items": [
 		{
 			"id": "grass",
-			"model": "res://assets/quaternius/nature_pack/Grass.glb",
+			"model": "procedural",
 			"scale": [
 				0.8,
 				1.25
 			],
-			"spacing": 0.85,
+			"spacing": 0.8,
 			"chance": {
 				"meadow": 0.95,
 				"riverside": 0.8,
@@ -23,24 +23,22 @@
 			"shadows": false,
 			"max_slope": 30,
 			"color": [
-				0.44,
-				0.6,
-				0.2
+				0.95,
+				1.0,
+				0.9
 			],
 			"procedural": {
-				"kind": "tuft",
-				"blades": 14,
-				"height": [
-					0.32,
-					0.7
-				],
-				"width": 0.1,
-				"spread": 0.4
+				"kind": "cards",
+				"texture": "grass_clump",
+				"count": 3,
+				"width": 1.1,
+				"height": 0.55,
+				"dryness": 0.2
 			}
 		},
 		{
 			"id": "grass_tall",
-			"model": "res://assets/quaternius/nature_pack/Grass_2.glb",
+			"model": "procedural",
 			"scale": [
 				0.8,
 				1.2
@@ -59,43 +57,55 @@
 			"shadows": false,
 			"max_slope": 30,
 			"color": [
-				0.55,
-				0.62,
-				0.24
+				1,
+				1,
+				1
 			],
 			"procedural": {
-				"kind": "tuft",
-				"blades": 10,
-				"height": [
-					0.7,
-					1.15
-				],
-				"width": 0.085,
-				"spread": 0.3
+				"kind": "cards",
+				"texture": "grass_wild",
+				"count": 3,
+				"width": 1.0,
+				"height": 0.95,
+				"dryness": 0.35
 			}
 		},
 		{
 			"id": "flowers",
-			"model": "res://assets/quaternius/nature_pack/Flowers.glb",
+			"model": "procedural",
 			"scale": [
 				0.8,
 				1.1
 			],
-			"spacing": 4.0,
+			"spacing": 3.0,
 			"chance": {
-				"meadow": 0.22,
-				"plain": 0.06
+				"meadow": 0.35,
+				"plain": 0.08,
+				"riverside": 0.1
 			},
 			"range": [
 				45,
 				70
 			],
 			"shadows": false,
-			"max_slope": 25
+			"max_slope": 25,
+			"procedural": {
+				"kind": "cards",
+				"texture": "flowers_meadow",
+				"count": 2,
+				"width": 0.9,
+				"height": 0.6,
+				"dryness": 0.0
+			},
+			"color": [
+				1,
+				1,
+				1
+			]
 		},
 		{
 			"id": "wheat",
-			"model": "res://assets/quaternius/nature_pack/Wheat.glb",
+			"model": "procedural",
 			"scale": [
 				0.9,
 				1.2
@@ -111,21 +121,29 @@
 			"shadows": false,
 			"max_slope": 12,
 			"color": [
-				0.86,
-				0.72,
-				0.36
-			]
+				1.15,
+				1.0,
+				0.6
+			],
+			"procedural": {
+				"kind": "cards",
+				"texture": "grass_dry",
+				"count": 3,
+				"width": 1.0,
+				"height": 1.05,
+				"dryness": 0.9
+			}
 		},
 		{
 			"id": "oak",
-			"model": "res://assets/quaternius/nature_pack/CommonTree_1.glb",
+			"model": "generated",
 			"scale": [
-				3.0,
-				3.9
+				0.75,
+				1.1
 			],
-			"spacing": 5.2,
+			"spacing": 6.8,
 			"chance": {
-				"forest": 0.36,
+				"forest": 0.34,
 				"meadow": 0.012,
 				"plain": 0.03
 			},
@@ -135,19 +153,20 @@
 			],
 			"shadows": true,
 			"max_slope": 32,
-			"collide": 0.55
+			"collide": 0.45,
+			"generated": true
 		},
 		{
-			"id": "oak_tall",
-			"model": "res://assets/quaternius/nature_pack/CommonTree_3.glb",
+			"id": "beech",
+			"model": "generated",
 			"scale": [
-				2.8,
-				3.6
+				0.8,
+				1.1
 			],
-			"spacing": 5.6,
+			"spacing": 6.6,
 			"chance": {
 				"forest": 0.3,
-				"plain": 0.02
+				"plain": 0.015
 			},
 			"range": [
 				230,
@@ -155,18 +174,19 @@
 			],
 			"shadows": true,
 			"max_slope": 32,
-			"collide": 0.5
+			"collide": 0.38,
+			"generated": true
 		},
 		{
-			"id": "pine",
-			"model": "res://assets/quaternius/nature_pack/PineTree_2.glb",
+			"id": "fir",
+			"model": "generated",
 			"scale": [
-				3.0,
-				4.0
+				0.7,
+				1.15
 			],
-			"spacing": 5.8,
+			"spacing": 6.2,
 			"chance": {
-				"forest": 0.26,
+				"forest": 0.22,
 				"mountain": 0.3
 			},
 			"range": [
@@ -175,18 +195,21 @@
 			],
 			"shadows": true,
 			"max_slope": 38,
-			"collide": 0.5
+			"collide": 0.32,
+			"generated": true
 		},
 		{
-			"id": "willow",
-			"model": "res://assets/quaternius/nature_pack/Willow_2.glb",
+			"id": "maple",
+			"model": "generated",
 			"scale": [
-				2.8,
-				3.4
+				0.8,
+				1.1
 			],
 			"spacing": 8.0,
 			"chance": {
-				"riverside": 0.22
+				"riverside": 0.16,
+				"forest": 0.04,
+				"meadow": 0.008
 			},
 			"range": [
 				230,
@@ -194,14 +217,81 @@
 			],
 			"shadows": true,
 			"max_slope": 25,
-			"collide": 0.6
+			"collide": 0.32,
+			"generated": true
+		},
+		{
+			"id": "fir_young",
+			"model": "generated",
+			"generated": true,
+			"scale": [
+				0.6,
+				1.2
+			],
+			"spacing": 7.0,
+			"chance": {
+				"forest": 0.12,
+				"mountain": 0.16,
+				"plain": 0.006
+			},
+			"collide": 0.18,
+			"range": [
+				150,
+				220
+			],
+			"shadows": true,
+			"max_slope": 35
+		},
+		{
+			"id": "dead",
+			"model": "generated",
+			"generated": true,
+			"scale": [
+				0.8,
+				1.2
+			],
+			"spacing": 18.0,
+			"chance": {
+				"forest": 0.05,
+				"plain": 0.01,
+				"mountain": 0.03
+			},
+			"collide": 0.3,
+			"range": [
+				200,
+				260
+			],
+			"shadows": true,
+			"max_slope": 35
+		},
+		{
+			"id": "burnt",
+			"model": "generated",
+			"generated": true,
+			"scale": [
+				0.8,
+				1.2
+			],
+			"spacing": 22.0,
+			"chance": {
+				"plain": 0.012,
+				"meadow": 0.006,
+				"mountain": 0.02
+			},
+			"collide": 0.32,
+			"range": [
+				200,
+				260
+			],
+			"shadows": true,
+			"max_slope": 35
 		},
 		{
 			"id": "bush",
-			"model": "res://assets/quaternius/nature_pack/Bush_1.glb",
+			"model": "generated",
 			"scale": [
-				0.9,
-				1.4
+				0.8,
+				1.3
 			],
 			"spacing": 5.0,
 			"chance": {
@@ -215,13 +305,14 @@
 				120
 			],
 			"shadows": true,
-			"max_slope": 30
+			"max_slope": 30,
+			"generated": true
 		},
 		{
 			"id": "berry_bush",
-			"model": "res://assets/quaternius/nature_pack/BushBerries_1.glb",
+			"model": "generated",
 			"scale": [
-				0.9,
+				0.8,
 				1.3
 			],
 			"spacing": 8.0,
@@ -234,14 +325,15 @@
 				120
 			],
 			"shadows": true,
-			"max_slope": 30
+			"max_slope": 30,
+			"generated": true
 		},
 		{
 			"id": "rock_moss",
-			"model": "res://assets/quaternius/nature_pack/Rock_Moss_2.glb",
+			"model": "res://assets/nature/rock_moss_set_01/rock_moss_set_01.gltf",
 			"scale": [
-				0.9,
-				2.0
+				0.7,
+				1.4
 			],
 			"spacing": 11.0,
 			"chance": {
@@ -255,14 +347,82 @@
 				200
 			],
 			"shadows": true,
-			"max_slope": 45
+			"max_slope": 45,
+			"node": "rock_moss_set_01_rock01"
+		},
+		{
+			"id": "rock_moss_b",
+			"model": "res://assets/nature/rock_moss_set_01/rock_moss_set_01.gltf",
+			"node": "rock_moss_set_01_rock04",
+			"scale": [
+				0.7,
+				1.3
+			],
+			"spacing": 12.0,
+			"chance": {
+				"forest": 0.1,
+				"meadow": 0.012,
+				"mountain": 0.2,
+				"plain": 0.02
+			},
+			"range": [
+				140,
+				200
+			],
+			"shadows": true,
+			"max_slope": 40
+		},
+		{
+			"id": "rock_small",
+			"model": "res://assets/nature/rock_moss_set_02/rock_moss_set_02.gltf",
+			"node": "rock_moss_set_02_rock10",
+			"scale": [
+				0.6,
+				1.2
+			],
+			"spacing": 9.0,
+			"chance": {
+				"forest": 0.1,
+				"meadow": 0.02,
+				"riverside": 0.08,
+				"plain": 0.03,
+				"mountain": 0.25
+			},
+			"range": [
+				140,
+				200
+			],
+			"shadows": true,
+			"max_slope": 40
+		},
+		{
+			"id": "rock_small_b",
+			"model": "res://assets/nature/rock_moss_set_02/rock_moss_set_02.gltf",
+			"node": "rock_moss_set_02_rock13",
+			"scale": [
+				0.6,
+				1.1
+			],
+			"spacing": 11.0,
+			"chance": {
+				"forest": 0.06,
+				"meadow": 0.015,
+				"riverside": 0.06,
+				"mountain": 0.2
+			},
+			"range": [
+				140,
+				200
+			],
+			"shadows": true,
+			"max_slope": 40
 		},
 		{
 			"id": "rock",
-			"model": "res://assets/quaternius/nature_pack/Rock_4.glb",
+			"model": "res://assets/nature/rock_face_01/rock_face_01.gltf",
 			"scale": [
-				2.0,
-				4.5
+				0.5,
+				1.1
 			],
 			"spacing": 14.0,
 			"chance": {
@@ -279,10 +439,10 @@
 		},
 		{
 			"id": "stump",
-			"model": "res://assets/quaternius/nature_pack/TreeStump_Moss.glb",
+			"model": "res://assets/nature/tree_stump_01/tree_stump_01.gltf",
 			"scale": [
-				1.0,
-				1.4
+				0.8,
+				1.15
 			],
 			"spacing": 16.0,
 			"chance": {
@@ -297,9 +457,9 @@
 		},
 		{
 			"id": "log",
-			"model": "res://assets/quaternius/nature_pack/WoodLog_Moss.glb",
+			"model": "res://assets/nature/dead_tree_trunk/dead_tree_trunk.gltf",
 			"scale": [
-				1.0,
+				0.9,
 				1.3
 			],
 			"spacing": 18.0,
@@ -316,21 +476,24 @@
 		},
 		{
 			"id": "fern",
-			"model": "res://assets/quaternius/nature_pack/Plant_2.glb",
+			"model": "res://assets/nature/fern_02/fern_02.gltf",
 			"scale": [
-				0.7,
-				1.0
+				1.0,
+				1.7
 			],
 			"spacing": 3.0,
 			"chance": {
-				"forest": 0.28
+				"forest": 0.32,
+				"riverside": 0.08
 			},
 			"range": [
 				40,
 				60
 			],
 			"shadows": false,
-			"max_slope": 35
+			"max_slope": 35,
+			"node": "fern_02_b",
+			"keep_material": true
 		}
 	],
 	"clear": {

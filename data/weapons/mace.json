@@ -3,7 +3,7 @@
 	"name": "Gürz",
 	"damage_type": "crush",
 	"grip": "2h",
-	"model": {"path": "res://assets/quaternius/medieval_weapons_pack/Hammer_Double.glb", "length": 1.45, "rotation": [0, 0, 0]},
+	"model": {"path": "res://assets/quaternius/medieval_weapons_pack/Hammer_Double.glb", "length": 1.05, "rotation": [0, 0, 0]},
 	"shield": false,
 	"hitstop": "heavy",
 	"locomotion": {"idle": "2H_Melee_Idle", "run": "Running_A"},

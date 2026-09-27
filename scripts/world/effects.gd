@@ -275,6 +275,35 @@ static func smoke_burst(amount: int, speed: float, lifetime: float, size: float)
 	return p
 
 
+## Hearth smoke from a chimney: a thin, slow plume that widens and drifts downwind.
+static func chimney_smoke() -> GPUParticles3D:
+	var pm := ParticleProcessMaterial.new()
+	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	pm.emission_sphere_radius = 0.15
+	pm.direction = Vector3.UP
+	pm.spread = 8.0
+	pm.initial_velocity_min = 0.6
+	pm.initial_velocity_max = 0.9
+	pm.gravity = Vector3(0.35, 0.25, 0.12)   # rises, then leans with the valley wind
+	pm.damping_min = 0.1
+	pm.damping_max = 0.2
+	pm.angle_min = -180.0
+	pm.angle_max = 180.0
+	pm.scale_curve = curve([Vector2(0, 0.25), Vector2(0.4, 0.75), Vector2(1, 1.3)])
+	pm.color_ramp = ramp([
+		[0.0, Color(0.42, 0.4, 0.38, 0.0)],
+		[0.12, Color(0.45, 0.43, 0.41, 0.6)],
+		[1.0, Color(0.6, 0.6, 0.6, 0.0)],
+	])
+	var p := make_particles(22, 7.0, pm, 1.6, particle_material(false), 12.0)
+	p.one_shot = false
+	p.explosiveness = 0.0
+	p.randomness = 0.4
+	p.emitting = true
+	p.visibility_aabb = AABB(Vector3(-6, -1, -6), Vector3(12, 14, 12))
+	return p
+
+
 ## Flat crescent used for sword slashes. Alpha fades toward both ends and the inner edge.
 static func arc_mesh(inner: float, outer: float, angle_deg: float, segments := 18) -> ArrayMesh:
 	var st := SurfaceTool.new()

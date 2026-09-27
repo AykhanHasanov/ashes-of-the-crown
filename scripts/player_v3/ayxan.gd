@@ -21,6 +21,10 @@ signal weapon_changed(weapon_name: String)
 signal lock_changed(target)
 
 const CharacterModel := preload("res://scripts/characters/character_model.gd")
+const Human := preload("res://scripts/characters/human.gd")
+## Ayxan: a hooded ranger in ash-stained crimson (realistic V3 look)
+const LOOK := {"outfit": "Male_Ranger", "hood": true, "beard": true, "hair": "Hair_SimpleParted",
+	"hair_color": Color(0.11, 0.08, 0.06), "cloth_hue": [0.18, 0.55, 0.985, 1.05, 0.62]}
 const Effects := preload("res://scripts/world/effects.gd")
 const Melee := preload("res://scripts/combat/melee.gd")
 const OVERLAY := preload("res://shaders/ash_overlay.gdshader")
@@ -125,10 +129,9 @@ func _ready() -> void:
 	shape.position.y = 0.9
 	add_child(shape)
 
-	_model = CharacterModel.new()
+	_model = Human.build(LOOK)
 	add_child(_model)
-	_model.setup(MODEL_PATH, HIDDEN, 0.82, ["Running_Strafe_Left", "Running_Strafe_Right", "Walking_Backwards", "Jump_Idle"])
-	_cloth = _model.recolor(0.18, 0.55, 0.0, 1.15, 0.7)
+	_cloth = _model.recolor(0.18, 0.55, 0.985, 1.05, 0.62)
 	_overlay = ShaderMaterial.new()
 	_overlay.shader = OVERLAY
 	_overlay.set_shader_parameter("intensity", 0.0)
@@ -180,7 +183,7 @@ func equip(id: String) -> void:
 		return
 	for n in _weapon_nodes:
 		if is_instance_valid(n):
-			n.get_parent().queue_free()
+			(n.get_parent().get_parent() if _model is Human else n.get_parent()).queue_free()
 	_weapon_nodes.clear()
 	weapon = w
 	var m: Dictionary = w["model"]
@@ -191,7 +194,10 @@ func equip(id: String) -> void:
 		_fit_item(item, float(m.get("length", 1.0)))
 		_weapon_nodes.append(item)
 	if w["shield"] is Dictionary:
-		_weapon_nodes.append(_model.borrow(w["shield"]["donor"], w["shield"]["node"], "handslot.l"))
+		if w["shield"].has("path"):
+			_weapon_nodes.append(_model.attach(w["shield"]["path"], "handslot.l", Vector3.ZERO, true))
+		else:
+			_weapon_nodes.append(_model.borrow(w["shield"]["donor"], w["shield"]["node"], "handslot.l"))
 	_combo = -1
 	weapon_changed.emit(w["name"])
 

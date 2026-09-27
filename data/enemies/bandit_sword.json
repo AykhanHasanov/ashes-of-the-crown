@@ -6,26 +6,12 @@
 	"role": "flanker",
 	"xp": 15,
 	"model": {
-		"path": "res://assets/characters/adventurers/Rogue.glb",
-		"hidden": [
-			"Knife_Offhand",
-			"1H_Crossbow",
-			"2H_Crossbow",
-			"Knife",
-			"Throwable"
-		],
-		"scale": 0.82,
-		"recolor": [
-			0.3,
-			0.7,
-			0.08,
-			0.7,
-			0.6
-		],
+		"human": {
+			"look": "bandit"
+		},
 		"weapons": [
 			{
-				"donor": "res://assets/characters/adventurers/Knight.glb",
-				"node": "1H_Sword",
+				"path": "res://assets/props_mk/Sword_Bronze.gltf",
 				"bone": "handslot.r"
 			}
 		]

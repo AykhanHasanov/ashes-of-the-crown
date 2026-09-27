@@ -1,0 +1,46 @@
+{
+	"_about": "Villagers with daily routines (scripts/npc/villager.gd), per prefab type. Positions are prefab-local [x, z]. A spot is where a villager works: anim (Universal Animation Library clip), face = yaw in degrees (0 = +Z) or [x, z] to look at, optional prop in the right hand. A spot with 'route' is walked back and forth. schedule: [from hour, to hour, spot]; any other hour the villager is at home (walks to the door and goes in). 'hub' is where paths meet (the open square) so villagers walk round houses, not through them.",
+	"village": {
+		"hub": [0, 6],
+		"spots": {
+			"forge": {"p": [-20.5, 4.5], "face": [-26, 3], "anim": "Fixing_Kneeling"},
+			"chop": {"p": [23.5, -20.5], "face": [27, -24], "anim": "TreeChopping", "prop": "res://assets/props_mk/Axe_Bronze.gltf"},
+			"stall_a": {"p": [7.4, 7.6], "face": [0, 0], "anim": "Idle_FoldArms"},
+			"stall_b": {"p": [-8.4, 6.2], "face": [0, 0], "anim": "Idle_Talking"},
+			"bench_a": {"p": [-4, 10.3], "face": 180, "anim": "Sitting_Idle"},
+			"bench_b": {"p": [4, 10.3], "face": 180, "anim": "Sitting_Talking"},
+			"fire_a": {"p": [2.3, 12.4], "face": [0, 12], "anim": "Idle_Talking"},
+			"fire_b": {"p": [-2.2, 13.2], "face": [0, 12], "anim": "Idle"},
+			"fire_c": {"p": [0.4, 14.4], "face": [0, 12], "anim": "Idle_FoldArms"},
+			"well": {"p": [1.7, 0.6], "face": [0, 0], "anim": "Interact"},
+			"water": {"route": [[1.8, -1.2], [0, -17]], "anim": "Walk_Carry"},
+			"patrol": {"route": [[9, -6], [-9, -6], [-10, 14], [10, 15]], "anim": "Walk"},
+			"watch": {"p": [4.5, 14.8], "face": [0, 0], "anim": "Idle_Lantern"}
+		},
+		"villagers": [
+			{"name": "Usta Rüstem", "look": "villager_old", "voice": "villager_old", "home": [-21, 3],
+				"schedule": [[6, 12, "forge"], [12, 13, "bench_a"], [13, 19, "forge"], [19, 22, "fire_a"]]},
+			{"name": "Oduncu Kerem", "look": "villager_m", "voice": "villager_m", "home": [24, 3],
+				"schedule": [[7, 12, "chop"], [12, 13, "well"], [13, 18, "chop"], [18, 22, "fire_b"]]},
+			{"name": "Sevda", "look": "villager_f", "voice": "villager_f", "home": [15, -13],
+				"schedule": [[8, 13, "stall_a"], [13, 14, "bench_b"], [14, 18, "stall_a"], [18, 21, "fire_c"]]},
+			{"name": "Nuri", "look": "villager_m", "voice": "villager_m", "home": [-15, -12],
+				"schedule": [[8, 18, "stall_b"], [18, 20, "bench_a"]]},
+			{"name": "Hatice", "look": "villager_f", "voice": "villager_f", "home": [0, -19],
+				"schedule": [[6, 8, "well"], [8, 12, "water"], [12, 14, "bench_b"], [14, 18, "water"]]},
+			{"name": "Bekçi Ali", "look": "guard", "voice": "guard", "home": [5, 15], "prop": "res://assets/quaternius/medieval_weapons_pack/Spear.glb",
+				"schedule": [[8, 20, "patrol"], [20, 24, "watch"], [0, 6, "watch"]]}
+		]
+	},
+	"grove": {
+		"hub": [0, -12],
+		"spots": {
+			"harvest": {"route": [[-9, -4], [-3, 2], [3, -4], [9, 2]], "anim": "Walk", "work": "Farm_Harvest"},
+			"water_trees": {"p": [-6, 4], "face": [-6, 7], "anim": "Farm_Watering"}
+		},
+		"villagers": [
+			{"name": "Bağban Emin", "look": "villager_old", "voice": "villager_old", "home": [12, -2],
+				"schedule": [[7, 12, "harvest"], [12, 14, "water_trees"], [14, 19, "harvest"]]}
+		]
+	}
+}

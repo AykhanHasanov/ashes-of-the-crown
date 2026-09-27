@@ -1,0 +1,4 @@
+Foliage source textures (all CC0 1.0, public domain):
+- ambientCG (https://ambientcg.com): LeafSet014, LeafSet016, LeafSet019, LeafSet024, LeafSet027,
+  Foliage001, Foliage003, Foliage006 (composed into cards/ by tools/make_foliage_cards.py),
+  Bark001, Bark005, Bark012 (bark/).

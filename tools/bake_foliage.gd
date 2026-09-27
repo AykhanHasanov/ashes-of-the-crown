@@ -12,17 +12,27 @@ func _init() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT))
 	var veg = JSON.parse_string(FileAccess.get_file_as_string("res://data/world/vegetation.json"))
 	for item in veg["items"]:
+		if item.get("generated", false):
+			continue   # grown by tools/gen_trees.gd
 		if item.has("procedural"):
-			_save(item["id"], _tuft(item["procedural"]))
+			var proc: Dictionary = item["procedural"]
+			_save(item["id"], _cards(proc) if proc["kind"] == "cards" else _tuft(proc))
 			continue
 		var src: Node3D = load(item["model"]).instantiate()
 		var mi: MeshInstance3D = src.find_children("*", "MeshInstance3D", true, false)[0]
+		if item.has("node"):
+			mi = src.find_children(item["node"], "MeshInstance3D", true, false)[0]
 		var xf := Transform3D()
 		var n: Node = mi
 		while n != null and n != src:
 			xf = (n as Node3D).transform * xf
 			n = n.get_parent()
-		var baked := ArrayMesh.new()
+		if item.has("node"):
+			# One rock out of a set: centre it on its own footprint, base on the ground
+			var box: AABB = xf * mi.get_aabb()
+			xf = Transform3D(Basis(), -Vector3(box.get_center().x, box.position.y + box.size.y * 0.08, box.get_center().z)) * xf
+		# Rebuilt through ImporterMesh so distant instances get automatic LODs
+		var im := ImporterMesh.new()
 		var normal_basis := xf.basis.inverse().transposed()
 		for s in mi.mesh.get_surface_count():
 			var arrays: Array = mi.mesh.surface_get_arrays(s)
@@ -35,12 +45,20 @@ func _init() -> void:
 				for i in normals.size():
 					normals[i] = (normal_basis * normals[i]).normalized()
 				arrays[Mesh.ARRAY_NORMAL] = normals
-			arrays[Mesh.ARRAY_TANGENT] = null
-			baked.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-			var mat := mi.get_active_material(s)
-			if mat != null:
-				baked.surface_set_material(s, mat)
-		_save(item["id"], baked)
+			if arrays[Mesh.ARRAY_TANGENT] != null:
+				# Keep tangents (normal-mapped Poly Haven rocks): rotate xyz, keep the sign
+				var tan: PackedFloat32Array = arrays[Mesh.ARRAY_TANGENT]
+				for i in range(0, tan.size(), 4):
+					var t := (xf.basis * Vector3(tan[i], tan[i + 1], tan[i + 2])).normalized()
+					tan[i] = t.x
+					tan[i + 1] = t.y
+					tan[i + 2] = t.z
+				arrays[Mesh.ARRAY_TANGENT] = tan
+			for k in [Mesh.ARRAY_TEX_UV2, Mesh.ARRAY_BONES, Mesh.ARRAY_WEIGHTS]:
+				arrays[k] = null
+			im.add_surface(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, mi.get_active_material(s))
+		im.generate_lods(25.0, 60.0, [])
+		_save(item["id"], im.get_mesh())
 		src.free()
 	quit()
 
@@ -93,4 +111,34 @@ func _tuft(cfg: Dictionary) -> ArrayMesh:
 	mat.albedo_color = Color(0.44, 0.6, 0.2)
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	st.set_material(mat)
+	return st.commit()
+
+
+## Photo grass/flower cards (assets/foliage/cards, tools/make_foliage_cards.py): `count`
+## vertical quads crossing at the centre, a second smaller clump beside the first.
+## Normals lean up so the clump shades like the ground it grows from.
+func _cards(cfg: Dictionary) -> ArrayMesh:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var count: int = cfg.get("count", 3)
+	var w: float = cfg.get("width", 1.0)
+	var h: float = cfg.get("height", 0.6)
+	var clumps: Array = [[Vector3.ZERO, 1.0], [Vector3(rng.randf_range(-0.5, 0.5), 0, rng.randf_range(-0.5, 0.5)) * w, 0.7]]
+	for c in clumps:
+		var at: Vector3 = c[0]
+		var k: float = c[1]
+		var a0 := rng.randf() * PI
+		for i in count:
+			var ang := a0 + PI * i / count
+			var d := Vector3(cos(ang), 0, sin(ang)) * w * k * 0.5
+			var up := Vector3(rng.randf_range(-0.08, 0.08), h * k, rng.randf_range(-0.08, 0.08))
+			var face := d.cross(Vector3.UP).normalized()
+			var nrm := (Vector3.UP * 1.6 + face * 0.4).normalized()
+			var quad := [[at - d, Vector2(0, 1)], [at + d, Vector2(1, 1)], [at + d + up, Vector2(1, 0)], [at - d + up, Vector2(0, 0)]]
+			for idx in [0, 2, 1, 0, 3, 2]:
+				st.set_normal(nrm)
+				st.set_uv(quad[idx][1])
+				st.add_vertex(quad[idx][0])
 	return st.commit()

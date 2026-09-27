@@ -15,6 +15,9 @@ const WorldMap := preload("res://scripts/ui/world_map.gd")
 const HearthMenu := preload("res://scripts/ui/hearth_menu.gd")
 const Interactable := preload("res://scripts/world/interactable.gd")
 const AiOverlay := preload("res://scripts/debug/ai_overlay.gd")
+const Villager := preload("res://scripts/npc/villager.gd")
+const Wildlife := preload("res://scripts/world/wildlife.gd")
+const Effects := preload("res://scripts/world/effects.gd")
 
 const HINT := "WASD hareket · Shift koşu · Space kaçış · LMB/F saldırı · RMB blok · C kilit\nE kullan · R şerbet · M harita · F10 debug · F6 streaming · F3 FPS"
 const AUTOSAVE_SECONDS := 300.0
@@ -25,6 +28,7 @@ var world_map
 var hearth_menu
 var _stream_label: Label
 var _foes := {}                   # spawn key -> Foe
+var _villagers := {}               # poi id -> [Villager]
 var _last_hearth := ""
 var _discover_t := 0.0
 var _autosave_t := 0.0
@@ -51,6 +55,16 @@ func _setup() -> void:
 	player.water_query = level.water.surface_at
 	level.streamer.actor_requested.connect(_on_actor_requested)
 	level.streamer.actors_released.connect(_on_actors_released)
+	level.streamer.poi_full.connect(_on_poi_full)
+	# Deer herds graze away from settlements
+	var wild := Wildlife.new()
+	wild.height_at = level.height_at
+	wild.water_at = level.water.surface_at
+	wild.player = player
+	for p in level.meta["pois"]:
+		if p["type"] in ["village", "castle", "camp", "grove", "hearth", "den", "lair", "ruins"]:
+			wild.avoid.append([Vector3(p["pos"][0], 0, p["pos"][2]), 70.0])
+	level.add_child(wild)
 	hud.set_hint(HINT)
 	hud._place(hud._objective, Vector4(0.5, 0, 0.5, 0), Vector4(-420, 64, 420, 96))
 	compass = Compass.new()
@@ -395,7 +409,38 @@ func _on_foe_killed(key: String) -> void:
 	_foes.erase(key)
 
 
+## Villagers of a loaded village (data/world/villagers.json) take up their routine.
+func _on_poi_full(p: Dictionary) -> void:
+	_light_chimneys(p)
+	var all: Dictionary = DataDB.world("villagers")
+	if not all.has(p["type"]) or _villagers.has(p["id"]):
+		return
+	var town: Dictionary = all[p["type"]]
+	var list: Array = []
+	for v in town["villagers"]:
+		var npc = Villager.new()
+		npc.setup(v, town["spots"], level.streamer.poi_pos(p), town["hub"], level.height_at, level.day_night, player)
+		add_child(npc)
+		list.append(npc)
+	_villagers[p["id"]] = list
+
+
+## Smoke from every chimney of a loaded settlement (houses carry their chimney top as meta).
+func _light_chimneys(p: Dictionary) -> void:
+	var c: Vector3 = level.streamer.poi_pos(p)
+	for n: Node3D in level.streamer.find_children("*", "MeshInstance3D", true, false):
+		if n.has_meta("chimney") and not n.has_node("ChimneySmoke") and n.global_position.distance_to(c) < 80.0:
+			var smoke := Effects.chimney_smoke()
+			smoke.name = "ChimneySmoke"
+			n.add_child(smoke)
+			smoke.position = n.get_meta("chimney") / n.scale
+
+
 func _on_actors_released(poi_id: String) -> void:
+	for npc in _villagers.get(poi_id, []):
+		if is_instance_valid(npc):
+			npc.queue_free()
+	_villagers.erase(poi_id)
 	for key in _foes.keys():
 		if key.begins_with(poi_id + "@"):
 			var f = _foes[key]
@@ -537,6 +582,24 @@ func _demo_setup() -> void:
 			t.run()
 		"world_village":
 			_demo_view(Vector3(290, 0, 380), Vector3(304, 14, 342), 12.0)
+		"world_square":
+			# The village at work: stalls, forge, water carrier, the patrol (10:30)
+			level.day_night.set_hour(10.5)
+			_demo_view(Vector3(300, 0, 362), Vector3(304, 14.5, 344), 12.0)
+		"world_deer":
+			# Stand still in a meadow until a herd shows up, then look at it
+			level.day_night.set_hour(9.0)
+			get_tree().create_timer(2.5).timeout.connect(func():
+				for w in level.get_children():
+					if w is Wildlife and not w._herds.is_empty():
+						var a = w._herds[0]["animals"][0]["node"]
+						var at: Vector3 = a.global_position
+						player.global_position = at + Vector3(0, 0.5, 34)
+						_demo_view(player.global_position, at + Vector3(0, 1, 0), 10.0))
+		"world_evening":
+			# Villagers round the fire, the guard's lantern (20:30)
+			level.day_night.set_hour(20.5)
+			_demo_view(Vector3(301, 0, 362), Vector3(304, 14.5, 353), 12.0)
 		"world_castle":
 			_demo_view(Vector3(318, 0, 168), Vector3(395, 40, 106), 11.0)
 		"world_fort":

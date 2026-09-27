@@ -6,22 +6,18 @@
 	"role": "ranged",
 	"xp": 14,
 	"model": {
-		"path": "res://assets/characters/skeletons/Skeleton_Rogue.glb",
-		"scale": 0.8,
-		"tint": [
-			0.52,
-			0.45,
-			0.42
-		],
-		"ash_overlay": 0.5,
-		"glow_eyes": true,
+		"human": {
+			"look": "ash"
+		},
 		"weapons": [
 			{
-				"donor": "res://assets/characters/adventurers/Rogue.glb",
-				"node": "2H_Crossbow",
-				"bone": "handslot.r"
+				"path": "res://assets/quaternius/medieval_weapons_pack/Bow_Evil.glb",
+				"bone": "handslot.r",
+				"length": 1.25
 			}
-		]
+		],
+		"ash_overlay": 0.5,
+		"glow_eyes": true
 	},
 	"anims": {
 		"idle": "Idle",

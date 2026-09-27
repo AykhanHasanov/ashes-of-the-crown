@@ -6,20 +6,15 @@
 	"role": "leader",
 	"xp": 110,
 	"model": {
-		"path": "res://assets/characters/adventurers/Barbarian.glb",
-		"hidden": [
-			"1H_Axe_Offhand",
-			"Barbarian_Round_Shield",
-			"1H_Axe",
-			"Mug"
-		],
-		"scale": 0.98,
-		"recolor": [
-			0.0,
-			1.0,
-			0.02,
-			0.8,
-			0.45
+		"human": {
+			"look": "ataman"
+		},
+		"weapons": [
+			{
+				"path": "res://assets/quaternius/medieval_weapons_pack/Axe_Double.glb",
+				"bone": "handslot.r",
+				"length": 1.3
+			}
 		]
 	},
 	"anims": {

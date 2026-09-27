@@ -38,3 +38,18 @@ Terrain3D 4.4–4.6 üçün yazılıb. 4.7-də yüklənir və işləyir, amma in
 3. Sahnəyə girəndə asset siyahısı sıfırlanır. **Həll:** asset-lər sahnəyə daxil olandan sonra təyin edilir, region qovluğu isə ondan da sonra.
 
 Quaternius təbiət modelləri 1/100 miqyasdadır (node ×100, Z-yuxarı). Instancer node transformunu nəzərə almır, ona görə `bake_foliage` mesh-ləri metr ölçüsünə gətirir.
+
+## Realizm keçidi: generasiya (2026-09-27)
+
+```
+python tools/make_foliage_cards.py <ambientCG qovluğu>   # foto yarpaq, ot və çiçək kartları → assets/foliage/cards
+godot --headless --path . -s tools/gen_trees.gd          # data/world/trees.json → assets/foliage/<ağac>.scn (ilk dəfə .import yazır, sonra --import lazımdır)
+godot --headless --path . -s tools/bake_foliage.gd       # Poly Haven qaya/qıjı (LOD ilə) və kart otlar
+godot --headless --path . -s tools/build_houses.gd       # data/world/houses.json → assets/buildings/<ev>.scn
+godot --headless --path . -s tools/gen_world.gd
+```
+
+- Prefab prefiksləri: `f:` = generasiya olunmuş ağac və qayalar, `b:` = evlər, `pm:` = Fantasy Props MegaKit, `vm:` = Village MegaKit.
+- Kəndlilər: `data/world/villagers.json`. Yerlər prefab-lokal koordinatlardadır, rejim saatlarla verilir. Yollar `hub`-dan (meydandan) keçir.
+- Lab səhnələri: `scenes/tree_lab.tscn` (`TREE_LAB_IDS`, `TREE_LAB_DIST`, `TREE_LAB_GAP`, `TREE_LAB_ROT`) və `scenes/char_lab.tscn` (`CHAR_LAB_LOOKS`, `CHAR_LAB_WEAPON`, `CHAR_LAB_OVERLAY`).
+- Demolar: `world_square`, `world_evening`, `world_deer`.

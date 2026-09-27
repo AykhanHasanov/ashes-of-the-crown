@@ -8,6 +8,7 @@ extends Node3D
 
 signal actor_requested(poi: Dictionary, actor: Dictionary, key: String, pos: Vector3)
 signal actors_released(poi_id: String)
+signal poi_full(poi: Dictionary)   # buildings and colliders are in: villagers can move in
 signal interactable_created(node: Node3D)
 
 enum { NONE, VISUAL, FULL }
@@ -188,6 +189,7 @@ func _make_full(p: Dictionary) -> void:
 	rec["extras"] = extras
 	_loaded[id] = rec
 	spawn_actors(p)
+	poi_full.emit(p)
 
 
 ## Asks the world to spawn this POI's enemies (the world tracks kills and night rules).
