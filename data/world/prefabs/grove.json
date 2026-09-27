@@ -3,12 +3,22 @@
 	"_about": "Nar bağı: cərgə ilə nar ağacları, bağbanın koması. Sandıqda nar toxumu var (+1 şərbət).",
 	"icon": "grove",
 	"discover_radius": 40,
+	"interact": [
+		{
+			"kind": "chest",
+			"p": [
+				15,
+				0,
+				6
+			],
+			"reward": "flask_seed"
+		}
+	],
 	"pieces": [
 		{"grid": "f:pomegranate.scn", "from": [-12, -10], "to": [12, 10], "step": 6.0, "s": 1.0, "c": false, "trunk": 0.15},
-		{"m": "v:House_3", "p": [16, 0, -2], "r": 270, "s": 2.2},
-		{"line": "v:Fence", "from": [-16, -14], "to": [13, -14], "step": 1.9, "s": 2.4},
-		{"m": "v:Barrel", "p": [14, 0, 4], "s": 4.5},
-		{"m": "v:Bag", "p": [13, 0, 5.5], "s": 5, "c": false}
-	],
-	"interact": [{"kind": "chest", "p": [15, 0, 6], "reward": "flask_seed"}]
+		{"m": "b:house_small.scn", "p": [16, 0, -2], "r": 270, "s": 1.0},
+		{"line": "vm:Prop_WoodenFence_Single.gltf", "from": [-16, -14], "to": [13, -14], "step": 2.05, "s": 1.0},
+		{"m": "pm:Barrel.gltf", "p": [14, 0, 4], "s": 1.0},
+		{"m": "pm:Bag.gltf", "p": [13, 0, 5.5], "s": 1.0, "c": false}
+	]
 }

@@ -3,38 +3,64 @@
 	"_about": "Kürkənd: çay kənarında kənd. Meydanın ortasında quyu, ətrafında evlər, zəng qülləsi uzaqdan görünür.",
 	"icon": "village",
 	"discover_radius": 60,
+	"lights": [
+		{
+			"p": [
+				0,
+				1.2,
+				12
+			],
+			"kind": "fire",
+			"scale": 0.9
+		},
+		{
+			"p": [
+				-26,
+				2.0,
+				3
+			],
+			"kind": "forge",
+			"scale": 0.6
+		}
+	],
+	"interact": [
+		{
+			"kind": "echo",
+			"p": [
+				2.5,
+				0,
+				-2
+			],
+			"text": "Kuyunun taşına kazınmış: «Kür bizi doyurdu, Kül bizi götürmesin». Altında bir çocuk elinden çıkma bir ocak resmi var."
+		}
+	],
 	"pieces": [
 		{"m": "v:Well", "p": [0, 0, 0], "s": 2.4},
-		{"m": "v:Inn", "p": [0, 0, -24], "face": "center", "s": 2.4, "far": true},
-		{"m": "v:House_1", "p": [-19, 0, -16], "face": "center", "s": 2.4, "far": true},
-		{"m": "v:House_2", "p": [19, 0, -17], "face": "center", "s": 2.4, "far": true},
-		{"m": "v:Blacksmith", "p": [-26, 0, 3], "face": "center", "s": 2.3},
-		{"m": "v:Stable", "p": [26, 0, 4], "face": "center", "s": 2.3},
-		{"m": "v:House_3", "p": [-17, 0, 21], "face": "center", "s": 2.6},
-		{"m": "v:House_1", "p": [17, 0, 22], "face": "center", "s": 2.3},
-		{"m": "v:Bell_Tower", "p": [6, 0, 19], "face": "center", "s": 2.6, "far": true},
-		{"m": "v:Sawmill", "p": [30, 0, -28], "r": 200, "s": 2.2},
-		{"m": "v:Mill", "p": [-38, 0, 10], "r": 90, "s": 2.5, "far": true},
-		{"m": "v:MarketStand_1", "p": [6, 0, 6], "face": "center", "s": 2.4},
-		{"m": "v:MarketStand_2", "p": [-7, 0, 5], "face": "center", "s": 2.4},
+		{"m": "b:inn.scn", "p": [0, 0, -24], "face": "center", "s": 1.0, "far": true},
+		{"m": "b:house_a.scn", "p": [-19, 0, -16], "face": "center", "s": 1.0, "far": true},
+		{"m": "b:house_b.scn", "p": [19, 0, -17], "face": "center", "s": 1.0, "far": true},
+		{"m": "b:house_long.scn", "p": [-26, 0, 3], "face": "center", "s": 1.0},
+		{"m": "b:barn.scn", "p": [26, 0, 4], "face": "center", "s": 1.0},
+		{"m": "b:house_small.scn", "p": [-17, 0, 21], "face": "center", "s": 1.0},
+		{"m": "b:house_a.scn", "p": [17, 0, 22], "face": "center", "s": 1.0},
+		{"m": "b:tower.scn", "p": [6, 0, 19], "face": "center", "s": 1.0, "far": true},
+		{"m": "b:barn.scn", "p": [30, 0, -28], "r": 200, "s": 1.0},
+		{"m": "b:hall.scn", "p": [-38, 0, 10], "r": 90, "s": 1.0, "far": true},
+		{"m": "pm:Stall_Empty.gltf", "p": [6, 0, 6], "face": "center", "s": 1.0},
+		{"m": "pm:Stall_Cart_Empty.gltf", "p": [-7, 0, 5], "face": "center", "s": 1.0},
 		{"m": "v:Bonfire_Lit", "p": [0, 0, 12], "s": 3.2, "c": false},
-		{"m": "v:Cart", "p": [11, 0, -6], "r": 30, "s": 2.4},
+		{"m": "vm:Prop_Wagon.gltf", "p": [11, 0, -6], "r": 30, "s": 1.0},
 		{"m": "v:Gazebo", "p": [-12, 0, -4], "face": "center", "s": 2.5},
-		{"m": "v:Bench_1", "p": [-4, 0, 10], "r": 180, "s": 2.4, "c": false},
-		{"m": "v:Bench_1", "p": [4, 0, 10], "r": 180, "s": 2.4, "c": false},
-		{"m": "v:Barrel", "p": [-21.5, 0, 8], "s": 4.5},
-		{"m": "v:Barrel", "p": [-22.4, 0, 9.3], "s": 4.5},
-		{"m": "v:Crate", "p": [22, 0, -9], "r": 15, "s": 5.0},
-		{"m": "v:Crate", "p": [23, 0, -8], "r": 40, "s": 5.0},
+		{"m": "pm:Bench.gltf", "p": [-4, 0, 10], "r": 180, "s": 1.0, "c": false},
+		{"m": "pm:Bench.gltf", "p": [4, 0, 10], "r": 180, "s": 1.0, "c": false},
+		{"m": "pm:Barrel.gltf", "p": [-21.5, 0, 8], "s": 1.0},
+		{"m": "pm:Barrel.gltf", "p": [-22.4, 0, 9.3], "s": 1.0},
+		{"m": "pm:Crate_Wooden.gltf", "p": [22, 0, -9], "r": 15, "s": 1.0},
+		{"m": "pm:Crate_Wooden.gltf", "p": [23, 0, -8], "r": 40, "s": 1.0},
 		{"m": "v:Hay", "p": [29, 0, 10], "s": 6.0, "c": false},
 		{"m": "v:Hay", "p": [31, 0, 9], "s": 6.0, "c": false},
-		{"m": "v:Cauldron", "p": [-24, 0, 11], "s": 3.0},
-		{"line": "v:Fence", "from": [-34, 30], "to": [-6, 34], "step": 1.9, "s": 2.4},
-		{"line": "v:Fence", "from": [8, 34], "to": [34, 30], "step": 1.9, "s": 2.4}
-	],
-	"lights": [
-		{"p": [0, 1.2, 12], "kind": "fire", "scale": 0.9},
-		{"p": [-26, 2.0, 3], "kind": "forge", "scale": 0.6}
-	],
-	"interact": [{"kind": "echo", "p": [2.5, 0, -2], "text": "Kuyunun taşına kazınmış: «Kür bizi doyurdu, Kül bizi götürmesin». Altında bir çocuk elinden çıkma bir ocak resmi var."}]
+		{"m": "pm:Cauldron.gltf", "p": [-24, 0, 11], "s": 1.0},
+		{"line": "vm:Prop_WoodenFence_Single.gltf", "from": [-34, 30], "to": [-6, 34], "step": 2.05, "s": 1.0},
+		{"line": "vm:Prop_WoodenFence_Single.gltf", "from": [8, 34], "to": [34, 30], "step": 2.05, "s": 1.0}
+	]
 }

@@ -1,0 +1,13 @@
+{
+	"_about": "Houses assembled from the Medieval Village MegaKit (tools/build_houses.gd). w/d = footprint in 2 m modules (w = gable end: 2, 3 or 4), floors = storeys of 3 m, lower/upper = wall family per storey (UnevenBrick, Plaster, WoodGrid). Written to assets/buildings/<id>.scn and used by prefabs as b:<id>.scn.",
+	"houses": {
+		"house_small": {"seed": 1, "w": 2, "d": 3, "floors": 1, "lower": "Plaster", "upper": "Plaster", "chimney": true},
+		"house_a": {"seed": 2, "w": 3, "d": 4, "floors": 2, "lower": "UnevenBrick", "upper": "WoodGrid", "chimney": true},
+		"house_b": {"seed": 3, "w": 3, "d": 3, "floors": 2, "lower": "Plaster", "upper": "WoodGrid", "chimney": true},
+		"house_long": {"seed": 4, "w": 3, "d": 6, "floors": 1, "lower": "UnevenBrick", "upper": "Plaster", "chimney": true},
+		"inn": {"seed": 5, "w": 4, "d": 6, "floors": 2, "lower": "UnevenBrick", "upper": "WoodGrid", "chimney": true},
+		"hall": {"seed": 6, "w": 4, "d": 5, "floors": 2, "lower": "UnevenBrick", "upper": "Plaster", "chimney": false},
+		"tower": {"seed": 8, "w": 2, "d": 2, "floors": 4, "lower": "UnevenBrick", "upper": "Plaster", "chimney": false},
+		"barn": {"seed": 7, "w": 4, "d": 5, "floors": 1, "lower": "WoodGrid", "upper": "WoodGrid", "chimney": false}
+	}
+}

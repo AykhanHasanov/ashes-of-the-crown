@@ -12,7 +12,10 @@ const PREFIX := {
 	"c:": "res://assets/quaternius/modular_medieval_buildings_pack/",
 	"d:": "res://assets/quaternius/modular_dungeon_pack/",
 	"n:": "res://assets/quaternius/nature_pack/",
-	"f:": "res://assets/foliage/",   # generated trees (tools/gen_trees.gd): f:oak.scn
+	"f:": "res://assets/foliage/",
+	"b:": "res://assets/buildings/",   # houses built by tools/build_houses.gd: b:inn.scn
+	"pm:": "res://assets/props_mk/",   # Fantasy Props MegaKit: pm:Barrel.gltf
+	"vm:": "res://assets/village_mk/",  # Medieval Village MegaKit: vm:Prop_Wagon.gltf   # generated trees (tools/gen_trees.gd): f:oak.scn
 	"r:": "res://assets/quaternius/rpg_items_pack/",
 	"s:": "res://assets/quaternius/survival_pack/",
 	"kd:": "res://assets/environment/dungeon/",

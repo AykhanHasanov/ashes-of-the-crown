@@ -40,8 +40,10 @@ func _ready() -> void:
 	if OS.get_environment("TREE_LAB_IDS") != "":
 		ids = Array(OS.get_environment("TREE_LAB_IDS").split(","))
 	for i in ids.size():
-		var t: Node3D = load("res://assets/foliage/%s.scn" % ids[i]).instantiate()
-		t.position = Vector3((i - (ids.size() - 1) * 0.5) * 11.0, 0, 0)
+		var path: String = ids[i] if "/" in ids[i] else "res://assets/foliage/%s.scn" % ids[i]
+		var t: Node3D = load(path).instantiate()
+		t.position = Vector3((i - (ids.size() - 1) * 0.5) * float(OS.get_environment("TREE_LAB_GAP") if OS.get_environment("TREE_LAB_GAP") != "" else "11"), 0, 0)
+		t.rotation.y = float(OS.get_environment("TREE_LAB_ROT")) if OS.get_environment("TREE_LAB_ROT") != "" else 0.0
 		add_child(t)
 	var cam := Camera3D.new()
 	var dist := float(OS.get_environment("TREE_LAB_DIST")) if OS.get_environment("TREE_LAB_DIST") != "" else 45.0
