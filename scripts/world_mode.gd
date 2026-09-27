@@ -307,6 +307,9 @@ func _place_at_hearth(id: String) -> void:
 
 
 func _on_player_died() -> void:
+	var near: Array = get_tree().get_nodes_in_group("enemies").filter(func(e): return e.global_position.distance_to(player.global_position) < 25.0)
+	if not near.is_empty():
+		near.pick_random().bark("victory")
 	Audio.music("", 1.0)
 	Audio.play("sting_defeat", -2.0, 0.0)
 	await get_tree().create_timer(1.2).timeout

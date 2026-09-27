@@ -57,6 +57,8 @@ var ground_query := Callable()
 var world_visibility := Callable()
 var perception
 var surrendered := false
+var voice := ""              # Barks profile (tools/gen_voices.py)
+var _idle_bark_t := 0.0
 var lod := LOD.FULL
 
 # For the F4 overlay
@@ -162,6 +164,8 @@ func configure(id: String, enemy_level := 1, opts := {}) -> void:
 				_atk_speed = float(d["attack_speed"])
 	health = max_health
 	display_name = Affixes.full_name(data["name"], affixes)
+	voice = Barks.voice_for(id, _rng.randi())
+	_idle_bark_t = _rng.randf_range(8.0, 30.0)
 
 
 func _ready() -> void:
@@ -402,6 +406,12 @@ func _physics_process(delta: float) -> void:
 	_tick_affixes(delta)
 	_tick_stealth(delta)
 	_help_t -= delta
+	if not aggro and not dead and not surrendered:
+		_idle_bark_t -= delta
+		if _idle_bark_t <= 0.0:
+			_idle_bark_t = randf_range(18.0, 40.0)
+			if _target_ok() and global_position.distance_to(target.global_position) < 35.0:
+				bark("idle", 0.7)
 	var move := Vector3.ZERO
 	var to := _to_target()
 	var dist := to.length()
@@ -540,6 +550,12 @@ func _perceive(dt: float) -> void:
 		_release_token()
 		_ring.visible = false
 	if now != before:
+		if now == Perception.SUSPICIOUS:
+			bark("suspicious", 0.8)
+		elif now == Perception.SEARCH:
+			bark("search", 0.9)
+		elif now == Perception.CALM and before == Perception.SEARCH:
+			bark("give_up", 0.8)
 		if now in [Perception.SUSPICIOUS, Perception.SEARCH]:
 			_show_icon("?", Color(1.0, 0.85, 0.2))
 		elif now == Perception.CALM:
@@ -556,6 +572,10 @@ func _set_aggro(on: bool) -> void:
 	if not _engaged_once:
 		_engaged_once = true
 		engaged.emit(self)
+		if data["behavior"].get("leader", false) or _allies_near(20.0) > 1 and randf() < 0.4:
+			bark("call_help") or bark("spot")
+		else:
+			bark("spot")
 		_call_help()
 
 
@@ -646,6 +666,7 @@ func is_engaged() -> bool:
 
 func _begin_warn() -> void:
 	_show_icon("!", Color(1.0, 0.6, 0.1), 2.5)
+	bark("warn")
 	var clip: String = data["anims"].get("warn", "")
 	if clip != "":
 		_model.play_loop(clip)
@@ -680,6 +701,8 @@ func _think(to: Vector3, dist: float) -> void:
 	var t_down: bool = target.has_method("is_down") and target.is_down()
 	var t_blocking: bool = target.has_method("is_blocking") and target.is_blocking()
 	var punish: float = float(_ai["punish"]) if t_weak and float(b["aggression"]) >= 1.0 else 1.0
+	if t_weak or target.health < target.max_health * 0.3:
+		bark("taunt", 0.12)
 	_update_adaptive()
 	var allies := _allies_near(14.0)
 
@@ -900,6 +923,17 @@ func _begin_attack(a: Dictionary) -> void:
 	Audio.play("shade_windup", -12.0, 0.15, global_position)
 	if _stealthed:
 		_unstealth()
+	match kind:
+		"explode":
+			bark("explode")
+		"buff":
+			bark("war_cry")
+		"resurrect":
+			bark("resurrect")
+		"ward":
+			bark("ward")
+		_:
+			bark("attack", 0.55 if faction == "beast" else 0.3)
 	_enter(S.WINDUP)
 
 
@@ -1132,6 +1166,7 @@ func _check_phase() -> void:
 	_run_speed *= float(ph.get("speed", 1.0))
 	_atk_speed *= float(ph.get("attack_speed", 1.0))
 	Fx.notify(ph.get("banner", display_name + " öfkelendi!"))
+	bark("phase")
 	Fx.shake(0.5)
 	_flash = 1.0
 
@@ -1173,6 +1208,7 @@ func _morale_break() -> void:
 		_surrender()
 	else:
 		Fx.notify(display_name + " kaçıyor!")
+		bark("flee")
 		_enter(S.FLEE)
 
 
@@ -1187,6 +1223,7 @@ func _surrender() -> void:
 		_model.play_action(a["surrender"], 1.0, 0.1, true)
 	_show_icon("🏳", Color(0.95, 0.95, 0.9), 9999.0)
 	Fx.notify(display_name + " teslim oldu")
+	bark("surrender")
 	_enter(S.SURRENDER)
 
 
@@ -1196,6 +1233,7 @@ func spare() -> void:
 		return
 	_model.cancel_action()
 	_model.play_action(data["anims"]["recover"], 1.4, 0.1)
+	bark("spared")
 	_enter(S.FLEE)
 	_t = -1.0
 
@@ -1285,6 +1323,7 @@ func _on_hurt(hit, amount: float) -> void:
 	_lean(hit)
 	_check_summoner()
 	_check_phase()
+	bark("hurt", 0.6 if faction == "beast" else 0.35)
 	if _unstoppable() or _state in [S.BROKEN, S.EXECUTED, S.FLEE]:
 		return
 	if tier != "normal" and not hit.heavy:
@@ -1401,6 +1440,10 @@ func _on_died(_hit) -> void:
 			if o.faction == faction and o.global_position.distance_to(global_position) < 30.0 and o.has_method("_leader_fell"):
 				o._leader_fell()
 		Fx.notify("Reis düştü! Haydutlar sarsıldı.")
+	bark("death", 0.9)
+	var mourners: Array = get_tree().get_nodes_in_group("enemies").filter(func(o): return o.faction == faction and o.global_position.distance_to(global_position) < 18.0)
+	if not mourners.is_empty():
+		mourners.pick_random().bark("ally_died", 0.6)
 	if affixes.has("vengeful"):
 		_vengeance()
 	if _target_ok() and target.has_method("on_enemy_killed"):
@@ -1427,6 +1470,15 @@ func _vengeance() -> void:
 		if is_instance_valid(self):
 			_ring.visible = false
 			Aoe.blast(pos, float(d["radius"]), float(d["damage"]) * _dmg_scale, "fire", 40.0, 2.0, self, get_tree()))
+
+
+# --- Voice ------------------------------------------------------------------------------------
+
+## Says something for `event` if this enemy's voice has a line for it.
+func bark(event: String, chance := 1.0) -> bool:
+	if voice == "" or lod == LOD.FROZEN:
+		return false
+	return Barks.say(self, voice, event, chance, float(data["stats"]["height"]) * _body_scale)
 
 
 # --- Helpers ----------------------------------------------------------------------------------

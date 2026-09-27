@@ -1,0 +1,98 @@
+{
+	"_about": "Düşman sesleri. Her profil: TTS sesi (edge-tts), hız/perde, efekt zinciri ve olay → replik listesi. tools/gen_voices.py bunları assets/audio/voice/ altına üretir. Geçici prototip sesleridir: ticari sürümden önce gerçek seslendirmeyle değiştirilmelidir.",
+	"enemies": {
+		"ash_shade": ["ash", "ash_wraith"],
+		"ash_runner": ["ash", "ash_wraith"],
+		"ash_archer": ["ash"],
+		"ash_bomber": ["ash_bomber"],
+		"ash_shaman": ["shaman"],
+		"ash_giant": ["giant"],
+		"bandit_sword": ["bandit_a", "bandit_b", "bandit_c"],
+		"bandit_shield": ["bandit_a", "bandit_c"],
+		"bandit_archer": ["bandit_b", "bandit_a"],
+		"bandit_spear": ["bandit_c", "bandit_b"],
+		"bandit_ataman": ["ataman"],
+		"wolf": ["wolf"],
+		"leopard": ["leopard"]
+	},
+	"profiles": {
+		"bandit_a": {"voice": "tr-TR-AhmetNeural", "rate": "-4%", "pitch": "-14Hz", "fx": "bandit", "lines": "bandit"},
+		"bandit_b": {"voice": "tr-TR-AhmetNeural", "rate": "+10%", "pitch": "+6Hz", "fx": "bandit", "lines": "bandit"},
+		"bandit_c": {"voice": "tr-TR-AhmetNeural", "rate": "-12%", "pitch": "-26Hz", "fx": "bandit_old", "lines": "bandit"},
+		"ataman": {"voice": "tr-TR-AhmetNeural", "rate": "-14%", "pitch": "-34Hz", "fx": "ataman", "lines": "ataman"},
+		"ash": {"voice": "tr-TR-AhmetNeural", "rate": "-22%", "pitch": "-18Hz", "fx": "ash", "lines": "ash"},
+		"ash_wraith": {"voice": "tr-TR-EmelNeural", "rate": "-26%", "pitch": "-22Hz", "fx": "ash", "lines": "ash"},
+		"ash_bomber": {"voice": "tr-TR-AhmetNeural", "rate": "-10%", "pitch": "-8Hz", "fx": "ash_hot", "lines": "bomber"},
+		"shaman": {"voice": "tr-TR-EmelNeural", "rate": "-18%", "pitch": "-10Hz", "fx": "shaman", "lines": "shaman"},
+		"giant": {"voice": "tr-TR-AhmetNeural", "rate": "-30%", "pitch": "-40Hz", "fx": "giant", "lines": "giant"},
+		"wolf": {"synth": "wolf"},
+		"leopard": {"synth": "leopard"}
+	},
+	"lines": {
+		"bandit": {
+			"spot": ["Hey! Kim var orada?", "Bir yabancı! Silahlara!", "İşte orada!", "Sen de kimsin be?", "Yakalayın şunu!"],
+			"suspicious": ["Bir şey duydum...", "Kim var orada?", "Gölgelerde bir şey kıpırdadı...", "Rüzgâr mı bu?"],
+			"search": ["Nereye kayboldu?", "Çık ortaya!", "Buralarda bir yerde...", "Saklanamazsın, biliyorum burada olduğunu!"],
+			"give_up": ["Kaçtı... Boş ver.", "Rüzgârdı herhalde.", "Neyse, nöbete dönüyorum."],
+			"attack": ["Al bunu!", "Geber!", "Öl artık!", "Seni öldüreceğim!", "Kafanı keseceğim!", "Hah!"],
+			"taunt": ["Kan kaybediyorsun!", "Diz çök!", "Bitti senin işin!", "Şerbet mi içiyorsun? Son yudumun olsun!"],
+			"hurt": ["Ah!", "Lanet olsun!", "Kahretsin!", "Argh!"],
+			"death": ["Hayır...", "Anne...", "Ben... daha..."],
+			"call_help": ["Buraya! Yardım edin!", "Herkes buraya!", "Saldırı var! Kalkın!"],
+			"ally_died": ["Onu öldürdü!", "Kardeşimi öldürdü!", "Bunun hesabını vereceksin!"],
+			"flee": ["Ben kaçıyorum!", "Bu iş için bana para vermediler!", "Canımı kurtarayım!"],
+			"surrender": ["Teslim oluyorum! Canımı bağışla!", "Dur! Yeter! Teslim!", "Öldürme beni, yalvarırım!"],
+			"spared": ["Sağ ol... Bunu unutmayacağım.", "Bir daha karşına çıkmam, yemin ederim!"],
+			"victory": ["İşte bu kadar.", "Biri daha gitti.", "Üstünü arayın!"],
+			"idle": ["Bu gece çok soğuk...", "Kül yine yağıyor.", "Reis ganimeti yine kendine ayırdı.", "Közkale yandığından beri yollar boş.", "Gölgeleri gördün mü? Ölüler yürüyor diyorlar.", "Nöbet sende, ben biraz kestireceğim."]
+		},
+		"ataman": {
+			"spot": ["Ayağımıza bir av geldi!", "Kim cesaret eder benim toprağıma girmeye?"],
+			"war_cry": ["Kesin şunu!", "Haydi aslanlarım, parçalayın onu!", "Ne duruyorsunuz? Saldırın!"],
+			"attack": ["Bu balta seni ikiye bölecek!", "Öl!", "Başını kaleme asacağım!"],
+			"taunt": ["Şehzade miymiş? Tacın küle döndü, sen de döneceksin!", "Babanın tahtı yandı, sıra sende!"],
+			"hurt": ["Hıh... Fena değilsin.", "Argh!"],
+			"death": ["Bu... olamaz...", "Adamlarım... kaçın..."],
+			"call_help": ["Herkes silah başına!"],
+			"victory": ["Kalenin kapısına asın onu!"],
+			"search": ["Kaçmasına izin vermeyin!"],
+			"give_up": ["Tavşan gibi kaçtı. Bırakın."],
+			"idle": ["Bu kale artık benim.", "Kış gelmeden kervanlara bir baskın daha."]
+		},
+		"ash": {
+			"spot": ["Közün... taşıyıcısı...", "Sıcaklık... bir sıcaklık...", "Yaşayan biri..."],
+			"suspicious": ["Nerede... nerede o ateş...", "Kokusunu alıyorum..."],
+			"search": ["Gel... gel bize...", "Saklanma... bizden..."],
+			"give_up": ["Ateş... söndü..."],
+			"attack": ["Küle dön!", "Soğu...", "Bizimle... uyu..."],
+			"taunt": ["Taç seni bekliyor...", "Şah seni çağırıyor...", "Hatıraların... bizim olacak..."],
+			"death": ["Nihayet... sessizlik...", "Tekrar... küle..."],
+			"call_help": ["Kalkın... kalkın..."],
+			"victory": ["Bir kıvılcım daha... söndü..."],
+			"idle": ["Közkale... yanıyor...", "Oğlumun adı... neydi...", "Soğuk... çok soğuk..."]
+		},
+		"bomber": {
+			"spot": ["Sıcacık... sıcacık bir beden..."],
+			"explode": ["Seninle... birlikte... yanacağız!", "Sarıl bana!"],
+			"death": ["Hah... ha..."],
+			"idle": ["Yanmak... ne güzeldi..."]
+		},
+		"shaman": {
+			"spot": ["Ateşin çocuğu geldi!", "Şah'ın aradığı o!"],
+			"resurrect": ["Kalk! Kalk ve yeniden savaş!", "Kül seni geri çağırıyor!"],
+			"ward": ["Kül kalkanı üzerinize!", "Sizi koruyorum, kardeşlerim!"],
+			"attack": ["Yan!", "Kül yağmuru!"],
+			"hurt": ["Ah!"],
+			"death": ["Şah... beni... affet..."],
+			"taunt": ["Hatıraların seni terk edecek!"],
+			"idle": ["Külden doğduk... küle döneceğiz..."]
+		},
+		"giant": {
+			"spot": ["SICAKLIK... YAŞAYAN..."],
+			"attack": ["EZİLECEKSİN!", "HAAAH!"],
+			"taunt": ["KÜÇÜK... KIVILCIM..."],
+			"death": ["KÜÜÜL... BENİ... ALIYOR..."],
+			"idle": ["TAHT... KORUNMALI..."]
+		}
+	}
+}
