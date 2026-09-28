@@ -1,6 +1,6 @@
 extends Node
 ## Checks for the V3 combat core (suite of scenes/tests/combat_test.tscn): drives the
-## real Ayxan and Foe nodes through parry, block, back hits, stance break + execution,
+## real the protagonist and Foe nodes through parry, block, back hits, stance break + execution,
 ## stamina exhaustion, the input buffer and lock-on. run() returns the failure count.
 
 var mode      # combat_test_mode
@@ -89,7 +89,7 @@ func _block() -> void:
 
 func _back_hit() -> void:
 	await _reset_player()
-	var f = _foe("ash_shade", -2.0)  # behind Ayxan
+	var f = _foe("ash_shade", -2.0)  # behind the protagonist
 	Input.action_press("block")
 	await _wait(0.5)
 	var r: String = player.receive_hit(_hit(f))

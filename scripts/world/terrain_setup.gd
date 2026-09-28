@@ -62,7 +62,7 @@ static func make_assets(high_quality: bool, world: Dictionary, veg: Dictionary) 
 		if item.get("procedural", {}).get("kind", "") == "cards":
 			ma.material_override = _card_material(ma, item)
 		elif not item["shadows"] and not item.get("keep_material", false) and ma.get_mesh(0) != null and ma.get_mesh(0).get_surface_count() == 1:
-			# Small foliage sways in the wind and bends away from Ayxan
+			# Small foliage sways in the wind and bends away from the protagonist
 			ma.material_override = _foliage_material(ma, item.get("color", []))
 		assets.set_mesh_asset(i, ma)
 		i += 1

@@ -328,7 +328,18 @@ ANIMAL_EVENTS = {
 
 # --- Speech --------------------------------------------------------------------------------
 
+def protagonist_name():
+    """The spoken name comes from the translation table; lines keep the {PROTAGONIST} token."""
+    import csv
+    with open(os.path.join(ROOT, "localization", "strings.csv"), encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            if row["keys"] == "PROTAGONIST_NAME":
+                return row["tr"]
+    raise SystemExit("PROTAGONIST_NAME missing from localization/strings.csv")
+
+
 async def tts(text, prof, path):
+    text = text.replace("{PROTAGONIST}", protagonist_name())
     c = edge_tts.Communicate(text, prof["voice"], rate=prof["rate"], pitch=prof["pitch"])
     await c.save(path)
 
@@ -370,7 +381,8 @@ def main():
             for i, text in enumerate(texts):
                 rel = f"{pname}/{ev}_{i}.wav"
                 path = os.path.join(OUT, rel)
-                key = hashlib.sha1(json.dumps([text, prof], sort_keys=True).encode()).hexdigest()
+                spoken = text.replace("{PROTAGONIST}", protagonist_name())   # a new name re-synthesises
+                key = hashlib.sha1(json.dumps([spoken, prof], sort_keys=True).encode()).hexdigest()
                 if cache.get(rel) != key or not os.path.exists(path) or (only and pname in only):
                     for attempt in range(3):
                         try:

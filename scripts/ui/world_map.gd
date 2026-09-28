@@ -1,6 +1,6 @@
 extends CanvasLayer
 ## The map screen [M] (spec V3 §10): the parchment map drawn by the generator, fog over
-## unexplored ground, icons for discovered places and lit hearths, Ayxan's arrow and a
+## unexplored ground, icons for discovered places and lit hearths, the protagonist's arrow and a
 ## marker the player places with right click (it also shows on the compass). Opened
 ## from a lit hearth it is in travel mode: clicking another lit hearth travels there.
 
@@ -207,7 +207,7 @@ func _draw_map() -> void:
 		var ms := _to_screen(marker)
 		_canvas.draw_circle(ms, 7.0, Color(0.1, 0.35, 0.6))
 		_canvas.draw_circle(ms, 3.0, Color(0.8, 0.95, 1.0))
-	# Ayxan
+	# The protagonist
 	if is_instance_valid(player):
 		var ps := _to_screen(player.global_position)
 		var f: Vector3 = player.facing() if player.has_method("facing") else Vector3.FORWARD

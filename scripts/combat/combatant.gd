@@ -1,5 +1,5 @@
 extends CharacterBody3D
-## Shared body for everyone who fights — Ayxan, enemies and (later) soldiers.
+## Shared body for everyone who fights — the protagonist, enemies and (later) soldiers.
 ## Health, stamina, stance (poise) with break and recovery, damage-type
 ## resistances, a faction and the attack-token budget used by the AI director.
 ##
@@ -48,7 +48,7 @@ var _stance_recover_delay := 3.0
 var _stance_recover_rate := 0.15
 
 
-## Whether this combatant's blows should land on `other`. Ayxan's side vs everyone else;
+## Whether this combatant's blows should land on `other`. the protagonist's side vs everyone else;
 ## enemy factions never hurt each other.
 func is_hostile(other) -> bool:
 	var mine := is_in_group("player_side")

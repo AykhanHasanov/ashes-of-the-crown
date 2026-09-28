@@ -4,7 +4,7 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 
 ## Project
 
-- **What it is:** a 3D action-RPG. Ayxan, last heir of Atəşan, fights through a Caucasus / Silk Road land burned by Kül Şahı (the Ash Shah).
+- **What it is:** a 3D action-RPG. Aras, last heir of Atəşan, fights through a Caucasus / Silk Road land burned by Kül Şahı (the Ash Shah).
 - **Core mechanic:** *Yaddaş Yanğını*. Memories are fuel: burning them gives fire power at a cost.
 - **Owner:** a solo developer with no engine experience. They delegate decisions and want the best option chosen, then explained. **Talk to the owner in Azerbaijani.**
 - **Current direction:** a Bloodborne-like structure.
@@ -70,7 +70,7 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
    - Player-facing text uses translation keys via `tr()`, defined in `localization/strings.csv`. **Current language: Turkish (text and voice). New text must never be hardcoded.** Only the memories and the save-slot dialog use keys so far; moving the remaining legacy strings is a separate task.
    - Code, comments and commit messages: English.
    - Chat with the owner: Azerbaijani.
-6. **Keep the tests green.** Run the three self-tests before merging (see below). Add checks for new systems to the relevant self-test.
+6. **Keep the tests green.** Run the self-tests before merging (see below). Add checks for new systems to the relevant self-test.
 7. **Git.** Work on a `v3/<topic>` branch, commit per stage, merge to `main` with `--no-ff` after the tests pass, then `git push` (remote: private `github.com/AykhanHasanov/ashes-of-the-crown`). End commit messages with the attribution line the harness provides.
 8. **Assets.** CC0 (or clearly licensed) only. Record the source in a `CREDITS` file. Before downloading, state the file, source and size (the owner has given blanket approval).
 
@@ -81,7 +81,7 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 **WorldState**
 - It is the single source of truth. Sections:
   - `meta`
-  - `player`: stats, region, position, burned memories
+  - `player`: stats, region, position, memory states
   - `inventory`
   - `flags`
   - `story`: chapter, checkpoint, echoes seen
@@ -104,17 +104,32 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 
 **Memories**
 - Defined as data: `MemoryDefinition` resources in `data/memories/*.tres`, looked up through `scripts/core/memory_registry.gd` by permanent id.
-- Burned state is WorldState's. `Memory` (the autoload) is only the rules layer.
+- Every memory has one of three states in WorldState (`player.memories`, id → state): UNKNOWN (not found; absent), KEPT, BURNED. Change them only with `keep_memory` (UNKNOWN → KEPT, emits `memory_kept`) and `burn_memory` (UNKNOWN/KEPT → BURNED, emits `memory_burned`); read with `get_memory_state` / `has_burned`. Dialogue conditions: `memory:<id>` (burned), `kept:<id>`, `flag:<name>`.
+- `Memory` (the autoload) is only the rules layer. Memories with `combat_burnable = false` (e.g. `own_name`) are never offered to the fire wheel.
 - Refer to memories by id (`&"mother_name"`), never by title.
+
+**Echoes** (the protagonist's lost memories, played as short scenes)
+- Data: `EchoDefinition` resources in `data/echoes/*.tres` (id, memory_id, scene path, title/prompt/keep/burn keys), looked up through `scripts/core/echo_registry.gd`.
+- Trigger: a `memory_echo` interactable (a glowing ember) in a world prefab, `{"kind":"memory_echo","echo":"<id>"}`. It disappears once its memory is decided.
+- Flow: `scripts/echoes/echo_director.gd` (static state) stores scene, position, facing and clock, loads the echo scene; the echo scene extends `scripts/echoes/echo_mode.gd`, overrides `_make_level()`/`_start()` and calls `complete()`. The choice screen (`scripts/ui/echo_choice.gd`): KEEP (E) or BURN by holding Q / the button for 1.5 s. The choice is final: WorldState is written and the game autosaves at once, then chapter_base's `_return_from_echo()` puts him back exactly; a burn releases the existing Alov Dalğası.
+- Echoes are non-lethal and never save (`SaveManager.can_save()` is false while `EchoDirector.active`). The echo system never hardcodes consequences: other systems listen to `memory_kept` / `memory_burned`.
+- `test_echo` (`scenes/echoes/test_echo.tscn`, memory `first_sword`, keys `ECHO_TEST_*`) is a PLACEHOLDER.
+
+**The protagonist's name**
+- The protagonist is **Aras**. The name is only ever shown via the key `PROTAGONIST_NAME` and `scripts/core/names.gd` — never write it in code, scenes, data or dialogue. Internal ids use `protagonist`.
+- In text, write the token `{PROTAGONIST}` and pass the text through `Names.fill()`. UI and his own lines use `Names.protagonist()`: blank (`NAME_FORGOTTEN`) once the `own_name` memory is burned. NPC lines use `Names.protagonist_known()` — people still know him. NPC names go through `Names.resolve(key, memory_id)` the same way.
+- Old saves with the former name are renamed by the v1 → v2 migration in `save_manager.gd` (the only place the old name may appear).
 
 **Tests:** `"$G" --headless --path . res://scenes/tests/state_test.tscn` covers state, saves, migration and every main-menu case. It uses its own save folders.
 
-**Combat, AI and encounters:** `"$G" --headless --path . res://scenes/tests/combat_test.tscn`. It runs three suites on a primitive test yard (`scripts/debug/test_yard.gd`, the old arena's layout) with the real Ayxan and Foe nodes:
+**Combat, AI and encounters:** `"$G" --headless --path . res://scenes/tests/combat_test.tscn`. It runs three suites on a primitive test yard (`scripts/debug/test_yard.gd`, the old arena's layout) with the real protagonist and Foe nodes:
 - combat: 19 checks;
 - enemy AI: 41 checks;
 - encounters: 13 checks.
 
 It exits with the failure count and takes about 80 s headless.
+
+**Echoes, memory states, names, migration:** `"$G" --headless --path . res://scenes/tests/echo_test.tscn` plays the real KEEP and BURN flows (host `scenes/tests/echo_host.tscn` → test echo → back), checks hold-to-confirm, position/clock restore, save/load of the three states, v1/v0 migration incl. the name rename, the blank name, and scans the project for the old protagonist name.
 
 ## Running and testing
 
@@ -152,6 +167,6 @@ Set `G="C:/Users/User/Documents/games/_tools/godot/Godot_v4.7.2-stable_win64_con
 
 **Content pipelines:** see `docs/WORLD_PIPELINE.md` for the cards → trees → foliage bake → houses → world order.
 
-**State and save tests:** `"$G" --headless --path . res://scenes/tests/state_test.tscn`. **Animation isolation:** `"$G" --headless --path . -s tools/test_anim_isolation.gd`.
+**State and save tests:** `"$G" --headless --path . res://scenes/tests/state_test.tscn`. **Echo tests:** `"$G" --headless --path . res://scenes/tests/echo_test.tscn`. Echo views: `--demo=world_echo` (walk to the ember and enter), `res://scenes/echoes/test_echo.tscn -- --demo=echo_choice` (straight to the choice screen). **Animation isolation:** `"$G" --headless --path . -s tools/test_anim_isolation.gd`.
 
 **Known tool issue:** `tools/check_scripts.gd` reports false failures, because autoloads do not exist in `-s` mode. Use the self-tests or run a scene to check scripts.

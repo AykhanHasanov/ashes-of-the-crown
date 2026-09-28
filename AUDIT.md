@@ -67,7 +67,7 @@ Keyfiyyət şkalası: **stabil** / **işləyir amma qarışıqdır** / **bug-lı
 
 | Sistem | Fayllar | Nə edir | Keyfiyyət | Asılılıqlar |
 |---|---|---|---|---|
-| **Hərəkət (V3)** | `player_v3/ayxan.gd` (1399 sətir) | Yerimə, qaçış, sprint (stamina), sprintdən tullanma, yuvarlanma, üzmə, sürüşmə, düşmə zərəri, 1 m maneəni aşma | **işləyir amma qarışıqdır.** Testlərlə təsdiqlənib, amma hərəkət, döyüş, Köz, kilid və UI-bağlantıları tək monolitdədir. Üstəlik ölü `MODEL_PATH`, `HIDDEN` və `CharacterModel` qalıqları var | `combatant.gd`, `human.gd`, `Settings`, `Memory`, `Fx`, `DataDB` (weapons, combat.json), `third_person_camera` |
+| **Hərəkət (V3)** | `player_v3/protagonist.gd` (1399 sətir) | Yerimə, qaçış, sprint (stamina), sprintdən tullanma, yuvarlanma, üzmə, sürüşmə, düşmə zərəri, 1 m maneəni aşma | **işləyir amma qarışıqdır.** Testlərlə təsdiqlənib, amma hərəkət, döyüş, Köz, kilid və UI-bağlantıları tək monolitdədir. Üstəlik ölü `MODEL_PATH`, `HIDDEN` və `CharacterModel` qalıqları var | `combatant.gd`, `human.gd`, `Settings`, `Memory`, `Fx`, `DataDB` (weapons, combat.json), `third_person_camera` |
 | **Hərəkət (V2)** | `player/player.gd` (627) | İzometrik hərəkət, 3 zərbəlik kombo, Kül addımı, Alov dalğası | **işləyir amma qarışıqdır.** V3-ün təkrarıdır, yalnız Fəsil 1–2-də işlənir | `balance.gd`, `camera_rig`, `Memory`, `radial_menu`, `ash_offer` |
 | **Kamera** | `camera/third_person_camera.gd` (V3), `camera/camera_rig.gd` (V2) | V3: çiyin üstündən, SpringArm, lock-on, döyüşdə genişlənmə, köhnə rig-in API-si (cinematic, shake). V2: izometrik, titul orbiti | V3 **stabil**, V2 **dublikat** | `Fx` (shake/punch), dialoq |
 | **Döyüş** | `combat/combatant.gd`, `hit.gd`, `melee.gd`, `projectile.gd`, `aoe.gd`, `player_habits.gd`, `data/weapons/*`, `data/balance/combat.json` | Zərbə ilə can, stamina, stance (poise), parry, blok, arxadan zərbə, edam, statuslar (yanma), tokenlər, mərmilər, sahə effektləri, hit-stop (`Fx`) | **stabil** (19 test) | `Fx`, `DataDB` |
@@ -79,7 +79,7 @@ Keyfiyyət şkalası: **stabil** / **işləyir amma qarışıqdır** / **bug-lı
 | **Save** | `systems/game_state.gd` | JSON: fəsil, checkpoint, bayraqlar, əks-sədalar, yanmış xatirələr, `world{}` (ocaqlar, sandıqlar, kəşflər, xəritə dumanı, vaxt, mövqe). Versiya 4 | **işləyir amma qarışıqdır.** İki fayl və iki model var: hekayə fəsil+checkpoint, dünya isə açarlı siyahı. EventBus yoxdur. Düşmən, NPC və dünya vəziyyəti saxlanılmır | `Memory`, hamı `GameState.flags` oxuyur |
 | **UI** | `ui/hud.gd`, `pause_menu`, `settings_panel`, `ui_theme`, `main_menu`, `journal`, `compass`, `world_map`, `hearth_menu`, `radial_menu`, `ash_offer` | HUD: can, stamina, şərbət, Köz, xatirə siyahısı, boss zolağı, bannerlər. Menyular, jurnal, kompas, xəritə, ocaq menyusu, xatirə çarxı, Kül Şahı təklifi | Menyular **stabil**. `hud.gd` V2 və V3 elementlərini qarışıq saxlayır | `Memory`, `GameState`, `Settings`, `Balance` |
 | **Audio** | `systems/audio.gd`, `systems/barks.gd`, `tools/gen_audio.py`, `tools/gen_voices.py`, `data/voices/*` | Sintez olunmuş SFX, musiqi qatları, külək. 3D səsli türkcə replikalar və altyazılar (düşmənlər, kəndlilər) | **stabil.** Səslər TTS prototipidir, buraxılışdan əvvəl dəyişməlidir | `Settings` (səs), `DataDB` |
-| **Yaddaş Yanğını** | `systems/memory_system.gd`, `ui/radial_menu.gd`, `ui/ash_offer.gd`, `ayxan.gd` (Köz ölçüsü, `_refresh_burn_look`), `player.gd` | 6 şəxsi xatirə hərəsinin cəzası var. Çarxdan seçilib Alov Dalğası üçün yandırılır, Kül Şahı aşağı canda təsadüfi birini yandırır. Köz (ember) zərbələrlə dolur. Yanmış xatirə sayı Ayxanın "yanıq görünüşünü" artırır (**bu, yeni dizayndakı "kül səviyyəsi"nə ən yaxın şeydir**) | **işləyir.** Amma şəxsi xatirə modeli yeni "Xatirə valyutası" ilə uyğun gəlmir | `Fx`, HUD, dialoq (budaqlar), ocaq sağalması |
+| **Yaddaş Yanğını** | `systems/memory_system.gd`, `ui/radial_menu.gd`, `ui/ash_offer.gd`, `protagonist.gd` (Köz ölçüsü, `_refresh_burn_look`), `player.gd` | 6 şəxsi xatirə hərəsinin cəzası var. Çarxdan seçilib Alov Dalğası üçün yandırılır, Kül Şahı aşağı canda təsadüfi birini yandırır. Köz (ember) zərbələrlə dolur. Yanmış xatirə sayı Arasın "yanıq görünüşünü" artırır (**bu, yeni dizayndakı "kül səviyyəsi"nə ən yaxın şeydir**) | **işləyir.** Amma şəxsi xatirə modeli yeni "Xatirə valyutası" ilə uyğun gəlmir | `Fx`, HUD, dialoq (budaqlar), ocaq sağalması |
 | **Səviyyələr** | `world/kozqala.gd` (580), `son_ocaq.gd`, `arena.gd` (ikisi də kozqala-dan törəyir), `open_world.gd` + `cell_streamer`, `poi_builder`, `terrain_setup`, `day_night`, `weather`, `water`, `birds`, `wildlife`, `interactable`, `gen/world_generator.gd` | V2 səviyyələri kodda qurulub (KayKit). Açıq dünya data-dan generasiya olunur və stream edilir | Açıq dünya **stabil** (28 test). Terrain3D-nin 4.7-də 3 uyğunsuzluğu həll edilib. V2 səviyyələri **işləyir**, amma realizm keçidindən kənarda qalıb (chibi üslubu) | `DataDB`, Terrain3D, `human`, `villager` |
 | **NPC-lər** | `npc/villager.gd` (V3 rejim), `npc/survivor.gd` + `story/survivors.gd` (V2 ehtiyac AI), `npc/companion.gd` (Rüfət) | V3: saata görə iş yerləri, salam, qaçış. V2: istilik/ünsiyyət/vəzifə ehtiyacları | Hər ikisi **işləyir**. İki ayrı NPC beyni var. Yaddaş, münasibət və qalıcı ölüm yoxdur | `human`/`character_model`, `Barks`, `day_night` |
 | **Personaj modelləri** | `characters/human.gd`, `character_model.gd`, `fur.gd`, `data/looks.json`, `tools/build_anim_library.gd`, `tools/bake_heads.gd` | Real insanlar (UAL animasiyaları, KayKit klip xəritəsi), heyvanlar (shell fur) | **stabil.** Bir riski var, bax: (e) | assets |
@@ -94,7 +94,7 @@ Keyfiyyət şkalası: **stabil** / **işləyir amma qarışıqdır** / **bug-lı
 | Səhnələr | `main.tscn`, `chapter2.tscn` | `world.tscn` | `arena.tscn` |
 | Rejim skripti | `main.gd` (525), `chapter2.gd` (125) | `world_mode.gd` (652) | `arena_mode.gd` (255) |
 | Səviyyə | `kozqala.gd`, `son_ocaq.gd` | `open_world.gd` + streaming, generator | `arena.gd` (kozqala-dan törəyir) |
-| Oyunçu | **V2** `player/player.gd` | **V3** `ayxan.gd` | **V3** `ayxan.gd` |
+| Oyunçu | **V2** `player/player.gd` | **V3** `protagonist.gd` | **V3** `protagonist.gd` |
 | Kamera | **V2** `camera_rig.gd` | **V3** `third_person_camera.gd` | **V3** |
 | Düşmənlər | **V2** `ash_shade.gd` | **V3** `foe.gd` | **V3** `foe.gd` |
 | NPC | `companion.gd`, `survivor.gd` | `villager.gd` | yoxdur |
@@ -104,10 +104,10 @@ Keyfiyyət şkalası: **stabil** / **işləyir amma qarışıqdır** / **bug-lı
 **Paylaşılan kod:**
 - Hamısı `chapter_base.gd`-dən törəyir (273 sətir): HUD, dialoq, pause, jurnal, çarx, Kül Şahı, ocaq sağalması, capture.
 - Hamısı autoload-ları, `hud.gd`, `effects.gd`, `visuals.gd`-ni işlədir.
-- Açıq dünya ilə Fight Zone V3 nüvəsini tam paylaşır: `ayxan`, `foe`, `combatant`, `third_person_camera`, `human`, `debug_menu`, `ai_overlay`. Main Story V3 nüvəsindən **heç nə** işlətmir.
+- Açıq dünya ilə Fight Zone V3 nüvəsini tam paylaşır: `aras`, `foe`, `combatant`, `third_person_camera`, `human`, `debug_menu`, `ai_overlay`. Main Story V3 nüvəsindən **heç nə** işlətmir.
 
 **Dublikat kod (təxmini ~1 700 sətir, bütün kodun ~10%-i):**
-- `player.gd` ↔ `ayxan.gd`: iki tam oyunçu kontrolleri (hərəkət, kombo, yuvarlanma, Köz, Alov). Təxminən 600 sətir.
+- `player.gd` ↔ `protagonist.gd`: iki tam oyunçu kontrolleri (hərəkət, kombo, yuvarlanma, Köz, Alov). Təxminən 600 sətir.
 - `ash_shade.gd` ↔ `foe.gd` + `data/enemies/ash_shade.json`. Təxminən 400 sətir.
 - `camera_rig.gd` ↔ `third_person_camera.gd`: shake/cinematic API iki dəfə yazılıb. Təxminən 100 sətir.
 - `survivor.gd` ↔ `villager.gd`: iki NPC beyni. Təxminən 240 sətir.
@@ -146,8 +146,8 @@ Keyfiyyət şkalası: **stabil** / **işləyir amma qarışıqdır** / **bug-lı
 
 | Fayl | Qərar | Səbəb |
 |---|---|---|
-| `player_v3/ayxan.gd` | DƏYİŞDİR | Nüvə qalır. Monolit hissələrə bölünməli, Köz Xatirə yandırmaya çevrilməli, zərbə ilə can qaytarma (rally) əlavə olunmalı, ölü qalıqlar təmizlənməlidir |
-| `player/player.gd` | ARXİV | V2 izometrik oyunçunun yerini `ayxan.gd` tam tutur |
+| `player_v3/protagonist.gd` | DƏYİŞDİR | Nüvə qalır. Monolit hissələrə bölünməli, Köz Xatirə yandırmaya çevrilməli, zərbə ilə can qaytarma (rally) əlavə olunmalı, ölü qalıqlar təmizlənməlidir |
+| `player/player.gd` | ARXİV | V2 izometrik oyunçunun yerini `protagonist.gd` tam tutur |
 | `camera/third_person_camera.gd` | SAXLA | Soulslike kamera, lock-on və kinematik API hazırdır |
 | `camera/camera_rig.gd` | ARXİV | İzometrik V2 kamerasıdır. Titul orbitinə ehtiyac olsa, V3 kamerası ilə edilir |
 | `combat/combatant.gd` | DƏYİŞDİR | Stabildir, amma "qurtarıla bilən" stagger vəziyyəti və rally (gecikmiş can itkisi) buraya aiddir |
@@ -249,7 +249,7 @@ Keyfiyyət şkalası: **stabil** / **işləyir amma qarışıqdır** / **bug-lı
 | `assets/quaternius/animals_pack`, `medieval_weapons_pack`, `rpg_items_pack`, `survival_pack`, `modular_medieval_buildings_pack` | SAXLA | Heyvanlar, silahlar, qala və proplar hələ istifadə olunur |
 | `assets/quaternius/medieval_village_pack`, `modular_dungeon_pack`, `assets/environment` | DƏYİŞDİR | Quyu, köşk, tonqal və xarabalıq hissələri qalıb. Real kitlərlə əvəz olunmalıdır |
 | `assets/quaternius/nature_pack` | ARXİV | Heç bir prefab onu işlətmir. `vegetation.json`-da yalnız işlənməyən ehtiyat yolları qalıb |
-| `assets/characters` (KayKit) | ARXİV | Yalnız V2 oyunçu, ash_shade, Rüfət və sakinlər işlədir, bir də `ayxan.gd`-də ölü sabitdə qalıb. V2 köçürüldükdən sonra yeri qalmır |
+| `assets/characters` (KayKit) | ARXİV | Yalnız V2 oyunçu, ash_shade, Rüfət və sakinlər işlədir, bir də `protagonist.gd`-də ölü sabitdə qalıb. V2 köçürüldükdən sonra yeri qalmır |
 
 ---
 
@@ -263,21 +263,21 @@ Keyfiyyət şkalası: **stabil** / **işləyir amma qarışıqdır** / **bug-lı
 4. **`gen_world`:** Terrain3D ağaca əlavə olunanda `Error loading resource: ''` yazır. Zərərsizdir, amma təmizlənməmiş xətadır.
 5. **Performans (Intel UHD):** açıq dünya 25–30 fps, kənd meydanı 17–21 fps verir. Detallı evlər kölgə kaskadlarında dəfələrlə çəkilir. Hədəf maşın (Asus) hələ ölçülməyib.
 6. **Testlər zamana həssasdır:** maşın yüklü olanda vaxt pəncərəli yoxlamalar düşə bilir. `Human.warm_up()` bunu xeyli azaldıb, amma riski tam aradan qaldırmayıb.
-7. **Demo mövqeyi:** `world_forest` demosunun kamerası sıldırım yamaca düşür, Ayxan düşmə pozasında qalır. Oyuna təsiri yoxdur.
+7. **Demo mövqeyi:** `world_forest` demosunun kamerası sıldırım yamaca düşür, Aras düşmə pozasında qalır. Oyuna təsiri yoxdur.
 
 **Texniki borc**
 
 8. **İki oyunçu, iki kamera, iki düşmən, iki NPC beyni.** Təxminən 1 700 sətir dublikat var (bax: c).
 9. **İki save faylı və iki save modeli.** EventBus yoxdur. Düşmən və NPC vəziyyəti saxlanılmır.
-10. **Monolitlər:** `foe.gd` (1573) və `ayxan.gd` (1399). Yeni mexanikalar (Xatirə, Təmizləmə, rally) bunları daha da böyüdər.
+10. **Monolitlər:** `foe.gd` (1573) və `protagonist.gd` (1399). Yeni mexanikalar (Xatirə, Təmizləmə, rally) bunları daha da böyüdər.
 11. **Tənzimləmə iki yerdədir:** `balance.gd` (V2) və `data/balance/*.json` (V3).
 12. **Dialoq məzmunu GDScript-dədir**, JSON-da deyil.
 13. **Ölü kod:**
-    - `ayxan.gd`: `MODEL_PATH`, `HIDDEN`, `CharacterModel`;
+    - `protagonist.gd`: `MODEL_PATH`, `HIDDEN`, `CharacterModel`;
     - `foe.gd`: `spots` budağı;
     - `vegetation.json`: ot, çiçək və buğda üçün işlənməyən `model` yolları;
     - `shade.gdshader`.
-14. **Main Story vizual olaraq geridə qalıb:** KayKit chibi Ayxan, Rüfət və sakinlər, kodla qurulmuş Közkale.
+14. **Main Story vizual olaraq geridə qalıb:** KayKit chibi Aras, Rüfət və sakinlər, kodla qurulmuş Közkale.
 15. **Heyvanlar:** canavar və pars low-poly modeldir, yalnız tüklə yaxşılaşdırılıb. Pars tülkü modelindən törədilib.
 16. **Səslər:** TTS prototipidir, kommersiya buraxılışından əvvəl real səsləndirmə lazımdır.
 17. **Terrain3D 1.0.2** Godot 4.7 üçün yazılmayıb. Üç workaround kodda saxlanır, Terrain3D yenilənəndə yenidən yoxlanmalıdır.
@@ -300,8 +300,8 @@ Keyfiyyət şkalası: **stabil** / **işləyir amma qarışıqdır** / **bug-lı
    - Ocaqda Xatirə ilə səviyyə artırılsın (`hearth_menu`).
    - Yaddaş Yanğını Xatirəni yandırsın: Köz ölçüsü, yanıq görünüşü və çarx çıxarılır.
 4. **Döyüş hissi.**
-   - `combatant` və `ayxan` üçün rally (zərbədən sonra geri qaytarıla bilən can), daha aqressiv tempi, hit-stop dəyərləri `combat.json`-a.
-   - Eyni vaxtda `ayxan.gd`-ni hərəkət, döyüş və resurs komponentlərinə bölmək.
+   - `combatant` və `aras` üçün rally (zərbədən sonra geri qaytarıla bilən can), daha aqressiv tempi, hit-stop dəyərləri `combat.json`-a.
+   - Eyni vaxtda `protagonist.gd`-ni hərəkət, döyüş və resurs komponentlərinə bölmək.
    - Arena testləri genişlənir.
 5. **Qurtarma və hub.**
    - `foe`-ya "qurtarıla bilən" stagger pəncərəsi və 3 saniyəlik Təmizləmə ritualı.

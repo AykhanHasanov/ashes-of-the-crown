@@ -1,11 +1,11 @@
 extends Node3D
-## Over-the-shoulder camera (V3). A yaw/pitch pivot follows Ayxan; a SpringArm3D
+## Over-the-shoulder camera (V3). A yaw/pitch pivot follows the protagonist; a SpringArm3D
 ## pulls the camera in when a wall gets between them. The mouse (captured) or the
 ## right stick turns it. Lock-on swings it so player and target share the frame;
 ## in combat it drifts back and widens. It also keeps the old rig's API
 ## (cinematic/release/orbit/add_trauma/punch/snap/camera) for dialogues and Fx.
 
-var target: Node3D          # Ayxan
+var target: Node3D          # The protagonist
 var lock_target: Node3D     # a Combatant, or null
 var in_combat := false
 var camera: Camera3D
@@ -91,7 +91,7 @@ func _process(delta: float) -> void:
 	var want_fov: float = _cfg["combat_fov"] if in_combat else _cfg["fov"]
 	var want_shoulder: float = _cfg["shoulder"]
 	if is_instance_valid(lock_target) and not lock_target.dead:
-		# Look from behind Ayxan toward the target, a little from above
+		# Look from behind the protagonist toward the target, a little from above
 		var to: Vector3 = lock_target.global_position - target.global_position
 		to.y = 0.0
 		if to.length() > 0.3:
@@ -99,7 +99,7 @@ func _process(delta: float) -> void:
 			yaw = lerp_angle(yaw, want_yaw, 1.0 - exp(-8.0 * real_delta))
 			pitch = lerpf(pitch, deg_to_rad(_cfg["lock_pitch"]), 1.0 - exp(-4.0 * real_delta))
 		want_len = _cfg["lock_distance"]
-		want_shoulder = _cfg["lock_shoulder"]  # step aside so Ayxan doesn't hide the target
+		want_shoulder = _cfg["lock_shoulder"]  # step aside so the protagonist doesn't hide the target
 		want_pos = want_pos.lerp(lock_target.global_position + Vector3(0, height * 0.7, 0), 0.3)
 
 	global_position = global_position.lerp(want_pos, 1.0 - exp(-14.0 * real_delta))

@@ -206,7 +206,7 @@ static func ash_trail(size: float, amount := 14) -> GPUParticles3D:
 	return p
 
 
-## Small sparks leaking from Ayxan's chest ember.
+## Small sparks leaking from the protagonist's chest ember.
 static func ember_trail() -> GPUParticles3D:
 	var pm := ParticleProcessMaterial.new()
 	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE

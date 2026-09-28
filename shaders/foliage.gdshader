@@ -1,6 +1,6 @@
 shader_type spatial;
 // Grass, flowers, ferns and wheat: flat low-poly colour, wind sway that grows with
-// height, and a push away from Ayxan (global player_position) so grass parts as he walks.
+// height, and a push away from the protagonist (global player_position) so grass parts as he walks.
 
 render_mode cull_disabled, depth_draw_opaque;
 

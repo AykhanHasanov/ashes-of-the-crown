@@ -35,6 +35,16 @@
 				1.2
 			],
 			"text": "Taşa kral mührü basılmış: «Bu köprüyü Ateşan halkı için Şahbaz yaptırdı». Mührün üstünü biri kılıçla çizmiş."
+		},
+		{
+			"kind": "memory_echo",
+			"p": [
+				3.5,
+				0,
+				-2.5
+			],
+			"echo": "test_echo",
+			"_about": "PLACEHOLDER: the test echo's ember"
 		}
 	]
 }

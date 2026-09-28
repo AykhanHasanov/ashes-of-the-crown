@@ -8,7 +8,7 @@ Sonrakı fazalarda imkan olarsa əsl animasiya ilə əvəz olunacaq.
 godot --headless --path . -s tools/check_anims.gd
 ```
 
-## Ayxan (KayKit Rogue_Hooded, Rig_Medium)
+## Aras (KayKit Rogue_Hooded, Rig_Medium)
 
 | Hərəkət | Klip | Qeyd |
 |---|---|---|
@@ -41,7 +41,7 @@ godot --headless --path . -s tools/check_anims.gd
 
 | Lazım olan | İndiki həll | Nə vaxt / haradan |
 |---|---|---|
-| Cüt infaz (Ayxan + düşmən sinxron) | Tək zərbə + düşmən yıxılır | Faza H cilası. Mixamo retarget variantı |
+| Cüt infaz (Aras + düşmən sinxron) | Tək zərbə + düşmən yıxılır | Faza H cilası. Mixamo retarget variantı |
 | Ayrıca parry klipi | Block_Attack sürətləndirilmiş | Faza H |
 | Yüklənmə (charge) pozası | 2H_Melee_Idle / Blocking | Faza H |
 | Canavar stagger/qalxma | Death dondurulur + Jump_ToIdle | Başqa heyvan paketi tapılsa |

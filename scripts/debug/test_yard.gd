@@ -1,7 +1,7 @@
 extends Node3D
 ## Test yard for the combat and enemy-AI tests (scenes/tests/combat_test.tscn): a flat
 ## floor inside a 19 m ring of walls, four pillars and a low barrier, laid out like the
-## old arena the checks were written against (Ayxan starts at (0, 0, 8); the barrier at
+## old arena the checks were written against (the protagonist starts at (0, 0, 8); the barrier at
 ## (0, 0, 1) stays below eye height so sight lines pass over it). Plain primitives only,
 ## so it builds instantly and runs headless. Provides what chapter_base expects of a level.
 

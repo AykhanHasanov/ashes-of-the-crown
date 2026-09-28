@@ -45,7 +45,7 @@ func _reset() -> void:
 	player.velocity = Vector3.ZERO
 
 
-## Waits until Ayxan has left the ground and come down again (or died), up to `timeout` s.
+## Waits until the protagonist has left the ground and come down again (or died), up to `timeout` s.
 func _landed(timeout: float) -> void:
 	var t := 0.0
 	var airborne := false
@@ -116,7 +116,7 @@ func _swim() -> void:
 	player._fall_from = NAN
 	mode.rig.snap()
 	await _wait(0.6)
-	_check("deep water makes Ayxan swim", player._state == player.S.SWIM, str(player._state))
+	_check("deep water makes the protagonist swim", player._state == player.S.SWIM, str(player._state))
 	var st: float = player.stamina
 	await _wait(1.0)
 	_check("swimming drains stamina", player.stamina < st - 3.0, "%.0f → %.0f" % [st, player.stamina])
@@ -140,7 +140,7 @@ func _fall() -> void:
 	_check("an 18 m fall kills", player.dead)
 	mode._respawn()
 	await _wait(0.5)
-	_check("death wakes Ayxan at his last hearth", not player.dead and player.global_position.distance_to(Vector3(128, player.global_position.y, 298)) < 12.0)
+	_check("death wakes the protagonist at his last hearth", not player.dead and player.global_position.distance_to(Vector3(128, player.global_position.y, 298)) < 12.0)
 
 
 func _slide() -> void:
@@ -184,7 +184,7 @@ func _streaming_and_enemies() -> void:
 		var f = mode._foes[k]
 		any_aggro = any_aggro or f.aggro
 		grounded = grounded and absf(f.global_position.y - mode.level.height_at(f.global_position.x, f.global_position.z)) < 3.0
-	_check("guards stay calm while Ayxan is far", not any_aggro)
+	_check("guards stay calm while the protagonist is far", not any_aggro)
 	_check("far guards stay on the ground (no terrain collider there)", grounded)
 	if guards.size() > 0:
 		var g = mode._foes[guards[0]]
@@ -208,7 +208,7 @@ func _travel() -> void:
 	await mode._travel_to("hearth_north")
 	await _wait(0.5)
 	var h: Dictionary = mode.level.streamer.poi_by_id("hearth_north")
-	_check("fast travel puts Ayxan at the hearth", player.global_position.distance_to(Vector3(h["pos"][0], player.global_position.y, h["pos"][2])) < 8.0)
+	_check("fast travel puts the protagonist at the hearth", player.global_position.distance_to(Vector3(h["pos"][0], player.global_position.y, h["pos"][2])) < 8.0)
 	await _wait(1.5)
 	_check("the destination streams in", mode.level.streamer.is_full("hearth_north"))
 

@@ -47,7 +47,7 @@ All trees below are built in code. `chapter_base.gd._ready()` always creates thi
 <ModeRoot> (Node3D, mode script)
 ├─ level              (_make_level())
 ├─ rig                (_make_camera())         V2 CameraRig | V3 TPCamera
-├─ player             (_make_player())         V2 Player    | V3 Ayxan
+├─ player             (_make_player())         V2 Player    | V3 Aras
 ├─ Hud, DialogueUI, PauseMenu, Journal, RadialMenu, AshOffer   (CanvasLayers)
 └─ ...mode-specific children from _setup()
 ```
@@ -79,7 +79,7 @@ WorldMode
 │  ├─ Terrain3D (+ instanced vegetation MMIs), Water, WorldBounds, ambience players
 │  ├─ CellStreamer: per-POI visual nodes (threaded), colliders, lights, Interactables
 │  ├─ Birds, Wildlife (deer herds)
-├─ TPCamera, Ayxan (V3, realistic Human model) + core UI
+├─ TPCamera, Aras (V3, realistic Human model) + core UI
 ├─ Compass, WorldMap, HearthMenu, DebugMenu (F10), AiOverlay (F4), stream label (F6)
 ├─ Foe × n: spawned per POI actor, tracked in world_mode._foes by "poi@index"
 └─ Villager × n: spawned when a village POI loads fully, freed when it unloads
@@ -89,7 +89,7 @@ WorldMode
 ```
 ArenaMode
 ├─ Arena (world/arena.gd extends kozqala.gd): walled ring, hearth, torches
-├─ TPCamera, Ayxan (V3) + core UI
+├─ TPCamera, Aras (V3) + core UI
 ├─ DebugMenu (spawn any enemy, weapons, burn memories), AiOverlay
 └─ Foe × n (8 waves) | CombatSelfTest | AiSelfTest (with --demo)
 ```
@@ -106,7 +106,7 @@ The main menu lives inside `main.gd` (Chapter 1's scene). Its buttons work as fo
 
 **Shared code**
 - Everything shares `chapter_base.gd`, all the autoloads, `hud.gd`, the UI screens, `effects.gd` and `visuals.gd`.
-- The open world and the fight zone share the whole V3 core: `ayxan`, `foe`, `combatant`, `perception`, `third_person_camera`, `human`, `debug_menu`, `ai_overlay`.
+- The open world and the fight zone share the whole V3 core: `aras`, `foe`, `combatant`, `perception`, `third_person_camera`, `human`, `debug_menu`, `ai_overlay`.
 - **The story chapters share none of the V3 gameplay.** They run the V2 player, camera and enemy.
 
 **Shared state**
@@ -118,7 +118,7 @@ The main menu lives inside `main.gd` (Chapter 1's scene). Its buttons work as fo
   - There is one `GameState`, but the modes treat it as their own.
 
 **Duplicated logic:** about 1.7k lines. Full list in `AUDIT.md` §c.
-- player ↔ ayxan
+- player ↔ aras
 - ash_shade ↔ foe
 - camera_rig ↔ third_person_camera
 - survivor ↔ villager
@@ -134,9 +134,9 @@ The main menu lives inside `main.gd` (Chapter 1's scene). Its buttons work as fo
 | State | Where | Persisted? |
 |---|---|---|
 | Health, stamina, stance | `combatant.gd` vars on the player node | No. Rebuilt at spawn |
-| Flasks (current/max) | `ayxan.gd` (`flasks`); the max also in `GameState.world["max_flasks"]` | Max only |
-| Equipped weapon | `ayxan.gd` (`weapon`, from `data/weapons/`) | **No** |
-| Ember / Köz meter | `ayxan.gd` (`ember`) | No |
+| Flasks (current/max) | `protagonist.gd` (`flasks`); the max also in `GameState.world["max_flasks"]` | Max only |
+| Equipped weapon | `protagonist.gd` (`weapon`, from `data/weapons/`) | **No** |
+| Ember / Köz meter | `protagonist.gd` (`ember`) | No |
 | Burned memories | `Memory.burned` | Yes (`memory.burned` ids) |
 | Story progress | `GameState.chapter`, `checkpoint`, `echoes_seen` | Yes |
 | Flags | `GameState.flags` (Dictionary of `true`), set by dialogue `set`/`do` and code | Yes |
@@ -175,12 +175,12 @@ The main menu lives inside `main.gd` (Chapter 1's scene). Its buttons work as fo
 - `gifted` exists but is never filled (it was meant for V2 phase 5).
 
 **Signals**
-- `Memory.memory_burned(memory)` is heard by the HUD (memory diamonds), the V2 player and Ayxan (burn look).
+- `Memory.memory_burned(memory)` is heard by the HUD (memory diamonds), the V2 player and Aras (burn look).
 - `Memory.memories_reset` fires on new game and load.
 - `radial_menu.confirmed(ok)` answers the one-time "are you sure".
 - `ash_offer.resolved(accepted)` answers Kül Şahı's offer.
 
-**V3 flow in `ayxan.gd`**
+**V3 flow in `protagonist.gd`**
 1. **Tap Q:** Köz strike. `_ember_strike()` spends the ember meter. Ember fills from hits, kills and perfect dodges.
 2. **Hold Q:** opens `RadialMenu`, which slows time. On release, `cast_wave(id)` → `_do_cast()` → `Memory.burn(id)` → a fire nova (radius and damage from `data/balance/combat.json` → `ember`).
 3. **Health ≤ `offer_health_fraction`:** `AshOffer` opens once per encounter. Accepting calls `Memory.burn_random()` and heals to full.
@@ -191,7 +191,7 @@ The main menu lives inside `main.gd` (Chapter 1's scene). Its buttons work as fo
 | Memory id | Effect | Where |
 |---|---|---|
 | `mother_name` | Weaker hearth healing | `chapter_base.gd` |
-| `sabir_lesson` | Harder perfect dodge | `ayxan.gd` |
+| `sabir_lesson` | Harder perfect dodge | `protagonist.gd` |
 | `father_voice` | Echoes go silent | `main.gd`, `journal.gd` |
 | `rufet_face` | Rüfət not recognised | `main.gd`, `chapter2.gd`, dialogue branches |
 
@@ -202,9 +202,9 @@ The dialogue data branches on `memory` burned/intact. The V2 `player.gd` has its
 ## 8. NPC, dialogue and interaction systems
 
 **NPC brains (three separate ones)**
-- `npc/companion.gd`: Rüfət, V2, KayKit. Follows, fights beside Ayxan and talks.
+- `npc/companion.gd`: Rüfət, V2, KayKit. Follows, fights beside Aras and talks.
 - `npc/survivor.gd` + `story/survivors.gd`: V2 needs-based utility AI (warmth, company, duty). Picks an activity; the greeting is spoken on interact.
-- `npc/villager.gd` + `data/world/villagers.json`: V3 hourly schedule with work spots and routes via a hub point. Turns to greet Ayxan with voiced Barks, walks home at night (hides the model), flees from nearby aggro foes. Moves kinematically on the terrain height. **Spawned per POI type from static JSON: there is no per-NPC identity or persistence.**
+- `npc/villager.gd` + `data/world/villagers.json`: V3 hourly schedule with work spots and routes via a hub point. Turns to greet Aras with voiced Barks, walks home at night (hides the model), flees from nearby aggro foes. Moves kinematically on the terrain height. **Spawned per POI type from static JSON: there is no per-NPC identity or persistence.**
 
 **Dialogue**
 - `ui/dialogue_ui.gd` takes a Dictionary of nodes: `speaker`, `text`, `next`, `choices[{text, next, set, event}]`, `branch{memory, burned, intact}`, `do`.
@@ -240,7 +240,7 @@ Things to watch:
 
 **Monoliths**
 - `enemies/foe.gd` (1573 lines): AI, animation, UI bar, barks, affixes, statuses and phases in one file.
-- `player_v3/ayxan.gd` (1399 lines): movement, combat, ember, memory wheel, lock-on and UI signals.
+- `player_v3/protagonist.gd` (1399 lines): movement, combat, ember, memory wheel, lock-on and UI signals.
 
 **Hardcoded values and strings**
 - Memory ids scattered across 6 files (§7).

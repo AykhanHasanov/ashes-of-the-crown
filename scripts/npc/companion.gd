@@ -1,7 +1,7 @@
 extends CharacterBody3D
-## Rüfət — Ayxan's blood brother and captain of the palace guard (KayKit Knight
+## Rüfət — the protagonist's blood brother and captain of the palace guard (KayKit Knight
 ## with helmet, sword and round shield). Waits by the south-gate hearth, talks, and
-## fights beside Ayxan during the waves. Shades target only Ayxan in this chapter.
+## fights beside the protagonist during the waves. Shades target only the protagonist in this chapter.
 
 const CharacterModel := preload("res://scripts/characters/character_model.gd")
 const MODEL_PATH := "res://assets/characters/adventurers/Knight.glb"

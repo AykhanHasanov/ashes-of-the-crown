@@ -390,7 +390,7 @@
 			"greet": [
 				"Hoş geldin yolcu. Kürköy'de ekmek de var, dert de.",
 				"Selam sana. Yolun açık olsun.",
-				"Sen Ayxan'sın, değil mi? Ocağı yakan sensin diyorlar.",
+				"Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar.",
 				"Gözlerin yorgun, evlat. Biraz otur, dinlen.",
 				"Kuyudan su iç, serindir. Kül henüz ona ulaşmadı.",
 				"Kül çökmeden önce buralar ne güzeldi, bilir misin?"

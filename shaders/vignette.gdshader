@@ -1,4 +1,4 @@
-// Screen vignette with a red pulse when Ayxan is hurt.
+// Screen vignette with a red pulse when the protagonist is hurt.
 shader_type canvas_item;
 
 uniform float strength = 0.6;

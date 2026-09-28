@@ -5,6 +5,7 @@ extends Node
 ## at most two voices at once, a pause per speaker, cooldowns per event across the
 ## whole group, and the same line is never repeated back to back.
 
+const Names := preload("res://scripts/core/names.gd")
 const MANIFEST := "res://data/voices/manifest.json"
 const MAX_VOICES := 2
 ## Seconds before anyone may bark this event again (anyone, not just this speaker)
@@ -91,7 +92,7 @@ func say(speaker: Node3D, profile: String, event: String, chance := 1.0, head_he
 	_speaking.append(p)
 	speaker.set_meta("bark_until", now + int(stream.get_length() * 1000.0) + 1800)
 	if entry.get("text", "") != "" and Settings.subtitles:
-		_subtitle(speaker, entry["text"], head_height, stream.get_length())
+		_subtitle(speaker, Names.fill(entry["text"]), head_height, stream.get_length())   # the speaker knows the name
 	return true
 
 

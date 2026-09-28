@@ -1,5 +1,5 @@
 extends CanvasLayer
-## Ayxan's journal (Tab). For now it holds his memories — burned ones crossed out —
+## The protagonist's journal (Tab). For now it holds his memories — burned ones crossed out —
 ## and the king's words from the ember echoes. Pauses the game while open.
 
 const UITheme := preload("res://scripts/ui/ui_theme.gd")
@@ -91,7 +91,7 @@ func _column(parent: Control, width: float) -> RichTextLabel:
 
 func _refresh() -> void:
 	var m := "[color=#e8b870][font_size=22]HATIRALAR[/font_size][/color]\n"
-	for mem in Memory.all():
+	for mem in Memory.combat_memories():
 		if WorldState.has_burned(mem.id):
 			m += "[color=#5f5852][s]%s[/s] — kül[/color]\n" % tr(mem.display_name_key)
 		else:

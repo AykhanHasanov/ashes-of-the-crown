@@ -81,7 +81,7 @@ func _make_yard() -> void:
 	_prop("halloween/tree_dead_small.gltf", Vector3(-14.5, 0, 14.0), 0.0, 1.2, true, CHAR_TINT)
 
 
-## The last hearth: a great fire in a ring of stones. It also heals Ayxan.
+## The last hearth: a great fire in a ring of stones. It also heals the protagonist.
 func _make_hearth() -> void:
 	braziers.append(hearth)
 	for i in 12:

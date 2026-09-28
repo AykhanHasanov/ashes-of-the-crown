@@ -1,12 +1,12 @@
 extends "res://scripts/chapter_base.gd"
 ## Headless test run for combat, enemy AI and encounters, on the test yard with the real
-## Ayxan, TPCamera and Foe nodes. Runs the three suites one after another, prints
+## The protagonist, TPCamera and Foe nodes. Runs the three suites one after another, prints
 ## PASS/FAIL per check and quits with the total failure count as exit code.
 ## Run: godot --headless --path . res://scenes/tests/combat_test.tscn
 ## (without --headless it opens a window, which is handy to watch a failing check).
 
 const TestYard := preload("res://scripts/debug/test_yard.gd")
-const Ayxan := preload("res://scripts/player_v3/ayxan.gd")
+const Protagonist := preload("res://scripts/player_v3/protagonist.gd")
 const TPCamera := preload("res://scripts/camera/third_person_camera.gd")
 const Foe := preload("res://scripts/enemies/foe.gd")
 const CombatSelfTest := preload("res://scripts/debug/combat_selftest.gd")
@@ -19,7 +19,7 @@ func _make_level() -> Node3D:
 
 
 func _make_player() -> Node3D:
-	return Ayxan.new()
+	return Protagonist.new()
 
 
 func _make_camera() -> Node3D:
@@ -46,7 +46,7 @@ func _run() -> void:
 	get_tree().quit(fails)
 
 
-## Spawns a foe that hunts Ayxan from the first frame (no perception) unless opts say
+## Spawns a foe that hunts the protagonist from the first frame (no perception) unless opts say
 ## otherwise; summoned helpers are spawned the same way.
 func spawn_foe(id: String, at: Vector3, opts := {}):
 	var f = Foe.new()

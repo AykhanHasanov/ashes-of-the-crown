@@ -7,7 +7,8 @@ extends Node
 ## Sections (to_dict / from_dict; SaveManager writes them as JSON):
 ##   meta       save_version, playtime (s), last_saved_timestamp (unix)
 ##   player     stats {health, max_health, flasks, max_flasks, fire, weapon, level},
-##              current_region, position [x, y, z], burned_memories [ids]
+##              current_region, position [x, y, z],
+##              memories {memory_id: "kept" | "burned"} — absent means UNKNOWN (not found yet)
 ##   inventory  item_id -> count
 ##   flags      story flags, key -> bool / int / float / String
 ##   story      chapter, checkpoint, echoes_seen — story progress lives here and nowhere
@@ -18,7 +19,11 @@ extends Node
 
 const MemoryRegistry := preload("res://scripts/core/memory_registry.gd")
 
-const SAVE_VERSION := 1
+const SAVE_VERSION := 2
+
+## A memory is not found yet (UNKNOWN), remembered (KEPT) or given to the fire (BURNED).
+enum MemoryState { UNKNOWN, KEPT, BURNED }
+const STATE_NAMES := {MemoryState.KEPT: "kept", MemoryState.BURNED: "burned"}
 const WORLD_LISTS := ["hearths", "chests", "echoes", "discovered", "killed"]
 const INT_STATS := ["flasks", "max_flasks", "level"]
 const FLOAT_STATS := ["health", "max_health", "fire"]
@@ -45,7 +50,7 @@ func _process(delta: float) -> void:
 static func default_state() -> Dictionary:
 	return {
 		"meta": {"save_version": SAVE_VERSION, "playtime": 0.0, "last_saved_timestamp": 0},
-		"player": {"stats": {"level": 1}, "current_region": "", "position": [0.0, 0.0, 0.0], "burned_memories": []},
+		"player": {"stats": {"level": 1}, "current_region": "", "position": [0.0, 0.0, 0.0], "memories": {}},
 		"inventory": {},
 		"flags": {},
 		"story": {"chapter": 1, "checkpoint": "", "echoes_seen": []},
@@ -104,15 +109,19 @@ static func normalize(data: Variant) -> Dictionary:
 	out["player"]["current_region"] = String(p.get("current_region", ""))
 	var pos: Array = p.get("position", [0, 0, 0]) if p.get("position") is Array else [0, 0, 0]
 	out["player"]["position"] = [float(pos[0]) if pos.size() > 0 else 0.0, float(pos[1]) if pos.size() > 1 else 0.0, float(pos[2]) if pos.size() > 2 else 0.0]
-	var burned: Array = []
-	for id in p.get("burned_memories", []):
+	var mems: Dictionary = {}
+	var src_mems: Dictionary = p.get("memories", {}) if p.get("memories") is Dictionary else {}
+	for id in src_mems:
 		var sid := String(id)
+		var st := String(src_mems[id])
 		if not MemoryRegistry.has(StringName(sid)):
 			push_warning("WorldState: dropped unknown memory id '%s' from the save" % sid)
 			continue
-		if not sid in burned:
-			burned.append(sid)
-	out["player"]["burned_memories"] = burned
+		if not st in ["kept", "burned"]:
+			push_warning("WorldState: dropped memory '%s' with unknown state '%s'" % [sid, st])
+			continue
+		mems[sid] = st
+	out["player"]["memories"] = mems
 
 	var inv: Dictionary = d.get("inventory", {}) if d.get("inventory") is Dictionary else {}
 	for k in inv:
@@ -230,23 +239,45 @@ func clear_flag(key: StringName) -> void:
 
 # --- Memories (Yaddaş Yanğını) -------------------------------------------------------------------
 
-## Burns a memory for good. False if the id is unknown or it is already burned.
+func get_memory_state(id: StringName) -> MemoryState:
+	match _state["player"]["memories"].get(String(id), ""):
+		"kept":
+			return MemoryState.KEPT
+		"burned":
+			return MemoryState.BURNED
+	return MemoryState.UNKNOWN
+
+
+## Remembers a memory (an echo's KEEP choice). Only a memory not yet decided can be kept.
+## False if the id is unknown or the memory is already kept or burned.
+func keep_memory(id: StringName) -> bool:
+	if not MemoryRegistry.has(id) or get_memory_state(id) != MemoryState.UNKNOWN:
+		return false
+	_state["player"]["memories"][String(id)] = "kept"
+	EventBus.memory_kept.emit(id)
+	return true
+
+
+## Burns a memory for good (an echo's BURN choice, the fire wheel, Kül Şahı's offer).
+## False if the id is unknown or it is already burned.
 func burn_memory(id: StringName) -> bool:
 	if not MemoryRegistry.has(id) or has_burned(id):
 		return false
-	_state["player"]["burned_memories"].append(String(id))
+	_state["player"]["memories"][String(id)] = "burned"
 	EventBus.memory_burned.emit(id)
 	return true
 
 
 func has_burned(id: StringName) -> bool:
-	return String(id) in _state["player"]["burned_memories"]
+	return get_memory_state(id) == MemoryState.BURNED
 
 
+## Burned memory ids, in the order they burned.
 func burned_memories() -> Array[StringName]:
 	var out: Array[StringName] = []
-	for id in _state["player"]["burned_memories"]:
-		out.append(StringName(id))
+	for id in _state["player"]["memories"]:
+		if _state["player"]["memories"][id] == "burned":
+			out.append(StringName(id))
 	return out
 
 
@@ -475,12 +506,15 @@ func get_world_value(key: StringName, default: Variant = null) -> Variant:
 
 # --- Dialogue conditions -------------------------------------------------------------------------
 
-## Condition strings used by dialogue branches: "memory:<id>" (burned), "flag:<name>".
+## Condition strings used by dialogue branches: "memory:<id>" (burned), "kept:<id>",
+## "flag:<name>".
 func check(cond: String) -> bool:
 	var arg := cond.get_slice(":", 1)
 	match cond.get_slice(":", 0):
 		"memory":
 			return has_burned(StringName(arg))
+		"kept":
+			return get_memory_state(StringName(arg)) == MemoryState.KEPT
 		"flag":
 			return has_flag(StringName(arg))
 	return false

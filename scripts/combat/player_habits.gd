@@ -1,5 +1,5 @@
 extends RefCounted
-## Ayxan's defensive habits over the last `window` seconds (spec §4.1 adaptive AI):
+## The protagonist's defensive habits over the last `window` seconds (spec §4.1 adaptive AI):
 ## dodges, blocks, parries and time spent keeping his distance. Elites and bosses
 ## read weights() and lean on the counter to whatever he relies on most.
 

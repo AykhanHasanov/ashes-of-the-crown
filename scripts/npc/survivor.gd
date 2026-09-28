@@ -94,7 +94,7 @@ func face(point: Vector3) -> void:
 		_model.rotation.y = atan2(-d.x, -d.z)
 
 
-## Stop and look at Ayxan (conversation), or resume life.
+## Stop and look at the protagonist (conversation), or resume life.
 func hold(on: bool) -> void:
 	if mode == Mode.LIVE and on:
 		mode = Mode.HOLD

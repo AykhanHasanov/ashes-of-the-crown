@@ -1,7 +1,7 @@
 extends "res://scripts/chapter_base.gd"
 ## Chapter 2 "Son Ocaq": the survivors' caravanserai.
 ##
-## Interim state (V2 phase 1): Ayxan arrives, the eight survivors live their
+## Interim state (V2 phase 1): the protagonist arrives, the eight survivors live their
 ## needs-driven lives around the hearth and greet him when spoken to. The day/night
 ## structure, hearth defence, bonds and quests arrive in phase 5.
 ##
@@ -105,7 +105,7 @@ func _talk_to(s) -> void:
 	var p: Dictionary = Survivors.PEOPLE[s.id]
 	var greet: String = p["greet"]
 	if s.id == "rufet" and WorldState.has_burned(&"rufet_face"):
-		greet = "Ayxan. Yine beni tanımıyorsun, değil mi? Önemli değil. Ben buradayım."
+		greet = "{PROTAGONIST}. Yine beni tanımıyorsun, değil mi? Önemli değil. Ben buradayım."
 	talk_with(s, {"start": {"speaker": s.display_name, "text": greet, "end": true, "event": "talk_end"}}, false)
 
 

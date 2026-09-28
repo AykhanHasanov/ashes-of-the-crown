@@ -1,7 +1,7 @@
 extends CanvasLayer
 ## Kül Şahının təklifi: at ≤ 15 health (once per fight) the world slows and greys and
 ## the Ash Shah whispers "give me a memory... and live". E accepts within 3 seconds:
-## full health, but Kül Şahı picks which of Ayxan's own memories burns.
+## full health, but Kül Şahı picks which of the protagonist's own memories burns.
 
 signal resolved(accepted: bool)
 

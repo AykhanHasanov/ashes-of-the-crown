@@ -1,11 +1,11 @@
 extends CharacterBody3D
 ## Kül Kölgəsi — a skeleton risen from the ash (KayKit Skeletons).
-## Claws out of the ground, runs at Ayxan, telegraphs its strike with a ring on the
+## Claws out of the ground, runs at the protagonist, telegraphs its strike with a ring on the
 ## floor that grows for Balance.WINDUP seconds, lunges, then recovers. Sword hits
 ## stagger it — except during the last Balance.UNSTOPPABLE seconds of the windup,
 ## when the ring turns white-hot and only a dodge helps.
 ## Kinds: "normal" (minion), "fast" (rogue) and "elite" (Kül Cəngavəri), whose extra
-## move is Kül Burulğanı: a 360° sweep used when Ayxan gets behind it or piles on hits.
+## move is Kül Burulğanı: a 360° sweep used when the protagonist gets behind it or piles on hits.
 
 signal killed(shade: Node)
 
@@ -189,7 +189,7 @@ func _physics_process(delta: float) -> void:
 					if dist < 1.8 + radius and slot_free:
 						_begin_windup()
 					elif not slot_free and dist < WAIT_RING + 1.0:
-						# Circle Ayxan, keeping the wait distance, until a slot opens
+						# Circle the protagonist, keeping the wait distance, until a slot opens
 						var radial := -to.normalized() * clampf(WAIT_RING - dist, -1.0, 1.0)
 						var tangent := Vector3(-to.z, 0.0, to.x).normalized() * _orbit * 0.6
 						move = (radial + tangent + _separation()).limit_length(1.0) * speed * 0.6
@@ -231,7 +231,7 @@ func _physics_process(delta: float) -> void:
 		_model.set_locomotion(move.length() > 0.1, speed / 4.0)
 
 
-## Seconds until this shade's blow lands on Ayxan (INF when not attacking). Used for perfect dodges.
+## Seconds until this shade's blow lands on the protagonist (INF when not attacking). Used for perfect dodges.
 func time_to_strike() -> float:
 	match _state:
 		State.WINDUP:

@@ -176,7 +176,7 @@ func death_burst(pos: Vector3, size: float) -> void:
 	sparks.emitting = true
 
 
-## Köz Zərbəsi: a short cone of fire in front of Ayxan.
+## Köz Zərbəsi: a short cone of fire in front of the protagonist.
 func ember_cone(pos: Vector3, dir: Vector3, reach: float) -> void:
 	if not is_instance_valid(world):
 		return
@@ -195,7 +195,7 @@ func ember_cone(pos: Vector3, dir: Vector3, reach: float) -> void:
 	burst.emitting = true
 
 
-## Perfect dodge: a trail of ash where Ayxan was.
+## Perfect dodge: a trail of ash where the protagonist was.
 func ash_trail(pos: Vector3) -> void:
 	if not is_instance_valid(world):
 		return

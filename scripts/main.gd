@@ -1,11 +1,12 @@
 extends "res://scripts/chapter_base.gd"
-## Chapter 1 "İlk sabah" (also hosts the title screen): Ayxan rises from the
+## Chapter 1 "İlk sabah" (also hosts the title screen): the protagonist rises from the
 ## ash → Rüfət → three waves of ash shades → three Kül əks-sədaları (ember echoes)
 ## that replay the king's last night → back to Rüfət → chapter end,
 ## from where Enter leads on to Chapter 2 (Son Ocaq).
 ##
 ## Checkpoints: start, waves, echoes, return, chapter_end.
 
+const Names := preload("res://scripts/core/names.gd")
 const Kozqala := preload("res://scripts/world/kozqala.gd")
 const AshShade := preload("res://scripts/enemies/ash_shade.gd")
 const Companion := preload("res://scripts/npc/companion.gd")
@@ -91,7 +92,7 @@ func _begin(mode: String) -> void:
 
 # --- Flow --------------------------------------------------------------------
 
-## Title screen: the camera circles the ruins while Ayxan lies in the ash.
+## Title screen: the camera circles the ruins while the protagonist lies in the ash.
 func _menu() -> void:
 	phase = Phase.MENU
 	hud.visible = false
@@ -436,7 +437,7 @@ func _on_player_died() -> void:
 	Audio.music("", 1.0)
 	Audio.play("sting_defeat", -2.0, 0.0)
 	await get_tree().create_timer(1.2).timeout
-	hud.show_card("KÖZ SÖNDÜ", "Ayxan külün içine yığıldı.", "[R] — son noktadan devam et   ·   [Esc] — menü", 0.75)
+	hud.show_card("KÖZ SÖNDÜ", Names.fill("{PROTAGONIST} külün içine yığıldı.", false), "[R] — son noktadan devam et   ·   [Esc] — menü", 0.75)
 
 
 func _chapter_end() -> void:
@@ -451,13 +452,13 @@ func _chapter_end() -> void:
 	var lines := PackedStringArray()
 	lines.append("Görülen yankılar: %d / %d" % [WorldState.echoes_seen().size(), KingEchoes.ECHOES.size()])
 	var burned: int = Memory.burned_count()
-	lines.append("Yanan hatıralar: %d / %d" % [burned, Memory.all().size()])
+	lines.append("Yanan hatıralar: %d / %d" % [burned, Memory.combat_memories().size()])
 	if WorldState.has_burned(&"rufet_face"):
 		lines.append("Rüfet'i tanımıyorsun, ama o seni tanıyor.")
 	else:
 		lines.append("Rüfet yanında. Yüzünü hâlâ hatırlıyorsun.")
 	if burned >= 4:
-		lines.append("\"...yaklaşıyorsun, Ayxan. Taç seni bekliyor...\"  — Kül Şahı")
+		lines.append(Names.fill("\"...yaklaşıyorsun, {PROTAGONIST}. Taç seni bekliyor...\"  — Kül Şahı"))
 	lines.append("")
 	lines.append("[Enter] — Bölüm 2: Son Ocak   ·   [R] — yeni oyun   ·   [Esc] — menü")
 	await get_tree().create_timer(1.2).timeout

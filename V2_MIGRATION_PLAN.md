@@ -24,11 +24,11 @@ Effort: **S** < 1 session, **M** 1–2 sessions, **L** 3+ sessions.
 
 | Component | V2 implementation | Open-world equivalent | Recommendation | Effort | Risk |
 |---|---|---|---|---|---|
-| Player controller | `player/player.gd` (627 lines): KayKit Rogue, 3-hit combo, dodge, Köz strike, Alov Dalğası, Kül Şahı offer, `lie_down` / `stand_up` / `wake` | `player_v3/ayxan.gd`: all of those plus stamina, weapons as data, lock-on, flasks, swim, fall damage, realistic model | **Replace** (hypothesis confirmed). Add the two cutscene hooks V2 has and V3 lacks (see §2) | S | Low. V3 already offers `wake()`; `lie_down` / `stand_up` map to the UAL `LayToIdle` clip |
+| Player controller | `player/player.gd` (627 lines): KayKit Rogue, 3-hit combo, dodge, Köz strike, Alov Dalğası, Kül Şahı offer, `lie_down` / `stand_up` / `wake` | `player_v3/protagonist.gd`: all of those plus stamina, weapons as data, lock-on, flasks, swim, fall damage, realistic model | **Replace** (hypothesis confirmed). Add the two cutscene hooks V2 has and V3 lacks (see §2) | S | Low. V3 already offers `wake()`; `lie_down` / `stand_up` map to the UAL `LayToIdle` clip |
 | Camera | `camera/camera_rig.gd`: isometric follow, cinematic close-up, title orbit | `camera/third_person_camera.gd`: keeps the same `cinematic` / `release` / `orbit` / `add_trauma` API | **Replace** (confirmed). `talk_with()` in `chapter_base` already works with both | S | Low. Dialogue framing needs a visual check at over-the-shoulder distance |
 | Enemies | `enemies/ash_shade.gd` (397): normal / fast / elite skeletons, telegraph ring, unstoppable windup, the elite's 360° "Kül Burulğanı" | `enemies/foe.gd` + `data/enemies/ash_shade.json`, `ash_runner.json` (utility AI, perception, unstoppable windups, spins), realistic charred humans | **Replace** (confirmed). The wave-3 boss **"Kül Şövalyesi" has no V3 data file**: add one JSON (heavy sword, spin attack, boss bar) | S | Low |
-| Combat core | Inside `player.gd` / `ash_shade.gd`, tuned by `systems/balance.gd` | `combat/combatant.gd`, `hit.gd`, `melee.gd`, `projectile.gd`, `data/balance/combat.json` | **Replace** (confirmed) | — (comes free with player + enemies) | Low. Chapter 1 difficulty must be re-tuned: V3 Ayxan is stronger (flasks, stamina, lock-on) |
-| Companion (Rüfət fights beside Ayxan) | `npc/companion.gd` (102): follows, talks, swings at shades; shades ignore him | **None.** The world has no ally combatant | **Rebuild** on `combatant` as an allied faction (enemies may target him), realistic Human | M | Medium. An ally that enemies attack needs death rules; with permanent NPC death he can die (see §6) |
+| Combat core | Inside `player.gd` / `ash_shade.gd`, tuned by `systems/balance.gd` | `combat/combatant.gd`, `hit.gd`, `melee.gd`, `projectile.gd`, `data/balance/combat.json` | **Replace** (confirmed) | — (comes free with player + enemies) | Low. Chapter 1 difficulty must be re-tuned: V3 Aras is stronger (flasks, stamina, lock-on) |
+| Companion (Rüfət fights beside Aras) | `npc/companion.gd` (102): follows, talks, swings at shades; shades ignore him | **None.** The world has no ally combatant | **Rebuild** on `combatant` as an allied faction (enemies may target him), realistic Human | M | Medium. An ally that enemies attack needs death rules; with permanent NPC death he can die (see §6) |
 | Level: Közkale courtyard | `world/kozqala.gd` (580): a courtyard built in code from KayKit dungeon props plus lava/soot/stone shaders (throne dais, crater, galleries, south-gate hearth, spawn points) | The world streams prefab POIs built from realistic kits. Közkale already appears **as a smoke column behind the western pass** | **Rebuild** (hypothesis *rejected*). Keep the *layout design* (dais, crater, three echo spots, south gate, hearth), rebuild it as a world region/POI with the Village MegaKit (brick and plaster walls, arches) and Poly Haven rocks | L | Medium–high. Largest art task. The world is 512 m and fully used, so the courtyard needs either a western extension of the terrain or a separate streamed area behind the pass |
 | Level: Son Ocaq caravanserai | `world/son_ocaq.gd` (160): an arcaded yard in code (extends kozqala), one great fire, 8 stations, hide spots | Houses and props are built from the MegaKit (`tools/build_houses.gd`); villages are POIs with routines | **Rebuild** (*rejected*) as **the hub POI** in the valley: MegaKit arches, walls and doors (with the door metadata the hub needs) | L | Medium. This is the future hub; build it once, for the hub's needs, not as a copy of the V2 yard |
 | Dialogue content | `story/rufet_dialogue.gd` (3 trees, ~40 nodes), inline dialogues in `main.gd` / `chapter2.gd`, survivor greetings in `story/survivors.gd` | `ui/dialogue_ui.gd` (shared), conditions via `WorldState.check` | **Port** (confirmed): move the trees to data files with translation keys, **minus the traitor-linked beats** (§5) | M | Low |
@@ -45,7 +45,7 @@ Effort: **S** < 1 session, **M** 1–2 sessions, **L** 3+ sessions.
 ## 2. V2 features the open world lacks (port INTO the new systems, do not discard)
 
 1. **Echo replays.** A ghost re-enactment, desaturation and memory-gated words. Goes into `interactable.gd` as an echo "scene" option.
-2. **Allied companion in combat.** Rüfət fights beside Ayxan. Needs an allied faction on `combatant` / `foe`.
+2. **Allied companion in combat.** Rüfət fights beside Aras. Needs an allied faction on `combatant` / `foe`.
 3. **Scripted encounters.** Waves with banners, music, a boss bar and last-kill slow motion. Becomes a data-driven Encounter.
 4. **Needs-based NPC life.** Warmth, company and duty, plus hiding places during attacks. Belongs in the unified NPC model.
 5. **Cutscene body states.** `lie_down` / `stand_up` for the opening, via the UAL `LayToIdle` / `Death01` clips on `Human`.
@@ -55,7 +55,7 @@ Effort: **S** < 1 session, **M** 1–2 sessions, **L** 3+ sessions.
 ## 3. Visual consistency
 
 **V2 today**
-- **Characters:** Ayxan (Rogue), Rüfət (Knight with helmet and shield), the eight survivors (Knight, Mage, Rogue, Barbarian with recolours), the king's ghost (Rogue) and the shades (KayKit Skeletons). All KayKit chibi.
+- **Characters:** Aras (Rogue), Rüfət (Knight with helmet and shield), the eight survivors (Knight, Mage, Rogue, Barbarian with recolours), the king's ghost (Rogue) and the shades (KayKit Skeletons). All KayKit chibi.
 - **Levels:** KayKit dungeon, halloween and castle props.
 
 **Open world today**
@@ -69,7 +69,7 @@ Effort: **S** < 1 session, **M** 1–2 sessions, **L** 3+ sessions.
 
 | Item | Work | Effort |
 |---|---|---|
-| Ayxan, shades, bandits | Already realistic | — |
+| Aras, shades, bandits | Already realistic | — |
 | Rüfət, Şahbaz, Eşref, Elvin, Anar | Looks from existing outfits (Ranger / Peasant + recolours + beards), about one `looks.json` entry each | S |
 | Sabir (vizier), İbrahim (alchemist), Ehliman (high priest) | **Robes the current outfit set does not have.** Need an extra CC0 outfit pack (e.g. another Quaternius outfit set) or a robe mesh on the existing skeleton | M, **asset gap** |
 | The king's ghost | A Human with a crown prop and the ghost shader | S |
@@ -85,7 +85,7 @@ About 1,700 lines were identified as duplicated in `ARCHITECTURE_AUDIT.md` §4. 
 
 | File / part | Lines | Fate |
 |---|---|---|
-| `player/player.gd` | 627 | Gone (Ayxan V3) |
+| `player/player.gd` | 627 | Gone (Aras V3) |
 | `enemies/ash_shade.gd` | 397 | Gone (foe + JSON) |
 | `npc/survivor.gd` | 238 | Gone (its needs logic moves into the unified NPC) |
 | `camera/camera_rig.gd` | 108 | Gone (TPCamera) |
@@ -123,7 +123,7 @@ These story moments should write WorldState now, even with no hub yet. Everythin
 
 | Moment | Write | Section |
 |---|---|---|
-| Ayxan wakes in Közkale | `story.checkpoint = "start"` (exists) | story |
+| Aras wakes in Közkale | `story.checkpoint = "start"` (exists) | story |
 | Meets Rüfət | `npcs.rufet = {met: true, alive: true, location: "kozkale"}` | npcs |
 | Rüfət dialogue lore choices | keep `lore_forgetting_king`, `king_chose_fire` | flags |
 | Rüfət not recognised | **Do not write `rufet_forgotten`.** It is derivable from `burned_memories` containing `rufet_face` | — |

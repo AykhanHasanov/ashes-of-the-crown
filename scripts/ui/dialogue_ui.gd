@@ -4,13 +4,14 @@ extends CanvasLayer
 ## Dialogue data is a Dictionary of nodes keyed by id. A node may have:
 ##   speaker, text           — the line to show
 ##   next                    — id of the following node (continue with E / click)
-##   choices                 — [{text, next?, set?, event?}] Ayxan's answers (1-3 / click)
+##   choices                 — [{text, next?, set?, event?}] the protagonist's answers (1-3 / click)
 ##   branch                  — {memory, burned, intact}: jump depending on Yaddaş Yanğını, or
 ##                             {if, then, else} with a WorldState.check() condition
 ##   set                     — flag emitted through flag_set when the node is shown
 ##   do                      — [WorldState.apply() actions] run when a node is shown or a choice taken
 ##   end + event             — closes the dialogue and emits finished(event)
 
+const Names := preload("res://scripts/core/names.gd")
 signal finished(event: String)
 signal flag_set(flag: String)
 
@@ -135,9 +136,10 @@ func _show(id: String) -> void:
 	_node = node
 	Audio.play("ui_click", -12.0, 0.05)
 	var speaker: String = node.get("speaker", "")
-	_name.text = speaker
-	_name.add_theme_color_override("font_color", EMBER if speaker == "Ayxan" else GOLD)
-	_text.text = node.get("text", "")
+	var own_line := speaker == Names.TOKEN
+	_name.text = Names.fill(speaker, false)   # the protagonist's own label is blank once his name burned
+	_name.add_theme_color_override("font_color", EMBER if own_line else GOLD)
+	_text.text = Names.fill(node.get("text", ""), not own_line)
 	_text.visible_ratio = 0.0
 	for c in _choices.get_children():
 		c.queue_free()
@@ -161,7 +163,7 @@ func _finish_typing() -> void:
 		var choices: Array = _node["choices"]
 		for i in choices.size():
 			var btn := Button.new()
-			btn.text = "%d.  %s" % [i + 1, choices[i]["text"]]
+			btn.text = "%d.  %s" % [i + 1, Names.fill(choices[i]["text"], false)]
 			btn.flat = true
 			btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 			btn.add_theme_font_size_override("font_size", 19)

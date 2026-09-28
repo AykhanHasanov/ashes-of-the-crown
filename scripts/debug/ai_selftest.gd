@@ -94,7 +94,7 @@ func _perception() -> void:
 	var f = _wild("ash_shade", Vector3(0, 0.1, -2))
 	_face_to(f, player.global_position)
 	await _wait(2.0)
-	_check("an enemy facing Ayxan 10 m away notices him", f.perception.state == Perception.COMBAT and f.aggro,
+	_check("an enemy facing the protagonist 10 m away notices him", f.perception.state == Perception.COMBAT and f.aggro,
 		"%s %.2f" % [Perception.NAMES[f.perception.state], f.perception.awareness])
 	f.queue_free()
 	await _wait(0.2)
@@ -109,7 +109,7 @@ func _perception() -> void:
 	_check("the sound of a fight is heard", g.perception.state != Perception.CALM, Perception.NAMES[g.perception.state])
 	g.alarm(player.global_position)
 	await _wait(0.3)
-	# Ayxan slips away out of sight and earshot; step the brain by hand so the enemy
+	# The protagonist slips away out of sight and earshot; step the brain by hand so the enemy
 	# cannot chase him down meanwhile
 	g.set_physics_process(false)
 	g.global_position = Vector3(6, 0.1, -12)
@@ -228,7 +228,7 @@ func _affixes() -> void:
 	await _wait(1.6)   # rises out of the ground first
 	_face_to(eye, Vector3(8, 0, -40))
 	await _wait(0.6)
-	_check("Kül Şahının gözü: sees Ayxan even looking away", eye.perception.state == Perception.COMBAT)
+	_check("Kül Şahının gözü: sees the protagonist even looking away", eye.perception.state == Perception.COMBAT)
 	await _clear()
 	var hot = mode.spawn_foe("ash_shade", Vector3(0, 0.1, 2), {"affixes": ["flaming"]})
 	var patches := false
@@ -294,7 +294,7 @@ func _levels() -> void:
 	var g = Foe.new()
 	g.configure("ash_shade", 6, {"roll": false})
 	g.target = player
-	_check("5+ levels above Ayxan shows a skull", g.is_deadly() and not f.is_deadly())
+	_check("5+ levels above the protagonist shows a skull", g.is_deadly() and not f.is_deadly())
 	var n = Foe.new()
 	n.configure("ash_shade", 1, {"night": true, "roll": false})
 	_check("ash are 20% stronger at night", absf(n.max_health - 72.0) < 0.01)
