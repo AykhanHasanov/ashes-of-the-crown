@@ -18,7 +18,6 @@ const WHISPERS := [
 	"...biraz daha, küçük şah...",
 	"...hatıralar sadece yüktür...",
 	"...onların yüzü sana ne verdi ki?...",
-	"...babanı da böyle yedim. Yavaş yavaş...",
 	"...taç seni bekliyor. BEN seni bekliyorum...",
 	"...{PROTAGONIST} kimdi?...",
 ]

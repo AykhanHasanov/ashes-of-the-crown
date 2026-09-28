@@ -12,8 +12,10 @@ look_id = "npc_sahbaz"
 weapon_path = ""
 shield_path = ""
 voice_profile = "npc_sahbaz"
-personality_notes = "Serdar — commander of the scattered army. Wounded but standing; blunt, proud, a soldier first.
-V2 look: KayKit Knight, red."
+personality_notes = "Şahbaz, serdar — commander. Grief stance: anger — his soldiers died in the fire.
+Blames the King at first; at the midpoint learns Aras lit it and his door closes.
+Quest: release his soldiers' ash legion; confront Tural. Hub: combat training.
+Can die (ash legion / Tural line). See STORY_BIBLE.md §7."
 home_location_id = ""
 companion = false
 ignores_burned_names = false

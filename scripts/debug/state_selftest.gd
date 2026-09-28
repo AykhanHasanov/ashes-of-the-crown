@@ -41,8 +41,8 @@ func _translations() -> void:
 	_check("tr() finds the memory names (Turkish)", tr("MEMORY_RUFET_FACE_NAME") == "Rüfet'in yüzü")
 	var defs: Array = Memory.all()
 	var combat: Array = Memory.combat_memories()
-	_check("registry loads the 6 combat memories in order, plus the name memory", defs.size() == 7 and combat.size() == 6
-		and combat[0].id == &"rufet_face" and combat[5].id == &"first_sword" and not MemoryRegistry.get_def(&"own_name").combat_burnable)
+	_check("registry loads the 6 combat memories in order, plus own_name and narin", defs.size() == 8 and combat.size() == 6
+		and combat[0].id == &"rufet_face" and combat[5].id == &"first_sword" and not MemoryRegistry.get_def(&"own_name").combat_burnable and not MemoryRegistry.get_def(&"narin").combat_burnable)
 	for d in defs:
 		if tr(d.display_name_key) == d.display_name_key or tr(d.description_key) == d.description_key or tr(d.cost_key) == d.cost_key:
 			_check("every key of %s is translated" % d.id, false)

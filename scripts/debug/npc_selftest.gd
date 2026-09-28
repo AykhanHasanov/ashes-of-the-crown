@@ -9,6 +9,7 @@ extends Node
 const NpcRegistry := preload("res://scripts/core/npc_registry.gd")
 const NpcSpawner := preload("res://scripts/npc/npc_spawner.gd")
 const Names := preload("res://scripts/core/names.gd")
+const MemoryRegistry := preload("res://scripts/core/memory_registry.gd")
 const Foe := preload("res://scripts/enemies/foe.gd")
 const Hit := preload("res://scripts/combat/hit.gd")
 const Melee := preload("res://scripts/combat/melee.gd")
@@ -17,7 +18,7 @@ const TEST_DIR := "user://test_npc_saves/"
 ## The voiced core cast carried over from V2 (Nərmin replaces Anar) ...
 const PEOPLE := [&"ehliman", &"elvin", &"esref", &"ibrahim", &"nermin", &"rufet", &"sabir", &"sahbaz"]
 ## ... and the people STORY_BIBLE.md adds (data only so far).
-const BIBLE_NEW := [&"ayna", &"domrul", &"gulcin", &"kamal", &"peri_nene", &"samir", &"sona", &"tural", &"yadigar"]
+const BIBLE_NEW := [&"ayna", &"domrul", &"gulcin", &"kemal", &"narin", &"peri_nene", &"samir", &"sona", &"tural", &"yadigar"]
 const YARD := Vector3(4, 0, 4)
 
 var _fails := 0
@@ -74,7 +75,7 @@ func _definitions() -> void:
 	var ids: Array = NpcRegistry.all().filter(func(d): return d.npc_kind != "voice_only").map(func(d): return d.id)
 	var want: Array = PEOPLE + BIBLE_NEW
 	want.sort_custom(func(a, b): return String(a) < String(b))
-	_check("the registry holds the cast: V2's eight (anar now nermin) + the bible's nine", ids == want, str(ids))
+	_check("the registry holds the cast: V2's eight (anar now nermin) + the bible's ten", ids == want, str(ids))
 	_check("the old id 'anar' is gone", not NpcRegistry.has(&"anar"))
 	var looks: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/looks.json"))
 	var ok := true
@@ -87,10 +88,16 @@ func _definitions() -> void:
 			print("   bad definition: ", id)
 	_check("every NPC has name and epithet keys, a look and notes (and its voice, if it has one)", ok)
 	_check("the voiced core cast has voices", PEOPLE.all(func(id): return Barks.has_line(NpcRegistry.get_def(id).voice_profile, "greet")))
-	_check("npc_kind from the bible: Ayna a shade, Kül Şahı voice only, the rest human",
-		NpcRegistry.all().all(func(d): return d.npc_kind == {&"ayna": "shade", &"kul_sahi": "voice_only"}.get(d.id, "human")))
+	_check("npc_kind from the bible: Ayna and Narin shades, Kül Şahı voice only, the rest human",
+		NpcRegistry.all().all(func(d): return d.npc_kind == {&"ayna": "shade", &"narin": "shade", &"kul_sahi": "voice_only"}.get(d.id, "human")))
+	_check("owner's Turkish forms and epithets", tr("NPC_KEMAL_NAME") == "Kemal" and not NpcRegistry.has(&"kamal")
+		and tr("NPC_EHLIMAN_EPITHET") == "Köz Nizamı'nın kâhini" and tr("NPC_ELVIN_EPITHET") == "şahın gölgedeki oğlu"
+		and tr("NPC_SONA_EPITHET") == "dokumacı" and tr("NPC_KEMAL_EPITHET") == "demirci" and tr("NPC_GULCIN_EPITHET") == "ekmekçi"
+		and tr("NPC_SAMIR_EPITHET") == "kervancı" and tr("NPC_KUL_SAHI_EPITHET") == "Ateşan'ın şahı")
+	_check("Narin: her name hangs on her memory, which never burns in combat", NpcRegistry.get_def(&"narin").name_memory_id == &"narin"
+		and not MemoryRegistry.get_def(&"narin").combat_burnable and MemoryRegistry.get_def(&"narin").weight == 1)
 	_check("bible markers: hub / world presence, Tural a boss, Samir hidden",
-		NpcRegistry.get_def(&"peri_nene").presence == "hub" and NpcRegistry.get_def(&"kamal").presence == "hub"
+		NpcRegistry.get_def(&"peri_nene").presence == "hub" and NpcRegistry.get_def(&"kemal").presence == "hub"
 		and NpcRegistry.get_def(&"yadigar").presence == "world" and NpcRegistry.get_def(&"tural").tags.has("boss")
 		and NpcRegistry.get_def(&"samir").tags.has("hidden"))
 	_check("Nermin: the caravan mistress keeps Anar's hooded look, as a woman", tr("NPC_NERMIN_NAME") == "Nermin"
@@ -133,6 +140,9 @@ func _state() -> void:
 	_check("dialogue conditions alive / dead / rescued", WorldState.check("alive:sabir") and not WorldState.check("dead:sabir")
 		and WorldState.check("dead:esref") and not WorldState.check("alive:esref") and WorldState.check("rescued:sabir")
 		and not WorldState.check("rescued:elvin") and not WorldState.check("dead:nobody"))
+	_check("joined:<npc> is derived from the party location (no flag)", not WorldState.check("joined:rufet")
+		and WorldState.move_npc(&"rufet", WorldState.PARTY) and WorldState.check("joined:rufet") and not WorldState.has_flag(&"rufet_joined")
+		and WorldState.move_npc(&"rufet", "") and not WorldState.check("joined:rufet"))
 	WorldState.set_npc_flag(&"elvin", &"met", true)
 	_check("per-NPC flags", WorldState.get_npc_flag(&"elvin", &"met") == true and WorldState.get_npc_flag(&"elvin", &"x", 7) == 7)
 
@@ -163,11 +173,15 @@ func _save_and_migration() -> void:
 	var v3 := {"meta": {"save_version": 3}, "player": {"stats": {}, "memories": {}}, "story": {}, "world": {}, "flags": {},
 		"npcs": {"anar": {"alive": true, "location_id": "kurkend", "rescued": true, "relationship": 4, "death_cause": "", "flags": {"ledger": 3}}}}
 	var from_v3 := WorldState.normalize(SaveManager.migrate(JSON.parse_string(JSON.stringify(v3))))
-	_check("migration v3 → v4: 'anar' becomes 'nermin' with the whole record", not from_v3["npcs"].has("anar")
+	_check("migration v3 → v5: 'anar' becomes 'nermin' with the whole record", not from_v3["npcs"].has("anar")
 		and from_v3["npcs"]["nermin"] == {"alive": true, "location_id": "kurkend", "rescued": true, "relationship": 4, "death_cause": "", "flags": {"ledger": 3}})
 	_write_json(TEST_DIR + "slot_3.json", v3)
 	_check("... and such a save file loads", SaveManager.load_slot(3) and WorldState.get_npc_relationship(&"nermin") == 4
 		and WorldState.is_npc_rescued(&"nermin"))
+	var v4 := {"meta": {"save_version": 4}, "player": {"stats": {}, "memories": {}}, "story": {}, "world": {}, "flags": {},
+		"npcs": {"kamal": {"alive": true, "location_id": "", "rescued": false, "relationship": 2, "death_cause": "", "flags": {}}}}
+	var from_v4 := WorldState.normalize(SaveManager.migrate(JSON.parse_string(JSON.stringify(v4))))
+	_check("migration v4 → v5: 'kamal' becomes 'kemal'", not from_v4["npcs"].has("kamal") and from_v4["npcs"]["kemal"]["relationship"] == 2)
 	SaveManager.active_slot = 1
 	var legacy := {"version": 4, "chapter": 1, "checkpoint": "", "flags": {}, "echoes_seen": [], "memory": {"burned": ["mother_name"]}, "world": {}}
 	var from_legacy := WorldState.normalize(SaveManager.migrate(legacy))

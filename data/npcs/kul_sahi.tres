@@ -12,8 +12,10 @@ look_id = ""
 weapon_path = ""
 shield_path = ""
 voice_profile = ""
-personality_notes = "The Ash Shah: the antagonist, a voice in the ember. Speaker entry only (never spawned).
-He is the one who never forgets: his lines always show real names."
+personality_notes = "Kül Şahı, Ateşan'ın şahı — the King, Aras's father. He gave his body to the reversed
+Ulu Ocaq; people now call him Kül Şahı. The only antagonist. Voice only, no body.
+Never let go: keeps every memory anyone burned, including Aras's ('You forgot. I did not.').
+His lines always show real names. See STORY_BIBLE.md §7."
 home_location_id = ""
 companion = false
 ignores_burned_names = true

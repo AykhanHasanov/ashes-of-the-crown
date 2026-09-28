@@ -571,17 +571,6 @@
 		],
 		"_placeholder": true
 	},
-	"npc_kamal": {
-		"outfit": "Male_Peasant",
-		"hair": "Hair_SimpleParted",
-		"beard": false,
-		"hair_color": [
-			0.14,
-			0.09,
-			0.05
-		],
-		"_placeholder": true
-	},
 	"npc_gulcin": {
 		"outfit": "Female_Peasant",
 		"hair": "Hair_Buns",
@@ -606,6 +595,33 @@
 			0.58,
 			0.56
 		],
+		"_placeholder": true
+	},
+	"npc_kemal": {
+		"outfit": "Male_Peasant",
+		"hair": "Hair_SimpleParted",
+		"beard": false,
+		"hair_color": [
+			0.14,
+			0.09,
+			0.05
+		],
+		"_placeholder": true
+	},
+	"npc_narin": {
+		"outfit": "Female_Peasant",
+		"hair": "Hair_Buns",
+		"hair_color": [
+			0.14,
+			0.09,
+			0.05
+		],
+		"tint": [
+			0.5,
+			0.5,
+			0.52
+		],
+		"scale": 0.62,
 		"_placeholder": true
 	}
 }

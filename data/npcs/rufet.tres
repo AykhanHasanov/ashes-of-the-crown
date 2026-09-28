@@ -12,9 +12,11 @@ look_id = "npc_rufet"
 weapon_path = "res://assets/props_mk/Sword_Bronze.gltf"
 shield_path = "res://assets/props_mk/Shield_Wooden.gltf"
 voice_profile = "npc_rufet"
-personality_notes = "The protagonist's childhood friend and blood brother; captain of the palace guard.
-Loyal, protective, plain-spoken; steady under pressure, carries guilt quietly.
-Calls the protagonist by name and 'kardeşim'. V2 look: KayKit Knight, helmet, blue cape, sword + round shield."
+personality_notes = "Rüfət, kan kardeşi — companion. Aras's blood brother, captain of the guard.
+Grief stance: silent love — knows everything and lies to protect Aras from his own guilt;
+promised 'Never tell me'. Carries Aras's letter to himself; carried him out of Közkale.
+Joins in Act I ('You don't know me? ...Good.'). Downed, never killed in normal combat;
+fate decided by the story [TBD]. Name memory: rufet_face. See STORY_BIBLE.md §7."
 home_location_id = ""
 companion = true
 ignores_burned_names = false

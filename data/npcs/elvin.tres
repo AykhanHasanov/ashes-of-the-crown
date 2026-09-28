@@ -12,8 +12,10 @@ look_id = "npc_elvin"
 weapon_path = ""
 shield_path = ""
 voice_profile = "npc_elvin"
-personality_notes = "The king's illegitimate son, the protagonist's half-brother. Bright, ambitious, proud;
-wants to be seen. V2 look: KayKit Knight, violet."
+personality_notes = "Elvin, şahın gölgedeki oğlu — the King's illegitimate son, Aras's half-brother.
+Grief stance: the forgotten living — the King kept his dead son and forgot his living one.
+Wants to be seen. Hub aşık: sings Aras's story, including what Aras burned (recap songs).
+Meets his father in Act III; the King does not recognise him. See STORY_BIBLE.md §7."
 home_location_id = ""
 companion = false
 ignores_burned_names = false

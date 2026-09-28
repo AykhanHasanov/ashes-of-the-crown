@@ -6,12 +6,12 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 
 ## Project
 
-- **What it is:** a 3D action-RPG. Aras, last heir of Atəşan, fights through a Caucasus / Silk Road land burned by Kül Şahı (the Ash Shah).
+- **What it is:** a 3D action-RPG. Aras, crown prince of Ateşan and Közcü (keeper) of its Great Hearth, fights through a frozen Caucasus / Silk Road land ruled from the burning castle by Kül Şahı — the King, his own father. The full story is in `STORY_BIBLE.md`.
 - **Core mechanic:** *Yaddaş Yanğını*. Memories are fuel: burning them gives fire power at a cost.
 - **Owner:** a solo developer with no engine experience. They delegate decisions and want the best option chosen, then explained. **Talk to the owner in Azerbaijani.**
 - **Current direction:** a Bloodborne-like structure.
   - One unified world (menu: New game / Continue).
-  - A persistent hub: the Son Ocaq caravanserai. It changes with story actions and rescued NPCs. At night NPCs answer through closed doors. Death is permanent and NPCs have relationships.
+  - A persistent hub: Son Ocaq, a village grown around an old caravanserai; the last hearth burns in its courtyard. It changes with story actions and rescued NPCs. At night NPCs answer through closed doors. Death is permanent and NPCs have relationships.
   - A soulslike loop: "Xatirə" is collected from enemies (currency + level), dropped on death and lost on a second death, and each loss makes the night deeper (4 stages).
   - Redeemable enemies can be purified with a 3 s ritual after a stagger.
   - Aggressive combat: rally (win health back by attacking) and hit-stop.
@@ -128,6 +128,7 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 
 **NPCs** (identities only; roles and quests come later from the owner)
 - Data: `NpcDefinition` in `data/npcs/*.tres` (id, name_key `NPC_<ID>_NAME`, epithet_key `NPC_<ID>_EPITHET`, name_memory_id, look_id → `data/looks.json`, weapon/shield, voice_profile → `data/voices/voices.json`, dev-only personality_notes, home_location_id, companion, ignores_burned_names, npc_kind `human`/`shade`/`voice_only`, presence `hub`/`world`, tags `boss`/`hidden`, placeholder), looked up through `scripts/core/npc_registry.gd`. The cast follows `STORY_BIBLE.md` §7: V2's eight carried over without suspect content (`anar` became `nermin`, save v4 migrates it) plus the bible's new people as data only; `kul_sahi` is voice only. Show names with `Names.npc(id)` and epithets with `Names.npc_epithet(id)` (never blanked).
+- A companion "joined" is not a flag: the condition `joined:<npc>` is true while their location is `party` (one fact, one owner).
 - State: `WorldState` NPC accessors (`move_npc`, `rescue_npc` → location `son_ocaq`, `kill_npc` — permanent, `change_npc_relationship`, `set_npc_flag`) with `npc_moved` / `npc_rescued` / `npc_died` / `npc_relationship_changed`. Locations: a POI id, `party` (with the protagonist), `son_ocaq` (hub, not built), or `""`.
 - Bodies come only from WorldState: `scripts/npc/npc_spawner.gd` (world_mode owns one) builds a `resident.gd` at a loaded POI or an `ally.gd` for a companion in the party; the dead never get a body again. Never hand-place a named NPC. Generic villagers (`data/world/villagers.json`) are separate and unchanged.
 - The ally (`scripts/npc/ally.gd`, numbers in `data/balance/allies.json`): a player-side Combatant that follows, fights, sometimes draws an enemy off the protagonist (`Foe.retarget`). At 0 health he is DOWNED, never dead: the protagonist helps him up ([E], `help_up()`), or he rises alone when no enemy is near. Only the story kills him (`kill_npc`).
@@ -143,7 +144,7 @@ It exits with the failure count and takes about 80 s headless.
 
 **Echoes, memory states, names, migration:** `"$G" --headless --path . res://scenes/tests/echo_test.tscn` plays the real KEEP and BURN flows (host `scenes/tests/echo_host.tscn` → test echo → back), checks hold-to-confirm, position/clock restore, save/load of the three states, v1/v0 migration incl. the name rename, the blank name, and scans the project for the old protagonist name.
 
-**NPCs, ally, names in subtitles, fire wheel:** `"$G" --headless --path . res://scenes/tests/npc_test.tscn` (65 checks): definitions, NPC state and signals, save/load and v2 → v3 migration, spawning from WorldState (the dead never respawn, rescue moves them away), name blanking for NPCs and in subtitles (Kül Şahı excepted), Rüfət's fight / downed / help-up / recover, the ally never hurting the protagonist, burn contexts, the wheel's hold-to-confirm.
+**NPCs, ally, names in subtitles, fire wheel:** `"$G" --headless --path . res://scenes/tests/npc_test.tscn` (69 checks): definitions, NPC state and signals, save/load and v2 → v3 migration, spawning from WorldState (the dead never respawn, rescue moves them away), name blanking for NPCs and in subtitles (Kül Şahı excepted), Rüfət's fight / downed / help-up / recover, the ally never hurting the protagonist, burn contexts, the wheel's hold-to-confirm.
 
 ## Running and testing
 

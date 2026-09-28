@@ -12,8 +12,11 @@ look_id = "npc_sabir"
 weapon_path = ""
 shield_path = ""
 voice_profile = "npc_sabir"
-personality_notes = "Old vizier, the protagonist's teacher. Patient, measured, speaks in lessons and sayings.
-Knows much of the court's history. V2 look: KayKit Mage, blue-violet robe."
+personality_notes = "Sabir, yaşlı öğretmen — Aras's teacher since childhood.
+Grief stance: unchosen forgetting — losing memory to old age and fighting it; the mirror of
+Aras, who forgets by choice. Quest: help him remember his students' names. Hub: keeper of
+kept memories (re-watch KEPT echoes at the hearth). Handle with respect. No death risk.
+See STORY_BIBLE.md §7."
 home_location_id = ""
 companion = false
 ignores_burned_names = false
