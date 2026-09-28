@@ -3,7 +3,7 @@ extends CharacterBody3D
 ## schedule they walk (by way of the village square) to their work spot and work there
 ## with the matching animation — forging, chopping wood, keeping a stall, carrying
 ## water, sitting on a bench, talking at the fire, keeping watch with a lantern. Outside
-## the schedule they walk home and go in. When Ayxan comes close they turn to him and
+## the schedule they walk home and go in. When the protagonist comes close they turn to him and
 ## greet him (voiced, subtitled); if foes come near they run home.
 ## The body is moved kinematically on the terrain (villages are always near the player,
 ## but terrain collision only exists around the camera, so no gravity is trusted).
@@ -33,13 +33,13 @@ var _yaw := 0.0
 var _think := 0.0
 
 
-func setup(villager: Dictionary, prefab_spots: Dictionary, poi_center: Vector3, hub_local: Array, ground: Callable, day_night: Node, ayxan: Node3D) -> void:
+func setup(villager: Dictionary, prefab_spots: Dictionary, poi_center: Vector3, hub_local: Array, ground: Callable, day_night: Node, protagonist: Node3D) -> void:
 	def = villager
 	spots = prefab_spots
 	center = poi_center
 	height_at = ground
 	clock = day_night
-	player = ayxan
+	player = protagonist
 	hub = _world(hub_local)
 
 
@@ -220,7 +220,7 @@ func _social(delta: float) -> void:
 		return
 	var d := global_position.distance_to(player.global_position)
 	if d < 3.2 and _path.is_empty():
-		# Look up from the work at Ayxan
+		# Look up from the work at the protagonist
 		var to := player.global_position - global_position
 		_yaw = atan2(to.x, to.z)
 		if _speak_cd <= 0.0:

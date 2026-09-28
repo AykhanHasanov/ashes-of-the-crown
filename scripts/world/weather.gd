@@ -10,7 +10,7 @@ const NAMES := {"clear": "Açık", "cloudy": "Bulutlu", "rain": "Yağmur", "fog"
 var state := "clear"
 var day_night            # scripts/world/day_night.gd
 var camera: Camera3D
-var forest_fog := 0.0    # 0..1, set by the world from Ayxan's position
+var forest_fog := 0.0    # 0..1, set by the world from the protagonist's position
 
 var _cfg: Dictionary
 var _cur := {"cloud": 0.15, "fog": 0.0, "rain": 0.0, "sun": 1.0}

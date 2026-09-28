@@ -1,8 +1,8 @@
 extends RefCounted
-## How an enemy notices Ayxan (spec §4.1): a 120° view cone (25 m by day, 12 m at night
+## How an enemy notices the protagonist (spec §4.1): a 120° view cone (25 m by day, 12 m at night
 ## or in fog) with line of sight, hearing (sprinting 15 m, fighting 30 m), and an
 ## awareness meter that walks the states calm → suspicious (yellow ?) → combat (red !).
-## When Ayxan is lost the enemy searches his last known spot for 8 s, then gives up.
+## When the protagonist is lost the enemy searches his last known spot for 8 s, then gives up.
 
 enum { CALM, SUSPICIOUS, COMBAT, SEARCH }
 const NAMES := ["sakit", "şüpheli", "savaş", "arıyor"]

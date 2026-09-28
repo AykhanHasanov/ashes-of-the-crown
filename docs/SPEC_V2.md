@@ -17,9 +17,9 @@
 ## 1. Yeni konsepsiya
 Əsas sual artıq **"Satqın kimdir?"** deyil, **"Başqalarını xilas etmək üçün özündən nə qədər verə bilərsən?"**dir.
 
-Ayxanın gücü xatirələrindən gəlir. Hər böyük od istifadəsi bir xatirəni yandırır. Sağ qalanlarla bağ qurduqca onlar ona öz xatirələrini verir: bunlar həm güc (perk), həm də yanacaqdır. Kül Şahı hər yanmış xatirə ilə Ayxana daha çox yaxınlaşır.
+Arasın gücü xatirələrindən gəlir. Hər böyük od istifadəsi bir xatirəni yandırır. Sağ qalanlarla bağ qurduqca onlar ona öz xatirələrini verir: bunlar həm güc (perk), həm də yanacaqdır. Kül Şahı hər yanmış xatirə ilə Arasa daha çox yaxınlaşır.
 
-Əsas dövrə: **Döyüş → Od (xatirə yandırmaq) → Bağ (xatirə almaq) → Ocaqları müdafiə → Seçimlərin nəticəsi (Kölgə Ayxan, sonlar).**
+Əsas dövrə: **Döyüş → Od (xatirə yandırmaq) → Bağ (xatirə almaq) → Ocaqları müdafiə → Seçimlərin nəticəsi (Kölgə Aras, sonlar).**
 
 Satqın, izlər, sorğu-sual, etibar, divan, ittiham, "Külün Xaini" bossu, sürgün və məktub ipucusu tam silinib.
 
@@ -64,12 +64,12 @@ Bağ 0–100 arasındadır:
 ## 7. Ssenari
 - **Fəsil 1:** kralın son gecəsinin 3 əks-sədası, Rüfətin yeni "harada idin?" qolu (kral mühafizəni saraydan çıxarıb), yeni qayıdış dialoqu.
 - **Fəsil 2:** 8 nəfər, 3 ocaq, 2 gün + 2 gecə, ən çox 6 tapşırıq. Ocaq sönəndə yanındakılar külə dönür. 5 saniyə ərzində xatirə yandırmaqla ocağı yenidən alovlandırmaq olar.
-- **Boss: Kölgə Ayxan.** Canı 300 + (yanmış öz xatirəsi × 60). Hər yanmış xatirə ona bir hərəkət qazandırır.
+- **Boss: Kölgə Aras.** Canı 300 + (yanmış öz xatirəsi × 60). Hər yanmış xatirə ona bir hərəkət qazandırır.
 - **Sonlar matrisi:** sağ qalanların sayı (≥ 6 və ya ≤ 5) × yanmış öz xatirələri (≤ 2 və ya ≥ 3).
 
 ## 8–11. HUD, jurnal, vizual, səs, yadda saxlama
 - Jurnalda 4 tab olacaq: Xatirələr, Bağlar, Tapşırıqlar, Əks-sədalar.
-- Başlıqlar, kül-shader, Kölgə Ayxan, kral xəyalı.
+- Başlıqlar, kül-shader, Kölgə Aras, kral xəyalı.
 - Musiqi 6 qata bölünür, hər qat bir xatirəyə bağlıdır.
 - Save versiyası artırılır, köhnə save aşkar olunanda mesaj göstərilir.
 

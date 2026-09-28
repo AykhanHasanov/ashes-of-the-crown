@@ -1,13 +1,16 @@
 extends Node3D
-## Something Ayxan can use with [E] in the open world: a hearth (light it, rest, fast
-## travel), a chest (nar toxumu = +1 flask, or ember), an echo stone (lore). Its
+## Something the protagonist can use with [E] in the open world: a hearth (light it, rest, fast
+## travel), a chest (nar toxumu = +1 flask, or ember), an echo stone (lore), or a memory
+## ember that opens an echo (data {"echo": id}; gone once its memory is kept or burned). Its
 ## saved state lives in WorldState's world section, keyed by `key` / the POI id.
 
 const Effects := preload("res://scripts/world/effects.gd")
 const CHEST_CLOSED := "res://assets/quaternius/rpg_items_pack/Chest_Closed.glb"
 const CHEST_OPEN := "res://assets/quaternius/rpg_items_pack/Chest_Open.glb"
 
-var kind := ""            # hearth | chest | echo
+const EchoRegistry := preload("res://scripts/core/echo_registry.gd")
+
+var kind := ""            # hearth | chest | echo | memory_echo
 var poi: Dictionary
 var data: Dictionary
 var key := ""
@@ -36,6 +39,31 @@ func _ready() -> void:
 			_set_chest(is_used())
 		"echo":
 			use_range = 2.4
+		"memory_echo":
+			use_range = 2.2
+			_build_memory_ember()
+
+
+## A small glowing ember hovering over the ground: the placeholder look of a lost memory.
+func _build_memory_ember() -> void:
+	var core := MeshInstance3D.new()
+	var sphere := SphereMesh.new()
+	sphere.radius = 0.16
+	sphere.height = 0.32
+	core.mesh = sphere
+	core.material_override = Effects.additive_material(Color(1.0, 0.55, 0.2, 1.0))
+	core.position.y = 1.1
+	add_child(core)
+	var embers := Effects.ember_field(Vector3(0.3, 0.6, 0.3), 12)
+	embers.position.y = 1.0
+	add_child(embers)
+	_light = OmniLight3D.new()
+	_light.light_color = Color(1.0, 0.5, 0.2)
+	_light.light_energy = 1.6
+	_light.omni_range = 4.0
+	_light.position.y = 1.1
+	add_child(_light)
+	visible = not is_used()
 
 
 func hearth_id() -> String:
@@ -50,6 +78,9 @@ func is_used() -> bool:
 			return WorldState.has_world_entry("chests", key)
 		"echo":
 			return WorldState.has_world_entry("echoes", key)
+		"memory_echo":
+			var def: Resource = EchoRegistry.get_def(StringName(data.get("echo", ""))) if EchoRegistry.has(StringName(data.get("echo", ""))) else null
+			return def == null or WorldState.get_memory_state(def.memory_id) != WorldState.MemoryState.UNKNOWN
 	return false
 
 
@@ -61,6 +92,8 @@ func prompt() -> String:
 			return "" if is_used() else "[E]  Sandığı aç"
 		"echo":
 			return "[E]  Taşa dokun" if not is_used() else "[E]  Yeniden oku"
+		"memory_echo":
+			return "" if is_used() else tr("ECHO_PROMPT_EMBER")
 	return ""
 
 

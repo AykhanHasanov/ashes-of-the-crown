@@ -34,3 +34,19 @@ ENC_TEST_WAVE_1,Deneme karşılaşması — 1. dalga
 ENC_TEST_WAVE_2,Deneme karşılaşması — 2. dalga
 ENC_TEST_WAVE_3,Deneme karşılaşması — son dalga
 ENC_CLEARED,Kül yatıştı.
+PROTAGONIST_NAME,Aras
+NAME_FORGOTTEN,———
+MEMORY_OWN_NAME_NAME,Kendi adım (placeholder)
+MEMORY_OWN_NAME_DESC,(placeholder — bu hatırayı hikâye yazacak)
+MEMORY_OWN_NAME_COST,(placeholder) Adın senden silinir.
+ECHO_TEST_TITLE,Yankı (placeholder)
+ECHO_TEST_OBJECTIVE,Közleri takip et (placeholder)
+ECHO_TEST_PROMPT,"Bu hatıra geri döndü. Onu sakla, ya da ateşe ver. (placeholder)"
+ECHO_KEEP,Sakla — hatırla
+ECHO_BURN,Yak — basılı tut
+ECHO_KEEP_HINT,[E] sakla
+ECHO_BURN_HINT,[Q] basılı tut: yak
+ECHO_FIRE_POWER,Ateş gücü: +%d
+ECHO_PROMPT_EMBER,[E]  Köze dokun
+ECHO_KEPT,Hatıra saklandı.
+ECHO_BURNED,Hatıra yandı.

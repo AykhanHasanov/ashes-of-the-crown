@@ -1,10 +1,10 @@
 extends SceneTree
 ## Dev tool: checks that every animation clip named in data/weapons and data/enemies
-## (and Ayxan's hard-coded clips) exists in the model that plays it.
+## (and the protagonist's hard-coded clips) exists in the model that plays it.
 ## Usage: godot --headless --path . -s tools/check_anims.gd
 
-const AYXAN_MODEL := "res://assets/characters/adventurers/Rogue_Hooded.glb"
-const AYXAN_CLIPS := [
+const PROTAGONIST_MODEL := "res://assets/characters/adventurers/Rogue_Hooded.glb"
+const PROTAGONIST_CLIPS := [
 	"Block_Attack", "Block_Hit", "Blocking", "Death_A", "Hit_A", "Hit_B", "Jump_Land",
 	"Jump_Start", "Jump_Idle", "Lie_Down", "Lie_Idle", "Lie_StandUp", "Spellcast_Raise",
 	"Spellcast_Shoot", "Use_Item", "Running_Strafe_Right", "Running_Strafe_Left",
@@ -16,13 +16,13 @@ var _missing := 0
 
 
 func _init() -> void:
-	var ayxan := _clips(AYXAN_MODEL)
-	_expect("Ayxan", ayxan, AYXAN_CLIPS)
+	var protagonist := _clips(PROTAGONIST_MODEL)
+	_expect("protagonist", protagonist, PROTAGONIST_CLIPS)
 	for f in DirAccess.get_files_at("res://data/weapons"):
 		var w: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/weapons/" + f))
 		var names := []
 		_collect(w, names)
-		_expect("weapon " + f, ayxan, names)
+		_expect("weapon " + f, protagonist, names)
 	for f in DirAccess.get_files_at("res://data/enemies"):
 		var e: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/enemies/" + f))
 		var names := []

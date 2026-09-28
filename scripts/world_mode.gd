@@ -1,12 +1,13 @@
 extends "res://scripts/chapter_base.gd"
-## V3 Faza B: the Kür Vadisi slice as an open world. Ayxan starts by the western pass
+## V3 Faza B: the Kür Vadisi slice as an open world. the protagonist starts by the western pass
 ## next to a cold hearth. Places are discovered by walking near them, hearths are
 ## lit to become rest and fast-travel points, chests hold nar toxumu (+1 flask), echo
 ## stones tell the valley's story, enemies guard their homes and return when you
 ## rest. [M] map, compass on top, F10 debug (teleport, time, weather), F6 streaming.
 
+const Names := preload("res://scripts/core/names.gd")
 const OpenWorld := preload("res://scripts/world/open_world.gd")
-const Ayxan := preload("res://scripts/player_v3/ayxan.gd")
+const Protagonist := preload("res://scripts/player_v3/protagonist.gd")
 const TPCamera := preload("res://scripts/camera/third_person_camera.gd")
 const Foe := preload("res://scripts/enemies/foe.gd")
 const DebugMenu := preload("res://scripts/debug/debug_menu.gd")
@@ -30,7 +31,7 @@ var hearth_menu
 var _stream_label: Label
 var _foes := {}                   # spawn key -> Foe
 ## Elite affixes on world enemies (the world self-test turns them off: a random
-## "Kül Şahının gözü" guard would see Ayxan anywhere and fail the calm/leash checks).
+## "Kül Şahının gözü" guard would see the protagonist anywhere and fail the calm/leash checks).
 var roll_affixes := true
 var _villagers := {}               # poi id -> [Villager]
 var _last_hearth := ""
@@ -46,7 +47,7 @@ func _make_level() -> Node3D:
 
 
 func _make_player() -> Node3D:
-	return Ayxan.new()
+	return Protagonist.new()
 
 
 func _make_camera() -> Node3D:
@@ -294,9 +295,11 @@ func _use(it) -> void:
 					player.gain_ember(40.0)
 					Fx.notify("Köz kırıntıları: köz +40")
 			_save()
+		"memory_echo":
+			EchoDirector.enter(StringName(it.data["echo"]), self, player, level.day_night.hour)
 		"echo":
 			WorldState.add_world_entry("echoes", it.key)
-			hud.show_whisper(it.data["text"])
+			hud.show_whisper(Names.fill(it.data["text"], false))
 			Audio.play("memory_burn", -10.0, 0.0)
 
 
@@ -507,6 +510,14 @@ func _on_actors_released(poi_id: String) -> void:
 
 
 ## Night-only foes rise at dusk and sink back at dawn.
+## Back from an echo: the clock he left at, then the common return (position, fire).
+func _return_from_echo(ctx: Dictionary) -> void:
+	if ctx.is_empty():
+		return
+	level.day_night.set_hour(float(ctx["hour"]))
+	super._return_from_echo(ctx)
+
+
 func _on_hour(_h: int) -> void:
 	WorldState.set_time_of_day(level.day_night.hour)   # emits time_of_day_changed on a new phase
 	var night: bool = level.day_night.is_night()
@@ -658,9 +669,17 @@ func _demo_setup() -> void:
 						player.global_position = at + Vector3(0, 0.5, 34)
 						_demo_view(player.global_position, at + Vector3(0, 1, 0), 10.0))
 		"world_encounter":
-			# The placeholder test encounter rising around Ayxan in the valley
+			# The placeholder test encounter rising around the protagonist in the valley
 			player.make_invulnerable(60.0)
 			get_tree().create_timer(1.0).timeout.connect(func(): start_encounter(&"test_ash_rising", player.global_position))
+		"world_echo":
+			# Walk up to the placeholder memory ember by Köprü Taşı and enter its echo
+			var ep: Dictionary = {}
+			for p in level.meta["pois"]:
+				if p["type"] == "echo":
+					ep = p
+			_demo_view(Vector3(ep["pos"][0] + 3.5, 0, ep["pos"][2] + 1.0), Vector3(ep["pos"][0] + 3.5, ep["pos"][1] + 1.0, ep["pos"][2] - 2.5), 8.0)
+			get_tree().create_timer(2.5).timeout.connect(func(): EchoDirector.enter(&"test_echo", self, player, level.day_night.hour))
 		"world_evening":
 			# Villagers round the fire, the guard's lantern (20:30)
 			level.day_night.set_hour(20.5)

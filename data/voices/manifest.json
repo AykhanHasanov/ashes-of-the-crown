@@ -1532,7 +1532,7 @@
 				},
 				{
 					"file": "res://assets/audio/voice/villager_m/greet_2.wav",
-					"text": "Sen Ayxan'sın, değil mi? Ocağı yakan sensin diyorlar."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
 				},
 				{
 					"file": "res://assets/audio/voice/villager_m/greet_3.wav",
@@ -1606,7 +1606,7 @@
 				},
 				{
 					"file": "res://assets/audio/voice/villager_old/greet_2.wav",
-					"text": "Sen Ayxan'sın, değil mi? Ocağı yakan sensin diyorlar."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
 				},
 				{
 					"file": "res://assets/audio/voice/villager_old/greet_3.wav",
@@ -1680,7 +1680,7 @@
 				},
 				{
 					"file": "res://assets/audio/voice/villager_f/greet_2.wav",
-					"text": "Sen Ayxan'sın, değil mi? Ocağı yakan sensin diyorlar."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
 				},
 				{
 					"file": "res://assets/audio/voice/villager_f/greet_3.wav",

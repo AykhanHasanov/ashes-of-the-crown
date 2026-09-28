@@ -2,6 +2,7 @@ extends CanvasLayer
 ## In-game HUD: health, the memory list (Yaddaş Yanğını), objectives, Kül Şahı's
 ## whispers, banners, the boss bar and full-screen title/ending cards.
 
+const Names := preload("res://scripts/core/names.gd")
 const VIGNETTE := preload("res://shaders/vignette.gdshader")
 
 const GOLD := Color(0.92, 0.74, 0.42)
@@ -10,6 +11,7 @@ const TEXT := Color(0.9, 0.86, 0.8)
 const WHISPER := Color(0.95, 0.32, 0.2)
 
 var _root: Control
+var _name_label: Label
 var _health_fill: ColorRect
 var _ember_fill: ColorRect
 var _ember_ratio := 0.0
@@ -63,8 +65,8 @@ func _ready() -> void:
 	vig.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	# Health
-	var name_label := _label("AYXAN", 18, GOLD)
-	_place(name_label, Vector4(0, 0, 0, 0), Vector4(26, 16, 300, 40))
+	_name_label = _label(Names.protagonist().to_upper(), 18, GOLD)
+	_place(_name_label, Vector4(0, 0, 0, 0), Vector4(26, 16, 300, 40))
 	var back := ColorRect.new()
 	back.color = Color(0.05, 0.03, 0.03, 0.85)
 	back.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -376,14 +378,16 @@ func _on_memory_burned(id: StringName) -> void:
 
 
 func _refresh_memories() -> void:
+	if _name_label:
+		_name_label.text = Names.protagonist().to_upper()   # blank once the name memory burned
 	_embers.queue_redraw()
 
 
-## Ayxan's own memories as large ember diamonds (burned ones are grey ash) and the
+## The protagonist's own memories as large ember diamonds (burned ones are grey ash) and the
 ## memories gifted by survivors as a smaller row underneath.
 func _draw_embers() -> void:
 	var x := 10.0
-	for m in Memory.all():
+	for m in Memory.combat_memories():
 		_diamond(Vector2(x, 12), 9.0, Color(0.3, 0.28, 0.27, 0.9) if WorldState.has_burned(m.id) else Color(0.95, 0.42, 0.12))
 		x += 24.0
 	x = 8.0

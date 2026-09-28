@@ -1,5 +1,5 @@
 extends Label
-## F4 AI overlay (spec §15): Ayxan's defensive habits over the last minute and, for the
+## F4 AI overlay (spec §15): the protagonist's defensive habits over the last minute and, for the
 ## nearest enemies, state, perception, AI LOD, the chosen action, top utility scores,
 ## token use and the adaptive counter weights of elites and bosses.
 
@@ -32,7 +32,7 @@ func _process(_delta: float) -> void:
 	if player.get("habits") != null:
 		var c: Dictionary = player.habits.counts()
 		var w: Dictionary = player.habits.weights()
-		lines.append("Ayxan'ın alışkanlıkları (60 sn):  kaçış %d (%.0f%%)  ·  blok %d (%.0f%%)  ·  savuşturma %d (%.0f%%)  ·  mesafe %d (%.0f%%)" % [
+		lines.append("Kahramanın alışkanlıkları (60 sn):  kaçış %d (%.0f%%)  ·  blok %d (%.0f%%)  ·  savuşturma %d (%.0f%%)  ·  mesafe %d (%.0f%%)" % [
 			c["dodge"], w["dodge"] * 100.0, c["block"], w["block"] * 100.0, c["parry"], w["parry"] * 100.0, c["distance"], w["distance"] * 100.0])
 		lines.append("tokenler: %d / %d" % [player.get("_tokens_used"), player.get("token_budget")])
 	var foes: Array = []

@@ -2,7 +2,7 @@ extends RefCounted
 ## Every tunable number in one place (V2 spec, rule 5). Preload this file and read
 ## the constants; change values here, not in the systems that use them.
 
-# --- Ayxan ------------------------------------------------------------------------
+# --- the protagonist ------------------------------------------------------------------------
 const PLAYER_HEALTH := 100.0
 const PLAYER_SPEED := 6.2
 const PLAYER_ACCEL := 50.0

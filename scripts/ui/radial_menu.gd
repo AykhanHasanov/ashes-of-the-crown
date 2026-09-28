@@ -1,6 +1,6 @@
 extends CanvasLayer
 ## Alov Dalğası memory wheel. While Q / right mouse is held the world slows down and
-## Ayxan's unburned memories (large) and gifted memories (small) circle the screen.
+## The protagonist's unburned memories (large) and gifted memories (small) circle the screen.
 ## Point with the mouse or WASD; releasing burns the highlighted one, releasing on
 ## nothing cancels. Also hosts the one-time "are you sure" confirmation.
 

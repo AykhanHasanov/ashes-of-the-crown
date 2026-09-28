@@ -8,7 +8,7 @@ extends Node3D
 ## Layout (north = -Z): the throne dais against the two-tier north wall, the crater
 ## where the crown melted in front of it, a colonnade down the middle and the south
 ## gate where Rüfət camps. South and east sides are low parapets so the south-east
-## camera never loses Ayxan behind a wall.
+## camera never loses the protagonist behind a wall.
 
 const Visuals := preload("res://scripts/world/visuals.gd")
 const Effects := preload("res://scripts/world/effects.gd")
@@ -327,7 +327,7 @@ func _make_walls() -> void:
 		_prop("dungeon/" + ("wall_scaffold.glb" if i == 7 else _pick(lower)), Vector3(-HALF, 0, t), 90.0)
 		if _rng.randf() < 0.35:
 			_prop("dungeon/wall_broken.glb", Vector3(-HALF, 4, t), 90.0, 1.0, false)
-		# South and east: low parapets so the camera always sees Ayxan
+		# South and east: low parapets so the camera always sees the protagonist
 		if absf(t) > 3.0:
 			_prop("dungeon/barrier_column.glb", Vector3(t, 0, HALF))
 		_prop("dungeon/barrier_column.glb", Vector3(HALF, 0, t), 90.0)

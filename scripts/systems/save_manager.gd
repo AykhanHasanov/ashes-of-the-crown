@@ -15,6 +15,7 @@ extends Node
 ## Autosaves (to the active slot) on EventBus.checkpoint_rested and region_changed.
 ## Never writes while a debug --demo is running.
 
+const EchoDirector := preload("res://scripts/echoes/echo_director.gd")
 const SLOTS := 3
 
 ## Folders are variables so the headless tests can use their own.
@@ -108,8 +109,9 @@ static func format_time(unix: int) -> String:
 
 # --- Saving --------------------------------------------------------------------------------------
 
+## Never inside an echo (EchoDirector.active) or during a debug --demo.
 func can_save() -> bool:
-	return active_slot > 0 and (Settings.demo == "" or allow_in_demo)
+	return active_slot > 0 and not EchoDirector.active and (Settings.demo == "" or allow_in_demo)
 
 
 func autosave() -> void:
@@ -125,6 +127,9 @@ func save(slot := -1) -> bool:
 		push_warning("SaveManager: no slot to save to")
 		return false
 	if Settings.demo != "" and not allow_in_demo:
+		return false
+	if EchoDirector.active:
+		push_warning("SaveManager: no saving inside an echo")
 		return false
 	EventBus.saving.emit(slot)   # the active mode copies live values in now
 	WorldState.mark_saved(int(Time.get_unix_time_from_system()))
@@ -228,7 +233,9 @@ func _migrate_step(d: Dictionary, from: int) -> Dictionary:
 	match from:
 		0:
 			return _legacy_to_v1(d, [])
-		# 1: return _v1_to_v2(d)
+		1:
+			return _v1_to_v2(d)
+		# 2: return _v2_to_v3(d)
 	push_warning("SaveManager: no migration from save_version %d" % from)
 	return {}
 
@@ -252,6 +259,45 @@ func _legacy_to_v1(old: Dictionary, lost: Array) -> Dictionary:
 	var w: Dictionary = old.get("world", {}) if old.get("world") is Dictionary else {}
 	_merge_legacy_world(s, w, lost)
 	return s
+
+
+## v2: memories get three states. The burned list becomes {id: "burned"}; everything
+## else is UNKNOWN (absent). The protagonist's old name, which could appear in keys or
+## values of old saves, becomes the neutral id "protagonist".
+func _v1_to_v2(d: Dictionary) -> Dictionary:
+	var out: Dictionary = _rename_old_protagonist(d)
+	var p: Dictionary = out.get("player", {})
+	var mems := {}
+	for id in p.get("burned_memories", []):
+		mems[String(id)] = "burned"
+	p.erase("burned_memories")
+	p["memories"] = mems
+	out["player"] = p
+	out["meta"]["save_version"] = 2
+	return out
+
+
+## The protagonist was called "Ayxan" before v2; old saves may carry that name in flag
+## or NPC keys and in string values ("ayxan_met" → "protagonist_met").
+const OLD_PROTAGONIST_ID := "ayxan"
+
+
+func _rename_old_protagonist(v: Variant) -> Variant:
+	if v is Dictionary:
+		var out := {}
+		for k in v:
+			out[_rename_old_protagonist(k)] = _rename_old_protagonist(v[k])
+		return out
+	if v is Array:
+		return (v as Array).map(func(x): return _rename_old_protagonist(x))
+	if v is String and (v as String).to_lower().contains(OLD_PROTAGONIST_ID):
+		var s: String = v
+		var at := s.to_lower().find(OLD_PROTAGONIST_ID)
+		while at >= 0:
+			s = s.substr(0, at) + "protagonist" + s.substr(at + OLD_PROTAGONIST_ID.length())
+			at = s.to_lower().find(OLD_PROTAGONIST_ID)
+		return s
+	return v
 
 
 func _merge_legacy_world(s: Dictionary, w: Dictionary, lost: Array) -> void:
@@ -307,6 +353,7 @@ func import_legacy_saves() -> Array:
 			if state.is_empty():
 				state = WorldState.default_state()
 				state["player"]["current_region"] = "kur_vadisi"
+				state["player"]["burned_memories"] = []   # built in the v1 layout, like _legacy_to_v1
 			var w: Dictionary = world.get("world", {}) if world.get("world") is Dictionary else {}
 			_merge_legacy_world(state, w, lost)
 			var wf: Dictionary = world.get("flags", {}) if world.get("flags") is Dictionary else {}
@@ -329,7 +376,8 @@ func import_legacy_saves() -> Array:
 		report.append("nothing could be migrated; old files left as they are")
 		_print_log(report + lost.map(func(l): return "NOT MIGRATED: " + l))
 		return report
-	var clean := WorldState.normalize(state)
+	state["meta"]["save_version"] = 1          # built in the v1 layout: run the rest of the chain
+	var clean := WorldState.normalize(migrate(state))
 	clean["meta"]["last_saved_timestamp"] = int(Time.get_unix_time_from_system())
 	if not _write_atomic(slot_path(1), JSON.stringify(clean, "\t")):
 		report.append("could not write slot 1; old files left as they are")

@@ -4,7 +4,8 @@ extends Node
 ##
 ## State changes (emitted by WorldState, after the change is applied):
 ##   flag_changed(key, old_value, new_value)  WorldState.set_flag / clear_flag
-##   memory_burned(memory_id)                 WorldState.burn_memory
+##   memory_kept(memory_id)                   WorldState.keep_memory (an echo's KEEP choice)
+##   memory_burned(memory_id)                 WorldState.burn_memory (echo BURN, fire wheel, offer)
 ##   player_stats_changed()                   WorldState.set_player_stats
 ##   inventory_changed(item_id, count)        WorldState.add_item / remove_item (count = new total)
 ##   time_of_day_changed(phase)               WorldState.set_time_of_day, when dawn/day/dusk/night changes
@@ -15,7 +16,7 @@ extends Node
 ##   state_replaced()                         WorldState: new game or load — re-read everything
 ##
 ## Moments (emitted by gameplay / mode scripts):
-##   checkpoint_rested(checkpoint_id)         the mode, when Ayxan rests at an ocaq or reaches a story
+##   checkpoint_rested(checkpoint_id)         the mode, when the protagonist rests at an ocaq or reaches a story
 ##                                            checkpoint (SaveManager autosaves on it)
 ##
 ## Encounters (emitted by scripts/world/encounter.gd; the active mode shows banners/music):
@@ -29,6 +30,7 @@ extends Node
 ##   game_saved(slot), game_loaded(slot)      after a successful write / load
 
 signal flag_changed(key: StringName, old_value: Variant, new_value: Variant)
+signal memory_kept(memory_id: StringName)
 signal memory_burned(memory_id: StringName)
 signal player_stats_changed
 signal inventory_changed(item_id: StringName, count: int)

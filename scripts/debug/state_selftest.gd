@@ -5,6 +5,7 @@ extends Node
 ## Run: godot --headless --path . res://scenes/tests/state_test.tscn   (exit code = failures)
 
 const MainMenu := preload("res://scripts/ui/main_menu.gd")
+const MemoryRegistry := preload("res://scripts/core/memory_registry.gd")
 const TEST_DIR := "user://test_saves/"
 const LEGACY_DIR := "user://test_legacy/"
 
@@ -39,7 +40,9 @@ func _run() -> void:
 func _translations() -> void:
 	_check("tr() finds the memory names (Turkish)", tr("MEMORY_RUFET_FACE_NAME") == "Rüfet'in yüzü")
 	var defs: Array = Memory.all()
-	_check("registry loads the 6 memories in order", defs.size() == 6 and defs[0].id == &"rufet_face" and defs[5].id == &"first_sword")
+	var combat: Array = Memory.combat_memories()
+	_check("registry loads the 6 combat memories in order, plus the name memory", defs.size() == 7 and combat.size() == 6
+		and combat[0].id == &"rufet_face" and combat[5].id == &"first_sword" and not MemoryRegistry.get_def(&"own_name").combat_burnable)
 	for d in defs:
 		if tr(d.display_name_key) == d.display_name_key or tr(d.description_key) == d.description_key or tr(d.cost_key) == d.cost_key:
 			_check("every key of %s is translated" % d.id, false)

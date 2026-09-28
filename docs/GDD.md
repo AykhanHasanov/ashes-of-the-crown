@@ -6,7 +6,7 @@
 
 ## 1. Bir cümlədə
 
-Kral öldü, paytaxt bir gecədə yandı. Sinəsində Tacın közü yanan sonuncu varis **Ayxan** dağılan səltənəti xilas etməli, sarayda satqını tapmalı və tac qoymalıdır. Hər dəfə közün gücündən istifadə etdikdə isə kim olduğunun bir parçasını itirir.
+Kral öldü, paytaxt bir gecədə yandı. Sinəsində Tacın közü yanan sonuncu varis **Aras** dağılan səltənəti xilas etməli, sarayda satqını tapmalı və tac qoymalıdır. Hər dəfə közün gücündən istifadə etdikdə isə kim olduğunun bir parçasını itirir.
 
 ## 2. Forma
 
@@ -28,17 +28,17 @@ Min il boyu **Tac**, torpağı canlı saxlayan qədim **İlk Ocağı** içində 
 
 ### Dərin sirr (bütün oyunlarda sabit)
 
-Satqın kim olursa olsun, sonda həqiqət açılır: **kral yanğını özü istəyirdi.** O, Kül Şahını məhv etmək üçün özünü və şəhəri qurban verdi. Amma Tacın bir közü Ayxanın sinəsinə keçdi, indi Kül Şahı həmin közün içindən yeni qab axtarır.
+Satqın kim olursa olsun, sonda həqiqət açılır: **kral yanğını özü istəyirdi.** O, Kül Şahını məhv etmək üçün özünü və şəhəri qurban verdi. Amma Tacın bir közü Arasın sinəsinə keçdi, indi Kül Şahı həmin közün içindən yeni qab axtarır.
 
 ## 4. Personajlar
 
 | Ad | Rolu | Şübhə səbəbi | Gizli motivi (satqın olduqda) |
 |---|---|---|---|
-| **Ayxan** | Baş qəhrəman. Sonuncu varisdir, sinəsində köz yanır | — | — |
+| **Aras** | Baş qəhrəman. Sonuncu varisdir, sinəsində köz yanır | — | — |
 | **Rüfət** | Uşaqlıq dostu, qan qardaşı, mühafizə rəisi | Yanğın gecəsi postunda deyildi | Sabirin məktubu onu Elvinə bağlayır: taxtı "daha güclü" birinə vermək istəyir |
-| **Sabir** | Qoca vəzir, Ayxanın müəllimi | Hər şeyi bilir, heç nə demir | Kralın planını bilirdi. Közü Ayxana özü yönəltdi |
+| **Sabir** | Qoca vəzir, Arasın müəllimi | Hər şeyi bilir, heç nə demir | Kralın planını bilirdi. Közü Arasa özü yönəltdi |
 | **Şahbaz** | Sərkərdə | Kral onun oğlunu edam etdirmişdi | İntiqam: yanğın gecəsi darvazaları açıq qoydu |
-| **Elvin** | Ayxanın qeyri-qanuni qardaşı, parlaq və iddialı | Özünü varis elan edib | Tacı özü üçün istəyir, Kül Şahı ilə danışıq aparır |
+| **Elvin** | Arasın qeyri-qanuni qardaşı, parlaq və iddialı | Özünü varis elan edib | Tacı özü üçün istəyir, Kül Şahı ilə danışıq aparır |
 | **Əhliman** | Közün Ordeninin baş kahini | Yanğını "ilahi hökm" adlandırır | Kül Şahına sitayiş edən gizli təriqətin başçısıdır |
 | **Anar** | Karvan Gildiyasının başçısı | Yanğından sonra qəribə şəkildə varlanıb | Xarici imperiyaya satılıb, Tacın qalığını satmaq istəyir |
 | **Əşrəf** | Qartal Dağları tayfalarının bəyi | Taxtla üç nəsillik qan davası var | Tayfasını azad etmək üçün yanğını fürsət bildi |
@@ -64,12 +64,12 @@ Satqın kim olursa olsun, sonda həqiqət açılır: **kral yanğını özü ist
 
 ## 5. Əsas mexanika: Yaddaş Yanğını ⭐
 
-- Ayxanın **6 xatirəsi** var: Rüfətin üzü, anasının adı, Sabirin ilk dərsi, Közqalanın küçələri, atasının səsi, ilk qılıncı.
+- Arasın **6 xatirəsi** var: Rüfətin üzü, anasının adı, Sabirin ilk dərsi, Közqalanın küçələri, atasının səsi, ilk qılıncı.
 - Od gücləri güclüdür, amma hər istifadə **növbədəki xatirəni yandırır**. Növbə ekranda görünür, yəni oyunçu nəyi itirəcəyini bilərək qərar verir.
 - Yanmış xatirənin nəticələri:
-  - Dialoqlar dəyişir (məsələn, "Rüfətin üzü" yanıbsa, Ayxan onu tanımır).
+  - Dialoqlar dəyişir (məsələn, "Rüfətin üzü" yanıbsa, Aras onu tanımır).
   - Münasibətlər dəyişir, bəzi seçimlər və sübutlar yox olur.
-  - Köz daha parlaq yanır, Ayxanın zirehi külə çevrilir (vizual göstərici).
+  - Köz daha parlaq yanır, Arasın zirehi külə çevrilir (vizual göstərici).
   - Kül Şahının pıçıltısı güclənir.
 - Sonlar yanmış xatirələrin sayından asılıdır.
 
@@ -102,7 +102,7 @@ Satqın kim olursa olsun, sonda həqiqət açılır: **kral yanğını özü ist
 - **Oxunaqlılıq:** düşmən hücumdan əvvəl gözlərini alışdırır, altında isə böyüyən qırmızı halqa çıxır. Adi düşmənin hücumunu qılınc kəsir, elitə hücumunu isə yalnız güclü zərbə kəsə bilir.
 - **Kulminasiya:** dalğanın son düşməni yavaş çəkilişdə yıxılır.
 - **Can zolaqları (M3):** düşmənin başı üstündə zolaq zərbə dəyəndən sonra görünür. İtirilən hissə bir anlıq açıq rəngdə qalıb əriyir. Zərbə rəqəmləri default olaraq bağlıdır, parametrlərdən açıla bilər.
-- **Hücum növbəsi (M3):** eyni anda ən çox 2 kölgə hücum edir, qalanları Ayxanın ətrafında dövrə vurub növbə gözləyir. Kalabalıq ədalətli, amma gərgin qalır.
+- **Hücum növbəsi (M3):** eyni anda ən çox 2 kölgə hücum edir, qalanları Arasın ətrafında dövrə vurub növbə gözləyir. Kalabalıq ədalətli, amma gərgin qalır.
 
 ### Səs dizaynı
 - Bütün səslər `tools/gen_audio.py` ilə sintez olunur.
@@ -111,7 +111,7 @@ Satqın kim olursa olsun, sonda həqiqət açılır: **kral yanğını özü ist
 
 ## 8b. Fəsil 2: Son Ocaq (M5)
 
-**Axın:** Ayxan sağ qalanların toplaşdığı karvansaraya gəlir → şübhəliləri sorğu-suala tutur → 4 söhbətdən sonra **gecə hücumu** başlayır (darvaza içəridən açılır, satqın və təsadüfi bir günahsız yoxa çıxır) → şahid kimin olmadığını deyir → **Ocaqda divan**: bir ad seçilir.
+**Axın:** Aras sağ qalanların toplaşdığı karvansaraya gəlir → şübhəliləri sorğu-suala tutur → 4 söhbətdən sonra **gecə hücumu** başlayır (darvaza içəridən açılır, satqın və təsadüfi bir günahsız yoxa çıxır) → şahid kimin olmadığını deyir → **Ocaqda divan**: bir ad seçilir.
 - **Doğru ittiham:** satqın etiraf edir (hər personajın öz motivi var), Kül Şahı danışır, satqın külə çevrilib **"<ad> — Külün Xaini"** bossu kimi qalxır.
 - **Səhv ittiham:** günahsız sürgün edilir, hamının etibarı düşür, satqın son hücumu təşkil edir. Satqın Fəsil 3-ə qədər sağ qalır.
 
@@ -121,7 +121,7 @@ Satqın kim olursa olsun, sonda həqiqət açılır: **kral yanğını özü ist
 
 ## 9. NPC süni intellekti
 
-- Əsas yanaşma "utility AI"dır: hər NPC-nin məqsədi, qorxusu, sirri, sədaqəti və Ayxan haqqında yaddaşı olur.
+- Əsas yanaşma "utility AI"dır: hər NPC-nin məqsədi, qorxusu, sirri, sədaqəti və Aras haqqında yaddaşı olur.
 - NPC-lər ittifaq qurur, şayiə yayır, plan hazırlayır. Sistem proqnozlaşdırıla bilir, test olunur və internet tələb etmir.
 - İstəyə görə, sonradan dialoqu zənginləşdirmək üçün dil modeli (LLM) qatı əlavə oluna bilər. Oyunun təməli ondan asılı deyil.
 
@@ -137,9 +137,9 @@ Satqın kim olursa olsun, sonda həqiqət açılır: **kral yanğını özü ist
 
 | Mərhələ | Məzmun | Status |
 |---|---|---|
-| **M1: Prototip** | Közqala həyəti, Ayxan, Rüfət, dialoq, Yaddaş Yanğını, 3 dalğa, 2 qrafika rejimi | ✅ Hazırdır |
+| **M1: Prototip** | Közqala həyəti, Aras, Rüfət, dialoq, Yaddaş Yanğını, 3 dalğa, 2 qrafika rejimi | ✅ Hazırdır |
 | **M2: Hiss** | KayKit 3D personajları və animasiyaları, kombo döyüşü, hitstop, zərbə rəqəmləri, 28 sintez səs və muğam musiqisi (sakit və döyüş qatları) | ✅ Hazırdır |
-| **M3: Dünya və interfeys** | Közqala KayKit mühit modelləri ilə yenidən quruldu (hisə batmış divarlar, bayraqlar, xəzinə, sümüklər, yanmış ağaclar, məşələlər). Baş menyu (Ayxan külün içində yatır, kamera həyət ətrafında fırlanır), fasilə menyusu, yadda qalan parametrlər (səs, qrafika, tam ekran, silkələnmə, zərbə rəqəmləri). Düşmənlərin üstündə can zolaqları, eyni anda ən çox 2 düşmən hücum edir | ✅ Hazırdır |
+| **M3: Dünya və interfeys** | Közqala KayKit mühit modelləri ilə yenidən quruldu (hisə batmış divarlar, bayraqlar, xəzinə, sümüklər, yanmış ağaclar, məşələlər). Baş menyu (Aras külün içində yatır, kamera həyət ətrafında fırlanır), fasilə menyusu, yadda qalan parametrlər (səs, qrafika, tam ekran, silkələnmə, zərbə rəqəmləri). Düşmənlərin üstündə can zolaqları, eyni anda ən çox 2 düşmən hücum edir | ✅ Hazırdır |
 | **M4: Satqın və sübutlar** | Hər oyunda təsadüfi satqın (8 şübhəli × 3 iz), 3 Kül əks-sədası (görüntü: dünya boz rəngə keçir, közdən xəyal çıxır), jurnal (Tab), şərtli dialoqlar (satqın Rüfətdirsə, o, özünü başqa cür aparır), avtomatik yadda saxlama və "Davam et", hədəf işarəsi, köz ikonları | ✅ Hazırdır |
 | **M5: Son Ocaq** | Fəsil 2: karvansara, 8 şübhəli (hər birinin ayrıca modeli və rəngi), utility AI (istilik, ünsiyyət, vəzifə ehtiyacları), sorğu-sual (alibi, sübut, şübhə), etibar sistemi, gecə hücumu (satqın darvazanı açır, 2 nəfər yox olur), divan və ittiham, iki son (boss döyüşü və ya günahsızın sürgünü) | ✅ Hazırdır |
 | M6: Fəsil 3 | Kül Şahının həqiqəti, bölgələrə səyahət, Yaddaş Yanğınının sonlara təsiri | Növbəti |
@@ -150,7 +150,7 @@ Satqın kim olursa olsun, sonda həqiqət açılır: **kral yanğını özü ist
 
 Fəsil 1, "Birinci səhər":
 1. Titr ekranı: *Közqala. Kül Gecəsindən üç gün sonra.*
-2. Ayxan yanmış həyətdə oyanır. Tapşırıq: Rüfəti tapmaq.
+2. Aras yanmış həyətdə oyanır. Tapşırıq: Rüfəti tapmaq.
 3. Rüfətlə budaqlanan dialoq. Onun üzü yanıbsa, dialoq tamam başqa cür gedir. Seçimlər qeydə alınır: `clue_letter`, `rufet_hesitated` və s.
 4. Üç dalğa: Kül Kölgələri, sürətli kölgələr və **Kül Cəngavəri** (boss).
 5. Son ekranı: yanmış xatirələrə və seçimlərə görə mətn dəyişir.

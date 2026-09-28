@@ -163,6 +163,8 @@ func _setup_input() -> void:
 	_bind_keys("debug_stream", [KEY_F6])
 	_bind_keys("debug_ai", [KEY_F4])
 	_bind_keys("continue", [KEY_ENTER, KEY_KP_ENTER])
+	_bind_keys("echo_keep", [KEY_E])      # echo choice screen: keep the memory
+	_bind_keys("echo_burn", [KEY_Q])      # echo choice screen: hold to burn it
 	for i in 9:
 		_bind_keys("choice_%d" % (i + 1), [KEY_1 + i])
 	for i in 4:

@@ -1,5 +1,5 @@
 extends CharacterBody3D
-## Ayxan — the last heir of Atəşan, hooded in exile (KayKit Rogue with the Knight's sword).
+## The protagonist — the last heir of Atəşan, hooded in exile (KayKit Rogue with the Knight's sword).
 ##
 ## Sword: a three-hit combo (diagonal → horizontal → heavy chop) with input buffering,
 ## a forward lunge on each swing and damage on the impact frame.
@@ -112,7 +112,7 @@ func _ready() -> void:
 	_ember_node.add_child(_ember_light)
 	_ember_node.add_child(Effects.ember_trail())
 
-	# Soft "hero light" keeps Ayxan readable against the dark ground.
+	# Soft "hero light" keeps the protagonist readable against the dark ground.
 	var hero := OmniLight3D.new()
 	hero.light_color = Color(1.0, 0.85, 0.7)
 	hero.light_energy = 0.55
@@ -212,7 +212,7 @@ func _physics_process(delta: float) -> void:
 	_footsteps(delta, speed)
 
 
-## Ayxan lies unconscious in the ash (title screen and opening).
+## The protagonist lies unconscious in the ash (title screen and opening).
 func lie_down() -> void:
 	input_locked = true
 	_model.play_action("Lie_Idle", 1.0, 0.0, true)
@@ -342,7 +342,7 @@ func _set_ember(v: float) -> void:
 		ember_changed.emit(ember, Balance.EMBER_MAX)
 
 
-## Tap fire: a cone of flame in front of Ayxan, paid for with the ember meter.
+## Tap fire: a cone of flame in front of the protagonist, paid for with the ember meter.
 func ember_strike() -> void:
 	if not _can_act() or _strike_cd > 0.0:
 		return
@@ -466,7 +466,7 @@ func dash(move: Vector3) -> void:
 		_perfect_dodge()
 
 
-## A dodge counts as perfect when a nearby shade's strike is about to land on Ayxan.
+## A dodge counts as perfect when a nearby shade's strike is about to land on the protagonist.
 func _is_perfect_dodge() -> bool:
 	var window := perfect_window()
 	for e in get_tree().get_nodes_in_group("enemies"):
@@ -552,10 +552,10 @@ func _on_memory_burned(_id: StringName) -> void:
 	_refresh_burn_look()
 
 
-## The ember feeds on what Ayxan forgets: it burns brighter, his clothes turn to ash.
+## The ember feeds on what the protagonist forgets: it burns brighter, his clothes turn to ash.
 func _refresh_burn_look() -> void:
 	var n := Memory.burned_count()
-	var t := float(n) / maxi(Memory.all().size(), 1)
+	var t := float(n) / maxi(Memory.combat_memories().size(), 1)
 	_ember_light.light_energy = 1.2 + n * 0.45
 	_ember_light.omni_range = 3.5 + n * 0.4
 	_ember_mat.emission_energy_multiplier = 3.0 + n * 1.5

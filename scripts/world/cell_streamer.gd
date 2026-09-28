@@ -1,5 +1,5 @@
 extends Node3D
-## Cell streaming (spec V3 §6.1). The world is cut into cell_size cells. Around Ayxan the
+## Cell streaming (spec V3 §6.1). The world is cut into cell_size cells. Around the protagonist the
 ## 3×3 cells are FULL (meshes, colliders, lights, enemies, interactables), the 5×5 ring
 ## is VISUAL (meshes only), everything further shows only "far" landmark pieces.
 ## Mesh building runs on the WorkerThreadPool; colliders, lights and actors are added
@@ -22,7 +22,7 @@ var builder: Builder
 var cell_size := 128.0
 var full_radius := 1
 var visual_radius := 2
-var focus: Node3D                 # usually Ayxan
+var focus: Node3D                 # usually the protagonist
 var is_night := func() -> bool: return false
 var high_quality := true
 

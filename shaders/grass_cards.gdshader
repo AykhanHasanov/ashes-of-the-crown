@@ -1,7 +1,7 @@
 shader_type spatial;
 // Photographed grass and flower cards (tools/make_foliage_cards.py, crossed quads baked by
 // tools/bake_foliage.gd): alpha-tested blades, wind that rolls across the valley, a push
-// away from Ayxan (global player_position) so grass parts as he walks, root darkening,
+// away from the protagonist (global player_position) so grass parts as he walks, root darkening,
 // light through the blades, and per-clump colour variation so meadows are not uniform.
 
 render_mode cull_disabled, depth_draw_opaque;

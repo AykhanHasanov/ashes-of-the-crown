@@ -35,7 +35,7 @@ scripts/
   systems/      Settings, Memory (Yaddaş Yanğını), Fx (hitstop, effektlər), Audio autoload-ları
   characters/   KayKit modellərini idarə edən qat (animasiya, rəng, silah)
   world/        Közqala səviyyəsi, vizual və partikl köməkçiləri
-  player/       Ayxan
+  player/       Aras
   npc/          Rüfət
   enemies/      Kül Kölgəsi / Kül Cəngavəri
   camera/       İzometrik kamera + dialoq kamerası

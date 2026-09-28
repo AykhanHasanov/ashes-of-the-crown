@@ -1,5 +1,5 @@
 extends "res://scripts/combat/combatant.gd"
-## Ayxan in the V3 open-world combat system (souls-lite).
+## The protagonist in the V3 open-world combat system (souls-lite).
 ##
 ## Movement: walk/run on the stick or keys, Shift sprint (stamina), jump from a sprint.
 ## Stamina gates every action; presses made without enough stamina wait in a short buffer.
@@ -15,6 +15,7 @@ extends "res://scripts/combat/combatant.gd"
 ## health, slopes steeper than slide_angle slide you down, falls above fall_safe hurt
 ## (fall_lethal kills), and low obstacles up to vault_height are vaulted while running.
 
+const Names := preload("res://scripts/core/names.gd")
 signal ember_changed(current: float, maximum: float)
 signal flasks_changed(current: int, maximum: int)
 signal weapon_changed(weapon_name: String)
@@ -22,7 +23,7 @@ signal lock_changed(target)
 
 const CharacterModel := preload("res://scripts/characters/character_model.gd")
 const Human := preload("res://scripts/characters/human.gd")
-## Ayxan: a hooded ranger in ash-stained crimson (realistic V3 look)
+## The protagonist: a hooded ranger in ash-stained crimson (realistic V3 look)
 const LOOK := {"outfit": "Male_Ranger", "hood": true, "beard": true, "hair": "Hair_SimpleParted",
 	"hair_color": Color(0.11, 0.08, 0.06), "cloth_hue": [0.18, 0.55, 0.985, 1.05, 0.62]}
 const Effects := preload("res://scripts/world/effects.gd")
@@ -105,8 +106,8 @@ func _ready() -> void:
 	add_to_group("player")
 	add_to_group("player_side")
 	add_to_group("combatants")
-	faction = "ayxan"
-	display_name = "Ayxan"
+	faction = "protagonist"
+	display_name = Names.protagonist()
 	max_health = MAX_HEALTH
 	health = max_health
 	max_stamina = _cfg["stamina"]["max"]
@@ -922,12 +923,21 @@ func cast_wave(memory_id: String) -> void:
 	_enter(S.CAST)
 
 
+## The fire of a memory burned in its echo, released on the way back: the same Alov
+## Dalğası as the wheel's, but the memory is already gone (the echo burned it).
+func unleash_memory_fire() -> void:
+	if dead or _state == S.CAST:
+		return
+	cast_wave("")
+
+
 func _do_cast(delta: float) -> void:
 	_slow_to_stop(delta)
 	if not _impact_done and _state_t >= 0.26:
 		_impact_done = true
 		var e: Dictionary = _cfg["ember"]
-		Memory.burn(_cast_memory)
+		if _cast_memory != "":
+			Memory.burn(_cast_memory)
 		Fx.fire_nova(global_position, e["wave_radius"])
 		Fx.shake(0.8)
 		Fx.punch(1.0)
@@ -994,7 +1004,7 @@ func _check_offer() -> void:
 
 func _refresh_burn_look() -> void:
 	var n := Memory.burned_count()
-	var t := float(n) / maxi(Memory.all().size(), 1)
+	var t := float(n) / maxi(Memory.combat_memories().size(), 1)
 	_ember_light.light_energy = 1.0 + n * 0.45
 	_overlay.set_shader_parameter("intensity", t * 0.9)
 	for m in _cloth:
@@ -1368,7 +1378,7 @@ func release_token(cost: int) -> void:
 	_tokens_used = maxi(_tokens_used - cost, 0)
 
 
-## Where Ayxan is facing (enemies use it to flank).
+## Where the protagonist is facing (enemies use it to flank).
 func facing() -> Vector3:
 	return _facing
 

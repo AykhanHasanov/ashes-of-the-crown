@@ -23,11 +23,11 @@ Hamısı `data/enemies/*.json`-da təsvir olunur. Balans `data/balance/ai.json` 
 ## AI
 
 - **Utility:** hər 0.2–0.4 saniyədə bütün seçimlər qiymətləndirilir. Hücumlar, blok, yayınma, yaxınlaşma, dövrə vurma, flank, öndə durma, məsafə saxlama, yüksəyə çıxma, arxada qalma, geri çəkilmə və morale (qaçış və ya təslim olma).
-- **Tokenlər:** Ayxanın büdcəsi 3-dür. Adi düşmən 1, elit 2, boss 3 token tutur. Oxçular, sehrlər və partlayanlar token gözləmir.
+- **Tokenlər:** Arasın büdcəsi 3-dür. Adi düşmən 1, elit 2, boss 3 token tutur. Oxçular, sehrlər və partlayanlar token gözləmir.
 - **Algılama:** görmə 120°, gündüz 25 m, gecə və dumanda 12 m, görmə xətti yoxlanır. Eşitmə: sprint 15 m, döyüş səsi 30 m. Vəziyyətlər: sakit → şübhəli (sarı ?) → döyüş (qırmızı !) → 8 s axtarış → evə qayıdış.
-- **Adaptiv (elit və boss):** Ayxanın son 60 s-dəki vərdişinə əks-cavab verir. Yayınmaya süpürmə və gecikdirilmiş zərbə, bloka qalxan qıran, parry-yə feint, məsafəyə sıçrayış.
+- **Adaptiv (elit və boss):** Arasın son 60 s-dəki vərdişinə əks-cavab verir. Yayınmaya süpürmə və gecikdirilmiş zərbə, bloka qalxan qıran, parry-yə feint, məsafəyə sıçrayış.
 - **AI LOD:** 40 m-ə qədər tam, 40–120 m-də saniyədə bir qərar və seyrək animasiya, 120 m-dən uzaqda donmuş.
-- **Səviyyə:** HP = baza × (1 + 0.12(L−1)), zərər = baza × (1 + 0.08(L−1)), XP formulu. Ayxandan 5+ səviyyə yuxarı olanın adının yanında ☠ görünür. Kül gecə +20% güclüdür.
+- **Səviyyə:** HP = baza × (1 + 0.12(L−1)), zərər = baza × (1 + 0.08(L−1)), XP formulu. Arasdan 5+ səviyyə yuxarı olanın adının yanında ☠ görünür. Kül gecə +20% güclüdür.
 - **Affikslər** (adi düşmənə 6%, elitə 30%, 1–2 ədəd): Alovlu, Qalın, Sürətli, Çağıran, Qisasçı, Sarsılmaz, Kül Şahının Gözü.
 - **Morale:** quldurun canı az qalanda və tək olanda (və ya ataman ölüb) qaçır və ya təslim olur. Təslim olanı buraxmaq ([E]) və ya öldürmək olar. Orduya almaq Faza F-dədir.
 

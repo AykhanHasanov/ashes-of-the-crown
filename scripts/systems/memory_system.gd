@@ -1,5 +1,5 @@
 extends Node
-## Yaddaş Yanğını — Ayxan's memories are his fuel. The player chooses which one
+## Yaddaş Yanğını — the protagonist's memories are his fuel. The player chooses which one
 ## burns for each Alov Dalğası; only Kül Şahı's offer picks one at random.
 ## Burned memories never come back.
 ##
@@ -9,6 +9,7 @@ extends Node
 ##
 ## `gifted` will hold memories given by survivors (V2 phase 5); nothing fills it yet.
 
+const Names := preload("res://scripts/core/names.gd")
 const MemoryRegistry := preload("res://scripts/core/memory_registry.gd")
 
 ## Kül Şahı grows louder with every burned memory.
@@ -18,7 +19,7 @@ const WHISPERS := [
 	"...onların yüzü sana ne verdi ki?...",
 	"...babanı da böyle yedim. Yavaş yavaş...",
 	"...taç seni bekliyor. BEN seni bekliyorum...",
-	"...Ayxan kimdi?...",
+	"...{PROTAGONIST} kimdi?...",
 ]
 const GIFT_WHISPER := "...başkasının acısı da lezzetli..."
 
@@ -30,8 +31,13 @@ func all() -> Array:
 	return MemoryRegistry.all()
 
 
+## The memories the fire wheel and Kül Şahı's offer can burn (see combat_burnable).
+func combat_memories() -> Array:
+	return all().filter(func(d): return d.combat_burnable)
+
+
 func unburned() -> Array:
-	return all().filter(func(d): return not WorldState.has_burned(d.id))
+	return combat_memories().filter(func(d): return not WorldState.has_burned(d.id))
 
 
 func can_burn() -> bool:
@@ -42,7 +48,7 @@ func burned_count() -> int:
 	return WorldState.burned_memories().size()
 
 
-## Burns one of Ayxan's own memories by id. Returns its definition, or null if it was
+## Burns one of the protagonist's own memories by id. Returns its definition, or null if it was
 ## already gone or is unknown.
 func burn(id: StringName) -> Resource:
 	if not WorldState.burn_memory(id):
@@ -50,7 +56,7 @@ func burn(id: StringName) -> Resource:
 	return MemoryRegistry.get_def(id)
 
 
-## Kül Şahı chooses: a random unburned memory of Ayxan's own.
+## Kül Şahı chooses: a random unburned memory of the protagonist's own.
 func burn_random() -> Resource:
 	var left := unburned()
 	if left.is_empty():
@@ -59,4 +65,4 @@ func burn_random() -> Resource:
 
 
 func whisper() -> String:
-	return WHISPERS[clampi(burned_count() - 1, 0, WHISPERS.size() - 1)]
+	return Names.fill(WHISPERS[clampi(burned_count() - 1, 0, WHISPERS.size() - 1)])   # Kül Şahı knows the name

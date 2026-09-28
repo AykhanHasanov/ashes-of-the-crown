@@ -1,6 +1,6 @@
 extends Node3D
 ## Deer in the valley: a couple of small herds (hinds and a stag) graze in the open
-## near Ayxan, wander a few steps, lift their heads when he comes close and bolt when he
+## near the protagonist, wander a few steps, lift their heads when he comes close and bolt when he
 ## is too near or comes running. Herds that fall far behind move on and appear
 ## elsewhere, never in water, on steep ground or in a settlement. Furred like the wolves.
 
@@ -98,7 +98,7 @@ func _tick(a: Dictionary, h: Dictionary, pp: Vector3, delta: float) -> void:
 	var d := Vector2(pos.x - pp.x, pos.z - pp.z).length()
 	var running: bool = player.has_method("is_sprinting_now") and player.is_sprinting_now()
 	if a["state"] != S.FLEE and (d < 18.0 or (running and d < 32.0)):
-		# Bolt: away from Ayxan, the whole herd with it
+		# Bolt: away from the protagonist, the whole herd with it
 		for o in h["animals"]:
 			var away: Vector3 = (o["node"].global_position - pp)
 			away.y = 0

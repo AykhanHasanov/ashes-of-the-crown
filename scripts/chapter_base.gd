@@ -1,5 +1,5 @@
 extends Node3D
-## Shared scaffolding for every chapter scene: the level, camera, Ayxan, HUD,
+## Shared scaffolding for every chapter scene: the level, camera, the protagonist, HUD,
 ## dialogue box, pause menu, journal, checkpoints, prompts, the objective marker,
 ## hearth healing, scene changes between chapters and the debug capture.
 ##
@@ -16,6 +16,7 @@ const Journal := preload("res://scripts/ui/journal.gd")
 const RadialMenu := preload("res://scripts/ui/radial_menu.gd")
 const AshOffer := preload("res://scripts/ui/ash_offer.gd")
 const Balance := preload("res://scripts/systems/balance.gd")
+const EchoDirector := preload("res://scripts/echoes/echo_director.gd")
 
 const CHAPTER_SCENES := {1: "res://scenes/main.tscn", 2: "res://scenes/chapter2.tscn"}
 const TALK_RANGE := 3.0
@@ -95,9 +96,30 @@ func _ready() -> void:
 	var mode := restart_mode
 	restart_mode = ""
 	_begin(mode)
+	if EchoDirector.returning:
+		_return_from_echo(EchoDirector.consume_return())
 
 
 # --- Overridables ---------------------------------------------------------------
+
+## Back from an echo: stand exactly where the protagonist left, facing the same way;
+## a burned memory's fire is released (the existing Alov Dalğası), then a short banner.
+## The world adds its clock (world_mode).
+func _return_from_echo(ctx: Dictionary) -> void:
+	if ctx.is_empty():
+		return
+	player.global_position = ctx["position"]
+	player.velocity = Vector3.ZERO
+	if player.has_method("face_towards"):
+		player.face_towards(Vector3(ctx["position"]) + Vector3(ctx["facing"]))
+	rig.snap()
+	if ctx["outcome"] == &"burn":
+		hud.banner(tr("ECHO_BURNED"))
+		if player.has_method("unleash_memory_fire"):
+			get_tree().create_timer(0.6).timeout.connect(player.unleash_memory_fire)
+	else:
+		hud.banner(tr("ECHO_KEPT"))
+
 
 func _make_level() -> Node3D:
 	return null
@@ -172,7 +194,7 @@ func save_checkpoint(checkpoint: String) -> void:
 	EventBus.checkpoint_rested.emit(StringName(checkpoint))
 
 
-## Just before a save is written: copy Ayxan's live values into WorldState.
+## Just before a save is written: copy the protagonist's live values into WorldState.
 func _on_saving(_slot: int) -> void:
 	if not is_instance_valid(player):
 		return
@@ -192,14 +214,14 @@ func set_controls(on: bool) -> void:
 	journal.enabled = on
 
 
-## Shows `text` while Ayxan is within `dist`; returns true when E is pressed there.
+## Shows `text` while the protagonist is within `dist`; returns true when E is pressed there.
 func near_prompt(point: Vector3, dist: float, text: String) -> bool:
 	var near: bool = player.global_position.distance_to(point) < dist
 	hud.set_prompt(text if near else "")
 	return near and Input.is_action_just_pressed("interact")
 
 
-## Frames Ayxan and `other` side-on and opens a dialogue.
+## Frames the protagonist and `other` side-on and opens a dialogue.
 func talk_with(other: Node3D, data: Dictionary, bring_closer := true) -> void:
 	hud.set_prompt("")
 	hud.visible = false
@@ -229,7 +251,7 @@ func end_talk() -> void:
 	player.input_locked = false
 
 
-## Hearths heal Ayxan — but not in the middle of a fight.
+## Hearths heal the protagonist — but not in the middle of a fight.
 func _update_hearths(delta: float) -> void:
 	if player.dead or player.health >= player.MAX_HEALTH:
 		return

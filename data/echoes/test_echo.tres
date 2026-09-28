@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/echo_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"test_echo"
+memory_id = &"first_sword"
+scene_path = "res://scenes/echoes/test_echo.tscn"
+title_key = "ECHO_TEST_TITLE"
+prompt_key = "ECHO_TEST_PROMPT"
+keep_key = "ECHO_KEEP"
+burn_key = "ECHO_BURN"
+placeholder = true

@@ -230,7 +230,7 @@ func tint(color: Color, _only: Array = [], cloth_only := false) -> Array:
 	return out
 
 
-## Hue-range recolour of the outfit (e.g. the ranger's green into Ayxan's crimson).
+## Hue-range recolour of the outfit (e.g. the ranger's green into the protagonist's crimson).
 func recolor(from_min: float, from_max: float, to_hue: float, sat_scale := 1.0, val_scale := 0.8, _cloth := true) -> Array:
 	var out := []
 	for mi: MeshInstance3D in _cloth_meshes():

@@ -5,7 +5,7 @@ extends "res://scripts/combat/combatant.gd"
 ## off cooldown, block, dodge, approach, circle, flank, hold the front line (tanks),
 ## keep range or seek high ground (archers), stay behind the line (shamans), fall
 ## back, break and run or surrender (bandit morale) — and commits to the best.
-## Melee attacks need tokens from Ayxan's budget (normal 1, elite 2, boss 3); archers
+## Melee attacks need tokens from the protagonist's budget (normal 1, elite 2, boss 3); archers
 ## and bombers fire without one. Attacks telegraph with a ground ring (white = can't be
 ## interrupted, red = can't be parried).
 ##
@@ -15,7 +15,7 @@ extends "res://scripts/combat/combatant.gd"
 ##
 ## Perception (scripts/enemies/perception.gd): calm → suspicious (?) → combat (!) →
 ## search; beasts growl a warning first. Elites and bosses adapt: they weight the
-## counter to Ayxan's most used defence (dodge, block, parry, distance). Affixes
+## counter to the protagonist's most used defence (dodge, block, parry, distance). Affixes
 ## (scripts/enemies/affixes.gd) and boss phases change stats and behaviour. AI LOD:
 ## full within 40 m, one decision a second and coarse animation to 120 m, frozen beyond.
 
@@ -42,7 +42,7 @@ enum LOD { FULL, MID, FROZEN }
 static var corpses: Array = []
 
 var data: Dictionary = {}
-var target            # usually Ayxan
+var target            # usually the protagonist
 var level := 1
 var tier := "normal"
 var role := "melee"
@@ -375,7 +375,7 @@ func body_scale() -> float:
 	return float(data["stats"]["height"]) * _body_scale / 1.8
 
 
-## Level 5+ above Ayxan: a skull by the name.
+## Level 5+ above the protagonist: a skull by the name.
 func is_deadly() -> bool:
 	var pl: int = int(target.get("level")) if target != null and target.get("level") != null else int(_ai["levels"]["player_level"])
 	return level >= pl + int(_ai["levels"]["skull_gap"])
@@ -853,14 +853,14 @@ func _steer(to: Vector3, dist: float) -> Vector3:
 		"retreat", "kite":
 			return (-dir + tangent * 0.5 + _separation()).normalized() * (_run_speed if _action == "kite" else _speed)
 		"keep_back":
-			# Stay behind the allies' line, away from Ayxan
+			# Stay behind the allies' line, away from the protagonist
 			var c := _allies_center(16.0)
 			var goal2: Vector3 = c + (c - target.global_position).normalized() * 6.0
 			var g2 := goal2 - global_position
 			g2.y = 0.0
 			return g2.normalized() * _speed if g2.length() > 1.0 else Vector3.ZERO
 		"hold_front":
-			# Stand between Ayxan and the rest of the group
+			# Stand between the protagonist and the rest of the group
 			var c2 := _allies_center(16.0)
 			var goal3: Vector3 = target.global_position + (c2 - target.global_position).normalized() * (float(b["preferred_range"]) + 0.6)
 			var g3 := goal3 - global_position
@@ -873,7 +873,7 @@ func _steer(to: Vector3, dist: float) -> Vector3:
 	return Vector3.ZERO
 
 
-## Archers look for a nearby spot at least 1.5 m higher that still sees Ayxan.
+## Archers look for a nearby spot at least 1.5 m higher that still sees the protagonist.
 func _find_high_spot() -> bool:
 	if not ground_query.is_valid():
 		return false
@@ -904,7 +904,7 @@ func _attack_by_id(id: String) -> Dictionary:
 	return data["attacks"][0]
 
 
-## Elites and bosses lean on the counter to Ayxan's favourite defence.
+## Elites and bosses lean on the counter to the protagonist's favourite defence.
 func _update_adaptive() -> void:
 	adaptive_weights.clear()
 	if tier == "normal" or not data.has("counters") or not _target_ok() or target.get("habits") == null:
@@ -1239,7 +1239,7 @@ func _surrender() -> void:
 	_enter(S.SURRENDER)
 
 
-## Ayxan lets a surrendered bandit go: he gets up and leaves.
+## The protagonist lets a surrendered bandit go: he gets up and leaves.
 func spare() -> void:
 	if not surrendered:
 		return

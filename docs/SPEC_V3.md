@@ -1,7 +1,7 @@
 # ASHES OF THE CROWN: V3, açıq dünya spec-i
 
 > **Claude Code üçün təlimat:**
-> 1. Bu sənəd V2-nin (`ASHES_V2_SPEC.md`) üzərinə gəlir. V2 sistemləri **saxlanılır** (xatirələr, alınmış xatirələr, bağ, ocaq müdafiəsi, Kölgə Ayxan) və açıq dünyaya uyğunlaşdırılır (bölmə 11).
+> 1. Bu sənəd V2-nin (`ASHES_V2_SPEC.md`) üzərinə gəlir. V2 sistemləri **saxlanılır** (xatirələr, alınmış xatirələr, bağ, ocaq müdafiəsi, Kölgə Aras) və açıq dünyaya uyğunlaşdırılır (bölmə 11).
 > 2. Kod yazmazdan əvvəl layihəni oxu və arxitektura planı hazırla: qovluq strukturu, əsas sinif/node-lar, data formatları. Plan təsdiqlənmədən başlama.
 > 3. **Fazalarla işlə** (bölmə 14). Hər faza ayrıca branch/commit olsun və oyun işləyir vəziyyətdə qalsın. **Faza C-dən sonra dayan**: bu, "əyləncə qapısı"dır.
 > 4. **Data-driven yaz.** Silahlar, düşmənlər, bacarıqlar, hadisələr, tapşırıq şablonları `.tres`/JSON data fayllarında olsun, kodda hardcode olmasın. Bütün balans rəqəmləri `balance/` qovluğunda saxlanılsın.
@@ -12,7 +12,7 @@
 
 ## 1. Konsepsiya
 
-Atəşan Səltənəti Kül Gecəsindən sonra açıq dünyaya çevrilir. Ayxan yanmış Közqaladan çıxır. Sağ qalanları toplayır, bölgələri Kül Şahının kölgələrindən, quldurlardan və oyanmış əfsanəvi varlıqlardan azad edir, ordu qurur. Döyüşdükcə güclənir, amma ən böyük gücü yenə xatirələrinin hesabına gəlir.
+Atəşan Səltənəti Kül Gecəsindən sonra açıq dünyaya çevrilir. Aras yanmış Közqaladan çıxır. Sağ qalanları toplayır, bölgələri Kül Şahının kölgələrindən, quldurlardan və oyanmış əfsanəvi varlıqlardan azad edir, ordu qurur. Döyüşdükcə güclənir, amma ən böyük gücü yenə xatirələrinin hesabına gəlir.
 
 **Dizayn sütunları:**
 1. **Döyüş dərindir:** stamina, stance, parry, infaz. Hər düşmən tipi fərqli yanaşma tələb edir.
@@ -306,7 +306,7 @@ Hər boss bir aktiv bacarıq verir və o, 1–4 slotlarından birinə qoyulur:
 ### 7.4 Morale
 - Hər əsgərin morale-i 0–100-dür.
 - Azalır: yaxında müttəfiq öləndə (−8), canı az olanda, nəhəng düşmən görünəndə (−15), sərkərdə yaralananda.
-- Artır: oyunçu yaxında düşmən öldürəndə (+3), infaz edəndə (+8), Döyüş nərəsi, Kral bayrağı, Alov Dalğası (+20, "Ayxanın odu").
+- Artır: oyunçu yaxında düşmən öldürəndə (+3), infaz edəndə (+8), Döyüş nərəsi, Kral bayrağı, Alov Dalğası (+20, "Arasın odu").
 - Morale < 20 olanda əsgər qaçır. Döyüş nərəsi ilə yenidən toplanır.
 - Düşmən insanların da morale-i var. Atamanı öldürmək bütün dəstəni sarsıdır.
 
@@ -331,7 +331,7 @@ Hər boss bir aktiv bacarıq verir və o, 1–4 slotlarından birinə qoyulur:
   - 07–12 rolunun yerində işləyir (animasiyalı)
   - 12–13 yemək
   - 13–19 iş
-  - 19–22 çayxana, ocaq başında söhbət, musiqi
+  - 19–22 çarasa, ocaq başında söhbət, musiqi
   - 22 yatır
 - Yağışda örtülü yerə qaçır. Gecə keşikçilər məşəl yandırır.
 - V2-dəki ehtiyaclar sistemi (istilik, ünsiyyət, vəzifə) Son Ocaq sakinləri üçün saxlanılır və rejimlə birləşdirilir.
@@ -399,7 +399,7 @@ Hər boss bir aktiv bacarıq verir və o, 1–4 slotlarından birinə qoyulur:
 - **Fəsil 2 (Son Ocaq)** əsas hekayə bölməsi olur:
   - 8 personajın tapşırıqları dünyanın müxtəlif bölgələrinə paylanır.
   - "Gündə 3 tapşırıq" limiti ləğv olunur. Əvəzində **zaman təzyiqi** var: birinci gecə hücumu 3 oyun günü sonra, ikincisi 3 gün sonra gəlir. Səyahət vaxt aparır, ona görə hamıya çatmaq çətindir. Dilemma qalır.
-  - Ocaq müdafiəsi, bağ sistemi, alınmış xatirələr və Kölgə Ayxan bossu olduğu kimi qalır. Kölgə Ayxanın hərəkətləri yeni döyüş sisteminə uyğunlaşdırılır.
+  - Ocaq müdafiəsi, bağ sistemi, alınmış xatirələr və Kölgə Aras bossu olduğu kimi qalır. Kölgə Arasın hərəkətləri yeni döyüş sisteminə uyğunlaşdırılır.
 - **Xatirələrin nəticələri (yenilənmiş cədvəl):**
 
 | Xatirə | Açıq dünyada nəticəsi |
@@ -473,7 +473,7 @@ Hər boss bir aktiv bacarıq verir və o, 1–4 slotlarından birinə qoyulur:
 
 ### Faza H: Hekayənin inteqrasiyası
 - Fəsil 1-in yeni döyüşlə balansı, Fəsil 2-nin açıq dünyaya köçürülməsi (bölmə 11), 12 kral əks-sədası, xatirə nəticələrinin yenilənməsi, Fəsil 3-ün girişi.
-- **Qəbul:** yeni oyundan Kölgə Ayxana qədər hekayə boyunca kəsinti yoxdur. Bütün xatirə nəticələri debug menyusu ilə yoxlanılır.
+- **Qəbul:** yeni oyundan Kölgə Arasa qədər hekayə boyunca kəsinti yoxdur. Bütün xatirə nəticələri debug menyusu ilə yoxlanılır.
 
 ---
 
