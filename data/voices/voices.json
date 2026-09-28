@@ -167,13 +167,6 @@
 			"fx": "villager",
 			"lines": "villager"
 		},
-		"npc_anar": {
-			"voice": "tr-TR-AhmetNeural",
-			"rate": "+6%",
-			"pitch": "-2Hz",
-			"fx": "villager",
-			"lines": "villager"
-		},
 		"npc_elvin": {
 			"voice": "tr-TR-AhmetNeural",
 			"rate": "+2%",
@@ -199,6 +192,13 @@
 			"voice": "tr-TR-AhmetNeural",
 			"rate": "-12%",
 			"pitch": "-14Hz",
+			"fx": "villager",
+			"lines": "villager"
+		},
+		"npc_nermin": {
+			"voice": "tr-TR-EmelNeural",
+			"rate": "+4%",
+			"pitch": "-4Hz",
 			"fx": "villager",
 			"lines": "villager"
 		}

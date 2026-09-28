@@ -2,6 +2,8 @@
 
 A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_AUDIT.md` (how the code fits together and what is risky) and `docs/SPEC_V3.md` (the design spec). Log decisions in `docs/DECISIONS.md`.
 
+**Story:** `STORY_BIBLE.md` is the canonical story reference. **Read STORY_BIBLE.md before any story-related task. Never invent story content; use placeholders for [TBD] items and flag them.** If code, data or a request conflicts with the bible, stop and ask.
+
 ## Project
 
 - **What it is:** a 3D action-RPG. Aras, last heir of Atəşan, fights through a Caucasus / Silk Road land burned by Kül Şahı (the Ash Shah).
@@ -72,7 +74,8 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
    - Chat with the owner: Azerbaijani.
 6. **Keep the tests green.** Run the self-tests before merging (see below). Add checks for new systems to the relevant self-test.
 7. **Git.** Work on a `v3/<topic>` branch, commit per stage, merge to `main` with `--no-ff` after the tests pass, then `git push` (remote: private `github.com/AykhanHasanov/ashes-of-the-crown`). End commit messages with the attribution line the harness provides.
-8. **Assets.** CC0 (or clearly licensed) only. Record the source in a `CREDITS` file. Before downloading, state the file, source and size (the owner has given blanket approval).
+8. **Story.** Read `STORY_BIBLE.md` before any story-related task. Never invent story content; use placeholders for [TBD] items and flag them in the report.
+9. **Assets.** CC0 (or clearly licensed) only. Record the source in a `CREDITS` file. Before downloading, state the file, source and size (the owner has given blanket approval).
 
 ## State & Save
 
@@ -124,7 +127,7 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 - Old saves with the former name are renamed by the v1 → v2 migration in `save_manager.gd` (the only place the old name may appear).
 
 **NPCs** (identities only; roles and quests come later from the owner)
-- Data: `NpcDefinition` in `data/npcs/*.tres` (id, name_key, name_memory_id, look_id → `data/looks.json`, weapon/shield, voice_profile → `data/voices/voices.json`, dev-only personality_notes, home_location_id, companion, ignores_burned_names, speaker_only), looked up through `scripts/core/npc_registry.gd`. The cast is V2's eight (Rüfət + 7 residents) with no suspect content; `kul_sahi` is a speaker only.
+- Data: `NpcDefinition` in `data/npcs/*.tres` (id, name_key `NPC_<ID>_NAME`, epithet_key `NPC_<ID>_EPITHET`, name_memory_id, look_id → `data/looks.json`, weapon/shield, voice_profile → `data/voices/voices.json`, dev-only personality_notes, home_location_id, companion, ignores_burned_names, npc_kind `human`/`shade`/`voice_only`, presence `hub`/`world`, tags `boss`/`hidden`, placeholder), looked up through `scripts/core/npc_registry.gd`. The cast follows `STORY_BIBLE.md` §7: V2's eight carried over without suspect content (`anar` became `nermin`, save v4 migrates it) plus the bible's new people as data only; `kul_sahi` is voice only. Show names with `Names.npc(id)` and epithets with `Names.npc_epithet(id)` (never blanked).
 - State: `WorldState` NPC accessors (`move_npc`, `rescue_npc` → location `son_ocaq`, `kill_npc` — permanent, `change_npc_relationship`, `set_npc_flag`) with `npc_moved` / `npc_rescued` / `npc_died` / `npc_relationship_changed`. Locations: a POI id, `party` (with the protagonist), `son_ocaq` (hub, not built), or `""`.
 - Bodies come only from WorldState: `scripts/npc/npc_spawner.gd` (world_mode owns one) builds a `resident.gd` at a loaded POI or an `ally.gd` for a companion in the party; the dead never get a body again. Never hand-place a named NPC. Generic villagers (`data/world/villagers.json`) are separate and unchanged.
 - The ally (`scripts/npc/ally.gd`, numbers in `data/balance/allies.json`): a player-side Combatant that follows, fights, sometimes draws an enemy off the protagonist (`Foe.retarget`). At 0 health he is DOWNED, never dead: the protagonist helps him up ([E], `help_up()`), or he rises alone when no enemy is near. Only the story kills him (`kill_npc`).
@@ -140,7 +143,7 @@ It exits with the failure count and takes about 80 s headless.
 
 **Echoes, memory states, names, migration:** `"$G" --headless --path . res://scenes/tests/echo_test.tscn` plays the real KEEP and BURN flows (host `scenes/tests/echo_host.tscn` → test echo → back), checks hold-to-confirm, position/clock restore, save/load of the three states, v1/v0 migration incl. the name rename, the blank name, and scans the project for the old protagonist name.
 
-**NPCs, ally, names in subtitles, fire wheel:** `"$G" --headless --path . res://scenes/tests/npc_test.tscn` (57 checks): definitions, NPC state and signals, save/load and v2 → v3 migration, spawning from WorldState (the dead never respawn, rescue moves them away), name blanking for NPCs and in subtitles (Kül Şahı excepted), Rüfət's fight / downed / help-up / recover, the ally never hurting the protagonist, burn contexts, the wheel's hold-to-confirm.
+**NPCs, ally, names in subtitles, fire wheel:** `"$G" --headless --path . res://scenes/tests/npc_test.tscn` (65 checks): definitions, NPC state and signals, save/load and v2 → v3 migration, spawning from WorldState (the dead never respawn, rescue moves them away), name blanking for NPCs and in subtitles (Kül Şahı excepted), Rüfət's fight / downed / help-up / recover, the ally never hurting the protagonist, burn contexts, the wheel's hold-to-confirm.
 
 ## Running and testing
 

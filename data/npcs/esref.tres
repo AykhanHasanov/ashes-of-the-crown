@@ -6,7 +6,8 @@
 script = ExtResource("1")
 id = &"esref"
 name_key = "NPC_ESREF_NAME"
-name_memory_id = &""
+epithet_key = "NPC_ESREF_EPITHET"
+name_memory_id = &"&"
 look_id = "npc_esref"
 weapon_path = ""
 shield_path = ""
@@ -16,4 +17,7 @@ but keeps his word. V2 look: KayKit Barbarian."
 home_location_id = ""
 companion = false
 ignores_burned_names = false
-speaker_only = false
+npc_kind = "human"
+presence = ""
+tags = PackedStringArray()
+placeholder = false

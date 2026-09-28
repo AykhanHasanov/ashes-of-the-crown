@@ -2036,80 +2036,6 @@
 				}
 			]
 		},
-		"npc_anar": {
-			"greet": [
-				{
-					"file": "res://assets/audio/voice/npc_anar/greet_0.wav",
-					"text": "Hoş geldin yolcu. Kürköy'de ekmek de var, dert de."
-				},
-				{
-					"file": "res://assets/audio/voice/npc_anar/greet_1.wav",
-					"text": "Selam sana. Yolun açık olsun."
-				},
-				{
-					"file": "res://assets/audio/voice/npc_anar/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
-				},
-				{
-					"file": "res://assets/audio/voice/npc_anar/greet_3.wav",
-					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
-				},
-				{
-					"file": "res://assets/audio/voice/npc_anar/greet_4.wav",
-					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
-				},
-				{
-					"file": "res://assets/audio/voice/npc_anar/greet_5.wav",
-					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
-				}
-			],
-			"idle": [
-				{
-					"file": "res://assets/audio/voice/npc_anar/idle_0.wav",
-					"text": "Bu yıl nar erken kızardı..."
-				},
-				{
-					"file": "res://assets/audio/voice/npc_anar/idle_1.wav",
-					"text": "Ah, belim... Yaşlandık be."
-				},
-				{
-					"file": "res://assets/audio/voice/npc_anar/idle_2.wav",
-					"text": "Rüzgâr yine külü getiriyor."
-				},
-				{
-					"file": "res://assets/audio/voice/npc_anar/idle_3.wav",
-					"text": "Akşama çorba var, ocak başında."
-				},
-				{
-					"file": "res://assets/audio/voice/npc_anar/idle_4.wav",
-					"text": "Kür'ün suyu çekildi, balık da azaldı."
-				}
-			],
-			"flee": [
-				{
-					"file": "res://assets/audio/voice/npc_anar/flee_0.wav",
-					"text": "Kaçın! Gölgeler geldi!"
-				},
-				{
-					"file": "res://assets/audio/voice/npc_anar/flee_1.wav",
-					"text": "Kapıları kapatın, çabuk!"
-				},
-				{
-					"file": "res://assets/audio/voice/npc_anar/flee_2.wav",
-					"text": "Eyvah! Saklanın!"
-				}
-			],
-			"night": [
-				{
-					"file": "res://assets/audio/voice/npc_anar/night_0.wav",
-					"text": "Gece oldu, içeri girelim. Gölgeler gece daha açtır."
-				},
-				{
-					"file": "res://assets/audio/voice/npc_anar/night_1.wav",
-					"text": "Geç oldu. Kapımı kilitleyeceğim."
-				}
-			]
-		},
 		"npc_elvin": {
 			"greet": [
 				{
@@ -2402,6 +2328,80 @@
 				},
 				{
 					"file": "res://assets/audio/voice/npc_ehliman/night_1.wav",
+					"text": "Geç oldu. Kapımı kilitleyeceğim."
+				}
+			]
+		},
+		"npc_nermin": {
+			"greet": [
+				{
+					"file": "res://assets/audio/voice/npc_nermin/greet_0.wav",
+					"text": "Hoş geldin yolcu. Kürköy'de ekmek de var, dert de."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_nermin/greet_1.wav",
+					"text": "Selam sana. Yolun açık olsun."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_nermin/greet_2.wav",
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_nermin/greet_3.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_nermin/greet_4.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_nermin/greet_5.wav",
+					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/npc_nermin/idle_0.wav",
+					"text": "Bu yıl nar erken kızardı..."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_nermin/idle_1.wav",
+					"text": "Ah, belim... Yaşlandık be."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_nermin/idle_2.wav",
+					"text": "Rüzgâr yine külü getiriyor."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_nermin/idle_3.wav",
+					"text": "Akşama çorba var, ocak başında."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_nermin/idle_4.wav",
+					"text": "Kür'ün suyu çekildi, balık da azaldı."
+				}
+			],
+			"flee": [
+				{
+					"file": "res://assets/audio/voice/npc_nermin/flee_0.wav",
+					"text": "Kaçın! Gölgeler geldi!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_nermin/flee_1.wav",
+					"text": "Kapıları kapatın, çabuk!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_nermin/flee_2.wav",
+					"text": "Eyvah! Saklanın!"
+				}
+			],
+			"night": [
+				{
+					"file": "res://assets/audio/voice/npc_nermin/night_0.wav",
+					"text": "Gece oldu, içeri girelim. Gölgeler gece daha açtır."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_nermin/night_1.wav",
 					"text": "Geç oldu. Kapımı kilitleyeceğim."
 				}
 			]

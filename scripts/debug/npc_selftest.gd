@@ -14,7 +14,10 @@ const Hit := preload("res://scripts/combat/hit.gd")
 const Melee := preload("res://scripts/combat/melee.gd")
 const HOST := "res://scenes/tests/echo_host.tscn"
 const TEST_DIR := "user://test_npc_saves/"
-const PEOPLE := [&"anar", &"ehliman", &"elvin", &"esref", &"ibrahim", &"rufet", &"sabir", &"sahbaz"]
+## The voiced core cast carried over from V2 (Nərmin replaces Anar) ...
+const PEOPLE := [&"ehliman", &"elvin", &"esref", &"ibrahim", &"nermin", &"rufet", &"sabir", &"sahbaz"]
+## ... and the people STORY_BIBLE.md adds (data only so far).
+const BIBLE_NEW := [&"ayna", &"domrul", &"gulcin", &"kamal", &"peri_nene", &"samir", &"sona", &"tural", &"yadigar"]
 const YARD := Vector3(4, 0, 4)
 
 var _fails := 0
@@ -68,21 +71,33 @@ func _run() -> void:
 # --- Data --------------------------------------------------------------------------------------
 
 func _definitions() -> void:
-	var ids: Array = NpcRegistry.all().filter(func(d): return not d.speaker_only).map(func(d): return d.id)
-	_check("the registry holds the cast: 8 people (7 residents + Rüfət)", ids == PEOPLE, str(ids))
+	var ids: Array = NpcRegistry.all().filter(func(d): return d.npc_kind != "voice_only").map(func(d): return d.id)
+	var want: Array = PEOPLE + BIBLE_NEW
+	want.sort_custom(func(a, b): return String(a) < String(b))
+	_check("the registry holds the cast: V2's eight (anar now nermin) + the bible's nine", ids == want, str(ids))
+	_check("the old id 'anar' is gone", not NpcRegistry.has(&"anar"))
 	var looks: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/looks.json"))
 	var ok := true
-	for id in PEOPLE:
+	for id in want:
 		var d: Resource = NpcRegistry.get_def(id)
 		var name := tr(d.name_key)
-		if name == d.name_key or name == "" or not looks.has(d.look_id) or d.personality_notes == "" \
-				or not Barks.has_line(d.voice_profile, "greet"):
+		if name == d.name_key or name == "" or tr(d.epithet_key) == d.epithet_key or not looks.has(d.look_id) \
+				or d.personality_notes == "" or (d.voice_profile != "" and not Barks.has_line(d.voice_profile, "greet")):
 			ok = false
 			print("   bad definition: ", id)
-	_check("every NPC has a name key, a look, a voice and personality notes", ok)
+	_check("every NPC has name and epithet keys, a look and notes (and its voice, if it has one)", ok)
+	_check("the voiced core cast has voices", PEOPLE.all(func(id): return Barks.has_line(NpcRegistry.get_def(id).voice_profile, "greet")))
+	_check("npc_kind from the bible: Ayna a shade, Kül Şahı voice only, the rest human",
+		NpcRegistry.all().all(func(d): return d.npc_kind == {&"ayna": "shade", &"kul_sahi": "voice_only"}.get(d.id, "human")))
+	_check("bible markers: hub / world presence, Tural a boss, Samir hidden",
+		NpcRegistry.get_def(&"peri_nene").presence == "hub" and NpcRegistry.get_def(&"kamal").presence == "hub"
+		and NpcRegistry.get_def(&"yadigar").presence == "world" and NpcRegistry.get_def(&"tural").tags.has("boss")
+		and NpcRegistry.get_def(&"samir").tags.has("hidden"))
+	_check("Nermin: the caravan mistress keeps Anar's hooded look, as a woman", tr("NPC_NERMIN_NAME") == "Nermin"
+		and tr("NPC_NERMIN_EPITHET") == "kervan hanımı" and looks["npc_nermin"]["outfit"] == "Female_Ranger" and looks["npc_nermin"]["hood"] == true)
 	_check("Rüfət is the only companion", NpcRegistry.all().filter(func(d): return d.companion).map(func(d): return d.id) == [&"rufet"])
 	var ks: Resource = NpcRegistry.get_def(&"kul_sahi")
-	_check("Kül Şahı: a speaker that ignores burned names (data flag)", ks.speaker_only and ks.ignores_burned_names
+	_check("Kül Şahı: a speaker that ignores burned names (data flag)", ks.npc_kind == "voice_only" and ks.ignores_burned_names
 		and NpcRegistry.all().filter(func(d): return d.ignores_burned_names).size() == 1)
 
 
@@ -140,10 +155,20 @@ func _save_and_migration() -> void:
 		"story": {}, "world": {}, "flags": {}, "npcs": {"sabir": {"alive": false, "trust": 2}, "ghost": {"alive": true}}}
 	var clean := WorldState.normalize(SaveManager.migrate(JSON.parse_string(JSON.stringify(v2))))
 	_check("migration v2 → v3: old burns get context combat", clean["player"]["burn_context"] == {"rufet_face": "combat"}
-		and int(clean["meta"]["save_version"]) == 3)
+		and int(clean["meta"]["save_version"]) == WorldState.SAVE_VERSION)
 	_check("migration v2 → v3: NPC records filled, old fields kept as flags, unknown ids dropped",
 		clean["npcs"]["sabir"]["alive"] == false and clean["npcs"]["sabir"]["flags"] == {"trust": 2}
 		and clean["npcs"]["rufet"]["alive"] == true and not clean["npcs"].has("ghost") and clean["npcs"].size() == NpcRegistry.all().size())
+	# A v3 save still using the old id "anar"
+	var v3 := {"meta": {"save_version": 3}, "player": {"stats": {}, "memories": {}}, "story": {}, "world": {}, "flags": {},
+		"npcs": {"anar": {"alive": true, "location_id": "kurkend", "rescued": true, "relationship": 4, "death_cause": "", "flags": {"ledger": 3}}}}
+	var from_v3 := WorldState.normalize(SaveManager.migrate(JSON.parse_string(JSON.stringify(v3))))
+	_check("migration v3 → v4: 'anar' becomes 'nermin' with the whole record", not from_v3["npcs"].has("anar")
+		and from_v3["npcs"]["nermin"] == {"alive": true, "location_id": "kurkend", "rescued": true, "relationship": 4, "death_cause": "", "flags": {"ledger": 3}})
+	_write_json(TEST_DIR + "slot_3.json", v3)
+	_check("... and such a save file loads", SaveManager.load_slot(3) and WorldState.get_npc_relationship(&"nermin") == 4
+		and WorldState.is_npc_rescued(&"nermin"))
+	SaveManager.active_slot = 1
 	var legacy := {"version": 4, "chapter": 1, "checkpoint": "", "flags": {}, "echoes_seen": [], "memory": {"burned": ["mother_name"]}, "world": {}}
 	var from_legacy := WorldState.normalize(SaveManager.migrate(legacy))
 	_check("the whole chain v0 → v3 still works", from_legacy["player"]["burn_context"] == {"mother_name": "combat"}
@@ -157,7 +182,7 @@ func _spawning() -> void:
 	await _frames(3)
 	_check("nobody is spawned where WorldState puts nobody", spawner.body(&"rufet") == null and spawner.body(&"sabir") == null)
 	WorldState.move_npc(&"sabir", "yard")
-	WorldState.move_npc(&"anar", "yard")
+	WorldState.move_npc(&"nermin", "yard")
 	WorldState.move_npc(&"rufet", WorldState.PARTY)
 	await _frames(3)
 	var sabir = spawner.body(&"sabir")
@@ -176,11 +201,11 @@ func _spawning() -> void:
 	SaveManager.save(1)
 	SaveManager.load_slot(1)
 	await _frames(3)
-	_check("... nor after a save and load", spawner.body(&"sabir") == null and spawner.body(&"anar") != null)
-	WorldState.rescue_npc(&"anar")
+	_check("... nor after a save and load", spawner.body(&"sabir") == null and spawner.body(&"nermin") != null)
+	WorldState.rescue_npc(&"nermin")
 	await _frames(3)
-	_check("rescue: the NPC leaves (to son_ocaq, the hub is not built)", spawner.body(&"anar") == null
-		and WorldState.get_npc_location(&"anar") == "son_ocaq" and WorldState.is_npc_rescued(&"anar"))
+	_check("rescue: the NPC leaves (to son_ocaq, the hub is not built)", spawner.body(&"nermin") == null
+		and WorldState.get_npc_location(&"nermin") == "son_ocaq" and WorldState.is_npc_rescued(&"nermin"))
 
 
 # --- Names ---------------------------------------------------------------------------------------
@@ -193,6 +218,7 @@ func _names() -> void:
 	await _frames(1)
 	_check("an NPC's name is blank once its name memory burned", Names.npc(&"rufet") == blank and rufet.display_name == blank)
 	_check("other NPC names are untouched", Names.npc(&"sahbaz") == "Şahbaz")
+	_check("the epithet stays when the name burns", Names.npc_epithet(&"rufet") == "kan kardeşi")
 	# The protagonist's name, burned
 	WorldState.burn_memory(Names.PROTAGONIST_MEMORY, &"echo")
 	_check("burned name: blank in NPC text and subtitles", Names.fill("Yardım et, {PROTAGONIST}!", &"rufet") == "Yardım et, %s!" % blank)
@@ -340,6 +366,13 @@ func _seconds(s: float) -> void:
 func _frames(n: int) -> void:
 	for i in n:
 		await get_tree().process_frame
+
+
+func _write_json(path: String, data: Dictionary) -> void:
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(path.get_base_dir()))
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	f.store_string(JSON.stringify(data))
+	f.close()
 
 
 func _wipe() -> void:

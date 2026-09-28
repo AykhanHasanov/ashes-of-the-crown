@@ -1,0 +1,23 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/npc_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"peri_nene"
+name_key = "NPC_PERI_NENE_NAME"
+epithet_key = "NPC_PERI_NENE_EPITHET"
+name_memory_id = &""
+look_id = "npc_peri_nene"
+weapon_path = ""
+shield_path = ""
+voice_profile = ""
+personality_notes = "Blind lament singer (ağıtçı). Recognises shades by voice: the only one who can safely
+open a door at night; Aras's go-between. New model needed. See STORY_BIBLE.md §7."
+home_location_id = ""
+companion = false
+ignores_burned_names = false
+npc_kind = "human"
+presence = "hub"
+tags = PackedStringArray()
+placeholder = true

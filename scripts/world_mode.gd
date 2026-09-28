@@ -672,7 +672,7 @@ func _npcs_to(location_id: String) -> void:
 	if location_id == "":
 		return
 	for def in NpcSpawner.NpcRegistry.all():
-		if not def.companion and not def.speaker_only:
+		if not def.companion and def.npc_kind == "human":
 			WorldState.move_npc(def.id, location_id)
 
 

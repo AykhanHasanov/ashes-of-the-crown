@@ -23,7 +23,7 @@ extends Node
 const MemoryRegistry := preload("res://scripts/core/memory_registry.gd")
 const NpcRegistry := preload("res://scripts/core/npc_registry.gd")
 
-const SAVE_VERSION := 3
+const SAVE_VERSION := 4
 
 ## A memory is not found yet (UNKNOWN), remembered (KEPT) or given to the fire (BURNED).
 enum MemoryState { UNKNOWN, KEPT, BURNED }

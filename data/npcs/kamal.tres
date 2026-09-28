@@ -1,0 +1,23 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/npc_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"kamal"
+name_key = "NPC_KAMAL_NAME"
+epithet_key = "NPC_KAMAL_EPITHET"
+name_memory_id = &""
+look_id = "npc_kamal"
+weapon_path = ""
+shield_path = ""
+voice_profile = ""
+personality_notes = "Young husband, expecting a child with Gülçin. Everyday life. Act III naming scene.
+Never dies. See STORY_BIBLE.md §7."
+home_location_id = ""
+companion = false
+ignores_burned_names = false
+npc_kind = "human"
+presence = "hub"
+tags = PackedStringArray()
+placeholder = true

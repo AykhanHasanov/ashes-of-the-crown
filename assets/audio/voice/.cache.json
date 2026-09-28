@@ -440,5 +440,21 @@
 "npc_ehliman/flee_1.wav": "2aea08fda5ef03eaf713754a8109de910e45a663",
 "npc_ehliman/flee_2.wav": "36d03bbcb2a5d409bcc9cc3922bbeb537d474550",
 "npc_ehliman/night_0.wav": "2e6ed6914fb65b0220c9709fc7564960d476bcc3",
-"npc_ehliman/night_1.wav": "4620bda88edb465371c02c20a9bcf4e7c23e88af"
+"npc_ehliman/night_1.wav": "4620bda88edb465371c02c20a9bcf4e7c23e88af",
+"npc_nermin/greet_0.wav": "c556d44e89c7e630edc735eda16716fe062e2c4c",
+"npc_nermin/greet_1.wav": "904612237a17c7aab90ad9c3a34425473d0250da",
+"npc_nermin/greet_2.wav": "f253c575f35dd2daac8cc73790f72e2ae50388a3",
+"npc_nermin/greet_3.wav": "88f988d37a915d8155b75cc78a71cecabdc567d9",
+"npc_nermin/greet_4.wav": "8479badd3a5affd49d777d5975941db9054ebb08",
+"npc_nermin/greet_5.wav": "be6ec20f918b830b82e1bb54a3f98a73f9bef8f9",
+"npc_nermin/idle_0.wav": "2640af6cb4cf74db64a4980b51dfb9d36697219d",
+"npc_nermin/idle_1.wav": "ac5e2abe8d403e101583432f56c7767766befbdf",
+"npc_nermin/idle_2.wav": "b53f4e78932baa04ee66985adfe3cfdb25b33243",
+"npc_nermin/idle_3.wav": "a7c901f9a21da73151e60f51cf00d4bebe0d1898",
+"npc_nermin/idle_4.wav": "3966f6dd059235be826413408caa3426d0b28321",
+"npc_nermin/flee_0.wav": "07783b821f7e50515613f89f4dc02b911327952c",
+"npc_nermin/flee_1.wav": "6ea5ceaf93e24d68b1c90422fd019025ed7223a0",
+"npc_nermin/flee_2.wav": "2dc5241e1224379eb64111ad22f36cda73088dc9",
+"npc_nermin/night_0.wav": "183487e5063a7238fc991d082c0ccd4d622433b7",
+"npc_nermin/night_1.wav": "7ec6e12d240214884b8aca9957eaed1746ce398b"
 }

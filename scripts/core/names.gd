@@ -46,6 +46,14 @@ static func npc(npc_id: StringName) -> String:
 	return resolve(def.name_key, def.name_memory_id)
 
 
+## An NPC's epithet (NpcDefinition.epithet_key). Never blanked: it names them when the name
+## is gone. "" if they have none.
+static func npc_epithet(npc_id: StringName) -> String:
+	if not NpcRegistry.has(npc_id) or NpcRegistry.get_def(npc_id).epithet_key == "":
+		return ""
+	return TranslationServer.translate(NpcRegistry.get_def(npc_id).epithet_key)
+
+
 ## Whether `speaker` (an NPC id) always shows real names, burned or not.
 static func ignores_burned(speaker: StringName) -> bool:
 	return speaker != &"" and NpcRegistry.has(speaker) and NpcRegistry.get_def(speaker).ignores_burned_names
