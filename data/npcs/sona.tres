@@ -12,9 +12,9 @@ look_id = "npc_sona"
 weapon_path = ""
 shield_path = ""
 voice_profile = ""
-personality_notes = "Aras's wife, Narin's mother. Remembers what Aras burned; asks through the door
-'Do you remember Narin?'. Does not know Aras burned her. Death risk: Act III, Sona's night.
-New model needed; epithet [TBD]. See STORY_BIBLE.md §7."
+personality_notes = "Sona, dokumacı (weaver) — Aras's wife, Narin's mother. Remembers what Aras burned;
+asks through the door 'Do you remember Narin?'. Does not know Aras burned her.
+Death risk: Act III, Sona's night. New model needed. See STORY_BIBLE.md §7."
 home_location_id = ""
 companion = false
 ignores_burned_names = false

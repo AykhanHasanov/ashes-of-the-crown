@@ -238,8 +238,10 @@ func _migrate_step(d: Dictionary, from: int) -> Dictionary:
 		2:
 			return _v2_to_v3(d)
 		3:
-			return _v3_to_v4(d)
-		# 4: return _v4_to_v5(d)
+			return _rename_npcs(d, {"anar": "nermin"}, 4)   # Nərmin replaces Anar (STORY_BIBLE.md §7)
+		4:
+			return _rename_npcs(d, {"kamal": "kemal"}, 5)   # the Turkish form of the name
+		# 5: return _v5_to_v6(d)
 	push_warning("SaveManager: no migration from save_version %d" % from)
 	return {}
 
@@ -309,19 +311,15 @@ func _v2_to_v3(d: Dictionary) -> Dictionary:
 	return d
 
 
-## v4: the caravan head "anar" became "nermin" (STORY_BIBLE.md §7: Nərmin replaces Anar).
-## Her record keeps everything it had.
-const RENAMED_NPCS := {"anar": "nermin"}
-
-
-func _v3_to_v4(d: Dictionary) -> Dictionary:
+## v4, v5: NPC ids renamed (old -> new); each record keeps everything it had.
+func _rename_npcs(d: Dictionary, renamed: Dictionary, to_version: int) -> Dictionary:
 	var npcs: Dictionary = d.get("npcs", {}) if d.get("npcs") is Dictionary else {}
-	for old_id in RENAMED_NPCS:
+	for old_id in renamed:
 		if npcs.has(old_id):
-			npcs[RENAMED_NPCS[old_id]] = npcs[old_id]
+			npcs[renamed[old_id]] = npcs[old_id]
 			npcs.erase(old_id)
 	d["npcs"] = npcs
-	d["meta"]["save_version"] = 4
+	d["meta"]["save_version"] = to_version
 	return d
 
 

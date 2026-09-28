@@ -12,8 +12,10 @@ look_id = "npc_ehliman"
 weapon_path = ""
 shield_path = ""
 voice_profile = "npc_ehliman"
-personality_notes = "High priest of the Köz Order. Solemn, certain, speaks of fire as the divine; calls the
-protagonist 'evlat'. V2 look: KayKit Mage, red-orange."
+personality_notes = "Ehliman, Köz Nizamı'nın kâhini — high priest. Grief stance: forget everything —
+burned all memories of his own family out of piety; calls everyone 'evlat' because he no
+longer remembers his children. Opposed the reversal; nobody listened. Keeps Son Ocaq's
+hearth. Late-game ideological antagonist, voice of the 'Adsız' ending. See STORY_BIBLE.md §7."
 home_location_id = ""
 companion = false
 ignores_burned_names = false

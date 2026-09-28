@@ -12,8 +12,10 @@ look_id = "npc_ibrahim"
 weapon_path = ""
 shield_path = ""
 voice_profile = "npc_ibrahim"
-personality_notes = "Palace scholar and alchemist. Curious to a fault, fascinated by the ember; talks fast,
-forgets people for ideas. V2 look: KayKit Mage, green."
+personality_notes = "İbrahim, saray âlimi. Grief stance: guilt — built the reversal mechanism out of
+curiosity; lost his assistant through neglect. The only one who understands Ulu Ocaq
+technically. Hub: turns ash into permanent fire abilities. Death risk [TBD].
+See STORY_BIBLE.md §7."
 home_location_id = ""
 companion = false
 ignores_burned_names = false

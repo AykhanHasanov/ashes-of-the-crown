@@ -1532,7 +1532,7 @@
 				},
 				{
 					"file": "res://assets/audio/voice/villager_m/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
 				},
 				{
 					"file": "res://assets/audio/voice/villager_m/greet_3.wav",
@@ -1606,7 +1606,7 @@
 				},
 				{
 					"file": "res://assets/audio/voice/villager_old/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
 				},
 				{
 					"file": "res://assets/audio/voice/villager_old/greet_3.wav",
@@ -1680,7 +1680,7 @@
 				},
 				{
 					"file": "res://assets/audio/voice/villager_f/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
 				},
 				{
 					"file": "res://assets/audio/voice/villager_f/greet_3.wav",
@@ -1754,7 +1754,7 @@
 				},
 				{
 					"file": "res://assets/audio/voice/guard/greet_2.wav",
-					"text": "Ocağı yakan sen misin? Sağ ol, kardeş."
+					"text": "Şehzadem. Yolun açık olsun."
 				}
 			],
 			"idle": [
@@ -1900,7 +1900,7 @@
 				},
 				{
 					"file": "res://assets/audio/voice/npc_sabir/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
 				},
 				{
 					"file": "res://assets/audio/voice/npc_sabir/greet_3.wav",
@@ -1974,7 +1974,7 @@
 				},
 				{
 					"file": "res://assets/audio/voice/npc_sahbaz/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
 				},
 				{
 					"file": "res://assets/audio/voice/npc_sahbaz/greet_3.wav",
@@ -2048,7 +2048,7 @@
 				},
 				{
 					"file": "res://assets/audio/voice/npc_elvin/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
 				},
 				{
 					"file": "res://assets/audio/voice/npc_elvin/greet_3.wav",
@@ -2122,7 +2122,7 @@
 				},
 				{
 					"file": "res://assets/audio/voice/npc_esref/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
 				},
 				{
 					"file": "res://assets/audio/voice/npc_esref/greet_3.wav",
@@ -2196,7 +2196,7 @@
 				},
 				{
 					"file": "res://assets/audio/voice/npc_ibrahim/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
 				},
 				{
 					"file": "res://assets/audio/voice/npc_ibrahim/greet_3.wav",
@@ -2270,7 +2270,7 @@
 				},
 				{
 					"file": "res://assets/audio/voice/npc_ehliman/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
 				},
 				{
 					"file": "res://assets/audio/voice/npc_ehliman/greet_3.wav",
@@ -2344,7 +2344,7 @@
 				},
 				{
 					"file": "res://assets/audio/voice/npc_nermin/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
 				},
 				{
 					"file": "res://assets/audio/voice/npc_nermin/greet_3.wav",

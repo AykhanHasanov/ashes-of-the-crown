@@ -12,8 +12,10 @@ look_id = "npc_esref"
 weapon_path = ""
 shield_path = ""
 voice_profile = "npc_esref"
-personality_notes = "Bey of the Kartal Mountains clans. Big, rough, honour-bound; old grudges with the throne,
-but keeps his word. V2 look: KayKit Barbarian."
+personality_notes = "Eşref, Kartal Dağları'nın beyi. Grief stance: loyal memory — swore to his dead wife
+he would never forget her; honour makes him a small mirror of the King.
+Highest death risk: if his quest fails, one night he opens the door to her shade.
+See STORY_BIBLE.md §7."
 home_location_id = ""
 companion = false
 ignores_burned_names = false

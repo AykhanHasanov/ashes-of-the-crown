@@ -12,8 +12,10 @@ look_id = "npc_yadigar"
 weapon_path = ""
 shield_path = ""
 voice_profile = ""
-personality_notes = "Another Közçü further down the same road; emptier at every meeting. The in-story
-warning against burning everything. End [TBD]. Model: Közçü variant. See STORY_BIBLE.md §7."
+personality_notes = "Yadigar, başka bir Közcü (world) — a Közcü further down the same road; emptier at
+every meeting (advice → forgets why he hunts → forgets his name → attacks Aras or is found
+dead [TBD]). The in-story warning against burning everything. Model: Közcü variant.
+See STORY_BIBLE.md §7."
 home_location_id = ""
 companion = false
 ignores_burned_names = false

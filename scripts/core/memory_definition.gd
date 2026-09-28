@@ -13,5 +13,8 @@ extends Resource
 ## Offered by the fire wheel and Kül Şahı's offer. False for memories that are only ever
 ## decided in their echo (e.g. the protagonist's own name).
 @export var combat_burnable := true
+## How heavily this memory counts when the final boss (Kül Aras) is built from the burned
+## ones (STORY_BIBLE.md §5). Unused until then.
+@export var weight := 1
 ## Placeholder content: not written by the story yet.
 @export var placeholder := false

@@ -7,3 +7,4 @@ Notes to decide or clean up later. Not scheduled; nothing here is being worked o
 - **MUST-FIX before the vertical slice — permanent burn power.** Burning must grant a PERMANENT power (e.g. unlock or upgrade a fire ability per memory). Today a burn gives a one-time Alov Dalğası (placeholder). Solve together with consolidating memory effects.
 - **Memories at the hub hearth.** Kept memories can be re-watched at the hearth in the hub; burned ones remain as empty slots in that list.
 - **Villager facing.** `scripts/npc/villager.gd` turns its model with `atan2(x, z)` while the Human model faces -Z (the protagonist, enemies and the new NPC scripts use `atan2(-x, -z)`). Check in game whether villagers face away from what they look at.
+- **Pre-vertical-slice: mood pass.** Gradient from a faded late-autumn valley with light ash, to fully desaturated near Közkale; colour returns in Son Ocaq as grief is resolved. Lighting, fog, ash particles, saturation only — no new assets.

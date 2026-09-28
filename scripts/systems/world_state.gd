@@ -23,7 +23,7 @@ extends Node
 const MemoryRegistry := preload("res://scripts/core/memory_registry.gd")
 const NpcRegistry := preload("res://scripts/core/npc_registry.gd")
 
-const SAVE_VERSION := 4
+const SAVE_VERSION := 5
 
 ## A memory is not found yet (UNKNOWN), remembered (KEPT) or given to the fire (BURNED).
 enum MemoryState { UNKNOWN, KEPT, BURNED }
@@ -637,7 +637,8 @@ func get_world_value(key: StringName, default: Variant = null) -> Variant:
 # --- Dialogue conditions -------------------------------------------------------------------------
 
 ## Condition strings used by dialogue branches: "memory:<id>" (burned), "kept:<id>",
-## "flag:<name>", "alive:<npc>", "dead:<npc>", "rescued:<npc>".
+## "flag:<name>", "alive:<npc>", "dead:<npc>", "rescued:<npc>", "joined:<npc>" (with the
+## protagonist: location "party" — derived, never a separate flag).
 func check(cond: String) -> bool:
 	var arg := cond.get_slice(":", 1)
 	match cond.get_slice(":", 0):
@@ -653,6 +654,8 @@ func check(cond: String) -> bool:
 			return has_npc(StringName(arg)) and not is_npc_alive(StringName(arg))
 		"rescued":
 			return is_npc_rescued(StringName(arg))
+		"joined":
+			return is_npc_alive(StringName(arg)) and get_npc_location(StringName(arg)) == PARTY
 	return false
 
 

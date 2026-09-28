@@ -53,11 +53,14 @@ and the dead keep warming the living. The blessing "Ocağın sönməsin"
 
 **Ulu Ocaq (the Great Hearth)** burns in Közkale and anchors every hearth in the land.
 
-**Közçü (Ember-keeper).** The keeper of Ulu Ocaq. A Közçü can burn memories directly
-into fire power. Aras was the King's Közçü.
+**Közcü (Ember-keeper).** The keeper of Ulu Ocaq. A Közcü can burn memories directly
+into fire power. **By Ateşan tradition, the crown heir serves as Közcü of Ulu Ocaq until
+he takes the crown.** Aras is the crown prince **and** the King's Közcü.
 
 **The reversal.** The King turned Ulu Ocaq backwards: instead of consuming memories,
-it *preserves* them. Consequences:
+it *preserves* them. **The King gave his own body to the reversed hearth; people now
+call him Kül Şahı (the Ash King).** Kül Şahı and the King are one and the same — Aras's
+father, and the game's only antagonist [TBD: exactly when he gave his body]. Consequences:
 - The dead did not leave. They returned as **Küllüler (the Ash-born)**: shades wearing
   the faces and voices of the people who loved them. They are empty inside.
 - Hearths stopped giving warmth. The land froze. **Ash falls like snow, constantly.**
@@ -84,9 +87,12 @@ and Narin.
 
 ## 3. Timeline before the game
 
-1. The hearth custom works. Ulu Ocaq burns in Közkale. Aras is Közçü, married to
-   Sona, father of Narin. Rüfət is his blood brother and captain of the guard.
-2. **The Cold Sickness** spreads. The King's son dies. **Narin dies.**
+1. The hearth custom works. Ulu Ocaq burns in Közkale. Aras — the King's son and crown
+   prince — is Közcü, married to Sona, father of Narin (the King's granddaughter).
+   Elvin, the King's illegitimate son, is Aras's half-brother. Rüfət is Aras's blood
+   brother and captain of the guard.
+2. **The Cold Sickness** spreads. The King's younger son — Aras's brother [TBD: name] —
+   dies. **Narin dies.**
 3. The King cannot give his son to the fire. He orders **İbrahim** to design a way to
    reverse Ulu Ocaq. **Aras helps** — because he wants Narin back.
    **Ehliman** (high priest) opposes it. Nobody listens.
@@ -104,7 +110,8 @@ and Narin.
 8. Before the fire, Aras writes a **letter to himself** and makes Rüfət promise:
    *"Never tell me."* Rüfət carries Aras out and leaves him in the valley.
 9. Survivors of the court flee to the last village with a burning hearth:
-   **Son Ocaq**. Everyone believes **the King** caused the fire. Only Rüfət knows the
+   **Son Ocaq** — a village grown around an old caravanserai; the last hearth burns in
+   its courtyard. Everyone believes **the King** caused the fire. Only Rüfət knows the
    truth. Közkale is still burning on the horizon — **that fire is Aras's past.**
 
 ---
@@ -120,7 +127,8 @@ context**, and the player finally understands what he was carrying [TBD: exact o
 ### Act I — "Kül" (Ash)
 - Aras wakes alone in the valley near **Geçit Ocağı**, nameless. Közkale burns in the
   distance.
-- First fight. **Rüfət finds him** and joins (flag `rufet_joined`).
+- First fight. **Rüfət finds him** and joins (condition `joined:rufet`, derived from his
+  WorldState location `party` — one fact, one owner; there is no separate flag).
   *"You don't know me? ...Good. Better this way."*
 - Reach **Son Ocaq**. Meet the residents. Learn the night/door rule.
 - First echoes: happy memories. Burning looks easy.
@@ -150,7 +158,7 @@ context**, and the player finally understands what he was carrying [TBD: exact o
 - Ehliman pushes Aras to burn Narin for good ("Adsız" path).
 - **Sona's night:** Sona learns Aras burned Narin. If Aras has not earned her trust
   (told her the truth himself, see §6), she opens the door to Narin's shade → she dies.
-- A child is born in Son Ocaq; the parents ask Aras to name it (see §7, Kamal & Gülçin).
+- A child is born in Son Ocaq; the parents ask Aras to name it (see §7, Kemal & Gülçin).
 - **Domrul's last night:** he wants to open the door and go with his wife. Aras
   chooses: stop him or let him go.
 - **Final boss: Kül Aras** (§5). Then the last conversation with the King at Ulu Ocaq.
@@ -171,7 +179,7 @@ both echo and combat). This is the counterweight to "burn everything".
 | Ending | Condition | Result |
 |---|---|---|
 | **Adsız (Nameless)** | Aras burns Narin's memory at the final choice | Ulu Ocaq relit, land warms, residents live. Last scene: someone opens a door and calls Aras by his name. He does not know it. |
-| **Kül Şahı (Ash King)** | Aras refuses to burn and takes the King's place | He stays with Narin's shade. The land stays frozen. Son Ocaq slowly goes out. |
+| **Kül Şahı (Ash King)** | Aras refuses to burn and takes his father's crown of ash | He becomes the new Kül Şahı and stays with Narin's shade. The land stays frozen. Son Ocaq slowly goes out. |
 | **Ocağın Sönməsin (true)** | Narin's memory KEPT **and** Sona alive and told the truth **and** at least [TBD: 5] of 8 core residents alive with their grief resolved | Narin's memory is **shared**: each resident takes a piece of it to their own hearth. Novruz-like fire, people jumping over flames. Bittersweet, not alone. |
 
 The true-ending option is **visible but locked** at the final choice if conditions are
@@ -185,7 +193,7 @@ not met, so the player understands something was possible.
 |---|---|---|
 | Memory states UNKNOWN / KEPT / BURNED | Remembering vs forgetting | BURN is final. KEEP is not safe forever. |
 | Echo choice (hold-to-confirm BURN) | Deciding right after living the memory | Autosave on choice. No save inside echoes. |
-| Combat wheel can burn KEPT memories | Temptation in every hard fight | Hold-to-confirm, slowed time. `combat_burnable=false` protects story-critical memories (own_name, Narin, [TBD others]). |
+| Combat wheel can burn KEPT memories | Temptation in every hard fight | Hold-to-confirm, slowed time. `combat_burnable=false` protects story-critical memories (`own_name`, `narin`, [TBD others]). |
 | `burn_context` echo / combat | "You burned her out of fear" | Story may react differently later. |
 | Ash → İbrahim → permanent abilities | Power built from loss | Resolves BACKLOG MUST-FIX. |
 | Kül Aras scaling | What you burn comes back | Final boss strength from BURNED set. |
@@ -200,83 +208,88 @@ not met, so the player understands something was possible.
 ## 7. Characters
 
 Format: **id** — Name, *epithet* — role. Stance on grief. Secret. Hub function.
-Permanent death risk.
+Permanent death risk. Epithets are given in their in-game Turkish form
+(`NPC_<ID>_EPITHET`); names in Azerbaijani spelling note the in-game Turkish form.
 
 ### Protagonist
-- **protagonist** — **Aras**, *Közçü* — former King's Ember-keeper. Complicit, not a
-  villain: he helped reverse the hearth for Narin, then burned everything to undo it.
+- **protagonist** — **Aras**, *Közcü* — the King's son, crown prince and Közcü of Ulu
+  Ocaq (by Ateşan tradition the heir keeps the hearth until he is crowned). Complicit,
+  not a villain: he helped reverse the hearth for Narin, then burned everything to undo it.
   Wakes nameless. Name shown via `PROTAGONIST_NAME`, linked to `own_name`.
-  Marketing title: **Közçü** (EN: *The Emberbearer*).
+  Marketing title: **Közcü** (EN: *The Emberbearer*).
 
 ### Core cast
-- **rufet** — **Rüfət**, *qan qardaşı* — companion. **Silent love:** knows everything,
+- **rufet** — **Rüfət** (TR: Rüfet), *kan kardeşi* — companion. **Silent love:** knows everything,
   lies to protect Aras from his own guilt. Carries Aras's letter. Name memory:
   `rufet_face`. Downed, never killed in normal combat; fate decided by story [TBD].
-- **sona** — **Sona**, *[TBD epithet]* — Aras's wife, Narin's mother. **Remembers what
+- **sona** — **Sona**, *dokumacı* — Aras's wife, Narin's mother. **Remembers what
   Aras burned.** Asks through the door: *"Do you remember Narin?"* Does not know Aras
   burned her. Death risk: **Act III, Sona's night.** (New model needed.)
-- **narin** — **Narin** — Aras's daughter. `npc_kind: shade`. Appears only in echoes
-  and at Aras's door at night. Her lullaby is the game's main motif (§8).
-  Her memory is `combat_burnable=false`.
-- **elvin** — **Elvin**, *şahın oğlu* — the King's illegitimate son. **The forgotten
+- **narin** — **Narin**, *[TBD epithet]* — Aras's daughter, the King's granddaughter.
+  `npc_kind: shade`. Appears only in echoes and at Aras's door at night. Her lullaby is
+  the game's main motif (§8). Her memory is `narin`, `combat_burnable=false`.
+- **elvin** — **Elvin**, *şahın gölgedeki oğlu* — the King's illegitimate son, Aras's
+  half-brother. **The forgotten
   living:** the King kept his dead son and forgot his living one. Wants to be seen.
   Hub **aşık**: sings Aras's story, including what Aras burned (§9). Meets his father
   in Act III; the King does not recognise him.
-- **ehliman** — **Ehliman**, *Köz Ordeninin kahini* — **forget everything:** burned all
+- **ehliman** — **Ehliman**, *Köz Nizamı'nın kâhini* — **forget everything:** burned all
   memories of his own family out of piety; calls everyone "evlat" because he no longer
   remembers his children. Opposed the reversal. Keeps Son Ocaq's hearth. Late-game
   ideological antagonist, voice of the "Adsız" ending.
-- **ibrahim** — **İbrahim**, *saray alimi* — **guilt:** built the reversal mechanism out
+- **ibrahim** — **İbrahim**, *saray âlimi* — **guilt:** built the reversal mechanism out
   of curiosity. Lost his assistant through neglect. Only one who understands Ulu Ocaq
   technically. Hub: turns **ash into permanent abilities**. Death risk [TBD].
-- **sabir** — **Sabir**, *qoca müəllim* — Aras's teacher since childhood.
+- **sabir** — **Sabir**, *yaşlı öğretmen* — Aras's teacher since childhood.
   **Unchosen forgetting:** losing memory to old age and fighting it — the mirror of
   Aras, who forgets by choice. Quest: help him remember his students' names.
   Hub: keeper of **kept memories** — re-watch KEPT echoes at the hearth.
   Handle with respect. No death risk.
-- **sahbaz** — **Şahbaz**, *sərkərdə* — **anger:** his soldiers died in the fire. At
+- **sahbaz** — **Şahbaz**, *serdar* — **anger:** his soldiers died in the fire. At
   first blames the King; at the midpoint learns Aras lit it → door closes. Quest:
   release his soldiers' ash legion; confront **Tural**. Hub: combat training.
   Death risk: yes (ash legion / Tural line).
-- **esref** — **Eşref**, *Qartal Dağlarının bəyi* — **loyal memory:** swore to his dead
+- **esref** — **Eşref**, *Kartal Dağları'nın beyi* — **loyal memory:** swore to his dead
   wife he would never forget her. Honour makes him a small mirror of the King.
   **Highest death risk:** if his quest fails, one night he opens the door to her shade.
-- **nermin** — **Nərmin**, *karvan xanımı* — replaces V2 **Anar** (same hooded model,
+- **nermin** — **Nərmin** (TR: Nermin), *kervan hanımı* — replaces V2 **Anar** (same hooded model,
   adapted; migrate id `anar` → `nermin`). **Denial:** counts the dead in her ledger so
   she never has to feel them. One name is missing: her brother **Samir**.
   Dry humour. Hub: merchant, and **buys KEPT memories** for rare items
   ("everything has a price"). Selling = another way to lose a memory [TBD: does a sold
   memory count as BURNED for Kül Aras?].
-- **kul_sahi** — **Kül Şahı** — `npc_kind: voice_only`, no body. **Never let go.**
-  Kept every memory anyone burned, including Aras's. Has a real argument:
+- **kul_sahi** — **Kül Şahı**, *Ateşan'ın şahı* — **the King, Aras's father.** He gave his
+  body to the reversed hearth; people now call him Kül Şahı. The only antagonist.
+  `npc_kind: voice_only`, no body. **Never let go.** Kept every memory anyone burned,
+  including Aras's. Has a real argument:
   *"You forgot. I did not."* `ignores_burned_names = true`.
 
 ### Supporting cast
-- **domrul** — **Dəli Domrul**, *şəhərin dəlisi* — (Dede Korkut). Talked to his dead
+- **domrul** — **Dəli Domrul** (TR: Deli Dumrul), *şehrin delisi* — (Dede Korkut). Talked to his dead
   wife's shade through the door every night for a year; learned the truth; lost his
   mind. **Everything he says is literally true** — riddles, rhymes, mis-sung lullaby.
   Example meaning: *"The Ember-keeper kissed his daughter, then gave her to the fire."*
   Arc end: on his last night he wants to open the door and go with her; Aras stops or
   releases him. Replaces Bəhlul (dropped).
-- **yadigar** — **Yadigar**, *başqa bir Közçü* (world) — a Közçü further down the same
+- **yadigar** — **Yadigar**, *başka bir Közcü* (world) — a Közcü further down the same
   road. Each meeting he is emptier: advice → forgets why he hunts → forgets his name
   → attacks Aras or is found dead [TBD]. "Yadigar" = keepsake: the man who kept
-  nothing. The in-story warning against burning everything. Model: Közçü variant.
-- **ayna** — **Ayna**, *özünü bilən kölgə* (world) — a shade who knows she is a shade and
+  nothing. The in-story warning against burning everything. Model: Közcü variant.
+- **ayna** — **Ayna**, *kendini bilen gölge* (world) — a shade who knows she is a shade and
   begs Aras to burn her memory and free her. Makes the player see shades as people.
   Model: shade variant.
 - **tural** — **Tural**, *Kül Şövalyesi* (world, boss) — Şahbaz's former lieutenant;
   chose the King for the promise of his dead comrades. Save or kill [TBD outcomes].
   Model: enemy knight variant.
-- **peri_nene** — **Pəri Nənə**, *ağıtçı* (hub) — blind lament singer. Cannot see the
+- **peri_nene** — **Pəri Nənə** (TR: Peri Nene), *ağıtçı* (hub) — blind lament singer. Cannot see the
   shades' borrowed faces, recognises them by voice — **the only one who can safely
   open a door at night**; Aras's go-between. Her laments shape the soundtrack.
   (New model needed.)
-- **kamal / gulcin** — **Kamal** and **Gülçin** (hub) — young couple expecting a child.
+- **kemal / gulcin** — **Kemal**, *demirci*, and **Gülçin**, *ekmekçi* (hub) — young couple expecting a child.
   Everyday life: arguing, laughing, preparing. **Naming scene (Act III):** they ask
   Aras to name the baby. If Narin is KEPT, "Narin" appears as an option; if not, the
   option simply does not exist.
-- **samir** — **Samir** (world, hidden) — Nərmin's brother. Alive: survived the cold by
+- **samir** — **Samir**, *kervancı* (world, hidden) — Nərmin's brother. Alive: survived the cold by
   burning all his memories. Found and brought home, he does not know her.
 
 ### Background
@@ -284,7 +297,7 @@ Generic villagers with barks only. Unlimited. Never carry story facts alone.
 
 ### Death risk summary
 Can die permanently: Sona, Eşref, Şahbaz, Domrul (by choice), İbrahim [TBD],
-Yadigar [TBD], Tural (boss). Never: Sabir, Kamal, Gülçin, the newborn.
+Yadigar [TBD], Tural (boss). Never: Sabir, Kemal, Gülçin, the newborn.
 Rüfət: story-only [TBD].
 
 ---
@@ -310,7 +323,7 @@ Rüfət: story-only [TBD].
 2. **Burned memories become legend, not blanks.** When a memory is burned, its
    first-person journal entry is replaced by a verse from Elvin's song ("They say the
    Ember-keeper had a daughter..."). The player keeps the information; Aras loses it.
-3. **Közçü's journal** (auto-filled):
+3. **Közcü's journal** (auto-filled):
    - *People:* portrait, epithet, one-line relationship, last thing they said.
      Burned name → portrait stays, name shows `———`.
    - *Threads:* always exactly one current goal line.
@@ -331,7 +344,7 @@ Rüfət: story-only [TBD].
 
 | Fact | First hint | Confirmed |
 |---|---|---|
-| Aras is the Közçü | Act I, Rüfət / residents | Act I |
+| Aras is the Közcü | Act I, Rüfət / residents | Act I |
 | Közkale's fire was not the King's | Act I, Domrul | Act II midpoint |
 | Aras had a daughter | Act I, Domrul / lullaby | Act I end (echo + Sona) |
 | Aras helped reverse the hearth | Act II, İbrahim's quest | Act II midpoint (echo) |
@@ -345,7 +358,8 @@ Rüfət: story-only [TBD].
 ## 11. Language and naming
 
 - Player-facing text: **Turkish**, via keys only. Code, comments, docs: English.
-- Protagonist: **Aras** (`PROTAGONIST_NAME`). Title: **Közçü**.
+- Protagonist: **Aras** (`PROTAGONIST_NAME`). Title: **Közcü** (the Turkish form, used in
+  all Turkish text).
 - Place names used in-game follow the existing Turkish forms (Közkale, Geçit Ocağı,
   Kürköy). Son Ocaq's Turkish in-game form: [TBD: "Son Ocak"].
 - Each NPC: `NPC_<ID>_NAME` and `NPC_<ID>_EPITHET`.
@@ -377,5 +391,27 @@ Rüfət: story-only [TBD].
 6. Yadigar's end: fight or found dead.
 7. İbrahim's death risk.
 8. Exact trigger for telling Sona the truth.
-9. Sona's epithet; King's dead son's name (if ever needed).
+9. The King's dead younger son (Aras's brother): his name. Narin's epithet.
 10. Which memories besides own_name and Narin are `combat_burnable=false`.
+
+---
+
+## 14. Changelog
+
+- **2026-09-28 — owner decisions after the first conflict report**
+  - Aras is the crown prince **and** the King's Közcü (Ateşan tradition: the heir keeps
+    Ulu Ocaq until he is crowned). Heir references ("küçük şah", "şehzadem", "Babamın
+    sesi") stay.
+  - Kül Şahı **is** the King, Aras's father; he gave his body to the reversed hearth.
+    One antagonist. The "Kül Şahı" ending = Aras takes his father's crown of ash.
+  - The King's dead son is Aras's younger brother [TBD name]; Elvin is Aras's
+    half-brother; Narin is the King's granddaughter.
+  - Son Ocaq: a village grown around an old caravanserai; the last hearth burns in its
+    courtyard.
+  - `rufet_joined` is not a flag: the condition `joined:rufet` derives it from his
+    location `party`.
+  - Narin: memory `narin` (`combat_burnable=false`) and NPC `narin` (shade) added as
+    placeholders.
+  - Turkish forms: Közcü (not Közçü) in all Turkish text; Nermin, Deli Dumrul, Peri Nene,
+    Kemal (id `kemal`, was `kamal`). Epithets fixed (§7).
+- **2026-09-28 — first version** (owner).

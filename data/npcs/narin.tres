@@ -1,0 +1,25 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/npc_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"narin"
+name_key = "NPC_NARIN_NAME"
+epithet_key = "NPC_NARIN_EPITHET"
+name_memory_id = &"narin"
+look_id = "npc_narin"
+weapon_path = ""
+shield_path = ""
+voice_profile = ""
+personality_notes = "Narin — Aras's daughter, the King's granddaughter. Shade: appears only in echoes and at
+Aras's door at night (the small shade that knocks). Her lullaby is the game's main motif.
+Her memory is narin (combat_burnable=false); her name is tied to it. Epithet [TBD].
+See STORY_BIBLE.md §7."
+home_location_id = ""
+companion = false
+ignores_burned_names = false
+npc_kind = "shade"
+presence = ""
+tags = PackedStringArray()
+placeholder = true
