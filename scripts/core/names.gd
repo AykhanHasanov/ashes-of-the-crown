@@ -46,12 +46,17 @@ static func npc(npc_id: StringName) -> String:
 	return resolve(def.name_key, def.name_memory_id)
 
 
-## An NPC's epithet (NpcDefinition.epithet_key). Never blanked: it names them when the name
-## is gone. "" if they have none.
+## An NPC's epithet: the first NpcDefinition.epithet_rules entry whose condition holds,
+## else epithet_key. Never blanked: it names them when the name is gone. "" if none.
 static func npc_epithet(npc_id: StringName) -> String:
-	if not NpcRegistry.has(npc_id) or NpcRegistry.get_def(npc_id).epithet_key == "":
+	if not NpcRegistry.has(npc_id):
 		return ""
-	return TranslationServer.translate(NpcRegistry.get_def(npc_id).epithet_key)
+	var def: Resource = NpcRegistry.get_def(npc_id)
+	for rule in def.epithet_rules:
+		var parts := String(rule).split("=>")
+		if parts.size() == 2 and WorldState.check(parts[0].strip_edges()):
+			return TranslationServer.translate(parts[1].strip_edges())
+	return TranslationServer.translate(def.epithet_key) if def.epithet_key != "" else ""
 
 
 ## Whether `speaker` (an NPC id) always shows real names, burned or not.

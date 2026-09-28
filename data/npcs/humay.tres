@@ -1,0 +1,24 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/npc_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"humay"
+name_key = "NPC_HUMAY_NAME"
+epithet_key = "NPC_HUMAY_EPITHET"
+name_memory_id = &""
+look_id = "npc_humay"
+weapon_path = ""
+shield_path = ""
+voice_profile = ""
+personality_notes = "Humay — the Queen, Aras's mother. Died years before the Cold Sickness; the King gave her
+memory to the hearth and could never recall her face. She sang the family lullaby.
+Voice only, heard in echoes [TBD]. See STORY_BIBLE.md §3, §7, §8."
+home_location_id = ""
+companion = false
+ignores_burned_names = false
+npc_kind = "voice_only"
+presence = ""
+tags = PackedStringArray()
+placeholder = true

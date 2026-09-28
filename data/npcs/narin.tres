@@ -14,7 +14,7 @@ shield_path = ""
 voice_profile = ""
 personality_notes = "Narin — Aras's daughter, the King's granddaughter. Shade: appears only in echoes and at
 Aras's door at night (the small shade that knocks). Her lullaby is the game's main motif.
-Her memory is narin (combat_burnable=false); her name is tied to it. Epithet [TBD].
+Her memory is narin (combat_burnable=false); her name is tied to it. Epithet: 'kapıdaki\ngölge' until narin_revealed, then 'Közcü'nün kızı'.
 See STORY_BIBLE.md §7."
 home_location_id = ""
 companion = false
@@ -22,4 +22,5 @@ ignores_burned_names = false
 npc_kind = "shade"
 presence = ""
 tags = PackedStringArray()
+epithet_rules = PackedStringArray("flag:narin_revealed=>NPC_NARIN_EPITHET_REVEALED")
 placeholder = true

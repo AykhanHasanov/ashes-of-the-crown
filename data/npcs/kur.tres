@@ -1,0 +1,24 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/npc_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"kur"
+name_key = "NPC_KUR_NAME"
+epithet_key = "NPC_KUR_EPITHET"
+name_memory_id = &""
+look_id = "npc_kur"
+weapon_path = ""
+shield_path = ""
+voice_profile = ""
+personality_notes = "Kür — the King's younger son, Aras's brother (Aras and Kür: the two rivers that merge).
+Died of the Cold Sickness; the King renamed the valley Kür Vadisi after him. His death is
+the root of the reversal. Shade [TBD: where he appears]. See STORY_BIBLE.md §3, §7."
+home_location_id = ""
+companion = false
+ignores_burned_names = false
+npc_kind = "shade"
+presence = ""
+tags = PackedStringArray()
+placeholder = true
