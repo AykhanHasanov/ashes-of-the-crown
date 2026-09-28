@@ -45,6 +45,15 @@ func voice_for(enemy_id: String, seed_value: int) -> String:
 	return "" if list.is_empty() else list[absi(seed_value) % list.size()]
 
 
+## A voice clip of `profile` for `event` (a random line), or null — for callers that play
+## it themselves (e.g. a voice through a door, on its own muffled bus).
+func voice_stream(profile: String, event: String) -> AudioStream:
+	var lines: Array = _profiles.get(profile, {}).get(event, [])
+	if lines.is_empty():
+		return null
+	return load(lines[randi() % lines.size()]["file"])
+
+
 func has_line(profile: String, event: String) -> bool:
 	return _profiles.get(profile, {}).has(event)
 

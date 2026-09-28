@@ -34,6 +34,9 @@ extends Resource
 ## What this NPC calls the protagonist, story permitting: "condition=>NAME_KEY" (first match
 ## wins; with none, his own name). E.g. Sabir sometimes calls Aras "Kür".
 @export var calls_protagonist_rules: PackedStringArray = PackedStringArray()
+## Opens the door at night: the conversation is face to face (Peri Nene, who recognises
+## shades by their voice — the only one who can open safely).
+@export var allows_night_open := false
 ## Fights beside the protagonist when with him (scripts/npc/ally.gd).
 @export var companion := false
 ## Their lines always show real names, even burned ones (Kül Şahı never forgets).

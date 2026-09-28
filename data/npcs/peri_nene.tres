@@ -21,3 +21,4 @@ npc_kind = "human"
 presence = "hub"
 tags = PackedStringArray()
 placeholder = true
+allows_night_open = true

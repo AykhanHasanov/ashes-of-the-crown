@@ -3,10 +3,18 @@ extends CanvasLayer
 ##
 ## Dialogue data is a Dictionary of nodes keyed by id. A node may have:
 ##   speaker, text           — the line to show
+##   speaker_id, text_key    — the same through an NPC id and a translation key
 ##   next                    — id of the following node (continue with E / click)
-##   choices                 — [{text, next?, set?, event?}] the protagonist's answers (1-3 / click)
+##   choices                 — [{text, next?, set?, event?, disabled?}] the protagonist's answers
+##                             (1-3 / click); a disabled one is shown but cannot be chosen
+##   auto                    — {after: seconds, next: id}: moves on by itself (no input)
 ##   branch                  — {memory, burned, intact}: jump depending on Yaddaş Yanğını, or
-##                             {if, then, else} with a WorldState.check() condition
+##                             {if, then, else} with a condition (check(): WorldState's, plus
+##                             the conversation's own, e.g. "door_mode")
+##   type "name_challenge"   — the speaker asks who is there (text_key); the only answer is the
+##                             protagonist's name as the UI resolves it. Once his name memory
+##                             is burned it shows as the blank and cannot be chosen: after a
+##                             moment the node goes to "fail" instead of "pass".
 ##   set                     — flag emitted through flag_set when the node is shown
 ##   do                      — [WorldState.apply() actions] run when a node is shown or a choice taken
 ##   end + event             — closes the dialogue and emits finished(event)
@@ -14,6 +22,9 @@ extends CanvasLayer
 const Names := preload("res://scripts/core/names.gd")
 signal finished(event: String)
 signal flag_set(flag: String)
+signal line_shown(node: Dictionary)      # after a node's text is set (voices, door shadows)
+
+const CHALLENGE_WAIT := 1.8              # a blank name hangs in the air this long
 
 const GOLD := Color(0.92, 0.74, 0.42)
 const EMBER := Color(1.0, 0.55, 0.22)
@@ -21,6 +32,9 @@ const BAR_HEIGHT := 84.0
 
 var _data: Dictionary
 var _node: Dictionary
+var node_id := ""
+var context: Dictionary = {}             # this conversation's own conditions (door_mode...)
+var _auto_t := -1.0
 var _active := false
 var _typing := false
 var _cooldown := 0.0
@@ -83,8 +97,9 @@ func _ready() -> void:
 	_panel.visible = false
 
 
-func start(data: Dictionary, start_id := "start") -> void:
+func start(data: Dictionary, start_id := "start", ctx: Dictionary = {}) -> void:
 	_data = data
+	context = ctx
 	_active = true
 	_panel.visible = true
 	_panel.modulate.a = 0.0
@@ -99,8 +114,33 @@ func is_active() -> bool:
 	return _active
 
 
+## A condition in this conversation: its own context ("door_mode"), else WorldState's.
+func check(cond: String) -> bool:
+	if context.has(cond):
+		return bool(context[cond])
+	return WorldState.check(cond)
+
+
+## For tests and tools: the answers on screen and whether each can be taken.
+func choice_texts() -> Array:
+	return (_node.get("choices", []) as Array).map(func(c): return Names.fill(c["text"]))
+
+
+func choice_enabled(i: int) -> bool:
+	return not bool(_node["choices"][i].get("disabled", false))
+
+
+func choose(i: int) -> void:
+	_choose(i)
+
+
 func _process(delta: float) -> void:
 	if not _active:
+		return
+	if _auto_t >= 0.0:
+		_auto_t -= delta
+		if _auto_t < 0.0:
+			_show(_node["auto"]["next"])
 		return
 	_cooldown -= delta
 	if _cooldown > 0.0:
@@ -125,15 +165,19 @@ func _show(id: String) -> void:
 	if node.has("branch"):
 		var b: Dictionary = node["branch"]
 		if b.has("if"):
-			_show(b["then"] if WorldState.check(b["if"]) else b["else"])
+			_show(b["then"] if check(b["if"]) else b["else"])
 		else:
 			_show(b["burned"] if WorldState.has_burned(StringName(b["memory"])) else b["intact"])
 		return
+	if node.get("type", "") == "name_challenge":
+		node = _name_challenge(node)
 	if node.has("set"):
 		flag_set.emit(node["set"])
 	for action in node.get("do", []):
 		WorldState.apply(action)
 	_node = node
+	node_id = id
+	_auto_t = float(node["auto"]["after"]) if node.has("auto") else -1.0
 	Audio.play("ui_click", -12.0, 0.05)
 	# "speaker_id" (an NPC id) names the speaker through Names; old trees give "speaker" text.
 	# Burned names are blank in all text, unless the speaker ignores burned names.
@@ -142,7 +186,8 @@ func _show(id: String) -> void:
 	var own_line := speaker == Names.TOKEN
 	_name.text = Names.npc(speaker_id) if speaker_id != &"" else Names.fill(speaker)
 	_name.add_theme_color_override("font_color", EMBER if own_line else GOLD)
-	_text.text = Names.fill(node.get("text", ""), speaker_id)
+	var text: String = tr(node["text_key"]) if node.has("text_key") else node.get("text", "")
+	_text.text = Names.fill(text, speaker_id)
 	_text.visible_ratio = 0.0
 	for c in _choices.get_children():
 		c.queue_free()
@@ -155,6 +200,18 @@ func _show(id: String) -> void:
 	_type_tween = create_tween()
 	_type_tween.tween_property(_text, "visible_ratio", 1.0, maxf(0.3, _text.text.length() * 0.022))
 	_type_tween.tween_callback(_finish_typing)
+	line_shown.emit(node)
+
+
+## "Who is there?" — answered only by the protagonist's name as the UI shows it. A burned
+## name is the blank: it cannot be said, and the node moves on to "fail".
+func _name_challenge(node: Dictionary) -> Dictionary:
+	var n := node.duplicate()
+	var burned := WorldState.has_burned(Names.PROTAGONIST_MEMORY)
+	n["choices"] = [{"text": Names.TOKEN, "next": node["pass"], "disabled": burned, "own": true}]
+	if burned:
+		n["auto"] = {"after": CHALLENGE_WAIT, "next": node["fail"]}
+	return n
 
 
 func _finish_typing() -> void:
@@ -173,6 +230,7 @@ func _finish_typing() -> void:
 			btn.add_theme_color_override("font_color", Color(0.95, 0.72, 0.45))
 			btn.add_theme_color_override("font_hover_color", Color(1.0, 0.85, 0.6))
 			btn.pressed.connect(_choose.bind(i))
+			btn.disabled = bool(choices[i].get("disabled", false))
 			_choices.add_child(btn)
 		_choices.visible = true
 	else:
@@ -190,6 +248,8 @@ func _choose(i: int) -> void:
 	if not _active or _typing:
 		return
 	var c: Dictionary = _node["choices"][i]
+	if bool(c.get("disabled", false)):
+		return
 	Audio.play("ui_select", -10.0, 0.0)
 	if c.has("set"):
 		flag_set.emit(c["set"])
@@ -203,6 +263,8 @@ func _choose(i: int) -> void:
 
 func _end(event: String) -> void:
 	_active = false
+	_auto_t = -1.0
+	context = {}
 	var tw := create_tween().set_parallel()
 	tw.tween_property(_top, "offset_bottom", 0.0, 0.5)
 	tw.tween_property(_bottom, "offset_top", 0.0, 0.5)

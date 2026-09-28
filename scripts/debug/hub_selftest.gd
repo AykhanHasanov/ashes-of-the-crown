@@ -51,6 +51,7 @@ func _run() -> void:
 	for d in _doors.values():
 		d.queue_free()
 	await _scene()
+	await _door_talk()
 	await _travel()
 	_wipe()
 	print("HUB TESTS DONE, failures: ", _fails)
@@ -172,8 +173,9 @@ func _lost_ones() -> void:
 		and tr(NpcRegistry.get_def(&"elvin").lost_one_name_key).contains("annesi") and tr(NpcRegistry.get_def(&"nermin").lost_one_name_key).contains("kocası"))
 	var living_lost: Array = NpcRegistry.all().filter(func(d): return d.lost_one_npc != &"" and NpcRegistry.get_def(d.lost_one_npc).npc_kind == "human")
 	_check("no lost one is a living person: Samir's shade never comes to Nermin's door", living_lost.is_empty(), str(living_lost.map(func(d): return d.id)))
-	var lines: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/hub/door_lines.json"))["lines"]
-	_check("placeholder hook: Nermin notices Samir's shade never knocks", lines.any(func(l): return l["npc"] == "nermin" and tr(l["key"]) != l["key"]))
+	var talk_data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/hub/door_talk.json"))
+	var nermin_night: Array = talk_data["npcs"]["nermin"]["night"]
+	_check("placeholder hook: Nermin notices Samir's shade never knocks", nermin_night.any(func(e): return e is Dictionary and e["key"] == "HUB_NERMIN_NO_SAMIR_PLACEHOLDER" and tr(e["key"]) != e["key"]))
 	WorldState.new_game()
 	_check("Sabir calls Aras by his own name ...", Names.fill("{PROTAGONIST}", &"sabir") == "Aras")
 	WorldState.set_flag(&"sabir_confused")
@@ -310,6 +312,135 @@ func _scene() -> void:
 	await _frames(4)
 	_check("waiting until morning: a new day, doors open, people out", WorldState.get_day_count() == day + 1
 		and lvl.doors["door_sona"].is_open and hub.npcs.body(&"sona") != null)
+
+
+# --- Through-the-door conversations (stage 3) -----------------------------------------------------
+
+func _door_talk() -> void:
+	WorldState.new_game()
+	var hub := await _go(HUB)
+	var lvl = hub.level
+	var talk = hub.door_talk
+	var dlg = hub.dialogue
+	hub.wait_until(21.0)
+	await _frames(4)
+	var sona_door = lvl.doors["door_sona"]
+	_check("B: a warm light under an occupied door at night", sona_door.is_lit)
+	_check("... none under an empty room's door", not lvl.doors["door_sabir"].is_lit)
+	WorldState.kill_npc(&"ehliman", "test")
+	await _frames(2)
+	_check("... none for the dead", not lvl.doors["door_ehliman"].is_lit)
+	# A: knock, who is there, the name
+	hub.player.global_position = hub.door_front(sona_door)
+	var out: String = hub.knock(sona_door)
+	await _typed(dlg)
+	_check("A: knocking at night starts a conversation through the door", out == "door" and dlg.is_active() and dlg.check("door_mode"))
+	_check("A: who is there? — the answer is his name as the UI resolves it", dlg.node_id == "start" and dlg.choice_texts() == ["Aras"] and dlg.choice_enabled(0))
+	_check("the camera closes on the door; the NPC is not seen", talk.door_camera != null and talk.door_camera.current and hub.npcs.body(&"sona") == null)
+	var bus_idx := AudioServer.get_bus_index("Door")
+	_check("F: the NPC's voice goes through the muffled Door bus", talk.last_bus.get("sona") == "Door" and bus_idx >= 0
+		and AudioServer.get_bus_effect(bus_idx, 0) is AudioEffectLowPassFilter)
+	_check("F: Aras's own answer is not muffled", talk.last_bus.get("protagonist") == "Voice" and talk.bus_for(&"protagonist", true) == "Voice")
+	var x0: float = sona_door.shadow_x()
+	await _seconds(0.5)
+	_check("B: while she speaks, a shadow crosses the light", sona_door.speaking and absf(sona_door.shadow_x() - x0) > 0.05)
+	dlg.choose(0)
+	await _typed(dlg)
+	var night_key: String = dlg._node.get("text_key", "")
+	_check("G: the answer comes from her night pool, not the day pool", talk.pool(&"sona", "night").has(night_key) and not talk.pool(&"sona", "day").has(night_key))
+	dlg._advance()
+	await _frames(3)
+	_check("after the talk the player's camera and controls come back", talk.door_camera == null and hub.rig.camera.current and not hub.player.input_locked)
+	# A: a burned name cannot answer; the door refuses and stays silent this night
+	WorldState.burn_memory(&"own_name", &"echo")
+	hub.knock(sona_door)
+	await _typed(dlg)
+	_check("A: with his name burned the answer is the blank and cannot be chosen", dlg.choice_texts() == [tr("NAME_FORGOTTEN")] and not dlg.choice_enabled(0))
+	dlg.choose(0)
+	await _frames(2)
+	_check("... choosing it does nothing", dlg.node_id == "start")
+	await _until(func(): return dlg.node_id == "refuse", 4.0)
+	_check("... the NPC refuses (placeholder)", dlg.node_id == "refuse" and dlg._node.get("text_key", "") == "HUB_NAME_REFUSED")
+	await _typed(dlg)
+	dlg._advance()
+	await _frames(3)
+	_check("... and the door stays silent for the rest of the night (no dialogue box)", hub.knock(sona_door) == "silent" and not dlg.is_active())
+	# C: silence from data
+	WorldState.set_flag(&"domrul_sleeps")
+	_check("C: a silent_if condition: no answer, no dialogue", hub.knock(lvl.doors["door_domrul"]) == "silent" and not dlg.is_active())
+	WorldState.clear_flag(&"domrul_sleeps")
+	WorldState.set_flag(&"hub_all_asleep")
+	_check("C: the default silence (everyone asleep)", hub.knock(lvl.doors["door_kemal_gulcin"]) == "silent")
+	WorldState.clear_flag(&"hub_all_asleep")
+	_check("C: an empty room is silent too", hub.knock(lvl.doors["door_sahbaz"]) == "silent")
+	# Conditional lines: Nermin and Sabir (his name back first)
+	WorldState.new_game()
+	hub.wait_until(21.0)
+	WorldState.rescue_npc(&"nermin")
+	WorldState.rescue_npc(&"sabir")
+	WorldState.set_flag(&"sabir_confused")
+	await _frames(3)
+	hub.knock(lvl.doors["door_nermin"])
+	await _typed(dlg)
+	dlg.choose(0)
+	await _typed(dlg)
+	_check("hook: at night Nermin's first line is that Samir's shade never comes", dlg._node.get("text_key", "") == "HUB_NERMIN_NO_SAMIR_PLACEHOLDER")
+	dlg._advance()
+	await _frames(3)
+	hub.knock(lvl.doors["door_sabir"])
+	await _typed(dlg)
+	dlg.choose(0)
+	await _typed(dlg)
+	_check("hook: Sabir calls him 'Kür' through the door", dlg._text.text.contains("Kür") and not dlg._text.text.contains("Aras"))
+	dlg._advance()
+	await _frames(3)
+	# E: Peri Nene opens at night; face to face
+	var peri_door = lvl.doors["door_peri_nene"]
+	var peri_out: String = hub.knock(peri_door)
+	await _frames(4)
+	await _typed(dlg)
+	_check("E: Peri Nene opens her door at night (allows_night_open)", peri_out == "open" and peri_door.is_open and NpcRegistry.get_def(&"peri_nene").allows_night_open)
+	_check("E: ... and talks face to face: she is there, not muffled, no door camera", hub.npcs.body(&"peri_nene") != null
+		and not dlg.check("door_mode") and talk.door_camera == null and talk.last_bus.get("peri_nene") == "Voice")
+	dlg._advance()
+	await _frames(4)
+	_check("E: afterwards her door closes again", not peri_door.is_open and hub.npcs.body(&"peri_nene") == null)
+	_check("only Peri Nene opens at night", NpcRegistry.all().filter(func(d): return d.allows_night_open).map(func(d): return d.id) == [&"peri_nene"])
+	# D: Aras's own door: listen; the small shade's rhythm
+	var own = lvl.doors["door_protagonist"]
+	var rhythm: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/hub/door_talk.json"))["knocks"]["narin"]["rhythm"]
+	_check("D: his own door at night is only listened at", hub.knock(own) == "listen" and not dlg.is_active() and not own.is_open)
+	await _seconds(float(rhythm.back()) + 0.4)
+	var intervals_ok: bool = talk.knock_log.size() == rhythm.size()
+	for i in range(1, mini(rhythm.size(), talk.knock_log.size())):
+		var want: float = float(rhythm[i]) - float(rhythm[i - 1])
+		var got: float = float(talk.knock_log[i]) - float(talk.knock_log[i - 1])
+		if absf(want - got) > 0.12:
+			intervals_ok = false
+	_check("D: the knock follows the rhythm in data (placeholder for the lullaby)", intervals_ok, str(talk.knock_log))
+	# G: by day, face to face from the day pool
+	hub.wait_until(7.0)
+	await _frames(4)
+	talk.talk(&"sona")
+	await _typed(dlg)
+	var day_key: String = dlg._node.get("text_key", "")
+	_check("G: by day she talks face to face from her day pool", talk.pool(&"sona", "day").has(day_key) and not dlg.check("door_mode") and talk.last_bus.get("sona") == "Voice")
+	dlg._advance()
+	await _frames(2)
+
+
+func _typed(dlg) -> void:
+	await _until(func(): return not dlg._typing, 5.0)
+	await _frames(2)
+
+
+func _until(cond: Callable, timeout: float) -> bool:
+	var start := Time.get_ticks_msec()
+	while (Time.get_ticks_msec() - start) / 1000.0 < timeout:
+		if cond.call():
+			return true
+		await get_tree().process_frame
+	return bool(cond.call())
 
 
 func _travel() -> void:

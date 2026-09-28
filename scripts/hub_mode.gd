@@ -4,6 +4,7 @@ extends "res://scripts/chapter_base.gd"
 ## behind them at night. The clock does not run here: it moves only when the protagonist
 ## waits at the hearth (until night / until morning) or when the story sets it; waiting
 ## autosaves. The road leads back to the valley (HubTravel).
+## Talking: by day face to face; at night through the doors (scripts/hub/door_talk.gd).
 ## Region "son_ocaq": Continue on a save made here comes back here.
 
 const HubLevel := preload("res://scripts/hub/hub_level.gd")
@@ -13,14 +14,19 @@ const Protagonist := preload("res://scripts/player_v3/protagonist.gd")
 const TPCamera := preload("res://scripts/camera/third_person_camera.gd")
 const NpcSpawner := preload("res://scripts/npc/npc_spawner.gd")
 const DebugMenu := preload("res://scripts/debug/debug_menu.gd")
+const DoorTalk := preload("res://scripts/hub/door_talk.gd")
 
 const HEARTH_RANGE := 2.9
+const DOOR_RANGE := 1.9          # from the point just in front of a door
+const TALK_RANGE_DAY := 2.4
 const GATE_RANGE := 2.6
 const ENTRY_PITCH := -8.0   # on entry the camera looks up a little: sky, hearth and upper storey in view
 
 var npcs                          # NpcSpawner
 var hearth_menu
 var debug
+var door_talk                     # DoorTalk
+var _night_guests := {}           # NPCs at their open door at night (Peri Nene)
 
 
 func _make_level() -> Node3D:
@@ -44,6 +50,13 @@ func _setup() -> void:
 	hearth_menu = HubHearthMenu.new()
 	add_child(hearth_menu)
 	hearth_menu.wait_requested.connect(wait_until)
+	door_talk = DoorTalk.new()
+	door_talk.name = "DoorTalk"
+	door_talk.dialogue = dialogue
+	door_talk.level = level
+	door_talk.mode = self
+	add_child(door_talk)
+	door_talk.finished.connect(func(): player.input_locked = false)
 	EventBus.time_of_day_changed.connect(func(_p): npcs.queue_refresh())
 	EventBus.flag_changed.connect(func(_k, _o, _n): npcs.queue_refresh())
 	debug = DebugMenu.new()
@@ -53,6 +66,11 @@ func _setup() -> void:
 	debug.button("Sabah (07:00)", func(): wait_until(HubHearthMenu.MORNING_HOUR))
 	debug.button("Rüfet katılsın / ayrılsın", func():
 		WorldState.move_npc(&"rufet", "" if WorldState.get_npc_location(&"rufet") == WorldState.PARTY else WorldState.PARTY))
+	debug.button("Sessiz gece (herkes uyusun)", func():
+		if WorldState.has_flag(&"hub_all_asleep"):
+			WorldState.clear_flag(&"hub_all_asleep")
+		else:
+			WorldState.set_flag(&"hub_all_asleep"))
 	debug.button("Herkesi kurtar", func():
 		for p in HubData.places():
 			for r in p["residents"]:
@@ -114,15 +132,26 @@ func wait_until(hour: float) -> void:
 ## Where a resident of Son Ocaq stands: by day at their workplace or their own door; at night
 ## behind their door (nowhere).
 func _npc_spot(npc_id: StringName, location_id: String) -> Variant:
-	if location_id != WorldState.SON_OCAQ or WorldState.get_phase() == &"night":
+	if location_id != WorldState.SON_OCAQ:
+		return null
+	if WorldState.get_phase() == &"night" and not _night_guests.has(npc_id):
 		return null
 	var place := HubData.day_place_of(String(npc_id))   # a workplace (smithy, bakery) or their room
 	return level.stand_point(place) if place != "" else null
 
 
+## Someone who opens their door at night (allows_night_open) stands in it for the talk.
+func night_guest(npc_id: StringName, on: bool) -> void:
+	if on:
+		_night_guests[npc_id] = true
+	else:
+		_night_guests.erase(npc_id)
+	npcs.queue_refresh()
+
+
 func _tick(_delta: float) -> void:
 	_update_mouse()
-	if player.dead or get_tree().paused:
+	if player.dead or get_tree().paused or dialogue.is_active():
 		return
 	_interact()
 
@@ -142,11 +171,65 @@ func _interact() -> void:
 		return
 	if near_prompt(level.gate_pos, GATE_RANGE, tr("HUB_PROMPT_GATE")):
 		HubTravel.leave(get_tree())
+		return
+	if WorldState.get_phase() == &"night":
+		var door = nearest_door()
+		if door != null:
+			var own := HubData.residents_of(door.place_id).has(HubData.PROTAGONIST)
+			if near_prompt(door_front(door), DOOR_RANGE, tr("HUB_PROMPT_LISTEN") if own else tr("HUB_PROMPT_KNOCK")):
+				knock(door)
+			return
+	else:
+		var who = nearest_resident()
+		if who != null and near_prompt(who.global_position, TALK_RANGE_DAY, tr("HUB_PROMPT_TALK")):
+			player.input_locked = true
+			player.face_towards(who.global_position)
+			door_talk.talk(who.npc_id)
+			return
+	hud.set_prompt("")
+
+
+## Knock on (or, his own, listen at) a door at night.
+func knock(door) -> String:
+	player.input_locked = true
+	player.face_towards(door.global_position)
+	var outcome: String = door_talk.knock(door)
+	if outcome in ["silent", "listen"]:
+		player.input_locked = false
+	return outcome
+
+
+func door_front(door) -> Vector3:
+	return door.global_position + door.global_basis.z * 1.0
+
+
+func nearest_door():
+	var best = null
+	var best_d := DOOR_RANGE
+	for d in level.doors.values():
+		var dist: float = player.global_position.distance_to(door_front(d))
+		if dist < best_d:
+			best_d = dist
+			best = d
+	return best
+
+
+func nearest_resident():
+	var best = null
+	var best_d := TALK_RANGE_DAY
+	for b in npcs.bodies.values():
+		if is_instance_valid(b) and b.get("npc_id") != null and not b.has_method("help_up"):
+			var dist: float = player.global_position.distance_to(b.global_position)
+			if dist < best_d:
+				best_d = dist
+				best = b
+	return best
 
 
 # --- Capture demos -------------------------------------------------------------------------------
 
-## hub_day | hub_night | hub_doors (the north row by day) | hub_leave (out to the valley)
+## hub_day | hub_night | hub_doors (the north row by day) | hub_leave (out to the valley) |
+## hub_door_talk (night: knock on Sona's door and answer) | hub_door_burned (the same, name burned)
 func _demo_setup() -> void:
 	match Settings.demo:
 		"hub_day", "hub_doors":
@@ -161,6 +244,19 @@ func _demo_setup() -> void:
 			# Walk out of the gate: back to the valley, at the road's sign
 			_demo_view(Vector3(0, 0, 9.0), Vector3(0, 1.5, 14.0))
 			get_tree().create_timer(1.5).timeout.connect(func(): HubTravel.leave(get_tree()))
+		"hub_door_talk", "hub_door_burned":
+			# Night: knock on Sona's door and answer who is there (burned: the name is gone)
+			if Settings.demo == "hub_door_burned":
+				WorldState.burn_memory(&"own_name", &"echo")
+			WorldState.set_time_of_day(22.0)
+			level.day_night.set_hour(22.0)
+			get_tree().create_timer(1.2).timeout.connect(func():
+				var door = level.doors["door_sona"]
+				player.global_position = door_front(door) - door.global_basis.x * 0.9 + Vector3(0, 0.1, 0)
+				knock(door)
+				get_tree().create_timer(2.4).timeout.connect(func():
+					if dialogue.is_active() and dialogue.choice_texts().size() > 0:
+						dialogue.choose(0)))
 		"hub_night":
 			WorldState.set_time_of_day(22.0)
 			level.day_night.set_hour(22.0)
