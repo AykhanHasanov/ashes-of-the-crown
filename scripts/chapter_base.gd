@@ -17,6 +17,7 @@ const RadialMenu := preload("res://scripts/ui/radial_menu.gd")
 const AshOffer := preload("res://scripts/ui/ash_offer.gd")
 const Balance := preload("res://scripts/systems/balance.gd")
 const EchoDirector := preload("res://scripts/echoes/echo_director.gd")
+const HubTravel := preload("res://scripts/hub/hub_travel.gd")
 
 const CHAPTER_SCENES := {1: "res://scenes/main.tscn", 2: "res://scenes/chapter2.tscn"}
 const TALK_RANGE := 3.0
@@ -100,6 +101,8 @@ func _ready() -> void:
 	_begin(mode)
 	if EchoDirector.returning:
 		_return_from_echo(EchoDirector.consume_return())
+	if HubTravel.returning:
+		_arrive_from_hub(HubTravel.consume_return())
 
 
 # --- Overridables ---------------------------------------------------------------
@@ -121,6 +124,18 @@ func _return_from_echo(ctx: Dictionary) -> void:
 			get_tree().create_timer(0.6).timeout.connect(player.unleash_memory_fire)
 	else:
 		hud.banner(tr("ECHO_KEPT"))
+
+
+## Back from Son Ocaq: stand where he stood when he took the road. The valley overrides
+## this (no remembered spot: the road's sign).
+func _arrive_from_hub(ctx: Dictionary) -> void:
+	if not ctx.has("position"):
+		return
+	player.global_position = ctx["position"]
+	player.velocity = Vector3.ZERO
+	if player.has_method("face_towards"):
+		player.face_towards(Vector3(ctx["position"]) - Vector3(ctx["facing"]))   # turned away from the road
+	rig.snap()
 
 
 func _make_level() -> Node3D:

@@ -2,7 +2,7 @@ extends Node3D
 ## A Son Ocaq door: a stable id, the place (room) it belongs to, and whether it is open.
 ## A view of derived state (HubData.door_open): it re-reads WorldState whenever time,
 ## people or overrides change, swings its leaf and announces EventBus.door_changed.
-## The leaf hinges on the door's left edge; closed, it blocks the doorway.
+## The leaf hinges on the door's left edge and swings out; closed, it blocks the doorway.
 
 const HubData := preload("res://scripts/hub/hub_data.gd")
 const LEAF := "res://assets/village_mk/Door_1_Round.gltf"
@@ -31,7 +31,7 @@ func _ready() -> void:
 	add_child(_hinge)
 	if ResourceLoader.exists(LEAF):
 		var leaf: Node3D = load(LEAF).instantiate()
-		leaf.position = Vector3(WIDTH * 0.5, 0, 0)
+		leaf.position = Vector3.ZERO   # the leaf's origin is its hinge side (as tools/build_houses.gd places it)
 		_hinge.add_child(leaf)
 	var body := StaticBody3D.new()
 	_blocker = CollisionShape3D.new()

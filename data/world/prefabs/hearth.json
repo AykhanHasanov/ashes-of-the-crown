@@ -63,6 +63,16 @@
 				0,
 				0
 			]
+		},
+		{
+			"kind": "hub_gate",
+			"p": [
+				5.5,
+				0,
+				4.0
+			],
+			"only": "hearth_west",
+			"_about": "The road to Son Ocaq (placeholder sign). 'only': this POI alone."
 		}
 	]
 }

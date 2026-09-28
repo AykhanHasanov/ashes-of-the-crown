@@ -10,7 +10,7 @@ const CHEST_OPEN := "res://assets/quaternius/rpg_items_pack/Chest_Open.glb"
 
 const EchoRegistry := preload("res://scripts/core/echo_registry.gd")
 
-var kind := ""            # hearth | chest | echo | memory_echo
+var kind := ""            # hearth | chest | echo | memory_echo | hub_gate
 var poi: Dictionary
 var data: Dictionary
 var key := ""
@@ -42,6 +42,9 @@ func _ready() -> void:
 		"memory_echo":
 			use_range = 2.2
 			_build_memory_ember()
+		"hub_gate":
+			use_range = 2.6
+			_build_gate_sign()
 
 
 ## A small glowing ember hovering over the ground: the placeholder look of a lost memory.
@@ -64,6 +67,31 @@ func _build_memory_ember() -> void:
 	_light.position.y = 1.1
 	add_child(_light)
 	visible = not is_used()
+
+
+## The road to Son Ocaq: a post with a lantern (placeholder sign).
+func _build_gate_sign() -> void:
+	var wood := StandardMaterial3D.new()
+	wood.albedo_color = Color(0.24, 0.16, 0.1)
+	wood.roughness = 0.9
+	for part in [[Vector3(0.16, 2.5, 0.16), Vector3(0, 1.25, 0)], [Vector3(0.9, 0.12, 0.12), Vector3(0.35, 2.25, 0)]]:
+		var mi := MeshInstance3D.new()
+		var bm := BoxMesh.new()
+		bm.size = part[0]
+		bm.material = wood
+		mi.mesh = bm
+		mi.position = part[1]
+		add_child(mi)
+	if ResourceLoader.exists("res://assets/props_mk/Lantern_Wall.gltf"):
+		var lantern: Node3D = load("res://assets/props_mk/Lantern_Wall.gltf").instantiate()
+		lantern.position = Vector3(0.7, 1.75, 0)
+		add_child(lantern)
+	_light = OmniLight3D.new()
+	_light.light_color = Color(1.0, 0.6, 0.3)
+	_light.light_energy = 1.4
+	_light.omni_range = 6.0
+	_light.position = Vector3(0.3, 2.0, 0)
+	add_child(_light)
 
 
 func hearth_id() -> String:
@@ -94,6 +122,8 @@ func prompt() -> String:
 			return "[E]  Taşa dokun" if not is_used() else "[E]  Yeniden oku"
 		"memory_echo":
 			return "" if is_used() else tr("ECHO_PROMPT_EMBER")
+		"hub_gate":
+			return tr("WORLD_PROMPT_HUB_GATE")
 	return ""
 
 

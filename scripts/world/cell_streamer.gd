@@ -174,6 +174,8 @@ func _make_full(p: Dictionary) -> void:
 		extras.append(n)
 	for i in prefab.get("interact", []).size():
 		var def: Dictionary = prefab["interact"][i]
+		if def.has("only") and def["only"] != id:
+			continue   # an entry meant for one POI of a shared prefab
 		var it := Interactable.new()
 		it.kind = def["kind"]
 		it.poi = p

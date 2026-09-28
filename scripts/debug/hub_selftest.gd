@@ -7,6 +7,11 @@ extends Node
 const HubData := preload("res://scripts/hub/hub_data.gd")
 const Door := preload("res://scripts/hub/door.gd")
 const NpcRegistry := preload("res://scripts/core/npc_registry.gd")
+const HubTravel := preload("res://scripts/hub/hub_travel.gd")
+const HubLevel := preload("res://scripts/hub/hub_level.gd")
+const HUB := "res://scenes/son_ocaq.tscn"
+const HOST := "res://scenes/tests/echo_host.tscn"
+const TEST_DIR := "user://test_hub_saves/"
 
 ## STORY_BIBLE Act I: these live in Son Ocaq from the start; the others are brought in.
 const START_IN_HUB := [&"domrul", &"ehliman", &"gulcin", &"kemal", &"peri_nene", &"sona"]
@@ -22,7 +27,17 @@ var _phases: Array = []
 func _ready() -> void:
 	EventBus.door_changed.connect(func(id, open): _door_events.append([id, open]))
 	EventBus.time_of_day_changed.connect(func(p): _phases.append(p))
-	_run.call_deferred()
+	SaveManager.directory = TEST_DIR
+	SaveManager.allow_in_demo = true
+	# Scene changes must not free the test: hand the "current scene" role to a dummy
+	var dummy := Node.new()
+	get_tree().root.add_child.call_deferred(dummy)
+	_start.call_deferred(dummy)
+
+
+func _start(dummy: Node) -> void:
+	get_tree().current_scene = dummy
+	_run()
 
 
 func _run() -> void:
@@ -31,6 +46,11 @@ func _run() -> void:
 	_grief_and_services()
 	_lost_ones()
 	_migration()
+	for d in _doors.values():
+		d.queue_free()
+	await _scene()
+	await _travel()
+	_wipe()
 	print("HUB TESTS DONE, failures: ", _fails)
 	get_tree().quit(_fails)
 
@@ -167,6 +187,116 @@ func _migration() -> void:
 	bad["world"]["doors"]["door_x"] = "ajar"
 	var norm := WorldState.normalize(JSON.parse_string(JSON.stringify(bad)))
 	_check("door overrides survive a save; invalid states are dropped", norm["world"]["doors"] == {"door_sahbaz": "closed"})
+
+
+# --- The hub scene (stage 2) --------------------------------------------------------------------
+
+func _scene() -> void:
+	WorldState.new_game()
+	SaveManager.active_slot = 1
+	WorldState.set_time_of_day(10.0)
+	var hub := await _go(HUB)
+	var lvl = hub.level
+	var room_doors: Array = HubData.places().filter(func(p): return p["kind"] == "room").map(func(p): return p["door"])
+	_check("the scene builds a live Door for every place", lvl.doors.keys().size() == HubData.places().size()
+		and HubData.places().all(func(p): return lvl.doors.has(p["door"]) and lvl.doors[p["door"]].place_id == p["id"]))
+	_check("entering Son Ocaq sets the region", WorldState.get_region() == &"son_ocaq")
+	# From the hearth every courtyard door is in sight: nothing between the fire and the door
+	var space: PhysicsDirectSpaceState3D = hub.get_world_3d().direct_space_state
+	var eye: Vector3 = lvl.hearth_pos + Vector3(0, 1.6, 0)
+	var hidden: Array = []
+	for id in room_doors:
+		var door: Node3D = lvl.doors[id]
+		var target: Vector3 = door.global_position + Vector3(0, 1.2, 0) + door.global_basis.z * 0.25
+		var q := PhysicsRayQueryParameters3D.create(eye, target)
+		q.exclude = [hub.player.get_rid()]
+		var hit := space.intersect_ray(q)
+		if not hit.is_empty() and hit["position"].distance_to(target) > 0.6:
+			hidden.append(id)
+	_check("from the hearth, every courtyard door is visible", hidden.is_empty(), str(hidden))
+	var outside: Array = HubData.places().filter(func(p): return p["kind"] == "outside")
+	_check("outside the walls: the smithy and the bakery", outside.size() == 2 and outside.all(func(p): return lvl.doors[p["door"]].global_position.z > HubLevel.SOUTH_Z))
+	await _frames(4)
+	var sona = hub.npcs.body(&"sona")
+	_check("by day, residents stand at their own door", sona != null and sona.global_position.distance_to(lvl.stand_point("room_sona")) < 0.5
+		and hub.npcs.body(&"sabir") == null)
+	var t: float = WorldState.get_time_of_day()
+	await _seconds(1.0)
+	_check("the hub's clock does not run", is_equal_approx(WorldState.get_time_of_day(), t) and is_equal_approx(lvl.day_night.hour, t))
+	_phases.clear()
+	hub.wait_until(21.0)
+	await _frames(4)
+	_check("waiting at the hearth until night: the phase changes, the doors close", _phases == [&"night"]
+		and lvl.doors.values().all(func(d): return not d.is_open) and is_equal_approx(lvl.day_night.hour, 21.0))
+	_check("at night residents are behind their doors (no bodies)", hub.npcs.body(&"sona") == null)
+	var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(SaveManager.slot_path(1)))
+	_check("resting at the hearth autosaves (clock, region)", saved is Dictionary and is_equal_approx(float(saved["world"]["time_of_day"]), 21.0)
+		and saved["player"]["current_region"] == "son_ocaq")
+	var day := WorldState.get_day_count()
+	hub.wait_until(7.0)
+	await _frames(4)
+	_check("waiting until morning: a new day, doors open, people out", WorldState.get_day_count() == day + 1
+		and lvl.doors["door_sona"].is_open and hub.npcs.body(&"sona") != null)
+
+
+func _travel() -> void:
+	# From another place to Son Ocaq and back (the valley does the same through its road sign)
+	WorldState.new_game()
+	var host := await _go(HOST)
+	var at := Vector3(3.0, host.player.global_position.y, -4.0)
+	host.player.global_position = at
+	await _frames(20)
+	at = host.player.global_position
+	HubTravel.enter(host, host.player, 19.5)
+	var hub := await _scene_loaded(HUB)
+	_check("the road leads to Son Ocaq, keeping the clock", hub != null and is_equal_approx(WorldState.get_time_of_day(), 19.5)
+		and is_equal_approx(hub.level.day_night.hour, 19.5))
+	_check("... and he arrives at the gate", hub.player.global_position.distance_to(hub.level.player_spawn) < 1.0)
+	HubTravel.leave(get_tree())
+	var back := await _scene_loaded(HOST)
+	_check("leaving puts him back where he took the road", back.player.global_position.distance_to(at) < 0.3,
+		"%s vs %s" % [back.player.global_position, at])
+	_check("Continue knows the hub: a save made there reopens it", load("res://scripts/main.gd").REGION_SCENES.get(&"son_ocaq") == HUB)
+	# Leaving a hub that was continued from a save goes to the valley's road sign
+	HubTravel._ctx = {}
+	HubTravel.returning = false
+	_check("without a remembered spot (a save continued in the hub), the road leads to the valley", HubTravel.return_scene() == HubTravel.VALLEY_SCENE)
+
+
+func _go(path: String) -> Node:
+	get_tree().change_scene_to_file(path)
+	return await _scene_loaded(path)
+
+
+func _scene_loaded(path: String) -> Node:
+	var start := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - start < 20000:
+		var c = get_tree().current_scene
+		if c != null and c.scene_file_path == path and c.get("player") != null and c.player.is_inside_tree():
+			await _frames(5)
+			return get_tree().current_scene
+		await get_tree().process_frame
+	_check("scene %s came up" % path, false)
+	return null
+
+
+func _seconds(s: float) -> void:
+	var start := Time.get_ticks_msec()
+	while (Time.get_ticks_msec() - start) / 1000.0 < s:
+		await get_tree().process_frame
+
+
+func _frames(n: int) -> void:
+	for i in n:
+		await get_tree().process_frame
+
+
+func _wipe() -> void:
+	var full := ProjectSettings.globalize_path(TEST_DIR)
+	if DirAccess.dir_exists_absolute(full):
+		for f in DirAccess.get_files_at(TEST_DIR):
+			DirAccess.remove_absolute(full.path_join(f))
+		DirAccess.remove_absolute(full)
 
 
 func _check(label: String, ok: bool, detail := "") -> void:

@@ -128,6 +128,28 @@ func _begin(_mode: String) -> void:
 	npcs.queue_refresh()
 
 
+## Back from Son Ocaq: where he stood when he left, or at the road's sign by Geçit Ocağı.
+func _arrive_from_hub(ctx: Dictionary) -> void:
+	var at: Vector3 = ctx["position"] if ctx.has("position") else hub_gate_position()
+	player.global_position = at + Vector3(0, 0.3, 0)
+	player.velocity = Vector3.ZERO
+	player._fall_from = NAN
+	if ctx.has("facing"):
+		player.face_towards(at - Vector3(ctx["facing"]))   # turned away from the road
+	rig.snap()
+	level.streamer.refresh()
+
+
+## The valley end of the road to Son Ocaq (the hearth prefab's hub_gate entry).
+func hub_gate_position() -> Vector3:
+	for d in DataDB.prefab("hearth").get("interact", []):
+		if d["kind"] == "hub_gate":
+			var p: Dictionary = level.streamer.poi_by_id(d["only"])
+			var at := Vector3(float(p["pos"][0]) + float(d["p"][0]), 0, float(p["pos"][2]) + float(d["p"][2]))
+			at.y = level.height_at(at.x, at.z)
+			return at
+	return level.player_spawn
+
 ## Puts the saved player stats, clock, map and last hearth back into the running world.
 func _apply_saved_state() -> void:
 	world_map.fog_from_string(String(WorldState.get_world_value(&"fog", "")))
@@ -315,6 +337,8 @@ func _use(it) -> void:
 			_save()
 		"memory_echo":
 			EchoDirector.enter(StringName(it.data["echo"]), self, player, level.day_night.hour)
+		"hub_gate":
+			HubTravel.enter(self, player, level.day_night.hour)
 		"echo":
 			WorldState.add_world_entry("echoes", it.key)
 			hud.show_whisper(Names.fill(it.data["text"]))
@@ -738,6 +762,12 @@ func _demo_setup() -> void:
 					ep = p
 			_demo_view(Vector3(ep["pos"][0] + 3.5, 0, ep["pos"][2] + 1.0), Vector3(ep["pos"][0] + 3.5, ep["pos"][1] + 1.0, ep["pos"][2] - 2.5), 8.0)
 			get_tree().create_timer(2.5).timeout.connect(func(): EchoDirector.enter(&"test_echo", self, player, level.day_night.hour))
+		"world_hub_gate":
+			# The road to Son Ocaq by Geçit Ocağı; walk it after a moment
+			level.day_night.set_hour(10.5)
+			var g := hub_gate_position()
+			_demo_view(g + Vector3(-3.0, 0, 4.0), g + Vector3(0, 1.5, 0), 8.0)
+			get_tree().create_timer(2.5).timeout.connect(func(): HubTravel.enter(self, player, level.day_night.hour))
 		"world_ally":
 			# Rüfət joins; a bandit comes at them both
 			level.day_night.set_hour(11.0)

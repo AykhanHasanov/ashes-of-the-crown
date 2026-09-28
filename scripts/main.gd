@@ -108,10 +108,14 @@ func _menu() -> void:
 		_continue_save())
 
 
+## Regions that have their own scene; any other region is a V2 chapter.
+const REGION_SCENES := {&"kur_vadisi": "res://scenes/world.tscn", &"son_ocaq": "res://scenes/son_ocaq.tscn"}
+
+
 func _continue_save() -> void:
-	if WorldState.get_region() == &"kur_vadisi":
+	if REGION_SCENES.has(WorldState.get_region()):
 		restart_mode = "checkpoint"
-		get_tree().change_scene_to_file("res://scenes/world.tscn")
+		get_tree().change_scene_to_file(REGION_SCENES[WorldState.get_region()])
 		return
 	if WorldState.get_chapter() != 1:
 		go_to_chapter(WorldState.get_chapter())
