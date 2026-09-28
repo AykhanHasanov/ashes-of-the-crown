@@ -29,12 +29,13 @@ const NORTH_Z := -6.0        # room facades (the courtyard, gallery included, is
 const SIDE_X := 8.0
 const SOUTH_Z := 6.0
 const GATE_HALF := 2.0
+const EYVAN_H := 7.0         # the entrance portal rises above the 3.3 m roofs
 
-var player_spawn := Vector3(0, 0.1, 3.2)
+var player_spawn := Vector3(0, 0.1, 2.4)   # the open courtyard: sky, hearth and upper storey in view
 var braziers: Array = []
 var day_night
-var hearth_pos := Vector3.ZERO
-var hearth_radius := 1.5
+var hearth_pos := Vector3(0, 0, -0.8)   # a little north of centre: the gate side stays open
+var hearth_radius := 1.7
 var gate_pos := Vector3(0, 0, SOUTH_Z + ROOM_DEPTH - 0.4)
 var doors: Dictionary = {}           # door id -> Door
 var fronts: Dictionary = {}          # place id -> {door: Transform3D, window: Transform3D}
@@ -96,7 +97,7 @@ static func place_transform(p: Dictionary) -> Transform3D:
 		"e":
 			return Transform3D(Basis(Vector3.UP, -PI * 0.5), Vector3(SIDE_X, 0, -4.0 + 4.0 * slot))
 		"s":
-			return Transform3D(Basis(Vector3.UP, PI), Vector3(-4.0 + 8.0 * slot, 0, SOUTH_Z))
+			return Transform3D(Basis(Vector3.UP, PI), Vector3(-5.0 + 10.0 * slot, 0, SOUTH_Z))
 	return Transform3D.IDENTITY
 
 
@@ -146,19 +147,28 @@ func _room(p: Dictionary, xf: Transform3D) -> void:
 		_prop(root, prop, Vector3(2.9, 0, 1.6), 0.0)
 
 
-## The south side beside the two south rooms, and the gate passage walls.
+## The south side: the entrance portal (eyvan) in the middle — a tall arched frame rising
+## above the roofs over a high vaulted passage — and plain wall beside the two south rooms.
 func _south_fillers() -> void:
+	var ph := EYVAN_H
 	for s in [-1.0, 1.0]:
-		var root := Node3D.new()
-		root.transform = Transform3D(Basis(Vector3.UP, PI), Vector3(s * 7.0, 0, SOUTH_Z))
-		add_child(root)
-		_put(root, "Wall_Plaster_Straight", Vector3.ZERO)
-		_box(root, Vector3(MODULE, ROOM_H, ROOM_DEPTH), Vector3(0, ROOM_H * 0.5, -ROOM_DEPTH * 0.5 - 0.3), _plaster)
-		# The passage walls and the gate's tall frame
-		_box(self, Vector3(0.6, ROOM_H, ROOM_DEPTH), Vector3(s * (GATE_HALF + 0.3), ROOM_H * 0.5, SOUTH_Z + ROOM_DEPTH * 0.5 + 0.3), _brick)
-		_box(self, Vector3(0.9, ROOM_H + 1.6, 1.0), Vector3(s * (GATE_HALF + 0.45), (ROOM_H + 1.6) * 0.5, SOUTH_Z + ROOM_DEPTH + 0.3), _stone)
-	_box(self, Vector3(GATE_HALF * 2.0 + 1.8, 1.1, 1.0), Vector3(0, ROOM_H + 1.05, SOUTH_Z + ROOM_DEPTH + 0.3), _stone)   # gate lintel
-	_box(self, Vector3(GATE_HALF * 2.0, 0.3, ROOM_DEPTH), Vector3(0, ROOM_H + 0.15, SOUTH_Z + ROOM_DEPTH * 0.5 + 0.3), _brick)   # passage roof
+		# Plain wall between the south rooms and the corners
+		_box(self, Vector3(1.0, ROOM_H, ROOM_DEPTH + 0.3), Vector3(s * (SIDE_X - 0.5), ROOM_H * 0.5, SOUTH_Z + ROOM_DEPTH * 0.5 + 0.15), _plaster)
+		# The portal's piers (courtyard face) and the passage walls, full height
+		_box(self, Vector3(1.0, ph, 1.2), Vector3(s * (GATE_HALF + 0.5), ph * 0.5, SOUTH_Z + 0.3), _stone)
+		_box(self, Vector3(0.6, ph - 0.6, ROOM_DEPTH), Vector3(s * (GATE_HALF + 0.3), (ph - 0.6) * 0.5, SOUTH_Z + ROOM_DEPTH * 0.5 + 0.3), _brick)
+		_box(self, Vector3(0.9, ph, 1.0), Vector3(s * (GATE_HALF + 0.45), ph * 0.5, SOUTH_Z + ROOM_DEPTH + 0.3), _stone)
+	# The arch of the eyvan: a big MegaKit arch in the frame, the frame's top, the vault
+	var arch := _model(KIT % "Wall_Arch")
+	if arch:
+		arch.scale = Vector3(GATE_HALF, (ph - 1.0) / 3.0, 1.0)
+		arch.position = Vector3(0, 0, SOUTH_Z - 0.05)
+		arch.rotation.y = PI
+		add_child(arch)
+	_box(self, Vector3(GATE_HALF * 2.0 + 2.0, 1.0, 1.2), Vector3(0, ph - 0.5, SOUTH_Z + 0.3), _stone)
+	_box(self, Vector3(GATE_HALF * 2.0 + 2.4, 0.4, 1.4), Vector3(0, ph + 0.2, SOUTH_Z + 0.3), _brick)   # cornice
+	_box(self, Vector3(GATE_HALF * 2.0, 0.4, ROOM_DEPTH), Vector3(0, ph - 0.6, SOUTH_Z + ROOM_DEPTH * 0.5 + 0.3), _brick)   # vault
+	_box(self, Vector3(GATE_HALF * 2.0 + 1.8, 1.1, 1.0), Vector3(0, ph - 0.55, SOUTH_Z + ROOM_DEPTH + 0.3), _stone)   # outer lintel
 
 
 ## Solid blocks where the rows meet.
@@ -170,14 +180,14 @@ func _corners() -> void:
 				(NORTH_Z - ROOM_DEPTH * 0.5 - 0.15) if sz < 0.0 else (SOUTH_Z + ROOM_DEPTH * 0.5 + 0.15)), _plaster)
 
 
-## The arched gallery: brick piers, MegaKit arches between them and a flat roof back to the rooms.
+## The arched gallery on the north, west and east sides: brick piers, MegaKit arches between
+## them and a flat roof back to the rooms. The south (gate) side is open to the sky.
 func _gallery() -> void:
 	var sides := [
 		# [line origin, along axis, count of modules, rotation, start]
 		[Vector3(0, 0, NORTH_Z + GALLERY), Vector3.RIGHT, 8, 0.0, -SIDE_X],
 		[Vector3(-SIDE_X + GALLERY, 0, 0), Vector3.BACK, 6, PI * 0.5, NORTH_Z],
 		[Vector3(SIDE_X - GALLERY, 0, 0), Vector3.BACK, 6, -PI * 0.5, NORTH_Z],
-		[Vector3(0, 0, SOUTH_Z - GALLERY), Vector3.RIGHT, 8, PI, -SIDE_X],
 	]
 	for side in sides:
 		var line: Vector3 = side[0]
@@ -207,10 +217,9 @@ func _gallery() -> void:
 		_box(self, roof_size, centre - inward * (GALLERY * 0.5 - 0.15) + Vector3(0, 3.15, 0), _brick)
 		var parapet := Vector3(length, 0.45, 0.25) if axis == Vector3.RIGHT else Vector3(0.25, 0.45, length)
 		_box(self, parapet, centre + Vector3(0, 3.5, 0), _brick)
-	# Corner squares of the gallery roof
+	# Corner squares of the gallery roof (north corners; the south side has no gallery)
 	for sx in [-1.0, 1.0]:
-		for sz in [-1.0, 1.0]:
-			_box(self, Vector3(GALLERY, 0.3, GALLERY), Vector3(sx * (SIDE_X - GALLERY * 0.5), 3.15, sz * ((SOUTH_Z if sz > 0.0 else -NORTH_Z) - GALLERY * 0.5)), _brick)
+		_box(self, Vector3(GALLERY, 0.3, GALLERY), Vector3(sx * (SIDE_X - GALLERY * 0.5), 3.15, NORTH_Z + GALLERY * 0.5), _brick)
 
 
 ## A pier here would stand in the line between the hearth and a courtyard door: leave it out
@@ -273,59 +282,87 @@ func _ground() -> void:
 	add_child(yard)
 
 
-## A built hearth: a round stone base, slightly raised, a ring of dressed stones, coals.
+## The hearth: low and wide — one course of dressed stones around a bed of embers and logs,
+## the flames rising above the rim, ash trodden into the ground around it. Placeholder
+## flames until the mood pass.
 func _hearth() -> void:
 	var root := Node3D.new()
 	root.name = "Hearth"
+	root.position = hearth_pos
 	add_child(root)
-	var base := MeshInstance3D.new()
-	var cyl := CylinderMesh.new()
-	cyl.top_radius = hearth_radius
-	cyl.bottom_radius = hearth_radius + 0.1
-	cyl.height = 0.2
-	cyl.material = _stone
-	base.mesh = cyl
-	base.position.y = 0.1
-	root.add_child(base)
-	for i in 18:
-		var a := TAU * i / 18.0
+	var ash := MeshInstance3D.new()
+	var ash_disc := CylinderMesh.new()
+	ash_disc.top_radius = hearth_radius + 1.1
+	ash_disc.bottom_radius = hearth_radius + 1.1
+	ash_disc.height = 0.01
+	var ash_mat := StandardMaterial3D.new()
+	ash_mat.albedo_color = Color(0.16, 0.15, 0.14, 0.75)
+	ash_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	ash_disc.material = ash_mat
+	ash.mesh = ash_disc
+	ash.position.y = 0.03
+	root.add_child(ash)
+	for i in 22:
+		var a := TAU * i / 22.0
 		var stone := MeshInstance3D.new()
 		var bm := BoxMesh.new()
-		bm.size = Vector3(0.42, 0.22, 0.3)
-		bm.material = _brick
+		bm.size = Vector3(0.44, 0.2, 0.34)
+		bm.material = _stone
 		stone.mesh = bm
-		stone.position = Vector3(cos(a) * (hearth_radius - 0.2), 0.31, sin(a) * (hearth_radius - 0.2))
+		stone.position = Vector3(cos(a) * hearth_radius, 0.1, sin(a) * hearth_radius)
 		stone.rotation.y = -a + PI * 0.5
 		root.add_child(stone)
-	var coals := MeshInstance3D.new()
+	var bed := MeshInstance3D.new()
 	var disc := CylinderMesh.new()
-	disc.top_radius = hearth_radius - 0.4
-	disc.bottom_radius = hearth_radius - 0.4
-	disc.height = 0.05
-	disc.material = _dark
-	coals.mesh = disc
-	coals.position.y = 0.22
-	root.add_child(coals)
+	disc.top_radius = hearth_radius - 0.15
+	disc.bottom_radius = hearth_radius - 0.1
+	disc.height = 0.08
+	var embers := StandardMaterial3D.new()
+	embers.albedo_color = Color(0.25, 0.08, 0.03)
+	embers.emission_enabled = true
+	embers.emission = Color(1.0, 0.32, 0.08)
+	embers.emission_energy_multiplier = 1.6
+	disc.material = embers
+	bed.mesh = disc
+	bed.position.y = 0.06
+	root.add_child(bed)
+	var wood := StandardMaterial3D.new()
+	wood.albedo_color = Color(0.13, 0.08, 0.05)
+	for i in 5:
+		var log_mi := MeshInstance3D.new()
+		var cyl := CylinderMesh.new()
+		cyl.top_radius = 0.09
+		cyl.bottom_radius = 0.11
+		cyl.height = hearth_radius * 1.4
+		cyl.material = wood
+		log_mi.mesh = cyl
+		log_mi.rotation = Vector3(deg_to_rad(80.0), TAU * i / 5.0, 0)
+		log_mi.position = Vector3(0, 0.22, 0)
+		root.add_child(log_mi)
+	var glow := Effects.ember_field(Vector3(hearth_radius * 0.8, 0.3, hearth_radius * 0.8), 18)
+	glow.position.y = 0.25
+	root.add_child(glow)
 	var body := StaticBody3D.new()
 	var cs := CollisionShape3D.new()
 	var shape := CylinderShape3D.new()
-	shape.radius = hearth_radius
-	shape.height = 0.42
+	shape.radius = hearth_radius + 0.2
+	shape.height = 0.3
 	cs.shape = shape
-	cs.position.y = 0.21
+	cs.position.y = 0.15
 	body.add_child(cs)
 	root.add_child(body)
 	hearth_fire = Node3D.new()
 	hearth_fire.name = "HearthFire"
+	hearth_fire.position = hearth_pos
 	add_child(hearth_fire)
-	var fire := Effects.fire(1.6, 40)
-	fire.position = Vector3(0, 0.3, 0)
+	var fire := Effects.fire(2.4, 48)
+	fire.position = Vector3(0, 0.5, 0)
 	hearth_fire.add_child(fire)
 	var light := OmniLight3D.new()
 	light.light_color = Color(1.0, 0.5, 0.2)
-	light.light_energy = 3.2
+	light.light_energy = 3.4
 	light.omni_range = 13.0
-	light.position = Vector3(0, 1.5, 0)
+	light.position = Vector3(0, 1.8, 0)
 	hearth_fire.add_child(light)
 	braziers.append(hearth_pos)
 

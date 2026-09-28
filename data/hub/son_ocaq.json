@@ -1,5 +1,5 @@
 {
-	"_about": "Son Ocaq (STORY_BIBLE §3.9): a village grown around an old caravanserai; the last hearth burns in its courtyard. Rooms open onto the courtyard behind an arched gallery (side n/w/e/s, slot 0..; the gate is in the middle of the south side). Each room has one door (stable id) and the residents who sleep there (NPC ids; 'protagonist' is Aras). room_rules move an NPC to another room while a condition holds (first match wins). outside: daytime workplaces just outside the gate ('workers' stand there by day; nobody sleeps there). services: hub services unlocked when their NPC lives here (placeholder hooks). hearth.stages: flame scale per number of resolved core grief arcs (NPCs tagged core_grief). Positions are computed by scripts/hub/hub_level.gd.",
+	"_about": "Son Ocaq (STORY_BIBLE §3.9): a village grown around an old caravanserai; the last hearth burns in its courtyard. Rooms open onto the courtyard, behind an arched gallery on the north, west and east sides (side n/w/e/s, slot 0..); the south side has the entrance portal (eyvan) in the middle and no gallery. Each room has one door (stable id) and the residents who sleep there (NPC ids; 'protagonist' is Aras). room_rules move an NPC to another room while a condition holds (first match wins). outside: daytime workplaces just outside the gate ('workers' stand there by day; nobody sleeps there). services: hub services unlocked when their NPC lives here (placeholder hooks). hearth.stages: flame scale per number of resolved core grief arcs (NPCs tagged core_grief). Positions are computed by scripts/hub/hub_level.gd.",
 	"rooms": [
 		{
 			"id": "room_sabir",
@@ -111,7 +111,7 @@
 			],
 			"side": "s",
 			"slot": 0,
-			"variant": 0
+			"variant": 1
 		},
 		{
 			"id": "room_kemal_gulcin",
@@ -122,7 +122,7 @@
 			],
 			"side": "s",
 			"slot": 1,
-			"variant": 1,
+			"variant": 0,
 			"_about": "Kemal and Gülçin sleep here; the birth happens here (STORY_BIBLE Act III)."
 		}
 	],

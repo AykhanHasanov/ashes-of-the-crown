@@ -10,3 +10,5 @@ Notes to decide or clean up later. Not scheduled; nothing here is being worked o
 - **Pre-vertical-slice: mood pass.** Gradient from a faded late-autumn valley with light ash, to fully desaturated near Közkale; colour returns in Son Ocaq as grief is resolved. Lighting, fog, ash particles, saturation only — no new assets.
 - **Valley entrance to Son Ocaq.** Replace the signpost by Geçit Ocağı with visible caravanserai walls and a gate; the transition happens when walking through the gate.
 - **Hub room doors open inward** once the rooms have interiors (they swing out into the gallery for now).
+- **MUST before the vertical slice: Kürköy art identity pass.** A Caucasus mountain village (reference: Xınalıq, Lahıc): flat-roofed stone houses, terraced on the slopes, the same visual language as the caravanserai. No marketing screenshots before this.
+- **Art pass: pointed (sivri) arches** instead of round arches in the caravanserai.

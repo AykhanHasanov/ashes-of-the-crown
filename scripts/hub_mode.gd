@@ -14,8 +14,9 @@ const TPCamera := preload("res://scripts/camera/third_person_camera.gd")
 const NpcSpawner := preload("res://scripts/npc/npc_spawner.gd")
 const DebugMenu := preload("res://scripts/debug/debug_menu.gd")
 
-const HEARTH_RANGE := 2.7
+const HEARTH_RANGE := 2.9
 const GATE_RANGE := 2.6
+const ENTRY_PITCH := -8.0   # on entry the camera looks up a little: sky, hearth and upper storey in view
 
 var npcs                          # NpcSpawner
 var hearth_menu
@@ -76,6 +77,8 @@ func _begin(mode: String) -> void:
 	else:
 		player.global_position = level.player_spawn
 		player.face_towards(level.hearth_pos)
+		rig.yaw = 0.0   # facing north, into the courtyard, from the gate
+		rig.pitch = deg_to_rad(ENTRY_PITCH)
 	rig.snap()
 	player.wake()
 	npcs.queue_refresh()
@@ -153,7 +156,7 @@ func _demo_setup() -> void:
 			if Settings.demo == "hub_doors":
 				_demo_view(Vector3(0.5, 0, 1.6), Vector3(-4.0, 1.4, -6.0))
 			else:
-				_demo_view(Vector3(0, 0, 3.2), Vector3(0, 1.5, -6.0))
+				_demo_view(Vector3(0, 0, 2.4), Vector3(0, 1.5, -6.0))
 		"hub_leave":
 			# Walk out of the gate: back to the valley, at the road's sign
 			_demo_view(Vector3(0, 0, 9.0), Vector3(0, 1.5, 14.0))
@@ -161,7 +164,7 @@ func _demo_setup() -> void:
 		"hub_night":
 			WorldState.set_time_of_day(22.0)
 			level.day_night.set_hour(22.0)
-			_demo_view(Vector3(0, 0, 3.2), Vector3(0, 1.5, -6.0))
+			_demo_view(Vector3(0, 0, 2.4), Vector3(0, 1.5, -6.0))
 
 
 func _demo_view(at: Vector3, look: Vector3) -> void:

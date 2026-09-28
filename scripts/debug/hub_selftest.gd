@@ -256,6 +256,28 @@ func _scene() -> void:
 	q.exclude = [hub.player.get_rid()]
 	var blocked: Dictionary = hub.get_world_3d().direct_space_state.intersect_ray(q)
 	_check("on entry the camera sees the protagonist (no wall or pier between)", blocked.is_empty(), str(blocked.get("collider", "")))
+	# The top third of the first frame: sky and distant walls, no ceiling or pillar close by
+	var vp := hub.get_viewport().get_visible_rect().size
+	var near: Array = []
+	for fy in [0.04, 0.18, 0.32]:
+		for fx in [0.08, 0.3, 0.5, 0.7, 0.92]:
+			var sp := Vector2(vp.x * fx, vp.y * fy)
+			var from := cam.project_ray_origin(sp)
+			var rq := PhysicsRayQueryParameters3D.create(from, from + cam.project_ray_normal(sp) * 60.0)
+			rq.exclude = [hub.player.get_rid()]
+			var h: Dictionary = hub.get_world_3d().direct_space_state.intersect_ray(rq)
+			if not h.is_empty() and from.distance_to(h["position"]) < 7.0:
+				near.append("%.2f,%.2f" % [fx, fy])
+	_check("... from the open courtyard: nothing close in the top third of the frame (no ceiling, no pillars)", near.is_empty(), str(near))
+	var open_sky := 0
+	for fx in [0.08, 0.3, 0.5, 0.7, 0.92]:
+		var sp_top := Vector2(vp.x * fx, vp.y * 0.04)
+		var sky := PhysicsRayQueryParameters3D.create(cam.project_ray_origin(sp_top), cam.project_ray_origin(sp_top) + cam.project_ray_normal(sp_top) * 200.0)
+		if hub.get_world_3d().direct_space_state.intersect_ray(sky).is_empty():
+			open_sky += 1
+	_check("... and sky along the top of the frame", open_sky >= 3, "%d of 5" % open_sky)
+	_check("the upper storey is in the frame", cam.is_position_in_frustum(Vector3(0, HubLevel.ROOM_H + 2.0, HubLevel.NORTH_Z)))
+	_check("the hearth is in the frame", cam.is_position_in_frustum(lvl.hearth_pos + Vector3(0, 0.6, 0)))
 	# Rüfət beside or a little behind, never between the camera and the protagonist
 	WorldState.move_npc(&"rufet", WorldState.PARTY)
 	await _seconds(2.0)
