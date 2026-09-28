@@ -58,9 +58,9 @@ into fire power. **By Ateşan tradition, the crown heir serves as Közcü of Ulu
 he takes the crown.** Aras is the crown prince **and** the King's Közcü.
 
 **The reversal.** The King turned Ulu Ocaq backwards: instead of consuming memories,
-it *preserves* them. **The King gave his own body to the reversed hearth; people now
-call him Kül Şahı (the Ash King).** Kül Şahı and the King are one and the same — Aras's
-father, and the game's only antagonist [TBD: exactly when he gave his body]. Consequences:
+it *preserves* them. **On the fire night the King gave his own body to the reversed
+hearth; people now call him Kül Şahı (the Ash King).** Kül Şahı and the King are one and
+the same — Aras's father, and the game's only antagonist (§3.7). Consequences:
 - The dead did not leave. They returned as **Küllüler (the Ash-born)**: shades wearing
   the faces and voices of the people who loved them. They are empty inside.
 - Hearths stopped giving warmth. The land froze. **Ash falls like snow, constantly.**
@@ -81,7 +81,14 @@ could not consume them fully. Fragments scattered across the land as glowing
 abilities (solves the MUST-FIX in BACKLOG.md).
 
 **The Cold Sickness.** The plague that started everything. It killed the King's son
-and Narin.
+Kür and Narin.
+
+**Kür Vadisi.** Aras and Kür — the two great rivers that merge. After Kür died, the King
+renamed the valley below Közkale **Kür Vadisi** after his younger son. (The valley in the
+game keeps this name; this is where it comes from.)
+
+**The lullaby.** One family lullaby, passed down the generations: Queen Humay sang it to
+Aras; Aras and Sona sang it to Narin; the King knows it as his wife's song (§8).
 
 ---
 
@@ -89,11 +96,15 @@ and Narin.
 
 1. The hearth custom works. Ulu Ocaq burns in Közkale. Aras — the King's son and crown
    prince — is Közcü, married to Sona, father of Narin (the King's granddaughter).
-   Elvin, the King's illegitimate son, is Aras's half-brother. Rüfət is Aras's blood
-   brother and captain of the guard.
-2. **The Cold Sickness** spreads. The King's younger son — Aras's brother [TBD: name] —
-   dies. **Narin dies.**
-3. The King cannot give his son to the fire. He orders **İbrahim** to design a way to
+   Kür is Aras's younger brother. Elvin, the King's illegitimate son, is Aras's
+   half-brother. Rüfət is Aras's blood brother and captain of the guard.
+   - Years before the Cold Sickness, **Queen Humay**, Aras's mother, dies. As custom
+     demands, the King gives her memory to the hearth — and can never recall her face
+     again. That emptiness stays with him.
+2. **The Cold Sickness** spreads. The King's younger son **Kür** dies; the King renames
+   the valley Kür Vadisi after him. **Narin dies.**
+3. Remembering Humay's lost face, the King swears *"never again"*: he cannot give his son
+   to the fire. This is the root of the reversal. He orders **İbrahim** to design a way to
    reverse Ulu Ocaq. **Aras helps** — because he wants Narin back.
    **Ehliman** (high priest) opposes it. Nobody listens.
 4. The reversal works. The dead return as shades. **Narin's shade comes home.**
@@ -105,6 +116,8 @@ and Narin.
    every night for a year. The dead know what happened in Közkale. It breaks his mind.
 7. **The fire night.** Aras burns *all* his memories at once — Narin included — to
    force Ulu Ocaq back to its true direction. **Közkale bursts into flame.**
+   When Aras's fire hits Ulu Ocaq, **the King throws himself into the hearth** to keep
+   holding the dead. **Aras's fire created Kül Şahı.**
    The plan half-works: the King's power is sealed inside Közkale, the shades weaken,
    but the cold remains and Ulu Ocaq stays reversed.
 8. Before the fire, Aras writes a **letter to himself** and makes Rüfət promise:
@@ -197,11 +210,27 @@ not met, so the player understands something was possible.
 | `burn_context` echo / combat | "You burned her out of fear" | Story may react differently later. |
 | Ash → İbrahim → permanent abilities | Power built from loss | Resolves BACKLOG MUST-FIX. |
 | Kül Aras scaling | What you burn comes back | Final boss strength from BURNED set. |
+| KEEP value of memories | Remembering pays off later | See the table below. |
 | Name blanking | Aras cannot "hold" names he burned | Voice still says the name; all text shows `———`. Exception: `ignores_burned_names` (Kül Şahı only). |
 | Night doors | Fear, grief, trust | Nobody opens at night. Opening to a shade = death. |
 | Permanent NPC death | Loss is real | Dead NPCs never respawn. |
 | Hub growth | Collective grief | Each resolved grief quest: that house's snow melts, a window lights up, the hearth grows. |
 | Telling Sona the truth | Trust | Required for Sona's survival and the true ending. Aras must tell her himself before Act III [TBD: exact trigger]. |
+
+---
+
+### KEEP value of the six memories
+
+What keeping each memory gives later (burning it gives fire power now; §2).
+
+| Memory | KEEP value |
+|---|---|
+| `rufet_face` — Rüfet'in yüzü | Full recognition in Rüfət's confession scene. |
+| `mother_name` — Annemin adı | Recognise the lullaby (its *ninni* is the family lullaby, §8); in the finale, reach the King through Humay's name. |
+| `sabir_lesson` — Sabir'in ilk dersi | In Sabir's quest, remind him of his own lesson. |
+| `kozqala_streets` — Közkale'nin sokakları | **Gameplay:** know shortcuts and hidden paths in burning Közkale (Act III). |
+| `father_voice` — Babamın sesi | In the finale, address the King as a father. [TBD: if BURNED, Aras does not recognise his father's voice.] |
+| `first_sword` — İlk kılıcım | After the midpoint, opens a path to reconcile with Şahbaz. |
 
 ---
 
@@ -225,7 +254,10 @@ Permanent death risk. Epithets are given in their in-game Turkish form
 - **sona** — **Sona**, *dokumacı* — Aras's wife, Narin's mother. **Remembers what
   Aras burned.** Asks through the door: *"Do you remember Narin?"* Does not know Aras
   burned her. Death risk: **Act III, Sona's night.** (New model needed.)
-- **narin** — **Narin**, *[TBD epithet]* — Aras's daughter, the King's granddaughter.
+- **narin** — **Narin**, *kapıdaki gölge* → *Közcü'nün kızı* — Aras's daughter, the King's
+  granddaughter. Her epithet follows the story: *kapıdaki gölge* ("the shade at the door")
+  until the reveal, *Közcü'nün kızı* ("the Közcü's daughter") after it (flag
+  `narin_revealed`).
   `npc_kind: shade`. Appears only in echoes and at Aras's door at night. Her lullaby is
   the game's main motif (§8). Her memory is `narin`, `combat_burnable=false`.
 - **elvin** — **Elvin**, *şahın gölgedeki oğlu* — the King's illegitimate son, Aras's
@@ -263,6 +295,14 @@ Permanent death risk. Epithets are given in their in-game Turkish form
   `npc_kind: voice_only`, no body. **Never let go.** Kept every memory anyone burned,
   including Aras's. Has a real argument:
   *"You forgot. I did not."* `ignores_burned_names = true`.
+
+### Family (memory only)
+- **kur** — **Kür**, *[TBD epithet]* — the King's younger son, Aras's brother. Died of the
+  Cold Sickness; the valley bears his name. His death is the root of the reversal.
+  `npc_kind: shade` [TBD: where he appears]. Placeholder look.
+- **humay** — **Humay**, *[TBD epithet]* — the Queen, Aras's mother. Died years before the
+  Cold Sickness; the King gave her memory to the hearth and lost her face. She sang the
+  family lullaby. `npc_kind: voice_only` (heard in echoes) [TBD]. Placeholder look.
 
 ### Supporting cast
 - **domrul** — **Dəli Domrul** (TR: Deli Dumrul), *şehrin delisi* — (Dede Korkut). Talked to his dead
@@ -304,9 +344,11 @@ Rüfət: story-only [TBD].
 
 ## 8. Motifs
 
-- **Narin's lullaby.** Sona hums it. Domrul sings it with wrong words. Elvin plays it
-  without knowing where he learned it. It plays in the memory menu. **Heard complete
-  only once — in the final scene.**
+- **The family lullaby (Narin's lullaby).** One lullaby across generations: Queen Humay
+  sang it to Aras; Aras and Sona sang it to Narin; the King knows it as his wife's song.
+  It is the *ninni* of the memory `mother_name`. Sona hums it. Domrul sings it with wrong
+  words. Elvin plays it without knowing where he learned it. It plays in the memory menu.
+  **Heard complete only once — in the final scene.**
 - **Doors.** Closed = fear and grief. Opened = trust or death.
 - **Ash snow.** Constant. Melts only near living fire and resolved grief.
 - **Fire is the only colour.** Közkale's flame on the horizon is always visible.
@@ -391,13 +433,27 @@ Rüfət: story-only [TBD].
 6. Yadigar's end: fight or found dead.
 7. İbrahim's death risk.
 8. Exact trigger for telling Sona the truth.
-9. The King's dead younger son (Aras's brother): his name. Narin's epithet.
+9. Kür's and Humay's epithets; where Kür's shade appears; how Humay is heard.
 10. Which memories besides own_name and Narin are `combat_burnable=false`.
+11. `father_voice` BURNED: does Aras fail to recognise his father's voice?
 
 ---
 
 ## 14. Changelog
 
+- **2026-09-28 — open items resolved** (owner)
+  - The King's younger son is **Kür** (Aras and Kür: the two great rivers that merge).
+    The King renamed the valley Kür Vadisi after him.
+  - The Queen, Aras's mother, is **Humay**. She died years before the Cold Sickness; the
+    King gave her memory to the hearth and could never recall her face — the root of his
+    "never again" and of the reversal.
+  - One family lullaby across generations; `mother_name`'s *ninni* is this lullaby (§8).
+  - The King gave his body to the hearth **on the fire night**: Aras's fire created
+    Kül Şahı (§3.7).
+  - Narin's epithet depends on the story: *kapıdaki gölge*, then *Közcü'nün kızı* after
+    `narin_revealed`.
+  - KEEP value of the six memories (§6).
+  - Kür (shade) and Humay (voice only) added as data-only entries with placeholder looks.
 - **2026-09-28 — owner decisions after the first conflict report**
   - Aras is the crown prince **and** the King's Közcü (Ateşan tradition: the heir keeps
     Ulu Ocaq until he is crowned). Heir references ("küçük şah", "şehzadem", "Babamın

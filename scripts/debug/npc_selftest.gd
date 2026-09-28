@@ -18,7 +18,7 @@ const TEST_DIR := "user://test_npc_saves/"
 ## The voiced core cast carried over from V2 (Nərmin replaces Anar) ...
 const PEOPLE := [&"ehliman", &"elvin", &"esref", &"ibrahim", &"nermin", &"rufet", &"sabir", &"sahbaz"]
 ## ... and the people STORY_BIBLE.md adds (data only so far).
-const BIBLE_NEW := [&"ayna", &"domrul", &"gulcin", &"kemal", &"narin", &"peri_nene", &"samir", &"sona", &"tural", &"yadigar"]
+const BIBLE_NEW := [&"ayna", &"domrul", &"gulcin", &"kemal", &"kur", &"narin", &"peri_nene", &"samir", &"sona", &"tural", &"yadigar"]
 const YARD := Vector3(4, 0, 4)
 
 var _fails := 0
@@ -75,7 +75,7 @@ func _definitions() -> void:
 	var ids: Array = NpcRegistry.all().filter(func(d): return d.npc_kind != "voice_only").map(func(d): return d.id)
 	var want: Array = PEOPLE + BIBLE_NEW
 	want.sort_custom(func(a, b): return String(a) < String(b))
-	_check("the registry holds the cast: V2's eight (anar now nermin) + the bible's ten", ids == want, str(ids))
+	_check("the registry holds the cast: V2's eight (anar now nermin) + the bible's people", ids == want, str(ids))
 	_check("the old id 'anar' is gone", not NpcRegistry.has(&"anar"))
 	var looks: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/looks.json"))
 	var ok := true
@@ -88,8 +88,11 @@ func _definitions() -> void:
 			print("   bad definition: ", id)
 	_check("every NPC has name and epithet keys, a look and notes (and its voice, if it has one)", ok)
 	_check("the voiced core cast has voices", PEOPLE.all(func(id): return Barks.has_line(NpcRegistry.get_def(id).voice_profile, "greet")))
-	_check("npc_kind from the bible: Ayna and Narin shades, Kül Şahı voice only, the rest human",
-		NpcRegistry.all().all(func(d): return d.npc_kind == {&"ayna": "shade", &"narin": "shade", &"kul_sahi": "voice_only"}.get(d.id, "human")))
+	_check("npc_kind from the bible: Ayna, Narin, Kür shades; Kül Şahı, Humay voice only; the rest human",
+		NpcRegistry.all().all(func(d): return d.npc_kind == {&"ayna": "shade", &"narin": "shade", &"kur": "shade",
+			&"kul_sahi": "voice_only", &"humay": "voice_only"}.get(d.id, "human")))
+	_check("Kür and Humay have names and placeholder looks", tr("NPC_KUR_NAME") == "Kür" and tr("NPC_HUMAY_NAME") == "Humay"
+		and looks.has("npc_kur") and looks.has("npc_humay") and NpcRegistry.get_def(&"humay").placeholder)
 	_check("owner's Turkish forms and epithets", tr("NPC_KEMAL_NAME") == "Kemal" and not NpcRegistry.has(&"kamal")
 		and tr("NPC_EHLIMAN_EPITHET") == "Köz Nizamı'nın kâhini" and tr("NPC_ELVIN_EPITHET") == "şahın gölgedeki oğlu"
 		and tr("NPC_SONA_EPITHET") == "dokumacı" and tr("NPC_KEMAL_EPITHET") == "demirci" and tr("NPC_GULCIN_EPITHET") == "ekmekçi"
@@ -143,6 +146,10 @@ func _state() -> void:
 	_check("joined:<npc> is derived from the party location (no flag)", not WorldState.check("joined:rufet")
 		and WorldState.move_npc(&"rufet", WorldState.PARTY) and WorldState.check("joined:rufet") and not WorldState.has_flag(&"rufet_joined")
 		and WorldState.move_npc(&"rufet", "") and not WorldState.check("joined:rufet"))
+	_check("Narin's epithet follows the story (first matching rule wins)", Names.npc_epithet(&"narin") == "kapıdaki gölge")
+	WorldState.set_flag(&"narin_revealed")
+	_check("... 'Közcü'nün kızı' once narin_revealed is set", Names.npc_epithet(&"narin") == "Közcü'nün kızı")
+	WorldState.clear_flag(&"narin_revealed")
 	WorldState.set_npc_flag(&"elvin", &"met", true)
 	_check("per-NPC flags", WorldState.get_npc_flag(&"elvin", &"met") == true and WorldState.get_npc_flag(&"elvin", &"x", 7) == 7)
 

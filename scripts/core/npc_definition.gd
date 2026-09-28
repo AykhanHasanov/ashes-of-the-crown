@@ -10,6 +10,10 @@ extends Resource
 ## NPC_<ID>_EPITHET ("Sabir, the old teacher"): always shown with the name, never blanked,
 ## so the epithet identifies them even when the name slips (STORY_BIBLE §9.4).
 @export var epithet_key: String
+## Epithets that follow the story: "condition=>KEY" (a WorldState.check condition, e.g.
+## "flag:narin_revealed=>NPC_NARIN_EPITHET_REVEALED"). The first rule whose condition
+## holds wins; with none, epithet_key.
+@export var epithet_rules: PackedStringArray = PackedStringArray()
 ## Optional: the name is blank in all text once this memory is BURNED.
 @export var name_memory_id: StringName
 @export var look_id: String               # data/looks.json entry (scripts/characters/human.gd)
