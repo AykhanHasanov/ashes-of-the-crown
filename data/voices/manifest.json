@@ -1783,6 +1783,628 @@
 					"text": "Gece dolaşma yolcu. Kül gölgeleri karanlığı sever."
 				}
 			]
+		},
+		"npc_rufet": {
+			"greet": [
+				{
+					"file": "res://assets/audio/voice/npc_rufet/greet_0.wav",
+					"text": "Ne gerekirse, yanındayım, {PROTAGONIST}."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/greet_1.wav",
+					"text": "Yol uzun, kardeşim. Ama birlikte yürürüz."
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/npc_rufet/idle_0.wav",
+					"text": "Kül hâlâ sıcak. Dikkatli ol."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/idle_1.wav",
+					"text": "Bu sessizlik hoşuma gitmiyor."
+				}
+			],
+			"spot": [
+				{
+					"file": "res://assets/audio/voice/npc_rufet/spot_0.wav",
+					"text": "Kılıcını çek, {PROTAGONIST}!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/spot_1.wav",
+					"text": "Arkanı kolluyorum!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/spot_2.wav",
+					"text": "Geliyorlar!"
+				}
+			],
+			"attack": [
+				{
+					"file": "res://assets/audio/voice/npc_rufet/attack_0.wav",
+					"text": "Al bunu!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/attack_1.wav",
+					"text": "Geri çekil!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/attack_2.wav",
+					"text": "Hah!"
+				}
+			],
+			"hurt": [
+				{
+					"file": "res://assets/audio/voice/npc_rufet/hurt_0.wav",
+					"text": "Ah!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/hurt_1.wav",
+					"text": "Sıyırdı sadece."
+				}
+			],
+			"downed": [
+				{
+					"file": "res://assets/audio/voice/npc_rufet/downed_0.wav",
+					"text": "{PROTAGONIST}... kalkamıyorum..."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/downed_1.wav",
+					"text": "Yardım et, {PROTAGONIST}!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/downed_2.wav",
+					"text": "Dizim... gitti..."
+				}
+			],
+			"helped": [
+				{
+					"file": "res://assets/audio/voice/npc_rufet/helped_0.wav",
+					"text": "Sağ ol, kardeşim."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/helped_1.wav",
+					"text": "Hâlâ ayaktayız, {PROTAGONIST}."
+				}
+			],
+			"recovered": [
+				{
+					"file": "res://assets/audio/voice/npc_rufet/recovered_0.wav",
+					"text": "Kendime geldim... Devam."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/recovered_1.wav",
+					"text": "Bitmedi daha."
+				}
+			],
+			"victory": [
+				{
+					"file": "res://assets/audio/voice/npc_rufet/victory_0.wav",
+					"text": "Bitti... şimdilik."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/victory_1.wav",
+					"text": "Kılıcın hâlâ keskin, {PROTAGONIST}."
+				}
+			]
+		},
+		"npc_sabir": {
+			"greet": [
+				{
+					"file": "res://assets/audio/voice/npc_sabir/greet_0.wav",
+					"text": "Hoş geldin yolcu. Kürköy'de ekmek de var, dert de."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sabir/greet_1.wav",
+					"text": "Selam sana. Yolun açık olsun."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sabir/greet_2.wav",
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sabir/greet_3.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sabir/greet_4.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sabir/greet_5.wav",
+					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/npc_sabir/idle_0.wav",
+					"text": "Bu yıl nar erken kızardı..."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sabir/idle_1.wav",
+					"text": "Ah, belim... Yaşlandık be."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sabir/idle_2.wav",
+					"text": "Rüzgâr yine külü getiriyor."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sabir/idle_3.wav",
+					"text": "Akşama çorba var, ocak başında."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sabir/idle_4.wav",
+					"text": "Kür'ün suyu çekildi, balık da azaldı."
+				}
+			],
+			"flee": [
+				{
+					"file": "res://assets/audio/voice/npc_sabir/flee_0.wav",
+					"text": "Kaçın! Gölgeler geldi!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sabir/flee_1.wav",
+					"text": "Kapıları kapatın, çabuk!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sabir/flee_2.wav",
+					"text": "Eyvah! Saklanın!"
+				}
+			],
+			"night": [
+				{
+					"file": "res://assets/audio/voice/npc_sabir/night_0.wav",
+					"text": "Gece oldu, içeri girelim. Gölgeler gece daha açtır."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sabir/night_1.wav",
+					"text": "Geç oldu. Kapımı kilitleyeceğim."
+				}
+			]
+		},
+		"npc_sahbaz": {
+			"greet": [
+				{
+					"file": "res://assets/audio/voice/npc_sahbaz/greet_0.wav",
+					"text": "Hoş geldin yolcu. Kürköy'de ekmek de var, dert de."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sahbaz/greet_1.wav",
+					"text": "Selam sana. Yolun açık olsun."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sahbaz/greet_2.wav",
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sahbaz/greet_3.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sahbaz/greet_4.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sahbaz/greet_5.wav",
+					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/npc_sahbaz/idle_0.wav",
+					"text": "Bu yıl nar erken kızardı..."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sahbaz/idle_1.wav",
+					"text": "Ah, belim... Yaşlandık be."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sahbaz/idle_2.wav",
+					"text": "Rüzgâr yine külü getiriyor."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sahbaz/idle_3.wav",
+					"text": "Akşama çorba var, ocak başında."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sahbaz/idle_4.wav",
+					"text": "Kür'ün suyu çekildi, balık da azaldı."
+				}
+			],
+			"flee": [
+				{
+					"file": "res://assets/audio/voice/npc_sahbaz/flee_0.wav",
+					"text": "Kaçın! Gölgeler geldi!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sahbaz/flee_1.wav",
+					"text": "Kapıları kapatın, çabuk!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sahbaz/flee_2.wav",
+					"text": "Eyvah! Saklanın!"
+				}
+			],
+			"night": [
+				{
+					"file": "res://assets/audio/voice/npc_sahbaz/night_0.wav",
+					"text": "Gece oldu, içeri girelim. Gölgeler gece daha açtır."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sahbaz/night_1.wav",
+					"text": "Geç oldu. Kapımı kilitleyeceğim."
+				}
+			]
+		},
+		"npc_anar": {
+			"greet": [
+				{
+					"file": "res://assets/audio/voice/npc_anar/greet_0.wav",
+					"text": "Hoş geldin yolcu. Kürköy'de ekmek de var, dert de."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_anar/greet_1.wav",
+					"text": "Selam sana. Yolun açık olsun."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_anar/greet_2.wav",
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_anar/greet_3.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_anar/greet_4.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_anar/greet_5.wav",
+					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/npc_anar/idle_0.wav",
+					"text": "Bu yıl nar erken kızardı..."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_anar/idle_1.wav",
+					"text": "Ah, belim... Yaşlandık be."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_anar/idle_2.wav",
+					"text": "Rüzgâr yine külü getiriyor."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_anar/idle_3.wav",
+					"text": "Akşama çorba var, ocak başında."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_anar/idle_4.wav",
+					"text": "Kür'ün suyu çekildi, balık da azaldı."
+				}
+			],
+			"flee": [
+				{
+					"file": "res://assets/audio/voice/npc_anar/flee_0.wav",
+					"text": "Kaçın! Gölgeler geldi!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_anar/flee_1.wav",
+					"text": "Kapıları kapatın, çabuk!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_anar/flee_2.wav",
+					"text": "Eyvah! Saklanın!"
+				}
+			],
+			"night": [
+				{
+					"file": "res://assets/audio/voice/npc_anar/night_0.wav",
+					"text": "Gece oldu, içeri girelim. Gölgeler gece daha açtır."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_anar/night_1.wav",
+					"text": "Geç oldu. Kapımı kilitleyeceğim."
+				}
+			]
+		},
+		"npc_elvin": {
+			"greet": [
+				{
+					"file": "res://assets/audio/voice/npc_elvin/greet_0.wav",
+					"text": "Hoş geldin yolcu. Kürköy'de ekmek de var, dert de."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_elvin/greet_1.wav",
+					"text": "Selam sana. Yolun açık olsun."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_elvin/greet_2.wav",
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_elvin/greet_3.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_elvin/greet_4.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_elvin/greet_5.wav",
+					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/npc_elvin/idle_0.wav",
+					"text": "Bu yıl nar erken kızardı..."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_elvin/idle_1.wav",
+					"text": "Ah, belim... Yaşlandık be."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_elvin/idle_2.wav",
+					"text": "Rüzgâr yine külü getiriyor."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_elvin/idle_3.wav",
+					"text": "Akşama çorba var, ocak başında."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_elvin/idle_4.wav",
+					"text": "Kür'ün suyu çekildi, balık da azaldı."
+				}
+			],
+			"flee": [
+				{
+					"file": "res://assets/audio/voice/npc_elvin/flee_0.wav",
+					"text": "Kaçın! Gölgeler geldi!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_elvin/flee_1.wav",
+					"text": "Kapıları kapatın, çabuk!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_elvin/flee_2.wav",
+					"text": "Eyvah! Saklanın!"
+				}
+			],
+			"night": [
+				{
+					"file": "res://assets/audio/voice/npc_elvin/night_0.wav",
+					"text": "Gece oldu, içeri girelim. Gölgeler gece daha açtır."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_elvin/night_1.wav",
+					"text": "Geç oldu. Kapımı kilitleyeceğim."
+				}
+			]
+		},
+		"npc_esref": {
+			"greet": [
+				{
+					"file": "res://assets/audio/voice/npc_esref/greet_0.wav",
+					"text": "Hoş geldin yolcu. Kürköy'de ekmek de var, dert de."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_esref/greet_1.wav",
+					"text": "Selam sana. Yolun açık olsun."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_esref/greet_2.wav",
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_esref/greet_3.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_esref/greet_4.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_esref/greet_5.wav",
+					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/npc_esref/idle_0.wav",
+					"text": "Bu yıl nar erken kızardı..."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_esref/idle_1.wav",
+					"text": "Ah, belim... Yaşlandık be."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_esref/idle_2.wav",
+					"text": "Rüzgâr yine külü getiriyor."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_esref/idle_3.wav",
+					"text": "Akşama çorba var, ocak başında."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_esref/idle_4.wav",
+					"text": "Kür'ün suyu çekildi, balık da azaldı."
+				}
+			],
+			"flee": [
+				{
+					"file": "res://assets/audio/voice/npc_esref/flee_0.wav",
+					"text": "Kaçın! Gölgeler geldi!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_esref/flee_1.wav",
+					"text": "Kapıları kapatın, çabuk!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_esref/flee_2.wav",
+					"text": "Eyvah! Saklanın!"
+				}
+			],
+			"night": [
+				{
+					"file": "res://assets/audio/voice/npc_esref/night_0.wav",
+					"text": "Gece oldu, içeri girelim. Gölgeler gece daha açtır."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_esref/night_1.wav",
+					"text": "Geç oldu. Kapımı kilitleyeceğim."
+				}
+			]
+		},
+		"npc_ibrahim": {
+			"greet": [
+				{
+					"file": "res://assets/audio/voice/npc_ibrahim/greet_0.wav",
+					"text": "Hoş geldin yolcu. Kürköy'de ekmek de var, dert de."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ibrahim/greet_1.wav",
+					"text": "Selam sana. Yolun açık olsun."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ibrahim/greet_2.wav",
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ibrahim/greet_3.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ibrahim/greet_4.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ibrahim/greet_5.wav",
+					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/npc_ibrahim/idle_0.wav",
+					"text": "Bu yıl nar erken kızardı..."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ibrahim/idle_1.wav",
+					"text": "Ah, belim... Yaşlandık be."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ibrahim/idle_2.wav",
+					"text": "Rüzgâr yine külü getiriyor."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ibrahim/idle_3.wav",
+					"text": "Akşama çorba var, ocak başında."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ibrahim/idle_4.wav",
+					"text": "Kür'ün suyu çekildi, balık da azaldı."
+				}
+			],
+			"flee": [
+				{
+					"file": "res://assets/audio/voice/npc_ibrahim/flee_0.wav",
+					"text": "Kaçın! Gölgeler geldi!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ibrahim/flee_1.wav",
+					"text": "Kapıları kapatın, çabuk!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ibrahim/flee_2.wav",
+					"text": "Eyvah! Saklanın!"
+				}
+			],
+			"night": [
+				{
+					"file": "res://assets/audio/voice/npc_ibrahim/night_0.wav",
+					"text": "Gece oldu, içeri girelim. Gölgeler gece daha açtır."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ibrahim/night_1.wav",
+					"text": "Geç oldu. Kapımı kilitleyeceğim."
+				}
+			]
+		},
+		"npc_ehliman": {
+			"greet": [
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/greet_0.wav",
+					"text": "Hoş geldin yolcu. Kürköy'de ekmek de var, dert de."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/greet_1.wav",
+					"text": "Selam sana. Yolun açık olsun."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/greet_2.wav",
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Ocağı yakan sensin diyorlar."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/greet_3.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/greet_4.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/greet_5.wav",
+					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
+				}
+			],
+			"idle": [
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/idle_0.wav",
+					"text": "Bu yıl nar erken kızardı..."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/idle_1.wav",
+					"text": "Ah, belim... Yaşlandık be."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/idle_2.wav",
+					"text": "Rüzgâr yine külü getiriyor."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/idle_3.wav",
+					"text": "Akşama çorba var, ocak başında."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/idle_4.wav",
+					"text": "Kür'ün suyu çekildi, balık da azaldı."
+				}
+			],
+			"flee": [
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/flee_0.wav",
+					"text": "Kaçın! Gölgeler geldi!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/flee_1.wav",
+					"text": "Kapıları kapatın, çabuk!"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/flee_2.wav",
+					"text": "Eyvah! Saklanın!"
+				}
+			],
+			"night": [
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/night_0.wav",
+					"text": "Gece oldu, içeri girelim. Gölgeler gece daha açtır."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/night_1.wav",
+					"text": "Geç oldu. Kapımı kilitleyeceğim."
+				}
+			]
 		}
 	}
 }

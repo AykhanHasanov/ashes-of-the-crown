@@ -17,6 +17,7 @@ const HearthMenu := preload("res://scripts/ui/hearth_menu.gd")
 const Interactable := preload("res://scripts/world/interactable.gd")
 const AiOverlay := preload("res://scripts/debug/ai_overlay.gd")
 const Villager := preload("res://scripts/npc/villager.gd")
+const NpcSpawner := preload("res://scripts/npc/npc_spawner.gd")
 const Encounter := preload("res://scripts/world/encounter.gd")
 const Wildlife := preload("res://scripts/world/wildlife.gd")
 const Effects := preload("res://scripts/world/effects.gd")
@@ -34,6 +35,8 @@ var _foes := {}                   # spawn key -> Foe
 ## "Kül Şahının gözü" guard would see the protagonist anywhere and fail the calm/leash checks).
 var roll_affixes := true
 var _villagers := {}               # poi id -> [Villager]
+var npcs                          # NpcSpawner: named NPCs, built from WorldState
+var _loaded_pois := {}            # poi id -> poi (fully loaded: named NPCs may stand there)
 var _last_hearth := ""
 var _discover_t := 0.0
 var _autosave_t := 0.0
@@ -74,6 +77,12 @@ func _setup() -> void:
 		if p["type"] in ["village", "castle", "camp", "grove", "hearth", "den", "lair", "ruins"]:
 			wild.avoid.append([Vector3(p["pos"][0], 0, p["pos"][2]), 70.0])
 	level.add_child(wild)
+	npcs = NpcSpawner.new()
+	npcs.name = "Npcs"
+	npcs.player = player
+	npcs.height_at = level.height_at
+	npcs.place = _npc_place
+	add_child(npcs)
 	hud.set_hint(HINT)
 	hud._place(hud._objective, Vector4(0.5, 0, 0.5, 0), Vector4(-420, 64, 420, 96))
 	compass = Compass.new()
@@ -116,6 +125,7 @@ func _begin(_mode: String) -> void:
 			WorldState.new_game()
 	WorldState.set_region(&"kur_vadisi")
 	_apply_saved_state()
+	npcs.queue_refresh()
 
 
 ## Puts the saved player stats, clock, map and last hearth back into the running world.
@@ -229,6 +239,14 @@ func _interact() -> void:
 	if exec != "":
 		hud.set_prompt(exec)
 		return
+	# A downed companion: help him up (allowed mid-fight)
+	for b in npcs.bodies.values():
+		if is_instance_valid(b) and b.has_method("help_up") and b.is_down() \
+				and player.global_position.distance_to(b.global_position) < b.help_range():
+			hud.set_prompt(tr("ALLY_HELP_PROMPT") % b.display_name)
+			if Input.is_action_just_pressed("interact"):
+				b.help_up()
+			return
 	for f in _foes.values():
 		if is_instance_valid(f) and f.surrendered and not f.dead and player.global_position.distance_to(f.global_position) < 2.8:
 			hud.set_prompt("[E]  Serbest bırak (teslim oldu)   ·   vur — öldür")
@@ -299,7 +317,7 @@ func _use(it) -> void:
 			EchoDirector.enter(StringName(it.data["echo"]), self, player, level.day_night.hour)
 		"echo":
 			WorldState.add_world_entry("echoes", it.key)
-			hud.show_whisper(Names.fill(it.data["text"], false))
+			hud.show_whisper(Names.fill(it.data["text"]))
 			Audio.play("memory_burn", -10.0, 0.0)
 
 
@@ -472,6 +490,8 @@ func _on_foe_killed(key: String) -> void:
 ## Villagers of a loaded village (data/world/villagers.json) take up their routine.
 func _on_poi_full(p: Dictionary) -> void:
 	_light_chimneys(p)
+	_loaded_pois[p["id"]] = p
+	npcs.queue_refresh()
 	var all: Dictionary = DataDB.world("villagers")
 	if not all.has(p["type"]) or _villagers.has(p["id"]):
 		return
@@ -496,7 +516,21 @@ func _light_chimneys(p: Dictionary) -> void:
 			smoke.position = n.get_meta("chimney") / n.scale
 
 
+## Where named NPCs at `location_id` stand: a loaded POI (its square for villages), else null.
+func _npc_place(location_id: String) -> Variant:
+	if not _loaded_pois.has(location_id):
+		return null
+	var p: Dictionary = _loaded_pois[location_id]
+	var c: Vector3 = level.streamer.poi_pos(p)
+	var town: Dictionary = DataDB.world("villagers").get(p["type"], {})
+	if town.has("hub"):
+		c += Vector3(float(town["hub"][0]), 0, float(town["hub"][1]))
+	return c
+
+
 func _on_actors_released(poi_id: String) -> void:
+	_loaded_pois.erase(poi_id)
+	npcs.queue_refresh()
 	for npc in _villagers.get(poi_id, []):
 		if is_instance_valid(npc):
 			npc.queue_free()
@@ -620,6 +654,10 @@ func _build_debug() -> void:
 	debug.section("Karşılaşma")
 	debug.button("Deneme karşılaşması (placeholder)", func():
 		start_encounter(&"test_ash_rising", player.global_position))
+	debug.section("NPC")
+	debug.button("Rüfet katılsın / ayrılsın", func():
+		WorldState.move_npc(&"rufet", "" if WorldState.get_npc_location(&"rufet") == WorldState.PARTY else WorldState.PARTY))
+	debug.button("Sakinler: en yakın yere", func(): _npcs_to(_nearest_loaded_poi()))
 	debug.section("Oyuncu")
 	debug.button("Tam can + şerbet", func():
 		player.heal(player.max_health)
@@ -627,6 +665,26 @@ func _build_debug() -> void:
 	debug.button("Köz 100", func(): player.gain_ember(100.0))
 	for id in ["sword", "sword_shield", "mace"]:
 		debug.button(DataDB.weapon(id)["name"], func(): player.equip(id))
+
+
+## Debug: every non-companion NPC moves to `location_id`.
+func _npcs_to(location_id: String) -> void:
+	if location_id == "":
+		return
+	for def in NpcSpawner.NpcRegistry.all():
+		if not def.companion and not def.speaker_only:
+			WorldState.move_npc(def.id, location_id)
+
+
+func _nearest_loaded_poi() -> String:
+	var best := ""
+	var best_d := 1e9
+	for id in _loaded_pois:
+		var d: float = player.global_position.distance_to(level.streamer.poi_pos(_loaded_pois[id]))
+		if d < best_d:
+			best_d = d
+			best = id
+	return best
 
 
 func _teleport(id: String) -> void:
@@ -680,6 +738,21 @@ func _demo_setup() -> void:
 					ep = p
 			_demo_view(Vector3(ep["pos"][0] + 3.5, 0, ep["pos"][2] + 1.0), Vector3(ep["pos"][0] + 3.5, ep["pos"][1] + 1.0, ep["pos"][2] - 2.5), 8.0)
 			get_tree().create_timer(2.5).timeout.connect(func(): EchoDirector.enter(&"test_echo", self, player, level.day_night.hour))
+		"world_ally":
+			# Rüfət joins; a bandit comes at them both
+			level.day_night.set_hour(11.0)
+			player.make_invulnerable(60.0)
+			WorldState.move_npc(&"rufet", WorldState.PARTY)
+			get_tree().create_timer(2.0).timeout.connect(func():
+				var at: Vector3 = player.global_position + player.facing() * 9.0
+				at.y = level.height_at(at.x, at.z) + 0.5
+				_spawn("bandit_sword", at, 1, {"roll": false, "hunt": true}))
+		"world_npcs":
+			# Everyone who is not a companion stands in Kürköy's square; Rüfət with the protagonist
+			level.day_night.set_hour(11.0)
+			WorldState.move_npc(&"rufet", WorldState.PARTY)
+			_npcs_to("kurkend")
+			_demo_view(Vector3(304, 0, 357), Vector3(304, 14.5, 348), 12.0)
 		"world_evening":
 			# Villagers round the fire, the guard's lantern (20:30)
 			level.day_night.set_hour(20.5)

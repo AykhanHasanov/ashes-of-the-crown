@@ -437,7 +437,7 @@ func _on_player_died() -> void:
 	Audio.music("", 1.0)
 	Audio.play("sting_defeat", -2.0, 0.0)
 	await get_tree().create_timer(1.2).timeout
-	hud.show_card("KÖZ SÖNDÜ", Names.fill("{PROTAGONIST} külün içine yığıldı.", false), "[R] — son noktadan devam et   ·   [Esc] — menü", 0.75)
+	hud.show_card("KÖZ SÖNDÜ", Names.fill("{PROTAGONIST} külün içine yığıldı."), "[R] — son noktadan devam et   ·   [Esc] — menü", 0.75)
 
 
 func _chapter_end() -> void:
@@ -458,7 +458,7 @@ func _chapter_end() -> void:
 	else:
 		lines.append("Rüfet yanında. Yüzünü hâlâ hatırlıyorsun.")
 	if burned >= 4:
-		lines.append(Names.fill("\"...yaklaşıyorsun, {PROTAGONIST}. Taç seni bekliyor...\"  — Kül Şahı"))
+		lines.append(Names.fill("\"...yaklaşıyorsun, {PROTAGONIST}. Taç seni bekliyor...\"  — Kül Şahı", &"kul_sahi"))
 	lines.append("")
 	lines.append("[Enter] — Bölüm 2: Son Ocak   ·   [R] — yeni oyun   ·   [Esc] — menü")
 	await get_tree().create_timer(1.2).timeout

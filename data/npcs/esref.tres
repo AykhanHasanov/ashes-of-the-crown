@@ -1,0 +1,19 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/npc_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"esref"
+name_key = "NPC_ESREF_NAME"
+name_memory_id = &""
+look_id = "npc_esref"
+weapon_path = ""
+shield_path = ""
+voice_profile = "npc_esref"
+personality_notes = "Bey of the Kartal Mountains clans. Big, rough, honour-bound; old grudges with the throne,
+but keeps his word. V2 look: KayKit Barbarian."
+home_location_id = ""
+companion = false
+ignores_burned_names = false
+speaker_only = false

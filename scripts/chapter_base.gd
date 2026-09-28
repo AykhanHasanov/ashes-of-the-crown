@@ -77,6 +77,8 @@ func _ready() -> void:
 	offer = AshOffer.new()
 	add_child(offer)
 	player.radial = radial
+	if player.has_method("on_wheel_burn"):
+		radial.burn_confirmed.connect(player.on_wheel_burn)
 	player.offer = offer
 
 	Fx.camera_rig = rig

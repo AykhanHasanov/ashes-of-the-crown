@@ -11,6 +11,7 @@ extends Node
 
 const Names := preload("res://scripts/core/names.gd")
 const MemoryRegistry := preload("res://scripts/core/memory_registry.gd")
+const KUL_SAHI := &"kul_sahi"   # speaker id (data/npcs/kul_sahi.tres)
 
 ## Kül Şahı grows louder with every burned memory.
 const WHISPERS := [
@@ -65,4 +66,4 @@ func burn_random() -> Resource:
 
 
 func whisper() -> String:
-	return Names.fill(WHISPERS[clampi(burned_count() - 1, 0, WHISPERS.size() - 1)])   # Kül Şahı knows the name
+	return Names.fill(WHISPERS[clampi(burned_count() - 1, 0, WHISPERS.size() - 1)], KUL_SAHI)   # he never forgets a name

@@ -12,7 +12,7 @@ const MAX_VOICES := 2
 const EVENT_COOLDOWN := {"attack": 1.6, "hurt": 0.8, "taunt": 9.0, "idle": 7.0, "spot": 1.2, "search": 4.0,
 	"suspicious": 3.0, "ally_died": 4.0, "call_help": 5.0, "victory": 6.0}
 ## Must-hear events skip the voice limit
-const URGENT := ["death", "explode", "surrender", "war_cry", "resurrect", "phase"]
+const URGENT := ["death", "explode", "surrender", "war_cry", "resurrect", "phase", "downed"]
 const SUBTITLE_COLORS := {"ash": Color(1.0, 0.62, 0.4), "bandit": Color(0.95, 0.88, 0.72), "beast": Color(0.9, 0.9, 0.9)}
 
 var _profiles := {}
@@ -92,7 +92,9 @@ func say(speaker: Node3D, profile: String, event: String, chance := 1.0, head_he
 	_speaking.append(p)
 	speaker.set_meta("bark_until", now + int(stream.get_length() * 1000.0) + 1800)
 	if entry.get("text", "") != "" and Settings.subtitles:
-		_subtitle(speaker, Names.fill(entry["text"]), head_height, stream.get_length())   # the speaker knows the name
+		# The voice says the name; the subtitle blanks a burned one unless this speaker never forgets
+		var who := StringName(speaker.get("npc_id")) if speaker.get("npc_id") != null else &""
+		_subtitle(speaker, Names.fill(entry["text"], who), head_height, stream.get_length())
 	return true
 
 

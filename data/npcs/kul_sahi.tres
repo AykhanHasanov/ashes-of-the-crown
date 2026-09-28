@@ -1,0 +1,19 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/npc_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"kul_sahi"
+name_key = "NPC_KUL_SAHI_NAME"
+name_memory_id = &""
+look_id = ""
+weapon_path = ""
+shield_path = ""
+voice_profile = ""
+personality_notes = "The Ash Shah: the antagonist, a voice in the ember. Speaker entry only (never spawned).
+He is the one who never forgets: his lines always show real names."
+home_location_id = ""
+companion = false
+ignores_burned_names = true
+speaker_only = true
