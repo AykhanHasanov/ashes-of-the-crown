@@ -1,0 +1,23 @@
+{
+	"_about": "Night events in Son Ocaq, checked when night falls (first match per NPC). door_death: the NPC opens the door to the shade of their lost one (NpcDefinition.lost_one_*) and dies (npc_died, cause 'door'). Only story conditions trigger them. The conditions below are PLACEHOLDER flags until the story writes the real ones.",
+	"events": [
+		{
+			"id": "esref_opens_door",
+			"npc": "esref",
+			"event": "door_death",
+			"condition": "flag:esref_quest_failed"
+		},
+		{
+			"id": "sona_opens_door",
+			"npc": "sona",
+			"event": "door_death",
+			"condition": "flag:sona_night_lost"
+		},
+		{
+			"id": "domrul_goes_with_her",
+			"npc": "domrul",
+			"event": "door_death",
+			"condition": "flag:domrul_released"
+		}
+	]
+}

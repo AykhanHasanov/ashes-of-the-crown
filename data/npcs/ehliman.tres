@@ -16,10 +16,12 @@ personality_notes = "Ehliman, Köz Nizamı'nın kâhini — high priest. Grief s
 burned all memories of his own family out of piety; calls everyone 'evlat' because he no
 longer remembers his children. Opposed the reversal; nobody listened. Keeps Son Ocaq's
 hearth. Late-game ideological antagonist, voice of the 'Adsız' ending. See STORY_BIBLE.md §7."
-home_location_id = ""
+home_location_id = "son_ocaq"
 companion = false
 ignores_burned_names = false
 npc_kind = "human"
 presence = ""
-tags = PackedStringArray()
+tags = PackedStringArray("core_grief")
 placeholder = false
+lost_one_name_key = "NPC_EHLIMAN_LOST_ONE"
+lost_one_look_id = "lost_ehliman"

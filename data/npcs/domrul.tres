@@ -15,10 +15,12 @@ voice_profile = ""
 personality_notes = "Dəli Domrul, the town's madman (Dede Korkut). Talked to his dead wife's shade through the
 door every night for a year; everything he says is literally true. Death by choice (Act III).
 See STORY_BIBLE.md §7."
-home_location_id = ""
+home_location_id = "son_ocaq"
 companion = false
 ignores_burned_names = false
 npc_kind = "human"
 presence = ""
 tags = PackedStringArray()
 placeholder = true
+lost_one_name_key = "NPC_DOMRUL_LOST_ONE"
+lost_one_look_id = "lost_domrul"

@@ -1,0 +1,169 @@
+{
+	"_about": "Son Ocaq (STORY_BIBLE §3.9): a village grown around an old caravanserai; the last hearth burns in its courtyard. Rooms open onto the courtyard (side n/e/w, slot 0..; the gate is on the south side). Each room has one door (stable id) and its residents (NPC ids; 'protagonist' is Aras). room_rules move an NPC to another room while a condition holds (first match wins). outside: buildings just outside the caravanserai. services: hub services unlocked when their NPC lives here (placeholder hooks). hearth.stages: flame scale per number of resolved core grief arcs (NPCs tagged core_grief). Blockout data; positions are computed by scripts/hub/hub_level.gd.",
+	"rooms": [
+		{
+			"id": "room_protagonist",
+			"door": "door_protagonist",
+			"residents": [
+				"protagonist",
+				"rufet"
+			],
+			"side": "n",
+			"slot": 2,
+			"variant": 0
+		},
+		{
+			"id": "room_sona",
+			"door": "door_sona",
+			"residents": [
+				"sona"
+			],
+			"side": "n",
+			"slot": 1,
+			"variant": 1
+		},
+		{
+			"id": "room_ehliman",
+			"door": "door_ehliman",
+			"residents": [
+				"ehliman"
+			],
+			"side": "n",
+			"slot": 3,
+			"variant": 2
+		},
+		{
+			"id": "room_sabir",
+			"door": "door_sabir",
+			"residents": [
+				"sabir"
+			],
+			"side": "n",
+			"slot": 0,
+			"variant": 1
+		},
+		{
+			"id": "room_elvin",
+			"door": "door_elvin",
+			"residents": [
+				"elvin"
+			],
+			"side": "n",
+			"slot": 4,
+			"variant": 0
+		},
+		{
+			"id": "room_peri_nene",
+			"door": "door_peri_nene",
+			"residents": [
+				"peri_nene"
+			],
+			"side": "w",
+			"slot": 0,
+			"variant": 2
+		},
+		{
+			"id": "room_domrul",
+			"door": "door_domrul",
+			"residents": [
+				"domrul"
+			],
+			"side": "w",
+			"slot": 1,
+			"variant": 1
+		},
+		{
+			"id": "room_ibrahim",
+			"door": "door_ibrahim",
+			"residents": [
+				"ibrahim"
+			],
+			"side": "w",
+			"slot": 2,
+			"variant": 0
+		},
+		{
+			"id": "room_nermin",
+			"door": "door_nermin",
+			"residents": [
+				"nermin",
+				"samir"
+			],
+			"side": "e",
+			"slot": 0,
+			"variant": 2
+		},
+		{
+			"id": "room_sahbaz",
+			"door": "door_sahbaz",
+			"residents": [
+				"sahbaz"
+			],
+			"side": "e",
+			"slot": 1,
+			"variant": 0
+		},
+		{
+			"id": "room_esref",
+			"door": "door_esref",
+			"residents": [
+				"esref"
+			],
+			"side": "e",
+			"slot": 2,
+			"variant": 1
+		}
+	],
+	"outside": [
+		{
+			"id": "smithy",
+			"door": "door_kemal",
+			"residents": [
+				"kemal"
+			],
+			"at": [
+				-12.0,
+				20.0
+			],
+			"face": 0
+		},
+		{
+			"id": "bakery",
+			"door": "door_gulcin",
+			"residents": [
+				"gulcin"
+			],
+			"at": [
+				12.0,
+				20.0
+			],
+			"face": 0
+		}
+	],
+	"room_rules": [
+		{
+			"npc": "sona",
+			"condition": "flag:sona_moved_in",
+			"room": "room_protagonist",
+			"_about": "Sona may move into Aras's room later [TBD trigger]"
+		}
+	],
+	"services": {
+		"ibrahim": "ash_upgrades",
+		"nermin": "shop",
+		"sahbaz": "training"
+	},
+	"hearth": {
+		"stages": [
+			1.0,
+			1.25,
+			1.5,
+			1.8,
+			2.1,
+			2.4,
+			2.7,
+			3.0,
+			3.3
+		]
+	}
+}

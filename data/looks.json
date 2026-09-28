@@ -655,5 +655,133 @@
 			0.6
 		],
 		"_placeholder": true
+	},
+	"lost_domrul": {
+		"outfit": "Female_Peasant",
+		"hair": "Hair_Long",
+		"hair_color": [
+			0.3,
+			0.3,
+			0.3
+		],
+		"tint": [
+			0.45,
+			0.45,
+			0.47
+		],
+		"scale": 1.0,
+		"_placeholder": true
+	},
+	"lost_ehliman": {
+		"outfit": "Male_Peasant",
+		"hair": "Hair_SimpleParted",
+		"hair_color": [
+			0.3,
+			0.3,
+			0.3
+		],
+		"tint": [
+			0.45,
+			0.45,
+			0.47
+		],
+		"scale": 0.7,
+		"_placeholder": true
+	},
+	"lost_elvin": {
+		"outfit": "Male_Peasant",
+		"hair": "Hair_SimpleParted",
+		"hair_color": [
+			0.3,
+			0.3,
+			0.3
+		],
+		"tint": [
+			0.45,
+			0.45,
+			0.47
+		],
+		"scale": 1.0,
+		"_placeholder": true
+	},
+	"lost_esref": {
+		"outfit": "Female_Peasant",
+		"hair": "Hair_Long",
+		"hair_color": [
+			0.3,
+			0.3,
+			0.3
+		],
+		"tint": [
+			0.45,
+			0.45,
+			0.47
+		],
+		"scale": 1.0,
+		"_placeholder": true
+	},
+	"lost_ibrahim": {
+		"outfit": "Male_Peasant",
+		"hair": "Hair_SimpleParted",
+		"hair_color": [
+			0.3,
+			0.3,
+			0.3
+		],
+		"tint": [
+			0.45,
+			0.45,
+			0.47
+		],
+		"scale": 1.0,
+		"_placeholder": true
+	},
+	"lost_nermin": {
+		"outfit": "Male_Peasant",
+		"hair": "Hair_SimpleParted",
+		"hair_color": [
+			0.3,
+			0.3,
+			0.3
+		],
+		"tint": [
+			0.45,
+			0.45,
+			0.47
+		],
+		"scale": 1.0,
+		"_placeholder": true
+	},
+	"lost_sabir": {
+		"outfit": "Male_Peasant",
+		"hair": "Hair_SimpleParted",
+		"hair_color": [
+			0.3,
+			0.3,
+			0.3
+		],
+		"tint": [
+			0.45,
+			0.45,
+			0.47
+		],
+		"scale": 1.0,
+		"_placeholder": true
+	},
+	"lost_sahbaz": {
+		"outfit": "Male_Peasant",
+		"hair": "Hair_SimpleParted",
+		"hair_color": [
+			0.3,
+			0.3,
+			0.3
+		],
+		"tint": [
+			0.45,
+			0.45,
+			0.47
+		],
+		"scale": 1.0,
+		"_placeholder": true
 	}
 }

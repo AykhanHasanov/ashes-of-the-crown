@@ -241,7 +241,9 @@ func _migrate_step(d: Dictionary, from: int) -> Dictionary:
 			return _rename_npcs(d, {"anar": "nermin"}, 4)   # Nərmin replaces Anar (STORY_BIBLE.md §7)
 		4:
 			return _rename_npcs(d, {"kamal": "kemal"}, 5)   # the Turkish form of the name
-		# 5: return _v5_to_v6(d)
+		5:
+			return _v5_to_v6(d)
+		# 6: return _v6_to_v7(d)
 	push_warning("SaveManager: no migration from save_version %d" % from)
 	return {}
 
@@ -308,6 +310,18 @@ func _v2_to_v3(d: Dictionary) -> Dictionary:
 				rec.erase(k)
 		rec["flags"] = flags
 	d["meta"]["save_version"] = 3
+	return d
+
+
+## v6: world.hub_stage is retired — the hub's growth is derived from resolved grief arcs
+## (grief_resolved NPC flags). Hub door overrides start empty.
+func _v5_to_v6(d: Dictionary) -> Dictionary:
+	var w: Dictionary = d.get("world", {}) if d.get("world") is Dictionary else {}
+	w.erase("hub_stage")
+	if not (w.get("doors") is Dictionary):
+		w["doors"] = {}
+	d["world"] = w
+	d["meta"]["save_version"] = 6
 	return d
 
 
