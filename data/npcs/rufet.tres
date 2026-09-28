@@ -24,3 +24,4 @@ npc_kind = "human"
 presence = ""
 tags = PackedStringArray()
 placeholder = false
+name_known_at_start = true

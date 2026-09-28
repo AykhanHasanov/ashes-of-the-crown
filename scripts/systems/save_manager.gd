@@ -16,6 +16,7 @@ extends Node
 ## Never writes while a debug --demo is running.
 
 const EchoDirector := preload("res://scripts/echoes/echo_director.gd")
+const NpcRegistry := preload("res://scripts/core/npc_registry.gd")
 const SLOTS := 3
 
 ## Folders are variables so the headless tests can use their own.
@@ -243,7 +244,9 @@ func _migrate_step(d: Dictionary, from: int) -> Dictionary:
 			return _rename_npcs(d, {"kamal": "kemal"}, 5)   # the Turkish form of the name
 		5:
 			return _v5_to_v6(d)
-		# 6: return _v6_to_v7(d)
+		6:
+			return _v6_to_v7(d)
+		# 7: return _v7_to_v8(d)
 	push_warning("SaveManager: no migration from save_version %d" % from)
 	return {}
 
@@ -322,6 +325,22 @@ func _v5_to_v6(d: Dictionary) -> Dictionary:
 		w["doors"] = {}
 	d["world"] = w
 	d["meta"]["save_version"] = 6
+	return d
+
+
+## v7: known names. NPCs Aras knows from the start (NpcDefinition.name_known_at_start)
+## get the name_known flag; everyone else is known by their epithet until the story
+## reveals the name.
+func _v6_to_v7(d: Dictionary) -> Dictionary:
+	var npcs: Dictionary = d.get("npcs", {}) if d.get("npcs") is Dictionary else {}
+	for def in NpcRegistry.all():
+		if def.name_known_at_start and npcs.get(String(def.id)) is Dictionary:
+			var rec: Dictionary = npcs[String(def.id)]
+			var flags: Dictionary = rec.get("flags", {}) if rec.get("flags") is Dictionary else {}
+			flags["name_known"] = true
+			rec["flags"] = flags
+	d["npcs"] = npcs
+	d["meta"]["save_version"] = 7
 	return d
 
 

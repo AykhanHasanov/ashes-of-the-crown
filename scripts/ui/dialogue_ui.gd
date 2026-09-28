@@ -35,6 +35,9 @@ var _node: Dictionary
 var node_id := ""
 var context: Dictionary = {}             # this conversation's own conditions (door_mode...)
 var _auto_t := -1.0
+var subtitles_only := false
+var _box_style: StyleBoxFlat
+var _plain_style: StyleBoxEmpty
 var _active := false
 var _typing := false
 var _cooldown := 0.0
@@ -61,6 +64,9 @@ func _ready() -> void:
 	style.set_corner_radius_all(6)
 	style.set_content_margin_all(22)
 	_panel.add_theme_stylebox_override("panel", style)
+	_box_style = style
+	_plain_style = StyleBoxEmpty.new()
+	_plain_style.set_content_margin_all(4)
 	add_child(_panel)
 	_panel.anchor_left = 0.5
 	_panel.anchor_right = 0.5
@@ -100,6 +106,7 @@ func _ready() -> void:
 func start(data: Dictionary, start_id := "start", ctx: Dictionary = {}) -> void:
 	_data = data
 	context = ctx
+	_subtitle_style(bool(ctx.get("door_mode", false)))
 	_active = true
 	_panel.visible = true
 	_panel.modulate.a = 0.0
@@ -119,6 +126,17 @@ func check(cond: String) -> bool:
 	if context.has(cond):
 		return bool(context[cond])
 	return WorldState.check(cond)
+
+
+## Through a door there is only a voice: the words sit as subtitles on the lower letterbox bar
+## (no panel), so the picture above stays clear. Otherwise the usual dialogue panel.
+func _subtitle_style(on: bool) -> void:
+	subtitles_only = on
+	_panel.add_theme_stylebox_override("panel", _plain_style if on else _box_style)
+	_panel.offset_top = -12.0 if on else -BAR_HEIGHT - 16
+	_panel.offset_bottom = -12.0 if on else -BAR_HEIGHT - 16
+	_name.add_theme_font_size_override("font_size", 16 if on else 22)
+	_text.add_theme_font_size_override("normal_font_size", 19 if on else 21)
 
 
 ## For tests and tools: the answers on screen and whether each can be taken.

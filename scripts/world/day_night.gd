@@ -30,6 +30,9 @@ var weather_sun := 1.0      # 0..1 from weather
 var weather_cloud := 0.2
 var weather_dark := 0.0
 var weather_fog := 0.0      # extra fog density
+## Scales sun/moon, sky and ambient light: < 1 darkens the scene (the night door conversation,
+## where the only warm light is the strip under the door).
+var mood_scale := 1.0
 
 var _cfg: Dictionary
 var _last_hour := -1
@@ -124,6 +127,7 @@ func _apply() -> void:
 	# Strong sun over a dimmer sky fill: shadows keep their depth (the old flat look)
 	light.light_energy = float(k[4]) * (1.0 if use_moon else 1.55) * lerpf(1.0, weather_sun, 0.9 if not use_moon else 0.5)
 	light.shadow_opacity = lerpf(1.0, 0.35, 1.0 - weather_sun) * (0.6 if use_moon else 1.0)
+	light.light_energy *= mood_scale
 
 	var top: Color = k[1]
 	var horizon: Color = k[2]
@@ -141,7 +145,8 @@ func _apply() -> void:
 	sky_mat.set_shader_parameter("cloud_darkness", weather_dark)
 	sky_mat.set_shader_parameter("ember_pulse", 0.8 + 0.2 * sin(_t * 1.3) + 0.08 * sin(_t * 5.1))
 
-	env.ambient_light_energy = float(k[5]) * 0.72 * lerpf(0.75, 1.0, weather_sun)
+	env.ambient_light_energy = float(k[5]) * 0.72 * lerpf(0.75, 1.0, weather_sun) * mood_scale
+	env.background_energy_multiplier = lerpf(0.15, 1.0, mood_scale)
 	var fog: Color = k[6]
 	env.fog_light_color = fog.lerp(grey, weather_dark * 0.6)
 	env.fog_density = 0.0016 + weather_fog * 0.012 + n * 0.0015

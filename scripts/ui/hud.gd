@@ -323,7 +323,43 @@ func track_boss(boss) -> void:
 	_boss_box.visible = true
 
 
+## While a conversation is open nothing else speaks over it: title cards, banners, burn
+## notices and whispers wait in a queue and come one at a time after it closes.
+var dialogue                      # DialogueUI (set by the mode)
+var _queue: Array = []            # [method name, args]
+var _flushing := false
+
+
+func _busy() -> bool:
+	return dialogue != null and is_instance_valid(dialogue) and dialogue.is_active()
+
+
+func queued() -> Array:
+	return _queue.map(func(q): return q[0])
+
+
+## After the conversation: the waiting messages, one at a time.
+func flush_queue() -> void:
+	if _flushing:
+		return
+	_flushing = true
+	while not _queue.is_empty() and not _busy():
+		var item: Array = _queue.pop_front()
+		callv(item[0], item[1])
+		var wait := 3.4
+		match item[0]:
+			"show_whisper":
+				wait = 4.2
+			"title_card":
+				wait = float(item[1][2]) + 1.4
+		await get_tree().create_timer(wait, false).timeout
+	_flushing = false
+
+
 func banner(text: String) -> void:
+	if _busy():
+		_queue.append(["banner", [text]])
+		return
 	_banner.text = text
 	if _banner_tween:
 		_banner_tween.kill()
@@ -335,6 +371,9 @@ func banner(text: String) -> void:
 
 
 func show_whisper(text: String) -> void:
+	if _busy():
+		_queue.append(["show_whisper", [text]])
+		return
 	_whisper.text = text
 	if _whisper_tween:
 		_whisper_tween.kill()
@@ -347,6 +386,9 @@ func show_whisper(text: String) -> void:
 
 ## Black title card that fades out after `hold` seconds. Await it.
 func title_card(title: String, sub: String, hold: float) -> void:
+	if _busy():
+		_queue.append(["title_card", [title, sub, hold]])
+		return
 	_set_card(title, sub, "", 1.0)
 	_card.modulate.a = 1.0
 	await get_tree().create_timer(hold).timeout

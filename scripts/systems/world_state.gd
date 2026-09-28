@@ -25,7 +25,7 @@ extends Node
 const MemoryRegistry := preload("res://scripts/core/memory_registry.gd")
 const NpcRegistry := preload("res://scripts/core/npc_registry.gd")
 
-const SAVE_VERSION := 6
+const SAVE_VERSION := 7
 
 ## A memory is not found yet (UNKNOWN), remembered (KEPT) or given to the fire (BURNED).
 enum MemoryState { UNKNOWN, KEPT, BURNED }
@@ -80,7 +80,7 @@ static func default_npcs() -> Dictionary:
 
 static func new_npc_record(def: Resource) -> Dictionary:
 	return {"alive": true, "location_id": def.home_location_id, "rescued": false, "relationship": 0,
-		"death_cause": "", "flags": {}}
+		"death_cause": "", "flags": {"name_known": true} if def.name_known_at_start else {}}
 
 
 # --- Session -----------------------------------------------------------------------------------
@@ -543,6 +543,16 @@ func change_npc_relationship(id: StringName, delta: int) -> void:
 	EventBus.npc_relationship_changed.emit(id, old, old + delta)
 
 
+## Aras knows this NPC's name (until then every label shows their epithet). NPC flag
+## name_known; the dialogue action "reveal_name:<id>" sets it. Emits npc_changed.
+func reveal_name(id: StringName) -> void:
+	set_npc_flag(id, &"name_known", true)
+
+
+func is_name_known(id: StringName) -> bool:
+	return get_npc_flag(id, &"name_known", false) == true
+
+
 ## A resident's grief arc is resolved (STORY_BIBLE §6: that room's window lights, the snow
 ## melts, the hearth grows). Stored as the NPC flag grief_resolved. Emits npc_changed.
 func resolve_grief(id: StringName) -> void:
@@ -703,7 +713,10 @@ func check(cond: String) -> bool:
 	return false
 
 
-## Side effects attached to dialogue nodes and choices ("do": [...]): "flag:<name>".
+## Side effects attached to dialogue nodes and choices ("do": [...]): "flag:<name>",
+## "reveal_name:<npc>".
 func apply(action: String) -> void:
 	if action.get_slice(":", 0) == "flag":
 		set_flag(StringName(action.get_slice(":", 1)))
+	elif action.get_slice(":", 0) == "reveal_name":
+		reveal_name(StringName(action.get_slice(":", 1)))

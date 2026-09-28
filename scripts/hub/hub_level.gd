@@ -40,6 +40,8 @@ var gate_pos := Vector3(0, 0, SOUTH_Z + ROOM_DEPTH - 0.4)
 var doors: Dictionary = {}           # door id -> Door
 var fronts: Dictionary = {}          # place id -> {door: Transform3D, window: Transform3D}
 var hearth_fire: Node3D
+var hearth_light: OmniLight3D
+var far_light: OmniLight3D
 
 var _plaster: StandardMaterial3D
 var _brick: StandardMaterial3D
@@ -69,12 +71,26 @@ func build() -> void:
 	var far := Effects.fire(14.0, 40)
 	far.position = Vector3(-60, 22, -260)
 	add_child(far)
-	var glow := OmniLight3D.new()
-	glow.light_color = Color(1.0, 0.45, 0.15)
-	glow.light_energy = 3.0
-	glow.omni_range = 120.0
-	glow.position = far.position + Vector3(0, 10, 0)
-	add_child(glow)
+	far_light = OmniLight3D.new()
+	far_light.light_color = Color(1.0, 0.45, 0.15)
+	far_light.light_energy = 3.0
+	far_light.omni_range = 120.0
+	far_light.position = far.position + Vector3(0, 10, 0)
+	add_child(far_light)
+
+
+## The night door conversation: the courtyard almost dark (sun/moon, sky and ambient down,
+## the hearth's and Közkale's light off, every other door's strip hidden); the only warm
+## light is the strip under `door`. null restores the night.
+func set_door_scene(door) -> void:
+	var on: bool = door != null
+	day_night.mood_scale = 0.05 if on else 1.0
+	day_night.set_hour(day_night.hour)
+	for l in [hearth_light, far_light]:
+		l.visible = not on
+	for d in doors.values():
+		d.set_strip_hidden(on and d != door)
+		d.set_key_light(on and d == door)
 
 
 func apply_quality(high: bool) -> void:
@@ -358,12 +374,12 @@ func _hearth() -> void:
 	var fire := Effects.fire(2.4, 48)
 	fire.position = Vector3(0, 0.5, 0)
 	hearth_fire.add_child(fire)
-	var light := OmniLight3D.new()
-	light.light_color = Color(1.0, 0.5, 0.2)
-	light.light_energy = 3.4
-	light.omni_range = 13.0
-	light.position = Vector3(0, 1.8, 0)
-	hearth_fire.add_child(light)
+	hearth_light = OmniLight3D.new()
+	hearth_light.light_color = Color(1.0, 0.5, 0.2)
+	hearth_light.light_energy = 3.4
+	hearth_light.omni_range = 13.0
+	hearth_light.position = Vector3(0, 1.8, 0)
+	hearth_fire.add_child(hearth_light)
 	braziers.append(hearth_pos)
 
 

@@ -38,12 +38,31 @@ static func protagonist_known() -> String:
 	return TranslationServer.translate(PROTAGONIST_KEY)
 
 
-## An NPC's display name (NpcDefinition.name_key, blank once its name_memory_id burned).
+## An NPC's display name: until Aras knows it (WorldState.is_name_known) their epithet,
+## capitalised ("Dokumacı"); once known, NpcDefinition.name_key — blank once its
+## name_memory_id burned (burning cannot take a name he never had: the epithet stays).
 static func npc(npc_id: StringName) -> String:
 	if not NpcRegistry.has(npc_id):
 		return ""
 	var def: Resource = NpcRegistry.get_def(npc_id)
+	if not WorldState.is_name_known(npc_id):
+		return capitalize(npc_epithet(npc_id))
 	return resolve(def.name_key, def.name_memory_id)
+
+
+## Upper-cases the first letter the Turkish way (i → İ, ı → I).
+static func capitalize(text: String) -> String:
+	if text == "":
+		return text
+	var first := text.substr(0, 1)
+	match first:
+		"i":
+			first = "İ"
+		"ı":
+			first = "I"
+		_:
+			first = first.to_upper()
+	return first + text.substr(1)
 
 
 ## An NPC's epithet: the first NpcDefinition.epithet_rules entry whose condition holds,

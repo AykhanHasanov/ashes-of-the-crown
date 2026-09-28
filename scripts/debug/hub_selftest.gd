@@ -198,7 +198,7 @@ func _migration() -> void:
 		"world": {"hub_stage": 2, "time_of_day": 20.0}}
 	var clean := WorldState.normalize(SaveManager.migrate(JSON.parse_string(JSON.stringify(v5))))
 	_check("migration v5 → v6: hub_stage retired, doors start empty", not clean["world"].has("hub_stage")
-		and clean["world"]["doors"] == {} and int(clean["meta"]["save_version"]) == 6)
+		and clean["world"]["doors"] == {} and int(clean["meta"]["save_version"]) == WorldState.SAVE_VERSION)
 	WorldState.new_game()
 	WorldState.set_door_override(&"door_sahbaz", "closed")
 	var bad := WorldState.to_dict()
@@ -330,10 +330,30 @@ func _door_talk() -> void:
 	WorldState.kill_npc(&"ehliman", "test")
 	await _frames(2)
 	_check("... none for the dead", not lvl.doors["door_ehliman"].is_lit)
-	# A: knock, who is there, the name
+	# UI priority: nothing talks over a conversation
 	hub.player.global_position = hub.door_front(sona_door)
 	var out: String = hub.knock(sona_door)
 	await _typed(dlg)
+	hub.hud.title_card("TEST", "", 0.5)
+	hub.hud.banner("banner")
+	WorldState.burn_memory(&"mother_name")   # a burn notice
+	await _frames(2)
+	_check("UI: title cards, banners and burn notices wait while a dialogue is open", hub.hud.queued() == ["title_card", "banner", "show_whisper"]
+		and hub.hud._card_title.text != "TEST" and hub.hud._banner.text != "banner", "%s %s %.2f" % [hub.hud.queued(), hub.hud._card_title.text, hub.hud._whisper.modulate.a])
+	# Door scene: almost dark, the strip the only warm light; Aras out of frame
+	var cam: Camera3D = talk.door_camera
+	_check("door scene: the courtyard goes almost dark", lvl.day_night.mood_scale <= 0.1 and not lvl.hearth_light.visible and not lvl.far_light.visible)
+	var others_dark: bool = lvl.doors.values().all(func(d): return d == sona_door or d.strip_light_energy() == 0.0)
+	_check("... the only warm light is the strip under this door", others_dark and sona_door.strip_light_energy() > 0.0)
+	var vp: Vector2 = hub.get_viewport().get_visible_rect().size
+	var door_c: Vector2 = cam.unproject_position(sona_door.global_position + Vector3(0, 1.0, 0)) / vp
+	var sill: Vector2 = cam.unproject_position(sona_door.global_position + Vector3(0, 0.03, 0.1)) / vp
+	_check("framing: the door is centred; the light under it sits above the subtitles", absf(door_c.x - 0.5) < 0.12 and sill.y < 0.86 and sill.y > 0.12,
+		"door %s, sill %s" % [door_c, sill])
+	var p: Vector3 = hub.player.global_position
+	var parts := [p + Vector3(0, 0.2, 0), p + Vector3(0, 1.0, 0), p + Vector3(0, 1.6, 0)]
+	_check("framing: Aras is out of the frame — no cut-off body or sword", parts.all(func(v): return not cam.is_position_in_frustum(v)))
+	_check("framing: through a door the words are subtitles (no panel)", dlg.subtitles_only)
 	_check("A: knocking at night starts a conversation through the door", out == "door" and dlg.is_active() and dlg.check("door_mode"))
 	_check("A: who is there? — the answer is his name as the UI resolves it", dlg.node_id == "start" and dlg.choice_texts() == ["Aras"] and dlg.choice_enabled(0))
 	_check("the camera closes on the door; the NPC is not seen", talk.door_camera != null and talk.door_camera.current and hub.npcs.body(&"sona") == null)
@@ -351,6 +371,11 @@ func _door_talk() -> void:
 	dlg._advance()
 	await _frames(3)
 	_check("after the talk the player's camera and controls come back", talk.door_camera == null and hub.rig.camera.current and not hub.player.input_locked)
+	_check("... and the night's light", is_equal_approx(lvl.day_night.mood_scale, 1.0) and lvl.hearth_light.visible)
+	_check("UI: afterwards the waiting messages come, one at a time", hub.hud._card.visible and hub.hud._card_title.text == "TEST"
+		and hub.hud.queued() == ["banner", "show_whisper"])
+	await _seconds(2.2)
+	_check("... next in line", hub.hud.queued() == ["show_whisper"])
 	# A: a burned name cannot answer; the door refuses and stays silent this night
 	WorldState.burn_memory(&"own_name", &"echo")
 	hub.knock(sona_door)

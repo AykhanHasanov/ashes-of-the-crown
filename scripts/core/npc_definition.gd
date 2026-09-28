@@ -14,6 +14,10 @@ extends Resource
 ## "flag:narin_revealed=>NPC_NARIN_EPITHET_REVEALED"). The first rule whose condition
 ## holds wins; with none, epithet_key.
 @export var epithet_rules: PackedStringArray = PackedStringArray()
+## Whether Aras knows this name when the game starts. Until he learns it (WorldState npc
+## flag name_known, the dialogue action reveal_name:<id>) every label shows the epithet.
+## [TBD per NPC: only Rüfət for now.]
+@export var name_known_at_start := false
 ## Optional: the name is blank in all text once this memory is BURNED.
 @export var name_memory_id: StringName
 @export var look_id: String               # data/looks.json entry (scripts/characters/human.gd)

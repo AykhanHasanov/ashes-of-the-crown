@@ -12,6 +12,8 @@ const HubData := preload("res://scripts/hub/hub_data.gd")
 const LEAF := "res://assets/village_mk/Door_1_Round.gltf"
 const OPEN_ANGLE := 100.0
 const WIDTH := 1.1
+const LINE_H := 0.012         # the gap under the door: a thin line of light, not a slot
+const STRIP_ENERGY := 0.8
 
 var door_id: StringName
 var place_id := ""
@@ -27,6 +29,8 @@ var _strip: MeshInstance3D
 var _strip_light: OmniLight3D
 var _shadow: MeshInstance3D
 var _shadow_tween: Tween
+var _glow: MeshInstance3D
+var _hidden_by_scene := false
 
 
 func setup(id: StringName, place: String) -> void:
@@ -42,7 +46,7 @@ func _ready() -> void:
 	add_child(_hinge)
 	if ResourceLoader.exists(LEAF):
 		var leaf: Node3D = load(LEAF).instantiate()
-		leaf.position = Vector3.ZERO   # the leaf's origin is its hinge side (as tools/build_houses.gd places it)
+		leaf.position = Vector3(0, -0.012, 0)   # the leaf's origin is its hinge side; it sits on the threshold
 		_hinge.add_child(leaf)
 	var body := StaticBody3D.new()
 	_blocker = CollisionShape3D.new()
@@ -64,40 +68,82 @@ func _ready() -> void:
 	_update_strip()
 
 
-## Light under the door: a thin warm strip on the ground at the threshold, a faint glow,
-## and the shadow that crosses it when someone moves inside.
+## Light under the door: a thin bright line at the threshold, a soft warm glow spilling onto
+## the floor, a low light — and a soft shadow that crosses the glow when someone moves inside.
 func _build_strip() -> void:
-	var warm := StandardMaterial3D.new()
-	warm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	warm.albedo_color = Color(1.0, 0.62, 0.28)
+	var line_mat := StandardMaterial3D.new()
+	line_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	line_mat.albedo_color = Color(1.0, 0.72, 0.4)
 	_strip = MeshInstance3D.new()
 	_strip.name = "LightStrip"
-	var q := QuadMesh.new()
-	q.size = Vector2(WIDTH - 0.1, 0.12)
-	q.material = warm
-	_strip.mesh = q
-	_strip.rotation.x = -PI * 0.5
-	_strip.position = Vector3(0, 0.02, 0.08)
+	var line := QuadMesh.new()
+	line.size = Vector2(WIDTH - 0.12, LINE_H)
+	line.material = line_mat
+	_strip.mesh = line
+	_strip.position = Vector3(0, 0.02 + LINE_H * 0.5, 0.066)
 	add_child(_strip)
+	_glow = MeshInstance3D.new()
+	_glow.name = "LightSpill"
+	var glow := QuadMesh.new()
+	glow.size = Vector2(WIDTH + 1.3, 1.6)
+	glow.material = _soft_material(Color(1.0, 0.55, 0.22, 0.85), true)
+	_glow.mesh = glow
+	_glow.rotation.x = -PI * 0.5
+	_glow.position = Vector3(0, 0.024, 0.066 + 0.8)
+	add_child(_glow)
 	_strip_light = OmniLight3D.new()
 	_strip_light.light_color = Color(1.0, 0.55, 0.22)
-	_strip_light.light_energy = 0.6
-	_strip_light.omni_range = 1.8
-	_strip_light.position = Vector3(0, 0.12, 0.3)
+	_strip_light.light_energy = STRIP_ENERGY
+	_strip_light.omni_range = 1.5
+	_strip_light.omni_attenuation = 2.0
+	_strip_light.position = Vector3(0, 0.03, 0.14)   # from under the door: it lights the floor, not the wall
 	add_child(_strip_light)
-	var dark := StandardMaterial3D.new()
-	dark.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	dark.albedo_color = Color(0.03, 0.02, 0.015)
 	_shadow = MeshInstance3D.new()
 	_shadow.name = "StripShadow"
 	var sq := QuadMesh.new()
-	sq.size = Vector2(0.28, 0.14)
-	sq.material = dark
+	sq.size = Vector2(0.9, 1.6)
+	sq.material = _soft_material(Color(0.0, 0.0, 0.0, 0.8), false)
 	_shadow.mesh = sq
 	_shadow.rotation.x = -PI * 0.5
-	_shadow.position = Vector3(-WIDTH * 0.35, 0.025, 0.08)
+	_shadow.position = Vector3(-WIDTH * 0.35, 0.027, 0.066 + 0.8)
 	_shadow.visible = false
 	add_child(_shadow)
+
+
+## A soft spot, brightest at the door edge and fading into the floor. Additive for light,
+## blended for shadow.
+static func _soft_material(color: Color, additive: bool) -> StandardMaterial3D:
+	# Fully faded at half the quad's depth, so the quad's own edges never show
+	var g := Gradient.new()
+	g.set_color(0, color)
+	g.set_color(1, Color(color.r, color.g, color.b, 0.0))
+	g.set_offset(1, 0.5)
+	g.add_point(0.22, Color(color.r, color.g, color.b, color.a * 0.45))
+	var tex := GradientTexture2D.new()
+	tex.gradient = g
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.fill_from = Vector2(0.5, 0.0)
+	tex.fill_to = Vector2(0.5, 1.0)
+	tex.width = 64
+	tex.height = 64
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD if additive else BaseMaterial3D.BLEND_MODE_MIX
+	m.albedo_texture = tex
+	m.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	return m
+
+
+## The door scene: this strip is the scene's key light (brighter); `on` = false restores it.
+func set_key_light(on: bool) -> void:
+	_strip_light.light_energy = STRIP_ENERGY * (1.4 if on else 1.0)
+
+
+## Hidden while another door's scene plays (the only warm light is that door's).
+func set_strip_hidden(hidden: bool) -> void:
+	_hidden_by_scene = hidden
+	_update_strip()
 
 
 func _on_world_changed(key: StringName) -> void:
@@ -145,8 +191,10 @@ func shadow_x() -> float:
 
 func _update_strip() -> void:
 	is_lit = not _wants_open() and WorldState.get_phase() == &"night" and HubData.is_lived_in(place_id)
-	_strip.visible = is_lit
-	_strip_light.visible = is_lit
+	var shown := is_lit and not _hidden_by_scene
+	_strip.visible = shown
+	_glow.visible = shown
+	_strip_light.visible = shown
 	if not is_lit and speaking:
 		set_speaking(false)
 
@@ -161,3 +209,7 @@ func _apply(animate: bool) -> void:
 		_tween.tween_property(_hinge, "rotation:y", angle, 0.6).set_trans(Tween.TRANS_SINE)
 	else:
 		_hinge.rotation.y = angle
+
+
+func strip_light_energy() -> float:
+	return _strip_light.light_energy if _strip_light.visible else 0.0

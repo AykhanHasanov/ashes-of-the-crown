@@ -123,7 +123,8 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 **The protagonist's name**
 - The protagonist is **Aras**. The name is only ever shown via the key `PROTAGONIST_NAME` and `scripts/core/names.gd` — never write it in code, scenes, data or dialogue. Internal ids use `protagonist`.
 - In text, write the token `{PROTAGONIST}` and pass the text through `Names.fill(text, speaker_id)`. Once a name's memory is burned (`own_name` for his), **all text** shows the blank `NAME_FORGOTTEN` — UI, dialogue, subtitles, NPC lines. Voices keep saying the name (`tools/gen_voices.py` fills the token with the real name). The only exception is a speaker whose NpcDefinition sets `ignores_burned_names` (Kül Şahı, `data/npcs/kul_sahi.tres`) — never hardcode a speaker check.
-- NPC names: `Names.npc(id)` (their `name_key`, blank once their `name_memory_id` burned). Dialogue nodes name NPC speakers with `"speaker_id"`.
+- NPC names: `Names.npc(id)`. Until Aras knows a name (WorldState `is_name_known` / `reveal_name`, NPC flag `name_known`, dialogue action `reveal_name:<id>`; at the start only `name_known_at_start` NPCs — Rüfət) every label shows the capitalised epithet; once known, their `name_key`, blank once their `name_memory_id` burned. Dialogue nodes name NPC speakers with `"speaker_id"`.
+- The HUD never talks over a conversation: title cards, banners, burn notices and whispers queue while a dialogue is open and come one at a time after it (`hud.queued()`).
 - Old saves with the former name are renamed by the v1 → v2 migration in `save_manager.gd` (the only place the old name may appear).
 
 **NPCs** (identities only; roles and quests come later from the owner)

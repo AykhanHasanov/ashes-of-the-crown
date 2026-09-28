@@ -81,6 +81,7 @@ func _ready() -> void:
 	if def.shield_path != "":
 		_model.attach(def.shield_path, "handslot.l", Vector3.ZERO, true)
 	EventBus.memory_burned.connect(func(_id): display_name = Names.npc(npc_id))
+	EventBus.npc_changed.connect(_on_npc_changed)
 	EventBus.state_replaced.connect(func(): display_name = Names.npc(npc_id))
 
 
@@ -382,3 +383,9 @@ func _enter(s: int) -> void:
 func _say(event: String, chance: float) -> void:
 	if def != null and def.voice_profile != "":
 		Barks.say(self, def.voice_profile, event, chance, 1.85)
+
+
+## A revealed name shows at once.
+func _on_npc_changed(id: StringName) -> void:
+	if id == npc_id:
+		display_name = Names.npc(npc_id)

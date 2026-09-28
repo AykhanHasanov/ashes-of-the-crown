@@ -24,6 +24,8 @@ const PATH := "res://data/hub/door_talk.json"
 const DOOR_BUS := "Door"
 const VOICE_BUS := "Voice"
 const DOOR_CUTOFF_HZ := 750.0
+const STAND_OFF := 2.9            # where Aras stands during the door shot: behind the camera
+const CAMERA_OFF := 2.2
 
 var dialogue                       # DialogueUI
 var level                          # HubLevel (doors)
@@ -189,19 +191,26 @@ func _on_finished(event: String) -> void:
 		door_camera.queue_free()
 		door_camera = null
 		mode.rig.camera.make_current()
+		level.set_door_scene(null)
 	finished.emit()
 
 
-## Close on the door: the whole door and the light under it, Aras at its side.
+## The door shot: Aras steps back out of frame (behind the camera); the camera stands before
+## the door at chest height, the door in the middle and the light under it above the
+## subtitles. No part of him — no cut-off body or sword — is in the picture.
 func _door_camera(door) -> void:
 	var xf: Transform3D = door.global_transform
+	var stand: Vector3 = xf.origin + xf.basis.z * STAND_OFF
+	mode.player.global_position = Vector3(stand.x, mode.player.global_position.y, stand.z)
+	mode.player.face_towards(xf.origin)
 	door_camera = Camera3D.new()
 	door_camera.name = "DoorCamera"
-	door_camera.fov = 50.0
+	door_camera.fov = 60.0
 	add_child(door_camera)
-	door_camera.global_position = xf.origin + xf.basis.z * 2.0 + xf.basis.x * 1.2 + Vector3(0, 1.5, 0)   # inside the gallery
-	door_camera.look_at(xf.origin + xf.basis.z * 0.2 + Vector3(-0.1, 0.25, 0))   # low enough that the light under the door shows above the subtitles
+	door_camera.global_position = xf.origin + xf.basis.z * CAMERA_OFF + xf.basis.x * 0.15 + Vector3(0, 1.1, 0)
+	door_camera.look_at(xf.origin + Vector3(0, 0.85, 0))
 	door_camera.make_current()
+	level.set_door_scene(door)
 
 
 func _silence(door) -> void:
