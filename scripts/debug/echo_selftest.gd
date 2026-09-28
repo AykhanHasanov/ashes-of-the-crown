@@ -76,14 +76,14 @@ func _migration() -> void:
 	v1["npcs"] = {OLD: {"alive": true}}
 	var up := SaveManager.migrate(JSON.parse_string(JSON.stringify(v1)))
 	var clean := WorldState.normalize(up)
-	_check("migration v1 → v2: burned list → BURNED, the rest UNKNOWN", clean["player"]["memories"] == {"rufet_face": "burned", "father_voice": "burned"}
+	_check("migration v1 → v3: burned list → BURNED, the rest UNKNOWN", clean["player"]["memories"] == {"rufet_face": "burned", "father_voice": "burned"}
 		and not clean["player"].has("burned_memories"))
 	_check("migration renames the old protagonist id in keys and values", clean["flags"].has("protagonist_met_rufet")
-		and clean["flags"]["helped"] == "protagonist" and clean["npcs"].has("protagonist"))
+		and clean["flags"]["helped"] == "protagonist" and up["npcs"].has("protagonist") and not up["npcs"].has(OLD))
 	_check("the migrated save loads", WorldState.from_dict(clean) and WorldState.has_burned(&"father_voice") and WorldState.get_memory_state(&"mother_name") == S.UNKNOWN)
 	var legacy := {"version": 4, "chapter": 1, "checkpoint": "waves", "flags": {}, "echoes_seen": [], "memory": {"burned": ["first_sword"]}, "world": {}}
 	var from_legacy := WorldState.normalize(SaveManager.migrate(legacy))
-	_check("the whole chain: old GameState file → v2", from_legacy["player"]["memories"] == {"first_sword": "burned"} and int(from_legacy["meta"]["save_version"]) == 2)
+	_check("the whole chain: old GameState file → v2", from_legacy["player"]["memories"] == {"first_sword": "burned"} and int(from_legacy["meta"]["save_version"]) == WorldState.SAVE_VERSION)
 	# The same through the file path, as an old save on disk would come in
 	_write(TEST_DIR + "slot_2.json", JSON.stringify(v1))
 	_check("an old v1 slot file loads through SaveManager", SaveManager.load_slot(2) and WorldState.has_burned(&"rufet_face"))
@@ -154,6 +154,7 @@ func _burn_path() -> void:
 	var back := await _scene(HOST)
 	_check("holding BURN 1.5 s burns the memory (memory_burned emitted)", WorldState.get_memory_state(&"first_sword") == S.BURNED and _events == [["burned", &"first_sword"]])
 	_check("BURN: saved at once", _saved_state("first_sword") == "burned")
+	_check("BURN in an echo is recorded as burn context \"echo\"", WorldState.get_burn_context(&"first_sword") == &"echo")
 	var fired := await _until(func(): return back.player._state == back.player.S.CAST, 2.0)
 	_check("the burned memory's fire is released on return (Alov Dalğası)", fired)
 
@@ -169,8 +170,8 @@ func _blank_name() -> void:
 	await _frames(2)
 	var blank := tr("NAME_FORGOTTEN")
 	_check("after burning the name memory the UI shows a blank", Names.protagonist() == blank and host.hud._name_label.text == blank.to_upper())
-	_check("people still know him: NPC lines keep the name", Names.protagonist_known() == "Aras" and Names.fill("{PROTAGONIST}!") == "Aras!")
-	_check("his own UI lines use the blank", Names.fill("{PROTAGONIST}", false) == blank)
+	_check("the voice still knows it (protagonist_known, used for voice lines)", Names.protagonist_known() == "Aras")
+	_check("all text uses the blank, NPC lines included", Names.fill("{PROTAGONIST}!") == blank + "!" and Names.fill("{PROTAGONIST}", &"rufet") == blank)
 	_check("the name memory is not offered to the fire wheel", Memory.combat_memories().all(func(d): return d.id != Names.PROTAGONIST_MEMORY))
 
 

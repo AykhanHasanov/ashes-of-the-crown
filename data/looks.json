@@ -328,5 +328,150 @@
 			0.35,
 			0.42
 		]
+	},
+	"npc_rufet": {
+		"outfit": "Male_Ranger",
+		"hood": false,
+		"pauldron": true,
+		"hair": "Hair_Buzzed",
+		"beard": true,
+		"hair_color": [
+			0.09,
+			0.07,
+			0.05
+		],
+		"cloth_hue": [
+			0.18,
+			0.55,
+			0.62,
+			0.55,
+			0.5
+		]
+	},
+	"npc_sabir": {
+		"outfit": "Male_Peasant",
+		"hair": "Hair_Long",
+		"beard": true,
+		"hair_color": [
+			0.72,
+			0.7,
+			0.66
+		],
+		"cloth_hue": [
+			0.18,
+			0.55,
+			0.66,
+			0.6,
+			0.55
+		]
+	},
+	"npc_sahbaz": {
+		"outfit": "Male_Ranger",
+		"hood": false,
+		"pauldron": true,
+		"hair": "Hair_Buzzed",
+		"beard": true,
+		"hair_color": [
+			0.2,
+			0.18,
+			0.16
+		],
+		"cloth_hue": [
+			0.18,
+			0.55,
+			0.0,
+			0.7,
+			0.5
+		]
+	},
+	"npc_anar": {
+		"outfit": "Male_Ranger",
+		"hood": true,
+		"pauldron": false,
+		"hair": "Hair_SimpleParted",
+		"beard": true,
+		"hair_color": [
+			0.14,
+			0.09,
+			0.05
+		],
+		"cloth_hue": [
+			0.18,
+			0.55,
+			0.1,
+			0.9,
+			0.65
+		]
+	},
+	"npc_elvin": {
+		"outfit": "Male_Ranger",
+		"hood": false,
+		"pauldron": true,
+		"hair": "Hair_SimpleParted",
+		"beard": false,
+		"hair_color": [
+			0.3,
+			0.2,
+			0.1
+		],
+		"cloth_hue": [
+			0.18,
+			0.55,
+			0.8,
+			0.8,
+			0.6
+		]
+	},
+	"npc_esref": {
+		"outfit": "Male_Ranger",
+		"hood": false,
+		"pauldron": false,
+		"hair": "Hair_Long",
+		"beard": true,
+		"hair_color": [
+			0.08,
+			0.06,
+			0.05
+		],
+		"tint": [
+			0.82,
+			0.72,
+			0.6
+		],
+		"scale": 1.06
+	},
+	"npc_ibrahim": {
+		"outfit": "Male_Peasant",
+		"hair": "Hair_SimpleParted",
+		"beard": true,
+		"hair_color": [
+			0.25,
+			0.22,
+			0.2
+		],
+		"cloth_hue": [
+			0.18,
+			0.55,
+			0.42,
+			0.7,
+			0.5
+		]
+	},
+	"npc_ehliman": {
+		"outfit": "Male_Peasant",
+		"hair": "Hair_Buzzed",
+		"beard": true,
+		"hair_color": [
+			0.4,
+			0.38,
+			0.36
+		],
+		"cloth_hue": [
+			0.18,
+			0.55,
+			0.02,
+			0.9,
+			0.55
+		]
 	}
 }

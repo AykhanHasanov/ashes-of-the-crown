@@ -102,6 +102,7 @@
 		"wave_radius": 7.0,
 		"wave_edge_falloff": 0.55,
 		"wave_cooldown": 1.0,
+		"burn_hold_seconds": 1.5,
 		"offer_health_fraction": 0.125,
 		"offer_time_scale": 0.3,
 		"offer_duration": 3.0

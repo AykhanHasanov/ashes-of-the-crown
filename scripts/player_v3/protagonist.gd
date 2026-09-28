@@ -898,11 +898,19 @@ func _open_wheel() -> void:
 	Fx.hold_time("radial", 0.2)
 
 
+## Q let go while the wheel is open: the hold was not completed — nothing burns.
 func _release_wheel() -> void:
-	var id: String = radial.close()
+	radial.close()
 	Fx.release_time("radial")
-	if id == "":
+
+
+## The wheel's hold completed on `id` (radial.burn_confirmed): close it and burn.
+func on_wheel_burn(id: String) -> void:
+	if radial == null or not radial.is_open:
 		return
+	radial.close()
+	Fx.release_time("radial")
+	_fire_down_ms = -1
 	if not WorldState.has_flag(&"wave_confirmed"):
 		radial.ask_confirm()
 		var ok: bool = await radial.confirmed

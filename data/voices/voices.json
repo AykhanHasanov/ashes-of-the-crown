@@ -145,6 +145,62 @@
 			"pitch": "-16Hz",
 			"fx": "villager",
 			"lines": "guard"
+		},
+		"npc_rufet": {
+			"voice": "tr-TR-AhmetNeural",
+			"rate": "-4%",
+			"pitch": "-10Hz",
+			"fx": "villager",
+			"lines": "rufet"
+		},
+		"npc_sabir": {
+			"voice": "tr-TR-AhmetNeural",
+			"rate": "-16%",
+			"pitch": "-20Hz",
+			"fx": "villager",
+			"lines": "villager"
+		},
+		"npc_sahbaz": {
+			"voice": "tr-TR-AhmetNeural",
+			"rate": "-8%",
+			"pitch": "-24Hz",
+			"fx": "villager",
+			"lines": "villager"
+		},
+		"npc_anar": {
+			"voice": "tr-TR-AhmetNeural",
+			"rate": "+6%",
+			"pitch": "-2Hz",
+			"fx": "villager",
+			"lines": "villager"
+		},
+		"npc_elvin": {
+			"voice": "tr-TR-AhmetNeural",
+			"rate": "+2%",
+			"pitch": "+4Hz",
+			"fx": "villager",
+			"lines": "villager"
+		},
+		"npc_esref": {
+			"voice": "tr-TR-AhmetNeural",
+			"rate": "-10%",
+			"pitch": "-30Hz",
+			"fx": "villager",
+			"lines": "villager"
+		},
+		"npc_ibrahim": {
+			"voice": "tr-TR-AhmetNeural",
+			"rate": "+8%",
+			"pitch": "+2Hz",
+			"fx": "villager",
+			"lines": "villager"
+		},
+		"npc_ehliman": {
+			"voice": "tr-TR-AhmetNeural",
+			"rate": "-12%",
+			"pitch": "-14Hz",
+			"fx": "villager",
+			"lines": "villager"
 		}
 	},
 	"lines": {
@@ -428,6 +484,47 @@
 			],
 			"night": [
 				"Gece dolaşma yolcu. Kül gölgeleri karanlığı sever."
+			]
+		},
+		"rufet": {
+			"greet": [
+				"Ne gerekirse, yanındayım, {PROTAGONIST}.",
+				"Yol uzun, kardeşim. Ama birlikte yürürüz."
+			],
+			"idle": [
+				"Kül hâlâ sıcak. Dikkatli ol.",
+				"Bu sessizlik hoşuma gitmiyor."
+			],
+			"spot": [
+				"Kılıcını çek, {PROTAGONIST}!",
+				"Arkanı kolluyorum!",
+				"Geliyorlar!"
+			],
+			"attack": [
+				"Al bunu!",
+				"Geri çekil!",
+				"Hah!"
+			],
+			"hurt": [
+				"Ah!",
+				"Sıyırdı sadece."
+			],
+			"downed": [
+				"{PROTAGONIST}... kalkamıyorum...",
+				"Yardım et, {PROTAGONIST}!",
+				"Dizim... gitti..."
+			],
+			"helped": [
+				"Sağ ol, kardeşim.",
+				"Hâlâ ayaktayız, {PROTAGONIST}."
+			],
+			"recovered": [
+				"Kendime geldim... Devam.",
+				"Bitmedi daha."
+			],
+			"victory": [
+				"Bitti... şimdilik.",
+				"Kılıcın hâlâ keskin, {PROTAGONIST}."
 			]
 		}
 	}

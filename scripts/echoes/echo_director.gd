@@ -49,7 +49,7 @@ static func resolve(choice: StringName, tree: SceneTree) -> void:
 		return
 	var def: Resource = definition()
 	if choice == &"burn":
-		WorldState.burn_memory(def.memory_id)
+		WorldState.burn_memory(def.memory_id, &"echo")
 	else:
 		WorldState.keep_memory(def.memory_id)
 	_ctx["outcome"] = choice

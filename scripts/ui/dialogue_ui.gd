@@ -135,11 +135,14 @@ func _show(id: String) -> void:
 		WorldState.apply(action)
 	_node = node
 	Audio.play("ui_click", -12.0, 0.05)
+	# "speaker_id" (an NPC id) names the speaker through Names; old trees give "speaker" text.
+	# Burned names are blank in all text, unless the speaker ignores burned names.
 	var speaker: String = node.get("speaker", "")
+	var speaker_id := StringName(node.get("speaker_id", ""))
 	var own_line := speaker == Names.TOKEN
-	_name.text = Names.fill(speaker, false)   # the protagonist's own label is blank once his name burned
+	_name.text = Names.npc(speaker_id) if speaker_id != &"" else Names.fill(speaker)
 	_name.add_theme_color_override("font_color", EMBER if own_line else GOLD)
-	_text.text = Names.fill(node.get("text", ""), not own_line)
+	_text.text = Names.fill(node.get("text", ""), speaker_id)
 	_text.visible_ratio = 0.0
 	for c in _choices.get_children():
 		c.queue_free()
@@ -163,7 +166,7 @@ func _finish_typing() -> void:
 		var choices: Array = _node["choices"]
 		for i in choices.size():
 			var btn := Button.new()
-			btn.text = "%d.  %s" % [i + 1, Names.fill(choices[i]["text"], false)]
+			btn.text = "%d.  %s" % [i + 1, Names.fill(choices[i]["text"])]
 			btn.flat = true
 			btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 			btn.add_theme_font_size_override("font_size", 19)

@@ -85,7 +85,7 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
   - `inventory`
   - `flags`
   - `story`: chapter, checkpoint, echoes seen
-  - `npcs`: reserved for the NPC model
+  - `npcs`: one record per NPC definition (alive, location_id, rescued, relationship, death_cause, flags)
   - `world`: clock, day, hub stage, open-world progress
 - **Never mutate its dictionaries.** Use the typed accessors (`set_flag`, `burn_memory`, `add_item`, `set_player_stats`, `add_world_entry`, ...).
 - Every mutation emits its `EventBus` signal. The signal list and who emits each one are in the header of `scripts/systems/event_bus.gd`.
@@ -104,8 +104,10 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 
 **Memories**
 - Defined as data: `MemoryDefinition` resources in `data/memories/*.tres`, looked up through `scripts/core/memory_registry.gd` by permanent id.
-- Every memory has one of three states in WorldState (`player.memories`, id → state): UNKNOWN (not found; absent), KEPT, BURNED. Change them only with `keep_memory` (UNKNOWN → KEPT, emits `memory_kept`) and `burn_memory` (UNKNOWN/KEPT → BURNED, emits `memory_burned`); read with `get_memory_state` / `has_burned`. Dialogue conditions: `memory:<id>` (burned), `kept:<id>`, `flag:<name>`.
-- `Memory` (the autoload) is only the rules layer. Memories with `combat_burnable = false` (e.g. `own_name`) are never offered to the fire wheel.
+- Every memory has one of three states in WorldState (`player.memories`, id → state): UNKNOWN (not found; absent), KEPT, BURNED. Change them only with `keep_memory` (UNKNOWN → KEPT, emits `memory_kept`) and `burn_memory(id, context)` (UNKNOWN/KEPT → BURNED, emits `memory_burned`); read with `get_memory_state` / `has_burned`. Each burn records where it happened (`player.burn_context`: `echo` or `combat`; `get_burn_context`). Dialogue conditions: `memory:<id>` (burned), `kept:<id>`, `flag:<name>`, `alive:<npc>`, `dead:<npc>`, `rescued:<npc>`.
+- `Memory` (the autoload) is only the rules layer. Memories with `combat_burnable = false` (e.g. `own_name`) are never offered to the fire wheel; they burn only in their echo.
+- The fire wheel (`scripts/ui/radial_menu.gd`) burns KEPT memories too (intended). It needs hold-to-confirm: point at a memory and keep pointing for `ember.burn_hold_seconds` (`data/balance/combat.json`, 1.5 s, shared with the echo's BURN) while time is slowed; letting go early cancels.
+- A burn's power is still the one-time Alov Dalğası — a placeholder (see `BACKLOG.md`, must-fix).
 - Refer to memories by id (`&"mother_name"`), never by title.
 
 **Echoes** (the protagonist's lost memories, played as short scenes)
@@ -117,8 +119,15 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 
 **The protagonist's name**
 - The protagonist is **Aras**. The name is only ever shown via the key `PROTAGONIST_NAME` and `scripts/core/names.gd` — never write it in code, scenes, data or dialogue. Internal ids use `protagonist`.
-- In text, write the token `{PROTAGONIST}` and pass the text through `Names.fill()`. UI and his own lines use `Names.protagonist()`: blank (`NAME_FORGOTTEN`) once the `own_name` memory is burned. NPC lines use `Names.protagonist_known()` — people still know him. NPC names go through `Names.resolve(key, memory_id)` the same way.
+- In text, write the token `{PROTAGONIST}` and pass the text through `Names.fill(text, speaker_id)`. Once a name's memory is burned (`own_name` for his), **all text** shows the blank `NAME_FORGOTTEN` — UI, dialogue, subtitles, NPC lines. Voices keep saying the name (`tools/gen_voices.py` fills the token with the real name). The only exception is a speaker whose NpcDefinition sets `ignores_burned_names` (Kül Şahı, `data/npcs/kul_sahi.tres`) — never hardcode a speaker check.
+- NPC names: `Names.npc(id)` (their `name_key`, blank once their `name_memory_id` burned). Dialogue nodes name NPC speakers with `"speaker_id"`.
 - Old saves with the former name are renamed by the v1 → v2 migration in `save_manager.gd` (the only place the old name may appear).
+
+**NPCs** (identities only; roles and quests come later from the owner)
+- Data: `NpcDefinition` in `data/npcs/*.tres` (id, name_key, name_memory_id, look_id → `data/looks.json`, weapon/shield, voice_profile → `data/voices/voices.json`, dev-only personality_notes, home_location_id, companion, ignores_burned_names, speaker_only), looked up through `scripts/core/npc_registry.gd`. The cast is V2's eight (Rüfət + 7 residents) with no suspect content; `kul_sahi` is a speaker only.
+- State: `WorldState` NPC accessors (`move_npc`, `rescue_npc` → location `son_ocaq`, `kill_npc` — permanent, `change_npc_relationship`, `set_npc_flag`) with `npc_moved` / `npc_rescued` / `npc_died` / `npc_relationship_changed`. Locations: a POI id, `party` (with the protagonist), `son_ocaq` (hub, not built), or `""`.
+- Bodies come only from WorldState: `scripts/npc/npc_spawner.gd` (world_mode owns one) builds a `resident.gd` at a loaded POI or an `ally.gd` for a companion in the party; the dead never get a body again. Never hand-place a named NPC. Generic villagers (`data/world/villagers.json`) are separate and unchanged.
+- The ally (`scripts/npc/ally.gd`, numbers in `data/balance/allies.json`): a player-side Combatant that follows, fights, sometimes draws an enemy off the protagonist (`Foe.retarget`). At 0 health he is DOWNED, never dead: the protagonist helps him up ([E], `help_up()`), or he rises alone when no enemy is near. Only the story kills him (`kill_npc`).
 
 **Tests:** `"$G" --headless --path . res://scenes/tests/state_test.tscn` covers state, saves, migration and every main-menu case. It uses its own save folders.
 
@@ -130,6 +139,8 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 It exits with the failure count and takes about 80 s headless.
 
 **Echoes, memory states, names, migration:** `"$G" --headless --path . res://scenes/tests/echo_test.tscn` plays the real KEEP and BURN flows (host `scenes/tests/echo_host.tscn` → test echo → back), checks hold-to-confirm, position/clock restore, save/load of the three states, v1/v0 migration incl. the name rename, the blank name, and scans the project for the old protagonist name.
+
+**NPCs, ally, names in subtitles, fire wheel:** `"$G" --headless --path . res://scenes/tests/npc_test.tscn` (57 checks): definitions, NPC state and signals, save/load and v2 → v3 migration, spawning from WorldState (the dead never respawn, rescue moves them away), name blanking for NPCs and in subtitles (Kül Şahı excepted), Rüfət's fight / downed / help-up / recover, the ally never hurting the protagonist, burn contexts, the wheel's hold-to-confirm.
 
 ## Running and testing
 
@@ -167,6 +178,6 @@ Set `G="C:/Users/User/Documents/games/_tools/godot/Godot_v4.7.2-stable_win64_con
 
 **Content pipelines:** see `docs/WORLD_PIPELINE.md` for the cards → trees → foliage bake → houses → world order.
 
-**State and save tests:** `"$G" --headless --path . res://scenes/tests/state_test.tscn`. **Echo tests:** `"$G" --headless --path . res://scenes/tests/echo_test.tscn`. Echo views: `--demo=world_echo` (walk to the ember and enter), `res://scenes/echoes/test_echo.tscn -- --demo=echo_choice` (straight to the choice screen). **Animation isolation:** `"$G" --headless --path . -s tools/test_anim_isolation.gd`.
+**State and save tests:** `"$G" --headless --path . res://scenes/tests/state_test.tscn`. **Echo tests:** `"$G" --headless --path . res://scenes/tests/echo_test.tscn`. NPC tests: `"$G" --headless --path . res://scenes/tests/npc_test.tscn`. NPC views: `--demo=world_npcs` (the residents in Kürköy's square, Rüfət with the protagonist), `--demo=world_ally` (Rüfət and a bandit). Echo views: `--demo=world_echo` (walk to the ember and enter), `res://scenes/echoes/test_echo.tscn -- --demo=echo_choice` (straight to the choice screen). **Animation isolation:** `"$G" --headless --path . -s tools/test_anim_isolation.gd`.
 
 **Known tool issue:** `tools/check_scripts.gd` reports false failures, because autoloads do not exist in `-s` mode. Use the self-tests or run a scene to check scripts.

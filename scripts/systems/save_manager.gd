@@ -235,7 +235,9 @@ func _migrate_step(d: Dictionary, from: int) -> Dictionary:
 			return _legacy_to_v1(d, [])
 		1:
 			return _v1_to_v2(d)
-		# 2: return _v2_to_v3(d)
+		2:
+			return _v2_to_v3(d)
+		# 3: return _v3_to_v4(d)
 	push_warning("SaveManager: no migration from save_version %d" % from)
 	return {}
 
@@ -275,6 +277,34 @@ func _v1_to_v2(d: Dictionary) -> Dictionary:
 	out["player"] = p
 	out["meta"]["save_version"] = 2
 	return out
+
+
+## v3: burned memories record where they burned; every memory burned before v3 burned in
+## combat (echoes did not exist). NPC records get the full layout (WorldState.normalize
+## fills defaults; the old reserved free-form records carry over what matches).
+func _v2_to_v3(d: Dictionary) -> Dictionary:
+	var p: Dictionary = d.get("player", {})
+	var ctx := {}
+	var mems: Dictionary = p.get("memories", {}) if p.get("memories") is Dictionary else {}
+	for id in mems:
+		if String(mems[id]) == "burned":
+			ctx[String(id)] = "combat"
+	p["burn_context"] = ctx
+	d["player"] = p
+	# Reserved v2 NPC records were free-form: keep the known fields, move the rest to flags
+	var npcs: Dictionary = d.get("npcs", {}) if d.get("npcs") is Dictionary else {}
+	for id in npcs:
+		if not (npcs[id] is Dictionary):
+			continue
+		var rec: Dictionary = npcs[id]
+		var flags: Dictionary = rec.get("flags", {}) if rec.get("flags") is Dictionary else {}
+		for k in rec.keys():
+			if not String(k) in ["alive", "location_id", "rescued", "relationship", "death_cause", "flags"]:
+				flags[String(k)] = rec[k]
+				rec.erase(k)
+		rec["flags"] = flags
+	d["meta"]["save_version"] = 3
+	return d
 
 
 ## The protagonist was called "Ayxan" before v2; old saves may carry that name in flag

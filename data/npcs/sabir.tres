@@ -1,0 +1,19 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/npc_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"sabir"
+name_key = "NPC_SABIR_NAME"
+name_memory_id = &""
+look_id = "npc_sabir"
+weapon_path = ""
+shield_path = ""
+voice_profile = "npc_sabir"
+personality_notes = "Old vizier, the protagonist's teacher. Patient, measured, speaks in lessons and sayings.
+Knows much of the court's history. V2 look: KayKit Mage, blue-violet robe."
+home_location_id = ""
+companion = false
+ignores_burned_names = false
+speaker_only = false

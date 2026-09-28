@@ -674,6 +674,15 @@ func is_engaged() -> bool:
 	return aggro and not dead and not surrendered
 
 
+## Turns on another opponent (an ally drawing it off the protagonist, or back). An attack
+## token held from the old target is given back to it first.
+func retarget(new_target: Node3D) -> void:
+	if new_target == target or new_target == null:
+		return
+	_release_token()
+	target = new_target
+
+
 # --- Territorial warning (beasts) ----------------------------------------------------------
 
 func _begin_warn() -> void:

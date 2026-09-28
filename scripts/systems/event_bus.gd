@@ -5,14 +5,19 @@ extends Node
 ## State changes (emitted by WorldState, after the change is applied):
 ##   flag_changed(key, old_value, new_value)  WorldState.set_flag / clear_flag
 ##   memory_kept(memory_id)                   WorldState.keep_memory (an echo's KEEP choice)
-##   memory_burned(memory_id)                 WorldState.burn_memory (echo BURN, fire wheel, offer)
+##   memory_burned(memory_id)                 WorldState.burn_memory (echo BURN, fire wheel, offer;
+##                                            WorldState.get_burn_context says which)
 ##   player_stats_changed()                   WorldState.set_player_stats
 ##   inventory_changed(item_id, count)        WorldState.add_item / remove_item (count = new total)
 ##   time_of_day_changed(phase)               WorldState.set_time_of_day, when dawn/day/dusk/night changes
 ##   region_changed(region)                   WorldState.set_region (SaveManager autosaves on it)
 ##   story_changed(field)                     WorldState chapter / checkpoint / echoes setters
 ##   world_changed(key)                       WorldState world-section setters (hearths, chests, fog, hub_stage...)
-##   npc_changed(npc_id)                      WorldState.set_npc (reserved for the NPC model)
+##   npc_moved(npc_id, from, to)              WorldState.move_npc / rescue_npc (location ids)
+##   npc_rescued(npc_id)                      WorldState.rescue_npc (then npc_moved to son_ocaq)
+##   npc_died(npc_id, cause)                  WorldState.kill_npc — permanent
+##   npc_relationship_changed(npc_id, old, new)  WorldState.change_npc_relationship
+##   npc_changed(npc_id)                      WorldState.set_npc_flag (an NPC's own flags)
 ##   state_replaced()                         WorldState: new game or load — re-read everything
 ##
 ## Moments (emitted by gameplay / mode scripts):
@@ -39,6 +44,10 @@ signal region_changed(region: StringName)
 signal story_changed(field: StringName)
 signal world_changed(key: StringName)
 signal npc_changed(npc_id: StringName)
+signal npc_moved(npc_id: StringName, from_location: String, to_location: String)
+signal npc_rescued(npc_id: StringName)
+signal npc_died(npc_id: StringName, cause: String)
+signal npc_relationship_changed(npc_id: StringName, old_value: int, new_value: int)
 signal state_replaced
 
 signal checkpoint_rested(checkpoint_id: StringName)

@@ -50,3 +50,15 @@ ECHO_FIRE_POWER,Ateş gücü: +%d
 ECHO_PROMPT_EMBER,[E]  Köze dokun
 ECHO_KEPT,Hatıra saklandı.
 ECHO_BURNED,Hatıra yandı.
+NPC_RUFET_NAME,"Rüfet"
+NPC_SABIR_NAME,"Sabir"
+NPC_SAHBAZ_NAME,"Şahbaz"
+NPC_ANAR_NAME,"Anar"
+NPC_ELVIN_NAME,"Elvin"
+NPC_ESREF_NAME,"Eşref"
+NPC_IBRAHIM_NAME,"İbrahim"
+NPC_EHLIMAN_NAME,"Ehliman"
+NPC_KUL_SAHI_NAME,"Kül Şahı"
+ALLY_HELP_PROMPT,"[E]  %s'i kaldır"
+ALLY_DOWNED,"%s yere düştü"
+WHEEL_HOLD_TO_BURN,"Yakmak için basılı tut"

@@ -4,14 +4,14 @@ extends CanvasLayer
 ## power it would give — never a list of consequences.
 ##
 ## KEEP: press E (echo_keep) or click. BURN: hold Q (echo_burn) or hold the button for
-## HOLD_SECONDS, measured in real time; letting go early resets it, so a single press or
-## tap can never burn a memory. Emits `chosen` once; the caller writes the result.
+## burn_hold_seconds (data/balance/combat.json, ember; shared with the fire wheel), measured
+## in real time; letting go early resets it, so a single press or tap can never burn a
+## memory. Emits `chosen` once; the caller writes the result.
 
 signal chosen(choice: StringName)   # &"keep" | &"burn"
 
 const UITheme := preload("res://scripts/ui/ui_theme.gd")
 const MemoryRegistry := preload("res://scripts/core/memory_registry.gd")
-const HOLD_SECONDS := 1.5
 
 var definition: Resource            # EchoDefinition
 
@@ -87,9 +87,13 @@ func _process(_delta: float) -> void:
 	if _hold_from_ms < 0:
 		_hold_from_ms = Time.get_ticks_msec()
 	var held := (Time.get_ticks_msec() - _hold_from_ms) / 1000.0
-	_progress.value = clampf(held / HOLD_SECONDS, 0.0, 1.0)
-	if held >= HOLD_SECONDS:
+	_progress.value = clampf(held / hold_seconds(), 0.0, 1.0)
+	if held >= hold_seconds():
 		_choose(&"burn")
+
+
+static func hold_seconds() -> float:
+	return float(DataDB.balance("combat")["ember"].get("burn_hold_seconds", 1.5))
 
 
 ## How far the burn hold has got, 0..1 (0 when not holding; for the tests).
