@@ -209,7 +209,13 @@ func _menu_cases() -> void:
 	menu._confirm.get_node("Box/Buttons").get_child(0).emit_signal("pressed")
 	_check("confirming picks the oldest slot for the new game", SaveManager.active_slot == 1 and menu._starting)
 	menu.queue_free()
-	_check("the menu shows only its two choices", _menu_buttons(await _open_menu()) == [tr("MENU_CONTINUE"), tr("MENU_NEW_GAME")])
+	_check("the title shows Continue, New Game, Settings, Quit", _menu_buttons(await _open_menu()) == [tr("MENU_CONTINUE"), tr("MENU_NEW_GAME"), tr("MENU_SETTINGS"), tr("MENU_QUIT")])
+	menu = await _open_menu()
+	menu._on_settings()
+	_check("Settings opens the pause menu's settings screen", menu._settings.visible and not menu._menu.visible)
+	menu._settings._close()   # what its Back button does
+	_check("closing Settings returns to the title", not menu._settings.visible and menu._menu.visible)
+	menu.queue_free()
 
 
 func _legacy_import() -> void:

@@ -1,0 +1,10 @@
+{
+	"id": "test_ash_rising",
+	"_about": "PLACEHOLDER test encounter (existing enemy types only). Real encounters are designed with the new story. Waves rise one after another around the start point; banner_key is a translation key.",
+	"spawn": {"radius": [7.0, 11.0]},
+	"waves": [
+		{"banner_key": "ENC_TEST_WAVE_1", "delay": 1.0, "enemies": [{"id": "ash_shade", "count": 3, "level": 1}]},
+		{"banner_key": "ENC_TEST_WAVE_2", "delay": 2.5, "enemies": [{"id": "ash_shade", "count": 2, "level": 1}, {"id": "ash_runner", "count": 2, "level": 1}]},
+		{"banner_key": "ENC_TEST_WAVE_3", "delay": 2.5, "enemies": [{"id": "ash_giant", "count": 1, "level": 1}, {"id": "ash_archer", "count": 1, "level": 1}]}
+	]
+}

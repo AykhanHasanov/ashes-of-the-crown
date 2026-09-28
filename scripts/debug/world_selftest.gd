@@ -10,6 +10,7 @@ var _fails := 0
 
 
 func run() -> void:
+	mode.roll_affixes = false   # deterministic enemies (see world_mode.roll_affixes)
 	await _wait(1.5)
 	await _discovery_and_hearth()
 	await _chest()
@@ -42,6 +43,20 @@ func _reset() -> void:
 	player._model.position.y = 0.0
 	player._enter(player.S.MOVE)
 	player.velocity = Vector3.ZERO
+
+
+## Waits until Ayxan has left the ground and come down again (or died), up to `timeout` s.
+func _landed(timeout: float) -> void:
+	var t := 0.0
+	var airborne := false
+	while t < timeout:
+		await _wait(0.1)
+		t += 0.1
+		if not player.is_on_floor():
+			airborne = true
+		elif airborne or player.dead:
+			break
+	await _wait(0.3)
 
 
 func _put(pos: Vector3, above := 1.0) -> void:
@@ -117,11 +132,11 @@ func _fall() -> void:
 	var spot := Vector3(300, 0, 230)
 	_put(spot, 10.0)
 	var hp: float = player.health
-	await _wait(2.0)
+	await _landed(6.0)   # not a fixed wait: a loading hitch slows game time, not the clock
 	_check("a 10 m fall hurts", player.health < hp and not player.dead, "%.0f → %.0f" % [hp, player.health])
 	_reset()
 	_put(spot, 18.0)
-	await _wait(2.5)
+	await _landed(6.0)
 	_check("an 18 m fall kills", player.dead)
 	mode._respawn()
 	await _wait(0.5)

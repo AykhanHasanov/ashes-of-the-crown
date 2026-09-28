@@ -16,6 +16,7 @@ const HearthMenu := preload("res://scripts/ui/hearth_menu.gd")
 const Interactable := preload("res://scripts/world/interactable.gd")
 const AiOverlay := preload("res://scripts/debug/ai_overlay.gd")
 const Villager := preload("res://scripts/npc/villager.gd")
+const Encounter := preload("res://scripts/world/encounter.gd")
 const Wildlife := preload("res://scripts/world/wildlife.gd")
 const Effects := preload("res://scripts/world/effects.gd")
 
@@ -28,6 +29,9 @@ var world_map
 var hearth_menu
 var _stream_label: Label
 var _foes := {}                   # spawn key -> Foe
+## Elite affixes on world enemies (the world self-test turns them off: a random
+## "Kül Şahının gözü" guard would see Ayxan anywhere and fail the calm/leash checks).
+var roll_affixes := true
 var _villagers := {}               # poi id -> [Villager]
 var _last_hearth := ""
 var _discover_t := 0.0
@@ -57,6 +61,9 @@ func _setup() -> void:
 	level.streamer.actors_released.connect(_on_actors_released)
 	level.streamer.poi_full.connect(_on_poi_full)
 	EventBus.saving.connect(_on_world_saving)
+	EventBus.encounter_started.connect(func(_id: StringName): player.begin_encounter())
+	EventBus.encounter_wave_started.connect(_on_encounter_wave)
+	EventBus.encounter_finished.connect(_on_encounter_finished)
 	# Deer herds graze away from settlements
 	var wild := Wildlife.new()
 	wild.height_at = level.height_at
@@ -387,7 +394,7 @@ func _on_actor_requested(_poi: Dictionary, actor: Dictionary, key: String, pos: 
 		return
 	if _foes.has(key) and is_instance_valid(_foes[key]):
 		return
-	var f = _spawn(actor["enemy"], pos, int(actor.get("level", 1)), {"roll": true})
+	var f = _spawn(actor["enemy"], pos, int(actor.get("level", 1)), {"roll": roll_affixes})
 	f.spawn_key = key
 	_foes[key] = f
 	f.killed.connect(func(_x): _on_foe_killed(key))
@@ -400,7 +407,7 @@ func _spawn(id: String, pos: Vector3, lv: int, opts: Dictionary):
 	o["night"] = level.day_night.is_night()
 	var f = Foe.new()
 	f.configure(id, lv, o)
-	f.aggro_range = 16.0
+	f.aggro_range = 0.0 if o.get("hunt", false) else 16.0   # encounter enemies attack at once
 	f.home = pos
 	f.ground_query = level.height_at
 	f.world_visibility = _visibility
@@ -419,6 +426,32 @@ func _visibility() -> float:
 	var n: float = level.day_night.night_amount()
 	var fog: float = level.weather._cur["fog"] + level.weather.forest_fog * 0.5
 	return clampf((1.0 - n * 0.85) * (1.0 - fog * 0.6), 0.0, 1.0)
+
+
+## Starts an encounter (data/encounters/<id>.json) around `center`; returns it, or null.
+func start_encounter(id: StringName, center: Vector3) -> Node:
+	var e := Encounter.new()
+	e.spawner = func(eid: String, pos: Vector3, lv: int, opts: Dictionary):
+		pos.y = level.height_at(pos.x, pos.z) + 0.1
+		return _spawn(eid, pos, lv, opts)
+	add_child(e)
+	if not e.start(id, center):
+		e.queue_free()
+		return null
+	return e
+
+
+func _on_encounter_wave(_id: StringName, _wave: int, _total: int, banner_key: String) -> void:
+	if banner_key != "":
+		hud.banner(tr(banner_key))
+	Fx.shake(0.35)
+	Audio.play("horn", -3.0, 0.0)
+	Audio.music("battle", 1.2)
+
+
+func _on_encounter_finished(_id: StringName) -> void:
+	hud.banner(tr("ENC_CLEARED"))
+	Audio.music("ambient", 3.0)
 
 
 func _on_engaged(f) -> void:
@@ -573,6 +606,9 @@ func _build_debug() -> void:
 			WorldState.add_world_entry("discovered", p["id"])
 		world_map.fog.fill(1))
 	debug.button("Dinlen (düşmanlar geri döner)", _rest)
+	debug.section("Karşılaşma")
+	debug.button("Deneme karşılaşması (placeholder)", func():
+		start_encounter(&"test_ash_rising", player.global_position))
 	debug.section("Oyuncu")
 	debug.button("Tam can + şerbet", func():
 		player.heal(player.max_health)
@@ -621,6 +657,10 @@ func _demo_setup() -> void:
 						var at: Vector3 = a.global_position
 						player.global_position = at + Vector3(0, 0.5, 34)
 						_demo_view(player.global_position, at + Vector3(0, 1, 0), 10.0))
+		"world_encounter":
+			# The placeholder test encounter rising around Ayxan in the valley
+			player.make_invulnerable(60.0)
+			get_tree().create_timer(1.0).timeout.connect(func(): start_encounter(&"test_ash_rising", player.global_position))
 		"world_evening":
 			# Villagers round the fire, the guard's lantern (20:30)
 			level.day_night.set_hour(20.5)
