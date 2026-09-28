@@ -81,8 +81,7 @@ func _spawn_ally(def: Resource) -> void:
 	a.setup(def, player)
 	a.height_at = height_at
 	add_child(a)
-	var back: Vector3 = player.facing() if player.has_method("facing") else Vector3.FORWARD
-	a.global_position = player.global_position - back * 2.0 + Vector3(0.8, 0.3, 0)
+	a.global_position = a.follow_point() + Vector3(0, 0.3, 0)   # beside him, out of the camera's view
 	bodies[def.id] = a
 
 

@@ -264,7 +264,8 @@ Permanent death risk. Epithets are given in their in-game Turkish form
   half-brother. **The forgotten
   living:** the King kept his dead son and forgot his living one. Wants to be seen.
   Hub **aşık**: sings Aras's story, including what Aras burned (§9). Meets his father
-  in Act III; the King does not recognise him.
+  in Act III; the King does not recognise him. **Lost one:** his mother, a singer the
+  King never acknowledged [TBD: name].
 - **ehliman** — **Ehliman**, *Köz Nizamı'nın kâhini* — **forget everything:** burned all
   memories of his own family out of piety; calls everyone "evlat" because he no longer
   remembers his children. Opposed the reversal. Keeps Son Ocaq's hearth. Late-game
@@ -276,7 +277,8 @@ Permanent death risk. Epithets are given in their in-game Turkish form
   **Unchosen forgetting:** losing memory to old age and fighting it — the mirror of
   Aras, who forgets by choice. Quest: help him remember his students' names.
   Hub: keeper of **kept memories** — re-watch KEPT echoes at the hearth.
-  Handle with respect. No death risk.
+  Handle with respect. No death risk. **Lost one:** Kür — Sabir was also Kür's teacher.
+  Sometimes he calls Aras "Kür" (a condition-based hook; the trigger is [TBD]).
 - **sahbaz** — **Şahbaz**, *serdar* — **anger:** his soldiers died in the fire. At
   first blames the King; at the midpoint learns Aras lit it → door closes. Quest:
   release his soldiers' ash legion; confront **Tural**. Hub: combat training.
@@ -289,7 +291,9 @@ Permanent death risk. Epithets are given in their in-game Turkish form
   she never has to feel them. One name is missing: her brother **Samir**.
   Dry humour. Hub: merchant, and **buys KEPT memories** for rare items
   ("everything has a price"). Selling = another way to lose a memory [TBD: does a sold
-  memory count as BURNED for Kül Aras?].
+  memory count as BURNED for Kül Aras?]. **Lost one:** her husband, the caravan master
+  [TBD: name]. **Samir's shade never comes to her door** — he is alive — and she
+  notices (placeholder line hook).
 - **kul_sahi** — **Kül Şahı**, *Ateşan'ın şahı* — **the King, Aras's father.** He gave his
   body to the reversed hearth; people now call him Kül Şahı. The only antagonist.
   `npc_kind: voice_only`, no body. **Never let go.** Kept every memory anyone burned,
@@ -326,11 +330,29 @@ Permanent death risk. Epithets are given in their in-game Turkish form
   open a door at night**; Aras's go-between. Her laments shape the soundtrack.
   (New model needed.)
 - **kemal / gulcin** — **Kemal**, *demirci*, and **Gülçin**, *ekmekçi* (hub) — young couple expecting a child.
+  They sleep in a room of the caravanserai (behind a door at night; the birth happens
+  there); the smithy and the bakery outside the gate are their daytime workplaces.
   Everyday life: arguing, laughing, preparing. **Naming scene (Act III):** they ask
   Aras to name the baby. If Narin is KEPT, "Narin" appears as an option; if not, the
   option simply does not exist.
 - **samir** — **Samir**, *kervancı* (world, hidden) — Nərmin's brother. Alive: survived the cold by
   burning all his memories. Found and brought home, he does not know her.
+
+### Lost ones (the shade at each door)
+At night the shade that knocks on a resident's door is **that person's own lost loved
+one**; a door death means opening the door to them. Only the dead have shades.
+
+| Resident | Lost one |
+|---|---|
+| Sona | Narin |
+| Eşref | his wife |
+| Domrul | his wife |
+| Ehliman | his children |
+| İbrahim | his assistant |
+| Şahbaz | his soldiers |
+| Sabir | Kür |
+| Elvin | his mother, a singer [TBD name] |
+| Nərmin | her husband, the caravan master [TBD name] — never Samir, who is alive |
 
 ### Background
 Generic villagers with barks only. Unlimited. Never carry story facts alone.
@@ -441,6 +463,14 @@ Rüfət: story-only [TBD].
 
 ## 14. Changelog
 
+- **2026-09-29 — Son Ocaq and the lost ones** (owner)
+  - Son Ocaq's residents live in caravanserai **rooms opening onto the courtyard** behind
+    an arched gallery; every door is seen from the hearth. Kemal and Gülçin have a room
+    inside; the smithy and the bakery are daytime workplaces outside the gate.
+  - Lost ones: Sabir → Kür (Sabir taught Kür; he sometimes calls Aras "Kür"); Elvin → his
+    mother, a singer the King never acknowledged [TBD name]; Nərmin → her husband, the
+    caravan master [TBD name]; Samir's shade never appears at her door (he is alive).
+    Table in §7.
 - **2026-09-28 — open items resolved** (owner)
   - The King's younger son is **Kür** (Aras and Kür: the two great rivers that merge).
     The King renamed the valley Kür Vadisi after him.

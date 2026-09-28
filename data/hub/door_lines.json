@@ -1,0 +1,17 @@
+{
+	"_about": "Placeholder line hooks for talking through doors (stage 3 of the hub). npc, a WorldState condition, a text key. First match per NPC wins. No story dialogue here: the story writes the real lines.",
+	"lines": [
+		{
+			"npc": "nermin",
+			"condition": "time:night",
+			"key": "HUB_NERMIN_NO_SAMIR_PLACEHOLDER",
+			"_about": "Nermin notices that Samir's shade never knocks (he is alive)."
+		},
+		{
+			"npc": "sabir",
+			"condition": "flag:sabir_confused",
+			"key": "HUB_SABIR_KUR_PLACEHOLDER",
+			"_about": "Sabir sometimes calls Aras 'Kür' (NpcDefinition.calls_protagonist_rules)."
+		}
+	]
+}

@@ -1,37 +1,6 @@
 {
-	"_about": "Son Ocaq (STORY_BIBLE §3.9): a village grown around an old caravanserai; the last hearth burns in its courtyard. Rooms open onto the courtyard (side n/e/w, slot 0..; the gate is on the south side). Each room has one door (stable id) and its residents (NPC ids; 'protagonist' is Aras). room_rules move an NPC to another room while a condition holds (first match wins). outside: buildings just outside the caravanserai. services: hub services unlocked when their NPC lives here (placeholder hooks). hearth.stages: flame scale per number of resolved core grief arcs (NPCs tagged core_grief). Blockout data; positions are computed by scripts/hub/hub_level.gd.",
+	"_about": "Son Ocaq (STORY_BIBLE §3.9): a village grown around an old caravanserai; the last hearth burns in its courtyard. Rooms open onto the courtyard behind an arched gallery (side n/w/e/s, slot 0..; the gate is in the middle of the south side). Each room has one door (stable id) and the residents who sleep there (NPC ids; 'protagonist' is Aras). room_rules move an NPC to another room while a condition holds (first match wins). outside: daytime workplaces just outside the gate ('workers' stand there by day; nobody sleeps there). services: hub services unlocked when their NPC lives here (placeholder hooks). hearth.stages: flame scale per number of resolved core grief arcs (NPCs tagged core_grief). Positions are computed by scripts/hub/hub_level.gd.",
 	"rooms": [
-		{
-			"id": "room_protagonist",
-			"door": "door_protagonist",
-			"residents": [
-				"protagonist",
-				"rufet"
-			],
-			"side": "n",
-			"slot": 2,
-			"variant": 0
-		},
-		{
-			"id": "room_sona",
-			"door": "door_sona",
-			"residents": [
-				"sona"
-			],
-			"side": "n",
-			"slot": 1,
-			"variant": 1
-		},
-		{
-			"id": "room_ehliman",
-			"door": "door_ehliman",
-			"residents": [
-				"ehliman"
-			],
-			"side": "n",
-			"slot": 3,
-			"variant": 2
-		},
 		{
 			"id": "room_sabir",
 			"door": "door_sabir",
@@ -43,14 +12,35 @@
 			"variant": 1
 		},
 		{
-			"id": "room_elvin",
-			"door": "door_elvin",
+			"id": "room_sona",
+			"door": "door_sona",
 			"residents": [
-				"elvin"
+				"sona"
 			],
 			"side": "n",
-			"slot": 4,
+			"slot": 1,
 			"variant": 0
+		},
+		{
+			"id": "room_protagonist",
+			"door": "door_protagonist",
+			"residents": [
+				"protagonist",
+				"rufet"
+			],
+			"side": "n",
+			"slot": 2,
+			"variant": 2
+		},
+		{
+			"id": "room_ehliman",
+			"door": "door_ehliman",
+			"residents": [
+				"ehliman"
+			],
+			"side": "n",
+			"slot": 3,
+			"variant": 1
 		},
 		{
 			"id": "room_peri_nene",
@@ -60,7 +50,7 @@
 			],
 			"side": "w",
 			"slot": 0,
-			"variant": 2
+			"variant": 0
 		},
 		{
 			"id": "room_domrul",
@@ -70,7 +60,7 @@
 			],
 			"side": "w",
 			"slot": 1,
-			"variant": 1
+			"variant": 2
 		},
 		{
 			"id": "room_ibrahim",
@@ -80,7 +70,7 @@
 			],
 			"side": "w",
 			"slot": 2,
-			"variant": 0
+			"variant": 1
 		},
 		{
 			"id": "room_nermin",
@@ -91,7 +81,7 @@
 			],
 			"side": "e",
 			"slot": 0,
-			"variant": 2
+			"variant": 1
 		},
 		{
 			"id": "room_sahbaz",
@@ -101,7 +91,7 @@
 			],
 			"side": "e",
 			"slot": 1,
-			"variant": 0
+			"variant": 2
 		},
 		{
 			"id": "room_esref",
@@ -111,31 +101,55 @@
 			],
 			"side": "e",
 			"slot": 2,
-			"variant": 1
+			"variant": 0
+		},
+		{
+			"id": "room_elvin",
+			"door": "door_elvin",
+			"residents": [
+				"elvin"
+			],
+			"side": "s",
+			"slot": 0,
+			"variant": 0
+		},
+		{
+			"id": "room_kemal_gulcin",
+			"door": "door_kemal_gulcin",
+			"residents": [
+				"kemal",
+				"gulcin"
+			],
+			"side": "s",
+			"slot": 1,
+			"variant": 1,
+			"_about": "Kemal and Gülçin sleep here; the birth happens here (STORY_BIBLE Act III)."
 		}
 	],
 	"outside": [
 		{
 			"id": "smithy",
-			"door": "door_kemal",
-			"residents": [
+			"door": "door_smithy",
+			"residents": [],
+			"workers": [
 				"kemal"
 			],
 			"at": [
-				-12.0,
-				20.0
+				-7.0,
+				17.0
 			],
 			"face": 180
 		},
 		{
 			"id": "bakery",
-			"door": "door_gulcin",
-			"residents": [
+			"door": "door_bakery",
+			"residents": [],
+			"workers": [
 				"gulcin"
 			],
 			"at": [
-				12.0,
-				20.0
+				7.0,
+				17.0
 			],
 			"face": 180
 		}

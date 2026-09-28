@@ -95,6 +95,10 @@ func _ready() -> void:
 	EventBus.saving.connect(_on_saving)
 	Settings.changed.connect(_apply_quality)
 	_apply_quality()
+	# One source of control hints for every mode on this controller (rebinding updates them)
+	if player.has_method("control_hint"):
+		hud.set_hint(player.control_hint())
+		Settings.changed.connect(func(): hud.set_hint(player.control_hint()))
 	_setup()
 	var mode := restart_mode
 	restart_mode = ""

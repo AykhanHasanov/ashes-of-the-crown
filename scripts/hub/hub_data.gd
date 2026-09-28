@@ -18,16 +18,21 @@ static func data() -> Dictionary:
 	return _data
 
 
-## Every room and outside building: {id, door, residents, kind: "room" | "outside", ...}.
+## Every room and outside building: {id, door, residents, workers, kind: "room" | "outside", ...}.
+## residents sleep there; workers (outside workplaces) stand there by day.
 static func places() -> Array:
 	var out: Array = []
 	for r in data()["rooms"]:
 		var d: Dictionary = r.duplicate()
 		d["kind"] = "room"
+		if not d.has("workers"):
+			d["workers"] = []
 		out.append(d)
 	for o in data()["outside"]:
 		var d: Dictionary = o.duplicate()
 		d["kind"] = "outside"
+		if not d.has("workers"):
+			d["workers"] = []
 		out.append(d)
 	return out
 
@@ -56,6 +61,14 @@ static func room_of(npc_id: String) -> String:
 		if (p["residents"] as Array).has(npc_id):
 			return p["id"]
 	return ""
+
+
+## Where an NPC is by day: their workplace if they have one, else their room.
+static func day_place_of(npc_id: String) -> String:
+	for p in places():
+		if (p["workers"] as Array).has(npc_id):
+			return p["id"]
+	return room_of(npc_id)
 
 
 ## Who lives in `place_id` now (room rules applied).
@@ -88,7 +101,7 @@ static func is_lived_in(place_id: String) -> bool:
 
 
 ## A door's state: the story's override if any; else closed at night; else open when
-## someone of its place is home.
+## someone of its place is home (or, for a workplace, someone who works there).
 static func door_open(door_id: String) -> bool:
 	var o := WorldState.get_door_override(StringName(door_id))
 	if o != "":
@@ -96,7 +109,9 @@ static func door_open(door_id: String) -> bool:
 	if WorldState.get_phase() == &"night":
 		return false
 	var p := place_of_door(door_id)
-	return not p.is_empty() and is_lived_in(p["id"])
+	if p.is_empty():
+		return false
+	return is_lived_in(p["id"]) or (p["workers"] as Array).any(func(w): return is_home(w))
 
 
 ## A hub service ("ash_upgrades", "shop", "training") is open when its NPC lives here.

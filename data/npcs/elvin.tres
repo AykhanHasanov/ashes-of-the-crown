@@ -15,7 +15,8 @@ voice_profile = "npc_elvin"
 personality_notes = "Elvin, şahın gölgedeki oğlu — the King's illegitimate son, Aras's half-brother.
 Grief stance: the forgotten living — the King kept his dead son and forgot his living one.
 Wants to be seen. Hub aşık: sings Aras's story, including what Aras burned (recap songs).
-Meets his father in Act III; the King does not recognise him. See STORY_BIBLE.md §7."
+Meets his father in Act III; the King does not recognise him. Lost one: his mother, a singer the King never acknowledged [TBD name].
+See STORY_BIBLE.md §7."
 home_location_id = ""
 companion = false
 ignores_burned_names = false

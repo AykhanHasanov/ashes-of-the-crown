@@ -22,7 +22,6 @@ const Encounter := preload("res://scripts/world/encounter.gd")
 const Wildlife := preload("res://scripts/world/wildlife.gd")
 const Effects := preload("res://scripts/world/effects.gd")
 
-const HINT := "WASD hareket · Shift koşu · Space kaçış · LMB/F saldırı · RMB blok · C kilit\nE kullan · R şerbet · M harita · F10 debug · F6 streaming · F3 FPS"
 const AUTOSAVE_SECONDS := 300.0
 
 var debug
@@ -83,7 +82,6 @@ func _setup() -> void:
 	npcs.height_at = level.height_at
 	npcs.place = _npc_place
 	add_child(npcs)
-	hud.set_hint(HINT)
 	hud._place(hud._objective, Vector4(0.5, 0, 0.5, 0), Vector4(-420, 64, 420, 96))
 	compass = Compass.new()
 	hud._root.add_child(compass)

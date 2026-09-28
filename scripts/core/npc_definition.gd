@@ -31,6 +31,9 @@ extends Resource
 @export var lost_one_npc: StringName
 @export var lost_one_name_key: String
 @export var lost_one_look_id: String
+## What this NPC calls the protagonist, story permitting: "condition=>NAME_KEY" (first match
+## wins; with none, his own name). E.g. Sabir sometimes calls Aras "Kür".
+@export var calls_protagonist_rules: PackedStringArray = PackedStringArray()
 ## Fights beside the protagonist when with him (scripts/npc/ally.gd).
 @export var companion := false
 ## Their lines always show real names, even burned ones (Kül Şahı never forgets).

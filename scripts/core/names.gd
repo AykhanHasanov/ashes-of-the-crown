@@ -69,4 +69,19 @@ static func ignores_burned(speaker: StringName) -> bool:
 static func fill(text: String, speaker: StringName = &"") -> String:
 	if not text.contains(TOKEN):
 		return text
+	var called := what_speaker_calls_him(speaker)
+	if called != "":
+		return text.replace(TOKEN, called)
 	return text.replace(TOKEN, protagonist_known() if ignores_burned(speaker) else protagonist())
+
+
+## Another name `speaker` uses for the protagonist right now (NpcDefinition.
+## calls_protagonist_rules, e.g. Sabir calling him "Kür"), or "" for his own.
+static func what_speaker_calls_him(speaker: StringName) -> String:
+	if speaker == &"" or not NpcRegistry.has(speaker):
+		return ""
+	for rule in NpcRegistry.get_def(speaker).calls_protagonist_rules:
+		var parts := String(rule).split("=>")
+		if parts.size() == 2 and WorldState.check(parts[0].strip_edges()):
+			return TranslationServer.translate(parts[1].strip_edges())
+	return ""

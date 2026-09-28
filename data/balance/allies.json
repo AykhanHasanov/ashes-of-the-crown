@@ -1,10 +1,12 @@
 {
-	"_comment": "Companions fighting beside the protagonist (scripts/npc/ally.gd), per NPC id. Seconds, metres, hit points. downed: health reaching 0 knocks them down (never dead in ordinary combat); the protagonist helps them up within help_range, or they get up alone after recover_calm seconds with no enemy within calm_range.",
+	"_comment": "Companions fighting beside the protagonist (scripts/npc/ally.gd), per NPC id. Seconds, metres, hit points. downed: health reaching 0 knocks them down (never dead in ordinary combat); the protagonist helps them up within help_range, or they get up alone after recover_calm seconds with no enemy within calm_range. follow_side / follow_back: where he walks, in the camera's frame (beside and slightly behind, never in view); follow_slack: how far off that spot before he moves.",
 	"rufet": {
 		"health": 160,
 		"walk_speed": 2.2,
 		"run_speed": 5.4,
-		"follow_distance": 2.8,
+		"follow_side": 1.6,
+		"follow_back": 0.6,
+		"follow_slack": 0.9,
 		"catch_up_distance": 7.0,
 		"teleport_distance": 35.0,
 		"engage_range": 14.0,
@@ -15,7 +17,11 @@
 		"windup": 0.42,
 		"recovery": 0.55,
 		"cooldown": 1.2,
-		"clips": ["1H_Melee_Attack_Slice_Diagonal", "1H_Melee_Attack_Slice_Horizontal", "1H_Melee_Attack_Chop"],
+		"clips": [
+			"1H_Melee_Attack_Slice_Diagonal",
+			"1H_Melee_Attack_Slice_Horizontal",
+			"1H_Melee_Attack_Chop"
+		],
 		"draw_aggro_chance": 0.35,
 		"draw_aggro_seconds": 8.0,
 		"tokens": 2,

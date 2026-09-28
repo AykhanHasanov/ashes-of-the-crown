@@ -14,7 +14,7 @@ const TPCamera := preload("res://scripts/camera/third_person_camera.gd")
 const NpcSpawner := preload("res://scripts/npc/npc_spawner.gd")
 const DebugMenu := preload("res://scripts/debug/debug_menu.gd")
 
-const HEARTH_RANGE := 3.4
+const HEARTH_RANGE := 2.7
 const GATE_RANGE := 2.6
 
 var npcs                          # NpcSpawner
@@ -108,12 +108,13 @@ func wait_until(hour: float) -> void:
 	EventBus.checkpoint_rested.emit(&"son_ocaq_hearth")   # SaveManager autosaves
 
 
-## Where a resident of Son Ocaq stands: at their own door by day, behind it (nowhere) at night.
+## Where a resident of Son Ocaq stands: by day at their workplace or their own door; at night
+## behind their door (nowhere).
 func _npc_spot(npc_id: StringName, location_id: String) -> Variant:
 	if location_id != WorldState.SON_OCAQ or WorldState.get_phase() == &"night":
 		return null
-	var room := HubData.room_of(String(npc_id))
-	return level.stand_point(room) if room != "" else null
+	var place := HubData.day_place_of(String(npc_id))   # a workplace (smithy, bakery) or their room
+	return level.stand_point(place) if place != "" else null
 
 
 func _tick(_delta: float) -> void:
@@ -150,17 +151,17 @@ func _demo_setup() -> void:
 			level.day_night.set_hour(10.5)
 			WorldState.move_npc(&"rufet", WorldState.PARTY)
 			if Settings.demo == "hub_doors":
-				_demo_view(Vector3(0, 0, 1.5), Vector3(0, 1.6, -9.0))
+				_demo_view(Vector3(0.5, 0, 1.6), Vector3(-4.0, 1.4, -6.0))
 			else:
-				_demo_view(Vector3(0, 0, 6.0), Vector3(0, 1.5, -6.0))
+				_demo_view(Vector3(0, 0, 3.2), Vector3(0, 1.5, -6.0))
 		"hub_leave":
 			# Walk out of the gate: back to the valley, at the road's sign
-			_demo_view(Vector3(0, 0, 7.5), Vector3(0, 1.5, 12.0))
+			_demo_view(Vector3(0, 0, 9.0), Vector3(0, 1.5, 14.0))
 			get_tree().create_timer(1.5).timeout.connect(func(): HubTravel.leave(get_tree()))
 		"hub_night":
 			WorldState.set_time_of_day(22.0)
 			level.day_night.set_hour(22.0)
-			_demo_view(Vector3(0, 0, 6.0), Vector3(0, 1.5, -6.0))
+			_demo_view(Vector3(0, 0, 3.2), Vector3(0, 1.5, -6.0))
 
 
 func _demo_view(at: Vector3, look: Vector3) -> void:

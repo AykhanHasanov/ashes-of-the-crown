@@ -9,6 +9,8 @@ const Door := preload("res://scripts/hub/door.gd")
 const NpcRegistry := preload("res://scripts/core/npc_registry.gd")
 const HubTravel := preload("res://scripts/hub/hub_travel.gd")
 const HubLevel := preload("res://scripts/hub/hub_level.gd")
+const ControlHints := preload("res://scripts/ui/control_hints.gd")
+const Names := preload("res://scripts/core/names.gd")
 const HUB := "res://scenes/son_ocaq.tscn"
 const HOST := "res://scenes/tests/echo_host.tscn"
 const TEST_DIR := "user://test_hub_saves/"
@@ -73,8 +75,10 @@ func _data() -> void:
 	_check("the others have a room but are brought in later", RESCUED_LATER.all(func(id): return NpcRegistry.get_def(id).home_location_id == "" and HubData.room_of(String(id)) != ""))
 	_check("Rüfət lives in Aras's room; Samir with Nermin; Sona in her own room", HubData.room_of("rufet") == "room_protagonist"
 		and HubData.room_of("samir") == "room_nermin" and HubData.room_of("sona") == "room_sona")
-	_check("Kemal's smithy and Gülçin's bakery stand outside the caravanserai", HubData.place(HubData.room_of("kemal"))["kind"] == "outside"
-		and HubData.place(HubData.room_of("gulcin"))["kind"] == "outside")
+	_check("Kemal and Gülçin sleep in a caravanserai room", HubData.room_of("kemal") == "room_kemal_gulcin" and HubData.room_of("gulcin") == "room_kemal_gulcin"
+		and HubData.place("room_kemal_gulcin")["kind"] == "room")
+	_check("... the smithy and the bakery outside are their day workplaces", HubData.day_place_of("kemal") == "smithy"
+		and HubData.day_place_of("gulcin") == "bakery" and HubData.place("smithy")["kind"] == "outside" and HubData.place("smithy")["residents"].is_empty())
 
 
 # --- Doors and stepped time ------------------------------------------------------------------------
@@ -88,7 +92,7 @@ func _doors_and_time() -> void:
 		add_child(d)
 		_doors[p["door"]] = d
 	await get_tree().process_frame
-	_check("by day, the doors of people at home are open", _open("door_sona") and _open("door_ehliman") and _open("door_kemal"))
+	_check("by day, the doors of people at home are open", _open("door_sona") and _open("door_ehliman") and _open("door_kemal_gulcin") and _open("door_smithy"))
 	_check("Aras's own door is open by day", _open("door_protagonist"))
 	_check("rooms of people not yet brought in stay closed", not _open("door_sabir") and not _open("door_esref"))
 	var open_before: int = _doors.values().filter(func(d): return d.is_open).size()
@@ -100,7 +104,7 @@ func _doors_and_time() -> void:
 	await get_tree().process_frame
 	_check("waiting until night: the phase event fires", _phases == [&"night"] and WorldState.check("time:night"))
 	_check("at night every door closes", _doors.values().all(func(d): return not d.is_open))
-	_check("... and each announces it (door_changed)", open_before == 7 and _door_events.size() == open_before and _door_events.all(func(e): return e[1] == false), str(_door_events))
+	_check("... and each announces it (door_changed)", open_before == 8 and _door_events.size() == open_before and _door_events.all(func(e): return e[1] == false), str(_door_events))
 	WorldState.set_time_of_day(7.0)   # "wait until morning"
 	await get_tree().process_frame
 	_check("morning: the phase event fires and doors open again", _phases.back() == &"dawn" and _open("door_sona") and WorldState.check("time:dawn"))
@@ -164,6 +168,18 @@ func _lost_ones() -> void:
 	_check("every core NPC (and Domrul) has a lost one", ok)
 	_check("Sona's lost one is Narin; Eşref's is his wife (placeholder)", NpcRegistry.get_def(&"sona").lost_one_npc == &"narin"
 		and tr(NpcRegistry.get_def(&"esref").lost_one_name_key).contains("karısı"))
+	_check("Sabir's lost one is Kür; Elvin's his mother, Nermin's her husband (placeholders)", NpcRegistry.get_def(&"sabir").lost_one_npc == &"kur"
+		and tr(NpcRegistry.get_def(&"elvin").lost_one_name_key).contains("annesi") and tr(NpcRegistry.get_def(&"nermin").lost_one_name_key).contains("kocası"))
+	var living_lost: Array = NpcRegistry.all().filter(func(d): return d.lost_one_npc != &"" and NpcRegistry.get_def(d.lost_one_npc).npc_kind == "human")
+	_check("no lost one is a living person: Samir's shade never comes to Nermin's door", living_lost.is_empty(), str(living_lost.map(func(d): return d.id)))
+	var lines: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/hub/door_lines.json"))["lines"]
+	_check("placeholder hook: Nermin notices Samir's shade never knocks", lines.any(func(l): return l["npc"] == "nermin" and tr(l["key"]) != l["key"]))
+	WorldState.new_game()
+	_check("Sabir calls Aras by his own name ...", Names.fill("{PROTAGONIST}", &"sabir") == "Aras")
+	WorldState.set_flag(&"sabir_confused")
+	_check("... and, when the story says so, 'Kür' (condition-based hook)", Names.fill("{PROTAGONIST}", &"sabir") == "Kür"
+		and Names.fill("{PROTAGONIST}", &"sona") == "Aras")
+	WorldState.clear_flag(&"sabir_confused")
 	var events: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/hub/night_events.json"))["events"]
 	var named := true
 	for e in events:
@@ -209,10 +225,10 @@ func _scene() -> void:
 		var door: Node3D = lvl.doors[id]
 		var target: Vector3 = door.global_position + Vector3(0, 1.2, 0) + door.global_basis.z * 0.25
 		var q := PhysicsRayQueryParameters3D.create(eye, target)
-		q.exclude = [hub.player.get_rid()]
+		q.exclude = [hub.player.get_rid()] + hub.get_tree().get_nodes_in_group("npcs").map(func(n): return n.get_rid())   # the buildings, not people
 		var hit := space.intersect_ray(q)
 		if not hit.is_empty() and hit["position"].distance_to(target) > 0.6:
-			hidden.append(id)
+			hidden.append("%s (%s)" % [id, hit["collider"].get_parent().name])
 	_check("from the hearth, every courtyard door is visible", hidden.is_empty(), str(hidden))
 	var outside: Array = HubData.places().filter(func(p): return p["kind"] == "outside")
 	_check("outside the walls: the smithy and the bakery", outside.size() == 2 and outside.all(func(p): return lvl.doors[p["door"]].global_position.z > HubLevel.SOUTH_Z))
@@ -220,6 +236,41 @@ func _scene() -> void:
 	var sona = hub.npcs.body(&"sona")
 	_check("by day, residents stand at their own door", sona != null and sona.global_position.distance_to(lvl.stand_point("room_sona")) < 0.5
 		and hub.npcs.body(&"sabir") == null)
+	var kemal = hub.npcs.body(&"kemal")
+	_check("... Kemal at his smithy", kemal != null and kemal.global_position.distance_to(lvl.stand_point("smithy")) < 0.5)
+	# The same controller, input map and HUD hints as the valley
+	var valley = load("res://scripts/world_mode.gd").new()
+	var valley_player = valley._make_player()
+	_check("the hub and the valley use the same player controller", valley_player.get_script() == hub.player.get_script())
+	valley_player.free()
+	valley.free()
+	var hint: String = hub.hud._hint.text
+	_check("the HUD hints come from the live input map (same builder as the valley)", hint == ControlHints.protagonist()
+		and hint.contains("J/LMB") and hint.contains("RMB") and hint.contains("Space"))
+	_check("no mode writes its own control hints", not FileAccess.get_file_as_string("res://scripts/world_mode.gd").contains("set_hint(")
+		and not FileAccess.get_file_as_string("res://scripts/hub_mode.gd").contains("set_hint("))
+	# Entering: nothing between the camera and the protagonist
+	var cam: Camera3D = hub.rig.camera
+	var head: Vector3 = hub.player.global_position + Vector3(0, 1.5, 0)
+	var q := PhysicsRayQueryParameters3D.create(cam.global_position, head)
+	q.exclude = [hub.player.get_rid()]
+	var blocked: Dictionary = hub.get_world_3d().direct_space_state.intersect_ray(q)
+	_check("on entry the camera sees the protagonist (no wall or pier between)", blocked.is_empty(), str(blocked.get("collider", "")))
+	# Rüfət beside or a little behind, never between the camera and the protagonist
+	WorldState.move_npc(&"rufet", WorldState.PARTY)
+	await _seconds(2.0)
+	var ally = hub.npcs.body(&"rufet")
+	var fwd: Vector3 = -cam.global_basis.z
+	fwd.y = 0.0
+	fwd = fwd.normalized()
+	var rel: Vector3 = ally.global_position - hub.player.global_position
+	var seg_a: Vector3 = cam.global_position
+	var seg_b: Vector3 = head
+	var t_seg: float = clampf((ally.global_position + Vector3(0, 1.2, 0) - seg_a).dot(seg_b - seg_a) / (seg_b - seg_a).length_squared(), 0.0, 1.0)
+	var off_line: float = (ally.global_position + Vector3(0, 1.2, 0)).distance_to(seg_a.lerp(seg_b, t_seg))
+	_check("Rüfət walks beside/behind him, out of the camera's line", rel.dot(fwd) < 0.4 and off_line > 0.8,
+		"ahead %.2f, off the line %.2f" % [rel.dot(fwd), off_line])
+	WorldState.move_npc(&"rufet", "")
 	var t: float = WorldState.get_time_of_day()
 	await _seconds(1.0)
 	_check("the hub's clock does not run", is_equal_approx(WorldState.get_time_of_day(), t) and is_equal_approx(lvl.day_night.hour, t))

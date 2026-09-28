@@ -16,6 +16,7 @@ personality_notes = "Sabir, yaşlı öğretmen — Aras's teacher since childhoo
 Grief stance: unchosen forgetting — losing memory to old age and fighting it; the mirror of
 Aras, who forgets by choice. Quest: help him remember his students' names. Hub: keeper of
 kept memories (re-watch KEPT echoes at the hearth). Handle with respect. No death risk.
+Lost one: Kür, whom he also taught; sometimes calls Aras 'Kür' (calls_protagonist_rules).
 See STORY_BIBLE.md §7."
 home_location_id = ""
 companion = false
@@ -24,5 +25,5 @@ npc_kind = "human"
 presence = ""
 tags = PackedStringArray("core_grief")
 placeholder = false
-lost_one_name_key = "NPC_SABIR_LOST_ONE"
-lost_one_look_id = "lost_sabir"
+lost_one_npc = &"kur"
+calls_protagonist_rules = PackedStringArray("flag:sabir_confused=>NPC_KUR_NAME")
