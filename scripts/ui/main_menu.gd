@@ -1,5 +1,6 @@
 extends CanvasLayer
-## Title screen shown over the slowly orbiting courtyard. Two choices only:
+## Title screen shown over the slowly orbiting courtyard: Continue, New Game, Settings
+## (the pause menu's settings screen) and Quit. The two ways into the game:
 ##   Continue — loads the most recently written save slot (SaveManager falls back to its
 ##              .bak); greyed out when there is no save. If loading fails the menu stays
 ##              and says so — it never starts a new game in the player's place.
@@ -11,12 +12,14 @@ signal new_game
 signal continue_game   # emitted after the slot has been loaded into WorldState
 
 const UITheme := preload("res://scripts/ui/ui_theme.gd")
+const SettingsPanel := preload("res://scripts/ui/settings_panel.gd")
 
 var _root: Control
 var _menu: VBoxContainer
 var _continue: Button
 var _new: Button
 var _status: Label
+var _settings: PanelContainer
 var _confirm: PanelContainer
 var _confirm_text: Label
 var _confirm_slot := 0
@@ -58,6 +61,8 @@ func _ready() -> void:
 	_menu.add_child(gap)
 	_continue = _button(tr("MENU_CONTINUE"), _on_continue)
 	_new = _button(tr("MENU_NEW_GAME"), _on_new_game)
+	_button(tr("MENU_SETTINGS"), _on_settings)
+	_button(tr("MENU_QUIT"), func(): get_tree().quit())
 	_status = UITheme.title("", 17, UITheme.EMBER)
 	_status.visible = false
 	_menu.add_child(_status)
@@ -74,6 +79,11 @@ func _ready() -> void:
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# The same settings screen the pause menu opens
+	_settings = SettingsPanel.new()
+	_settings.visible = false
+	_settings.closed.connect(_on_settings_closed)
+	center.add_child(_settings)
 	_build_confirm(center)
 
 	_root.modulate.a = 0.0
@@ -169,6 +179,19 @@ func _build_confirm(parent: Control) -> void:
 
 func _cancel_confirm() -> void:
 	_confirm.visible = false
+	_menu.visible = true
+	_focus_first()
+
+
+func _on_settings() -> void:
+	if _starting:
+		return
+	Audio.play("ui_select", -8.0, 0.0)
+	_menu.visible = false
+	_settings.open()
+
+
+func _on_settings_closed() -> void:
 	_menu.visible = true
 	_focus_first()
 

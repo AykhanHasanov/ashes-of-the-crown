@@ -18,6 +18,11 @@ extends Node
 ##   checkpoint_rested(checkpoint_id)         the mode, when Ayxan rests at an ocaq or reaches a story
 ##                                            checkpoint (SaveManager autosaves on it)
 ##
+## Encounters (emitted by scripts/world/encounter.gd; the active mode shows banners/music):
+##   encounter_started(id)                    the first wave is about to rise
+##   encounter_wave_started(id, wave, total, banner_key)   wave is 1-based; banner_key → tr()
+##   encounter_finished(id)                   the last enemy of the last wave fell
+##
 ## Saving (emitted by SaveManager):
 ##   saving(slot)                             just before writing: the active mode copies live values
 ##                                            (player stats, position, time) into WorldState
@@ -35,6 +40,10 @@ signal npc_changed(npc_id: StringName)
 signal state_replaced
 
 signal checkpoint_rested(checkpoint_id: StringName)
+
+signal encounter_started(encounter_id: StringName)
+signal encounter_wave_started(encounter_id: StringName, wave: int, total: int, banner_key: String)
+signal encounter_finished(encounter_id: StringName)
 
 signal saving(slot: int)
 signal game_saved(slot: int)

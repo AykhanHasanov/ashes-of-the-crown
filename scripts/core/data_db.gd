@@ -1,6 +1,6 @@
 extends Node
 ## Loads the game's content from JSON under res://data (spec V3 rule 4): balance
-## tables, weapons, enemies, the world layout and POI prefabs. Everything tunable
+## tables, weapons, enemies, encounters, the world layout and POI prefabs. Everything tunable
 ## lives in those files. World files are keyed by file name, the rest by their "id".
 
 const DIRS := {
@@ -9,6 +9,7 @@ const DIRS := {
 	"enemies": "res://data/enemies/",
 	"world": "res://data/world/",
 	"prefabs": "res://data/world/prefabs/",
+	"encounters": "res://data/encounters/",
 }
 
 var _tables := {}   # category -> {id -> Dictionary}
@@ -53,6 +54,11 @@ func enemy(id: String) -> Dictionary:
 ## A world file by name: world("world_layout"), world("vegetation")...
 func world(file: String) -> Dictionary:
 	return _tables["world"].get(file, {})
+
+
+## An encounter (waves of enemies), data/encounters/<id>.json.
+func encounter(id: String) -> Dictionary:
+	return _tables["encounters"].get(id, {})
 
 
 func prefab(id: String) -> Dictionary:

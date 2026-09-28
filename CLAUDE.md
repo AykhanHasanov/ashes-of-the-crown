@@ -109,16 +109,20 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 
 **Tests:** `"$G" --headless --path . res://scenes/tests/state_test.tscn` covers state, saves, migration and every main-menu case. It uses its own save folders.
 
-**Removed with the arena:** the combat self-test (19 checks) and the AI self-test (41 checks) lived in the arena. Combat and enemy AI currently have **no automated tests**; they should get a test scene of their own in the world.
+**Combat, AI and encounters:** `"$G" --headless --path . res://scenes/tests/combat_test.tscn`. It runs three suites on a primitive test yard (`scripts/debug/test_yard.gd`, the old arena's layout) with the real Ayxan and Foe nodes:
+- combat: 19 checks;
+- enemy AI: 41 checks;
+- encounters: 13 checks.
+
+It exits with the failure count and takes about 80 s headless.
 
 ## Running and testing
 
 Set `G="C:/Users/User/Documents/games/_tools/godot/Godot_v4.7.2-stable_win64_console.exe"` and run from the project root.
 
-**Main menu** (`scripts/ui/main_menu.gd`, shown by `main.gd`): two choices only, both from translation keys.
+**Main menu** (`scripts/ui/main_menu.gd`, shown by `main.gd`): Continue, New Game, Settings and Quit, all from translation keys (`MENU_*`). Settings opens the same screen as the pause menu.
 - *Continue* (`MENU_CONTINUE`) loads the most recently written slot. It falls back to the slot's `.bak`, is greyed out when no slot can be read, and on a failed load stays on the menu with `MENU_LOAD_FAILED` (it never starts a new game instead). A save whose region is `kur_vadisi` continues in the open world, otherwise in its chapter.
 - *New Game* (`MENU_NEW_GAME`) takes the first empty slot, or asks before overwriting the oldest one (`MENU_OVERWRITE_*`). It then starts Chapter 1.
-- There are no Settings or Quit entries on the title. Both are in the in-game pause menu (Esc).
 
 **Main story (Chapter 1 → 2)**
 - Play: `"$G" --path .` opens the title screen.
@@ -127,8 +131,15 @@ Set `G="C:/Users/User/Documents/games/_tools/godot/Godot_v4.7.2-stable_win64_con
 
 **Open world (Kür Vadisi)**
 - The open world has no menu entry and no story path leads there yet. It is reached by *Continue* on a save made in the world, or from the command line: `"$G" --path . res://scenes/world.tscn` (loads the newest slot, or starts a new game in the first empty one).
-- Self-test: `"$G" --path . res://scenes/world.tscn -- --demo=world_selftest` (28 checks).
+- Self-test: `"$G" --path . res://scenes/world.tscn -- --demo=world_selftest` (28 checks). It turns off elite affix rolls (`world_mode.roll_affixes`) and waits for landings instead of fixed times, so it stays deterministic under load.
 - Views: `--demo=world_village | world_square | world_evening | world_deer | world_forest | world_dusk | world_night | world_rain | world_lake`.
+
+**Encounters** (`scripts/world/encounter.gd`, data in `data/encounters/*.json`)
+- Waves of enemies rise around a point, one wave after another.
+- The encounter only runs the fight. Banners and music come from the mode, via `EventBus.encounter_started` / `encounter_wave_started` / `encounter_finished`.
+- What a finished encounter means for the story is written to WorldState by the caller.
+- In the world: `world_mode.start_encounter(id, center)`, F10 → *Karşılaşma*, or `--demo=world_encounter`.
+- `test_ash_rising` is **placeholder data**. Real encounters and bosses are designed with the new story.
 
 **Common flags and hotkeys**
 - `--capture=captures/x.png --frame=240` saves a screenshot and quits. It also prints a `PROFILE` line (fps, draw calls, primitives, VRAM).
