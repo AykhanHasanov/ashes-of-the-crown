@@ -6,7 +6,8 @@
 script = ExtResource("1")
 id = &"kul_sahi"
 name_key = "NPC_KUL_SAHI_NAME"
-name_memory_id = &""
+epithet_key = "NPC_KUL_SAHI_EPITHET"
+name_memory_id = &"&"
 look_id = ""
 weapon_path = ""
 shield_path = ""
@@ -16,4 +17,7 @@ He is the one who never forgets: his lines always show real names."
 home_location_id = ""
 companion = false
 ignores_burned_names = true
-speaker_only = true
+npc_kind = "voice_only"
+presence = ""
+tags = PackedStringArray()
+placeholder = false

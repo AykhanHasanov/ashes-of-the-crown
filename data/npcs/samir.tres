@@ -1,0 +1,23 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/npc_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"samir"
+name_key = "NPC_SAMIR_NAME"
+epithet_key = "NPC_SAMIR_EPITHET"
+name_memory_id = &""
+look_id = "npc_samir"
+weapon_path = ""
+shield_path = ""
+voice_profile = ""
+personality_notes = "Nərmin's brother. Alive: survived the cold by burning all his memories. Found and
+brought home, he does not know her. See STORY_BIBLE.md §7."
+home_location_id = ""
+companion = false
+ignores_burned_names = false
+npc_kind = "human"
+presence = "world"
+tags = PackedStringArray("hidden")
+placeholder = true

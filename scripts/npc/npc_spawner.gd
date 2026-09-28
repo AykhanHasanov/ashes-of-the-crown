@@ -39,7 +39,7 @@ func refresh() -> void:
 	_queued = false
 	var at_place: Dictionary = {}          # location -> [ids], for spreading people out
 	for def in NpcRegistry.all():
-		if def.speaker_only:
+		if def.npc_kind == "voice_only":
 			continue
 		var id: StringName = def.id
 		var loc := WorldState.get_npc_location(id)

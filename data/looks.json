@@ -1,5 +1,5 @@
 {
-	"_doc": "Named looks for realistic humans (scripts/characters/human.gd). A look is a spec or a list of variants; one variant is picked per character. Colours are [r, g, b]. Keys: outfit, hood, pauldron, hair, beard, hair_color, cloth_hue [from_min, from_max, to_hue, sat, val] (recolours the outfit's green), tint (multiplies the outfit), skin_tint (head), scale.",
+	"_doc": "Named looks for realistic humans (scripts/characters/human.gd). A look is a spec or a list of variants; one variant is picked per character. Colours are [r, g, b]. Keys: outfit, hood, pauldron, hair, beard, hair_color, cloth_hue [from_min, from_max, to_hue, sat, val] (recolours the outfit's green), tint (multiplies the outfit), skin_tint (head), scale. Looks with _placeholder: true stand in until the story's new models exist.",
 	"bandit": [
 		{
 			"outfit": "Male_Peasant",
@@ -384,25 +384,6 @@
 			0.5
 		]
 	},
-	"npc_anar": {
-		"outfit": "Male_Ranger",
-		"hood": true,
-		"pauldron": false,
-		"hair": "Hair_SimpleParted",
-		"beard": true,
-		"hair_color": [
-			0.14,
-			0.09,
-			0.05
-		],
-		"cloth_hue": [
-			0.18,
-			0.55,
-			0.1,
-			0.9,
-			0.65
-		]
-	},
 	"npc_elvin": {
 		"outfit": "Male_Ranger",
 		"hood": false,
@@ -473,5 +454,158 @@
 			0.9,
 			0.55
 		]
+	},
+	"npc_nermin": {
+		"outfit": "Female_Ranger",
+		"hood": true,
+		"pauldron": false,
+		"hair": "Hair_Long",
+		"beard": false,
+		"hair_color": [
+			0.14,
+			0.09,
+			0.05
+		],
+		"cloth_hue": [
+			0.18,
+			0.55,
+			0.1,
+			0.9,
+			0.65
+		]
+	},
+	"npc_sona": {
+		"outfit": "Female_Peasant",
+		"hair": "Hair_Long",
+		"hair_color": [
+			0.12,
+			0.08,
+			0.05
+		],
+		"tint": [
+			0.7,
+			0.7,
+			0.72
+		],
+		"_placeholder": true
+	},
+	"npc_domrul": {
+		"outfit": "Male_Peasant",
+		"hair": "Hair_Long",
+		"beard": true,
+		"hair_color": [
+			0.3,
+			0.28,
+			0.26
+		],
+		"tint": [
+			0.62,
+			0.6,
+			0.58
+		],
+		"_placeholder": true
+	},
+	"npc_yadigar": {
+		"outfit": "Male_Ranger",
+		"hood": true,
+		"pauldron": false,
+		"hair": "Hair_Buzzed",
+		"beard": true,
+		"hair_color": [
+			0.4,
+			0.38,
+			0.36
+		],
+		"tint": [
+			0.55,
+			0.5,
+			0.48
+		],
+		"_placeholder": true
+	},
+	"npc_ayna": {
+		"outfit": "Female_Peasant",
+		"hair": "Hair_Long",
+		"hair_color": [
+			0.35,
+			0.35,
+			0.35
+		],
+		"tint": [
+			0.5,
+			0.5,
+			0.52
+		],
+		"_placeholder": true
+	},
+	"npc_tural": {
+		"outfit": "Male_Ranger",
+		"hood": false,
+		"pauldron": true,
+		"hair": "Hair_Buzzed",
+		"beard": true,
+		"hair_color": [
+			0.1,
+			0.08,
+			0.06
+		],
+		"tint": [
+			0.45,
+			0.42,
+			0.42
+		],
+		"_placeholder": true
+	},
+	"npc_peri_nene": {
+		"outfit": "Female_Peasant",
+		"hair": "Hair_Buns",
+		"hair_color": [
+			0.78,
+			0.76,
+			0.74
+		],
+		"tint": [
+			0.62,
+			0.55,
+			0.5
+		],
+		"_placeholder": true
+	},
+	"npc_kamal": {
+		"outfit": "Male_Peasant",
+		"hair": "Hair_SimpleParted",
+		"beard": false,
+		"hair_color": [
+			0.14,
+			0.09,
+			0.05
+		],
+		"_placeholder": true
+	},
+	"npc_gulcin": {
+		"outfit": "Female_Peasant",
+		"hair": "Hair_Buns",
+		"hair_color": [
+			0.2,
+			0.12,
+			0.06
+		],
+		"_placeholder": true
+	},
+	"npc_samir": {
+		"outfit": "Male_Peasant",
+		"hair": "Hair_Buzzed",
+		"beard": true,
+		"hair_color": [
+			0.14,
+			0.1,
+			0.07
+		],
+		"tint": [
+			0.6,
+			0.58,
+			0.56
+		],
+		"_placeholder": true
 	}
 }

@@ -6,7 +6,10 @@ extends Resource
 ## Identities only: roles, quest lines and dialogue are written later by the story.
 
 @export var id: StringName                # permanent
-@export var name_key: String              # display name, shown through Names.npc(id)
+@export var name_key: String              # NPC_<ID>_NAME, shown through Names.npc(id)
+## NPC_<ID>_EPITHET ("Sabir, the old teacher"): always shown with the name, never blanked,
+## so the epithet identifies them even when the name slips (STORY_BIBLE §9.4).
+@export var epithet_key: String
 ## Optional: the name is blank in all text once this memory is BURNED.
 @export var name_memory_id: StringName
 @export var look_id: String               # data/looks.json entry (scripts/characters/human.gd)
@@ -22,5 +25,12 @@ extends Resource
 @export var companion := false
 ## Their lines always show real names, even burned ones (Kül Şahı never forgets).
 @export var ignores_burned_names := false
-## Speaks but never appears as a body in the world (a voice, a vision).
-@export var speaker_only := false
+## What they are (STORY_BIBLE §7): "human", "shade" (appears only in echoes / at doors), or
+## "voice_only" (speaks, never has a body — Kül Şahı).
+@export_enum("human", "shade", "voice_only") var npc_kind := "human"
+## Where the bible puts them: "hub" (Son Ocaq), "world", or "" (core cast, not stated).
+@export var presence := ""
+## Other markers from the bible: "boss", "hidden".
+@export var tags: PackedStringArray = PackedStringArray()
+## Placeholder data (look, voice, text) until the story/art decides.
+@export var placeholder := false

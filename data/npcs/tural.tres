@@ -1,0 +1,23 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/npc_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"tural"
+name_key = "NPC_TURAL_NAME"
+epithet_key = "NPC_TURAL_EPITHET"
+name_memory_id = &""
+look_id = "npc_tural"
+weapon_path = ""
+shield_path = ""
+voice_profile = ""
+personality_notes = "Kül Şövalyesi — Şahbaz's former lieutenant; chose the King for the promise of his dead
+comrades. Boss. Save or kill [TBD]. Model: enemy knight variant. See STORY_BIBLE.md §7."
+home_location_id = ""
+companion = false
+ignores_burned_names = false
+npc_kind = "human"
+presence = "world"
+tags = PackedStringArray("boss")
+placeholder = true

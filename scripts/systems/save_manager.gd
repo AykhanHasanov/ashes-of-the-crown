@@ -237,7 +237,9 @@ func _migrate_step(d: Dictionary, from: int) -> Dictionary:
 			return _v1_to_v2(d)
 		2:
 			return _v2_to_v3(d)
-		# 3: return _v3_to_v4(d)
+		3:
+			return _v3_to_v4(d)
+		# 4: return _v4_to_v5(d)
 	push_warning("SaveManager: no migration from save_version %d" % from)
 	return {}
 
@@ -304,6 +306,22 @@ func _v2_to_v3(d: Dictionary) -> Dictionary:
 				rec.erase(k)
 		rec["flags"] = flags
 	d["meta"]["save_version"] = 3
+	return d
+
+
+## v4: the caravan head "anar" became "nermin" (STORY_BIBLE.md §7: Nərmin replaces Anar).
+## Her record keeps everything it had.
+const RENAMED_NPCS := {"anar": "nermin"}
+
+
+func _v3_to_v4(d: Dictionary) -> Dictionary:
+	var npcs: Dictionary = d.get("npcs", {}) if d.get("npcs") is Dictionary else {}
+	for old_id in RENAMED_NPCS:
+		if npcs.has(old_id):
+			npcs[RENAMED_NPCS[old_id]] = npcs[old_id]
+			npcs.erase(old_id)
+	d["npcs"] = npcs
+	d["meta"]["save_version"] = 4
 	return d
 
 

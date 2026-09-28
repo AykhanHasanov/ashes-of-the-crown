@@ -1,0 +1,24 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/npc_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"domrul"
+name_key = "NPC_DOMRUL_NAME"
+epithet_key = "NPC_DOMRUL_EPITHET"
+name_memory_id = &""
+look_id = "npc_domrul"
+weapon_path = ""
+shield_path = ""
+voice_profile = ""
+personality_notes = "Dəli Domrul, the town's madman (Dede Korkut). Talked to his dead wife's shade through the
+door every night for a year; everything he says is literally true. Death by choice (Act III).
+See STORY_BIBLE.md §7."
+home_location_id = ""
+companion = false
+ignores_burned_names = false
+npc_kind = "human"
+presence = ""
+tags = PackedStringArray()
+placeholder = true
