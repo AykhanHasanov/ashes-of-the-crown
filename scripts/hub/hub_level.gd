@@ -52,9 +52,13 @@ var _dark: StandardMaterial3D
 var _ash: StandardMaterial3D
 var _step_mat: StandardMaterial3D
 var _snow: StandardMaterial3D
+var _cleared: StandardMaterial3D
+var _scorch: StandardMaterial3D
+var ash_cover: MeshInstance3D
 var _window_lit: StandardMaterial3D
 var lament: AudioStreamPlayer3D
 var _door_scene := false
+var moon_rim: DirectionalLight3D   # the door scene's faint cool light: the door's silhouette reads
 var _cache := {}
 
 
@@ -75,6 +79,12 @@ func build() -> void:
 	refresh_aftermath()
 	EventBus.npc_died.connect(func(_id, _c): refresh_aftermath())
 	EventBus.state_replaced.connect(refresh_aftermath)
+	moon_rim = DirectionalLight3D.new()
+	moon_rim.name = "MoonRim"
+	moon_rim.light_color = Color(0.55, 0.66, 0.95)
+	moon_rim.light_energy = 0.22
+	moon_rim.visible = false
+	add_child(moon_rim)
 	lament = AudioStreamPlayer3D.new()
 	lament.name = "Lament"
 	lament.stream = load("res://assets/audio/lament_loop.wav")
@@ -118,6 +128,12 @@ func set_door_scene(door) -> void:
 		d.set_key_light(on and d == door)
 	_door_scene = on
 	refresh_growth()   # lit windows go dark for the scene
+	moon_rim.visible = on
+	if on:
+		# grazing across the door's face from above and aside: its silhouette reads, cool
+		var d: Transform3D = door.global_transform
+		var dir: Vector3 = (-d.basis.z * 0.55 + d.basis.x * 0.7 + Vector3.DOWN * 0.55).normalized()
+		moon_rim.global_transform = Transform3D(Basis.looking_at(dir, Vector3.UP), Vector3.ZERO)
 
 
 ## After a door death: ash on the threshold and a trail of ash footprints from the gate to
@@ -139,12 +155,13 @@ func refresh_aftermath() -> void:
 		var xf: Transform3D = d.global_transform
 		var pile := MeshInstance3D.new()
 		var disc := CylinderMesh.new()
-		disc.top_radius = 0.55
-		disc.bottom_radius = 0.7
+		disc.top_radius = 0.95
+		disc.bottom_radius = 1.0
 		disc.height = 0.03
-		disc.material = _ash
+		disc.material = _scorch
+		pile.name = "Scorch"
 		pile.mesh = disc
-		pile.position = xf.origin + xf.basis.z * 0.35 + Vector3(0, 0.03, 0)
+		pile.position = xf.origin + xf.basis.z * 0.55 + Vector3(0, 0.028, 0)
 		root.add_child(pile)
 		var from := Vector3(0, 0, SOUTH_Z - 0.6)
 		var to: Vector3 = xf.origin + xf.basis.z * 0.7
@@ -157,7 +174,7 @@ func refresh_aftermath() -> void:
 			step.name = "Footprint%d" % i
 			step.set_meta("footprint", true)
 			var q := QuadMesh.new()
-			q.size = Vector2(0.13, 0.3)
+			q.size = Vector2(0.16, 0.36)
 			q.material = _step_mat
 			step.mesh = q
 			var at := from + dir * (float(i) / n) + side * (0.11 if i % 2 == 0 else -0.11)
@@ -205,14 +222,14 @@ func refresh_growth() -> void:
 	for id in growth:
 		var st := HubData.room_state(id)
 		growth[id]["window"].material_override = _window_lit if st != "dark" and not _door_scene else _dark
-		growth[id]["snow"].visible = st != "melted"
+		growth[id]["cleared"].visible = st == "melted"
 	hearth_fire.scale = Vector3.ONE * HubData.hearth_scale()
 
 
 func room_state_shown(place_id: String) -> String:
 	if growth[place_id]["window"].material_override == _dark:
 		return "dark"
-	return "lit" if growth[place_id]["snow"].visible else "melted"
+	return "melted" if growth[place_id]["cleared"].visible else "lit"
 
 
 ## The lament on the morning after a door death: sung at that door (placeholder audio), so
@@ -232,7 +249,23 @@ func _on_lament_finished() -> void:
 		lament.play()   # a loop while the mourning lasts
 
 
-## A soft round patch (alpha), for ash-snow on the ground.
+## Ash-snow lying unevenly: a noise alpha (heavier in drifts, thin between).
+static func _noise_cover() -> NoiseTexture2D:
+	var n := FastNoiseLite.new()
+	n.frequency = 0.03
+	var tex := NoiseTexture2D.new()
+	tex.noise = n
+	tex.width = 256
+	tex.height = 256
+	tex.seamless = true
+	var g := Gradient.new()
+	g.set_color(0, Color(1, 1, 1, 0.15))
+	g.set_color(1, Color(1, 1, 1, 0.6))
+	tex.color_ramp = g
+	return tex
+
+
+## A soft round patch (alpha).
 static func _soft_patch() -> GradientTexture2D:
 	var g := Gradient.new()
 	g.set_color(0, Color(1, 1, 1, 0.9))
@@ -300,17 +333,18 @@ func _room(p: Dictionary, xf: Transform3D) -> void:
 	var pane := _quad(root, Vector2(1.2, 1.1), Vector3(window_x, 1.7, -0.28), "Window")
 	inside.set_meta("place", p["id"])
 	pane.set_meta("place", p["id"])
-	# Ash-snow lying at the door; it melts when the grief of this room is resolved
-	var snow := MeshInstance3D.new()
-	snow.name = "AshSnow"
-	var sq := QuadMesh.new()
-	sq.size = Vector2(3.4, 2.0)
-	sq.material = _snow
-	snow.mesh = sq
-	snow.rotation.x = -PI * 0.5
-	snow.position = Vector3(0, 0.025, 1.2)
-	root.add_child(snow)
-	growth[p["id"]] = {"window": pane, "snow": snow}
+	# Resolved grief: the ash-snow at this door cleared, warm-toned stones showing
+	var cleared := MeshInstance3D.new()
+	cleared.name = "ClearedStones"
+	var cq := QuadMesh.new()
+	cq.size = Vector2(3.0, 1.9)
+	cq.material = _cleared
+	cleared.mesh = cq
+	cleared.rotation.x = -PI * 0.5
+	cleared.position = Vector3(0, 0.026, 1.15)
+	cleared.visible = false
+	root.add_child(cleared)
+	growth[p["id"]] = {"window": pane, "cleared": cleared}
 	var d = Door.new()
 	d.name = "Door_" + p["door"]
 	d.setup(StringName(p["door"]), p["id"])
@@ -453,6 +487,15 @@ func _ground() -> void:
 	plane.material = m
 	outside.mesh = plane
 	add_child(outside)
+	# The ambient ash-snow over the courtyard (under every mark and glow)
+	ash_cover = MeshInstance3D.new()
+	ash_cover.name = "AshCover"
+	var ap := PlaneMesh.new()
+	ap.size = Vector2(SIDE_X * 2.0, SOUTH_Z - NORTH_Z)
+	ap.material = _snow
+	ash_cover.mesh = ap
+	ash_cover.position = Vector3(0, 0.021, 0)
+	add_child(ash_cover)
 	var yard := MeshInstance3D.new()
 	var yp := PlaneMesh.new()
 	yp.size = Vector2(SIDE_X * 2.0, SOUTH_Z - NORTH_Z)
@@ -591,14 +634,28 @@ func _materials() -> void:
 	_ash.roughness = 1.0
 	_step_mat = StandardMaterial3D.new()
 	_step_mat.albedo_texture = footprint_texture()
-	_step_mat.albedo_color = Color(0.86, 0.84, 0.8)
+	_step_mat.albedo_color = Color(0.98, 0.97, 0.95)   # fresh pale ash: brighter than the lying cover
 	_step_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	_step_mat.roughness = 1.0
+	# Three ground states that must never look alike (STORY_BIBLE §8: ash snow):
+	#   ambient ash-snow — light grey, everywhere;   cleared (resolved grief) — warm stones;
+	#   a door death — a dark scorched mark (the footprints to it stay pale ash)
 	_snow = StandardMaterial3D.new()
-	_snow.albedo_texture = _soft_patch()
-	_snow.albedo_color = Color(0.8, 0.79, 0.77)
+	_snow.albedo_texture = _noise_cover()
+	_snow.albedo_color = Color(0.84, 0.83, 0.81)
 	_snow.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	_snow.roughness = 1.0
+	_snow.uv1_scale = Vector3(3, 3, 1)
+	_cleared = StandardMaterial3D.new()
+	_cleared.albedo_texture = load("res://assets/village_mk/T_RockTrim_BaseColor.png")
+	_cleared.albedo_color = Color(0.95, 0.66, 0.42)
+	_cleared.uv1_scale = Vector3(2, 1.3, 1)
+	_cleared.roughness = 0.85
+	_scorch = StandardMaterial3D.new()
+	_scorch.albedo_texture = _soft_patch()
+	_scorch.albedo_color = Color(0.07, 0.05, 0.04)
+	_scorch.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_scorch.roughness = 1.0
 	_window_lit = StandardMaterial3D.new()
 	_window_lit.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_window_lit.albedo_color = Color(0.95, 0.6, 0.28)

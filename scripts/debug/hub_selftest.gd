@@ -368,7 +368,10 @@ func _door_talk() -> void:
 	_check("door scene: the courtyard goes almost dark", lvl.day_night.mood_scale <= 0.1 and not lvl.hearth_light.visible and not lvl.far_light.visible)
 	var others_dark: bool = lvl.doors.values().all(func(d): return d == sona_door or d.strip_light_energy() == 0.0)
 	var windows_dark: bool = lvl.growth.values().all(func(g): return g["window"].material_override == lvl._dark)
-	_check("... the only warm light is the strip under this door (no lit windows either)", others_dark and windows_dark and sona_door.strip_light_energy() > 0.0)
+	_check("... the only warm light is the strip under this door (no lit windows, no other strips)", others_dark and windows_dark and sona_door.strip_light_energy() > 0.0)
+	var rim: DirectionalLight3D = lvl.moon_rim
+	_check("... and a faint cool moonlight rim lets the door's silhouette read", rim.visible and rim.light_color.b > rim.light_color.r
+		and rim.light_energy < 0.5 and (-rim.global_basis.z).dot(-sona_door.global_basis.z) > 0.3)
 	var spot: Node3D = sona_door._strip_light
 	_check("... it shines out from under the door onto the floor, away from the door's face",
 		(-spot.global_basis.z).dot(sona_door.global_basis.z) > 0.6 and (-spot.global_basis.z).y < -0.2)
@@ -398,7 +401,7 @@ func _door_talk() -> void:
 	dlg._advance()
 	await _frames(3)
 	_check("after the talk the player's camera and controls come back", talk.door_camera == null and hub.rig.camera.current and not hub.player.input_locked)
-	_check("... and the night's light", is_equal_approx(lvl.day_night.mood_scale, 1.0) and lvl.hearth_light.visible)
+	_check("... and the night's light", is_equal_approx(lvl.day_night.mood_scale, 1.0) and lvl.hearth_light.visible and not lvl.moon_rim.visible)
 	_check("UI: afterwards the waiting messages come, one at a time", hub.hud._card.visible and hub.hud._card_title.text == "TEST"
 		and hub.hud.queued() == ["banner", "show_whisper"])
 	await _seconds(2.2)
@@ -559,8 +562,17 @@ func _nights() -> void:
 	var peri = hub.npcs.body(&"peri_nene")
 	_check("... she stands there, at the open door", peri != null and peri.global_position.distance_to(esref_door.global_position) < 2.5)
 	_check("... and nothing on screen says so", hub.hud.queued().is_empty() and hub.hud._whisper.modulate.a < 0.05)
-	_check("the ash reads pale on the stone; the footprints are footprint-shaped", lvl._ash.albedo_color.v > 0.7
-		and lvl._step_mat.albedo_texture.get_image().get_pixel(16, 44).a > 0.5 and lvl._step_mat.albedo_texture.get_image().get_pixel(1, 1).a < 0.1)
+	var ash_c: Color = lvl._snow.albedo_color
+	var step_c: Color = lvl._step_mat.albedo_color
+	var scorch_c: Color = lvl._scorch.albedo_color
+	var warm_c: Color = lvl._cleared.albedo_color
+	_check("ground language: ambient ash-snow light grey, the footprints pale ash, the threshold scorched dark",
+		ash_c.v > 0.75 and absf(ash_c.r - ash_c.b) < 0.06 and step_c.v > 0.75 and scorch_c.v < 0.12
+		and lvl.get_node("Aftermath_door_esref/Scorch") != null)
+	_check("... cleared (resolved) stones are warm — none of the three look alike", warm_c.r - warm_c.b > 0.35
+		and absf(warm_c.v - ash_c.v) > 0.0 and (warm_c.r - warm_c.b) - (ash_c.r - ash_c.b) > 0.3 and ash_c.v - scorch_c.v > 0.6)
+	_check("the footprints are footprint-shaped", lvl._step_mat.albedo_texture.get_image().get_pixel(16, 44).a > 0.5
+		and lvl._step_mat.albedo_texture.get_image().get_pixel(1, 1).a < 0.1)
 	_check("B: morning: the door is ajar, ash on the threshold, footprints from the gate", esref_door.is_ajar and not esref_door.is_open
 		and lvl.footprint_count("door_esref") > 5 and lvl.get_node_or_null("Aftermath_door_esref") != null,
 		"ajar %s open %s steps %d" % [esref_door.is_ajar, esref_door.is_open, lvl.footprint_count("door_esref")])
@@ -642,8 +654,8 @@ func _growth() -> void:
 	hub.wait_until(7.0)
 	WorldState.resolve_grief(&"esref")
 	await _frames(3)
-	_check("growth: his grief resolved, the ash-snow at his door melts", lvl.room_state_shown("room_esref") == "melted"
-		and not lvl.growth["room_esref"]["snow"].visible and lvl.growth["room_sona"]["snow"].visible)
+	_check("growth: his grief resolved, warm stones show through the ash-snow at his door", lvl.room_state_shown("room_esref") == "melted"
+		and lvl.growth["room_esref"]["cleared"].visible and not lvl.growth["room_sona"]["cleared"].visible)
 	_check("growth: the hearth grows with the resolved core arcs (data)", lvl.hearth_fire.scale.x > scale0
 		and is_equal_approx(lvl.hearth_fire.scale.x, float(HubData.data()["hearth"]["stages"][1])))
 

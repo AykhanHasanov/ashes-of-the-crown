@@ -72,7 +72,7 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
    - Player-facing text uses translation keys via `tr()`, defined in `localization/strings.csv`. **Current language: Turkish (text and voice). New text must never be hardcoded.** Only the memories and the save-slot dialog use keys so far; moving the remaining legacy strings is a separate task.
    - Code, comments and commit messages: English.
    - Chat with the owner: Azerbaijani.
-6. **Keep the tests green.** Run the self-tests before merging (see below). Add checks for new systems to the relevant self-test.
+6. **Keep the tests green.** Run ALL the suites before EVERY commit — state_test, echo_test, npc_test, hub_test, combat_test, tools/test_anim_isolation.gd and the windowed world_selftest — not only the ones that look affected (the HUD, dialogue and WorldState are shared by every mode). Add checks for new systems to the relevant self-test.
 7. **Git.** Work on a `v3/<topic>` branch, commit per stage, merge to `main` with `--no-ff` after the tests pass, then `git push` (remote: private `github.com/AykhanHasanov/ashes-of-the-crown`). End commit messages with the attribution line the harness provides.
 8. **Story.** Read `STORY_BIBLE.md` before any story-related task. Never invent story content; use placeholders for [TBD] items and flag them in the report.
 9. **Assets.** CC0 (or clearly licensed) only. Record the source in a `CREDITS` file. Before downloading, state the file, source and size (the owner has given blanket approval).
