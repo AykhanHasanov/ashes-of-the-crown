@@ -12,6 +12,7 @@ const WHISPER := Color(0.95, 0.32, 0.2)
 
 var _root: Control
 var _name_label: Label
+const NAME_FADE := 2.0        # his name fading in when he learns it
 var _health_fill: ColorRect
 var _ember_fill: ColorRect
 var _ember_ratio := 0.0
@@ -190,7 +191,7 @@ func _ready() -> void:
 
 	EventBus.memory_burned.connect(_on_memory_burned)
 	EventBus.state_replaced.connect(_refresh_memories)
-	EventBus.flag_changed.connect(func(_k, _o, _n): _refresh_memories())
+	EventBus.flag_changed.connect(_on_flag_changed)
 	Fx.notified.connect(show_whisper)
 	_refresh_memories()
 
@@ -431,9 +432,17 @@ func _on_memory_burned(id: StringName) -> void:
 	show_whisper("«%s» yandı.\n%s" % [tr(Memory.MemoryRegistry.get_def(id).display_name_key), Memory.whisper()])
 
 
+## He learns his own name: it fades in on the HUD.
+func _on_flag_changed(key: StringName, _old: Variant, value: Variant) -> void:
+	_refresh_memories()
+	if key == &"protagonist_name_known" and value == true and _name_label:
+		_name_label.modulate.a = 0.0
+		create_tween().tween_property(_name_label, "modulate:a", 1.0, NAME_FADE)
+
+
 func _refresh_memories() -> void:
 	if _name_label:
-		_name_label.text = Names.protagonist_label().to_upper()   # blank until he knows it, and once it burned
+		_name_label.text = Names.protagonist_label().to_upper()   # empty until he knows it; "———" once it burned
 	_embers.queue_redraw()
 
 

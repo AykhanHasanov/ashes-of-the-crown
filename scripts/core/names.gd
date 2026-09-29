@@ -116,9 +116,12 @@ static func protagonist_self_known() -> bool:
 	return WorldState.has_flag(&"protagonist_name_known")
 
 
-## His name on the HUD: the blank until he knows it, and once it is burned.
+## His name on the HUD: empty while he does not know it; the blank ("———", reserved for
+## burned names) once it is burned; otherwise the name.
 static func protagonist_label() -> String:
-	return protagonist() if protagonist_self_known() else TranslationServer.translate("NAME_FORGOTTEN")
+	if WorldState.has_burned(PROTAGONIST_MEMORY):
+		return TranslationServer.translate("NAME_FORGOTTEN")
+	return protagonist() if protagonist_self_known() else ""
 
 
 ## What Aras can say when asked his name: the name; "Bilmiyorum..." while he does not know
