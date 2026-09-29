@@ -12,3 +12,4 @@ Notes to decide or clean up later. Not scheduled; nothing here is being worked o
 - **Hub room doors open inward** once the rooms have interiors (they swing out into the gallery for now).
 - **MUST before the vertical slice: Kürköy art identity pass.** A Caucasus mountain village (reference: Xınalıq, Lahıc): flat-roofed stone houses, terraced on the slopes, the same visual language as the caravanserai. No marketing screenshots before this.
 - **Art pass: pointed (sivri) arches** instead of round arches in the caravanserai.
+- **Kartal Yamacı into the terrain.** It is a separate scene for the slice (reached by a trail from the valley road); integrate it into the valley terrain later.

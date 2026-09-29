@@ -569,6 +569,12 @@ func _nights() -> void:
 	_check("ground language: ambient ash-snow light grey, the footprints pale ash, the threshold scorched dark",
 		ash_c.v > 0.75 and absf(ash_c.r - ash_c.b) < 0.06 and step_c.v > 0.75 and scorch_c.v < 0.12
 		and lvl.get_node("Aftermath_door_esref/Scorch") != null)
+	var burn_img: Image = lvl._scorch.albedo_texture.get_image()
+	var edge_alphas: Array = []
+	for i in 16:
+		var ang := TAU * i / 16.0
+		edge_alphas.append(burn_img.get_pixel(int(48 + cos(ang) * 30.0), int(48 + sin(ang) * 30.0)).a)
+	_check("the scorch mark is an irregular burn, not a circle", edge_alphas.max() - edge_alphas.min() > 0.3, str(edge_alphas))
 	_check("... cleared (resolved) stones are warm — none of the three look alike", warm_c.r - warm_c.b > 0.35
 		and absf(warm_c.v - ash_c.v) > 0.0 and (warm_c.r - warm_c.b) - (ash_c.r - ash_c.b) > 0.3 and ash_c.v - scorch_c.v > 0.6)
 	_check("the footprints are footprint-shaped", lvl._step_mat.albedo_texture.get_image().get_pixel(16, 44).a > 0.5

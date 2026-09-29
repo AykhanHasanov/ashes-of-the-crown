@@ -154,13 +154,12 @@ func refresh_aftermath() -> void:
 		add_child(root)
 		var xf: Transform3D = d.global_transform
 		var pile := MeshInstance3D.new()
-		var disc := CylinderMesh.new()
-		disc.top_radius = 0.95
-		disc.bottom_radius = 1.0
-		disc.height = 0.03
-		disc.material = _scorch
+		var blot := QuadMesh.new()
+		blot.size = Vector2(2.1, 2.1)
+		blot.material = _scorch
 		pile.name = "Scorch"
-		pile.mesh = disc
+		pile.mesh = blot
+		pile.rotation = Vector3(-PI * 0.5, 0, xf.basis.get_euler().y)
 		pile.position = xf.origin + xf.basis.z * 0.55 + Vector3(0, 0.028, 0)
 		root.add_child(pile)
 		var from := Vector3(0, 0, SOUTH_Z - 0.6)
@@ -263,6 +262,26 @@ static func _noise_cover() -> NoiseTexture2D:
 	g.set_color(1, Color(1, 1, 1, 0.6))
 	tex.color_ramp = g
 	return tex
+
+
+## A burn mark: an irregular blot — ragged edge, darker tongues licking outward — not a disc.
+static func scorch_texture() -> ImageTexture:
+	var size := 96
+	var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var n := FastNoiseLite.new()
+	n.seed = 71
+	n.frequency = 0.09
+	var c := Vector2(size, size) * 0.5
+	for y in size:
+		for x in size:
+			var p := Vector2(x, y) - c
+			var ang := atan2(p.y, p.x)
+			# the edge wanders with the angle, plus a few long tongues
+			var edge := 0.62 + 0.22 * n.get_noise_2d(cos(ang) * 40.0, sin(ang) * 40.0) + 0.12 * maxf(sin(ang * 5.0 + 1.3), 0.0)
+			var r := p.length() / (size * 0.5)
+			var a := clampf((edge - r) * 5.0, 0.0, 1.0) * (0.75 + 0.25 * n.get_noise_2d(x * 2.0, y * 2.0))
+			img.set_pixel(x, y, Color(1, 1, 1, clampf(a, 0.0, 1.0)))
+	return ImageTexture.create_from_image(img)
 
 
 ## A soft round patch (alpha).
@@ -652,7 +671,7 @@ func _materials() -> void:
 	_cleared.uv1_scale = Vector3(2, 1.3, 1)
 	_cleared.roughness = 0.85
 	_scorch = StandardMaterial3D.new()
-	_scorch.albedo_texture = _soft_patch()
+	_scorch.albedo_texture = scorch_texture()
 	_scorch.albedo_color = Color(0.07, 0.05, 0.04)
 	_scorch.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	_scorch.roughness = 1.0
