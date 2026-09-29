@@ -15,6 +15,7 @@ const HubData := preload("res://scripts/hub/hub_data.gd")
 const Door := preload("res://scripts/hub/door.gd")
 const DayNight := preload("res://scripts/world/day_night.gd")
 const Effects := preload("res://scripts/world/effects.gd")
+const HearthFire := preload("res://scripts/world/hearth_fire.gd")
 const KIT := "res://assets/village_mk/%s.gltf"
 const FAMILY := [
 	["Wall_Plaster_Door_Round", "Wall_Plaster_Window_Wide_Round", "Window_Wide_Round1"],
@@ -619,36 +620,6 @@ func _hearth() -> void:
 		stone.position = Vector3(cos(a) * hearth_radius, 0.1, sin(a) * hearth_radius)
 		stone.rotation.y = -a + PI * 0.5
 		root.add_child(stone)
-	var bed := MeshInstance3D.new()
-	var disc := CylinderMesh.new()
-	disc.top_radius = hearth_radius - 0.15
-	disc.bottom_radius = hearth_radius - 0.1
-	disc.height = 0.08
-	var embers := StandardMaterial3D.new()
-	embers.albedo_color = Color(0.25, 0.08, 0.03)
-	embers.emission_enabled = true
-	embers.emission = Color(1.0, 0.32, 0.08)
-	embers.emission_energy_multiplier = 1.6
-	disc.material = embers
-	bed.mesh = disc
-	bed.position.y = 0.06
-	root.add_child(bed)
-	var wood := StandardMaterial3D.new()
-	wood.albedo_color = Color(0.13, 0.08, 0.05)
-	for i in 5:
-		var log_mi := MeshInstance3D.new()
-		var cyl := CylinderMesh.new()
-		cyl.top_radius = 0.09
-		cyl.bottom_radius = 0.11
-		cyl.height = hearth_radius * 1.4
-		cyl.material = wood
-		log_mi.mesh = cyl
-		log_mi.rotation = Vector3(deg_to_rad(80.0), TAU * i / 5.0, 0)
-		log_mi.position = Vector3(0, 0.22, 0)
-		root.add_child(log_mi)
-	var glow := Effects.ember_field(Vector3(hearth_radius * 0.8, 0.3, hearth_radius * 0.8), 18)
-	glow.position.y = 0.25
-	root.add_child(glow)
 	var body := StaticBody3D.new()
 	var cs := CollisionShape3D.new()
 	var shape := CylinderShape3D.new()
@@ -658,19 +629,16 @@ func _hearth() -> void:
 	cs.position.y = 0.15
 	body.add_child(cs)
 	root.add_child(body)
+	# The fire itself (embers, logs, flames, sparks, the flickering light): a lit HearthFire
+	# inside the dressed stones; it grows with the hub (refresh_growth scales hearth_fire)
 	hearth_fire = Node3D.new()
 	hearth_fire.name = "HearthFire"
 	hearth_fire.position = hearth_pos
 	add_child(hearth_fire)
-	var fire := Effects.fire(2.4, 48)
-	fire.position = Vector3(0, 0.5, 0)
+	var fire = HearthFire.new().setup(true, hearth_radius - 0.2, false, true, true, 4.2, 15.0)
+	fire.name = "Fire"
 	hearth_fire.add_child(fire)
-	hearth_light = OmniLight3D.new()
-	hearth_light.light_color = Color(1.0, 0.5, 0.2)
-	hearth_light.light_energy = 3.4
-	hearth_light.omni_range = 13.0
-	hearth_light.position = Vector3(0, 1.8, 0)
-	hearth_fire.add_child(hearth_light)
+	hearth_light = fire.light
 	braziers.append(hearth_pos)
 
 

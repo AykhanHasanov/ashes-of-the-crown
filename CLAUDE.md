@@ -195,9 +195,11 @@ Set `G="C:/Users/User/Documents/games/_tools/godot/Godot_v4.7.2-stable_win64_con
 
 **Look (lighting and presets)**
 - Every outdoor mode lights through `scripts/world/day_night.gd`; its look is data in `data/world/lighting.json`: warm low sun, cool blue ambient, soft shadows, AgX, glow, haze and valley mist, and per preset what is on.
-- Low: glow, 2 shadow splits. Medium: + SSAO and coarse volumetric fog. High: + SSIL, SDFGI, finer volumetric fog, 4 splits, contact-hardening shadows. `Settings.is_high()` is High only; `Settings.at_least_medium()` for Medium and up.
-- SDFGI does not read the sky (on the dev Intel UHD it turned characters and trees chrome-white); two shadowless cool "sky fill" lights stand in for the sky while SDFGI is on. Re-check on the target machine.
-- Hearths look through `scripts/world/hearth_fire.gd` (lit: stone ring, embers, flames, sparks, flickering light; cold: ash, charred logs, a thread of smoke). Air dust: `Effects.dust_motes`.
+- Low: glow, 2 shadow splits. Medium: + SSAO and coarse volumetric fog. High: + SSIL, finer volumetric fog, 4 splits, contact-hardening shadows. `Settings.is_high()` is High only; `Settings.at_least_medium()` for Medium and up.
+- SDFGI is NOT part of a preset: it is the separate, experimental "Küresel aydınlatma (deneysel)" setting (`Settings.global_illumination`, `--gi=on`), off by default. It does not read the sky (on the dev Intel UHD its probes turned characters and trees chrome-white even with correct materials); two shadowless cool "sky fill" lights stand in for the sky while it is on.
+- First launch: `scripts/systems/benchmark.gd` measures the first gameplay scene at Medium with vsync off and picks the preset (`lighting.json` benchmark; no measurement → Medium). Saved; the player can change it. `--benchmark` runs it now without saving. Never in a --demo, capture or headless.
+- Materials: non-metals are `metallic 0`, `roughness >= 0.7` (`scripts/core/material_policy.gd`), applied at glTF import (`tools/import/material_policy_import.gd` is every model's import script — keep it when adding models) and to baked foliage (`tools/fix_materials.gd`). Audit: `-s tools/audit_materials.gd`; list in `docs/MATERIAL_AUDIT.md`.
+- Hearths look through `scripts/world/hearth_fire.gd` (lit: stone ring, embers, flames — mixed blend, so no white blob — sparks, flickering light; cold: ash, charred logs, a thread of smoke): Kartal Yamacı, the Son Ocak hearth, every valley hearth (cold until lit). Air dust: `Effects.dust_motes`. Views `--demo=world_hearth | world_hearth_lit`.
 
 **Labs**
 - `res://scenes/char_lab.tscn`: `CHAR_LAB_LOOKS`, `CHAR_LAB_WEAPON`, `CHAR_LAB_OVERLAY`.

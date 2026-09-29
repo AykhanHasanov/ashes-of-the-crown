@@ -349,12 +349,16 @@ static func dust_motes(extents: Vector3, amount: int) -> GPUParticles3D:
 	pm.scale_max = 1.0
 	pm.color_ramp = ramp([
 		[0.0, Color(1.0, 0.95, 0.85, 0.0)],
-		[0.2, Color(1.0, 0.95, 0.85, 0.55)],
-		[0.8, Color(1.0, 0.95, 0.85, 0.45)],
+		[0.2, Color(1.0, 0.95, 0.85, 0.35)],
+		[0.8, Color(1.0, 0.95, 0.85, 0.3)],
 		[1.0, Color(1.0, 0.95, 0.85, 0.0)],
 	])
 	var m := particle_material(false)
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL   # lit by the sun, dark in shade
+	m.proximity_fade_enabled = true   # no soft white blobs right in front of the lens
+	m.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_ALPHA
+	m.distance_fade_min_distance = 0.8
+	m.distance_fade_max_distance = 2.5
 	var p := make_particles(amount, 14.0, pm, 0.035, m, maxf(extents.x, extents.z) + 2.0)
 	p.preprocess = 14.0
 	return p
@@ -407,3 +411,32 @@ static func smoke_wisp() -> GPUParticles3D:
 	var p := make_particles(14, 5.0, pm, 0.45, particle_material(false), 4.0)
 	p.preprocess = 5.0
 	return p
+
+
+## Flames for a hearth: mixed (not additive) so overlapping tongues stay orange instead of
+## summing to a white blob; only the core runs a little over 1.0 for a touch of glow.
+static func hearth_flames(scale := 1.0, amount := 36) -> GPUParticles3D:
+	var pm := ParticleProcessMaterial.new()
+	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	pm.emission_sphere_radius = 0.22 * scale
+	pm.direction = Vector3.UP
+	pm.spread = 10.0
+	pm.initial_velocity_min = 0.6 * scale
+	pm.initial_velocity_max = 1.3 * scale
+	pm.gravity = Vector3(0, 1.1 * scale, 0)
+	pm.damping_min = 0.5
+	pm.damping_max = 1.0
+	pm.angle_min = -25.0
+	pm.angle_max = 25.0
+	pm.scale_min = 0.55
+	pm.scale_max = 1.0
+	pm.scale_curve = curve([Vector2(0, 0.55), Vector2(0.3, 1.0), Vector2(1, 0.05)])
+	pm.color_ramp = ramp([
+		[0.0, Color(1.4, 0.7, 0.2, 0.0)],
+		[0.08, Color(1.4, 0.62, 0.16, 0.85)],
+		[0.45, Color(1.05, 0.3, 0.05, 0.7)],
+		[0.8, Color(0.5, 0.09, 0.01, 0.35)],
+		[1.0, Color(0.15, 0.03, 0.0, 0.0)],
+	])
+	var m := particle_material(false)   # mixed: tongues overlap without summing to white
+	return make_particles(amount, 0.85, pm, 0.5 * scale, m, 3.0 * scale)

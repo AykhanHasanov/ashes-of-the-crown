@@ -5,6 +5,7 @@ extends SceneTree
 ## mesh without node transforms, so it would draw 5 mm grass. Run before gen_world.
 ## Usage: godot --headless --path . -s tools/bake_foliage.gd
 
+const MaterialPolicy := preload("res://scripts/core/material_policy.gd")
 const OUT := "res://assets/foliage/"
 
 
@@ -67,6 +68,7 @@ func _save(id: String, mesh: ArrayMesh) -> void:
 	var root := MeshInstance3D.new()
 	root.name = id
 	root.mesh = mesh
+	MaterialPolicy.apply(root)   # the project's material rule: non-metals are matte
 	var scene := PackedScene.new()
 	scene.pack(root)
 	var path: String = OUT + id + ".scn"

@@ -234,16 +234,17 @@ func apply_quality(_high: bool) -> void:
 	light.light_angular_distance = float(_look["sun"]["angular_distance_high"]) if high else 0.0   # contact-hardening soft shadows
 	env.ssao_enabled = p["ssao"]
 	env.ssil_enabled = p["ssil"]
-	env.sdfgi_enabled = p["sdfgi"]
+	var gi: bool = Settings.global_illumination   # experimental, its own setting (any preset)
+	env.sdfgi_enabled = gi
 	env.sdfgi_read_sky_light = bool(_look["sdfgi"]["read_sky_light"])
-	sky_fill.visible = p["sdfgi"] and not env.sdfgi_read_sky_light
+	sky_fill.visible = gi and float(_look["sdfgi"]["sky_fill"]) > 0.0
 	sky_top.visible = sky_fill.visible
 	env.glow_enabled = p["glow"]
 	env.volumetric_fog_enabled = p["volumetric"]
 	if p["volumetric"]:
 		var vf: Dictionary = _look["volumetric"]
 		env.volumetric_fog_length = float(vf["length_high" if high else "length_medium"])
-		env.volumetric_fog_gi_inject = 0.5 if high else 0.0
+		env.volumetric_fog_gi_inject = 0.5 if gi else 0.0
 		var size: Array = vf["size_high" if high else "size_medium"]
 		RenderingServer.environment_set_volumetric_fog_volume_size(int(size[0]), int(size[1]))
 

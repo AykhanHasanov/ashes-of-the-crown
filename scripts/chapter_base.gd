@@ -15,6 +15,7 @@ const PauseMenu := preload("res://scripts/ui/pause_menu.gd")
 const Journal := preload("res://scripts/ui/journal.gd")
 const KozcuJournal := preload("res://scripts/ui/kozcu_journal.gd")
 const StoryDirector := preload("res://scripts/story/story_director.gd")
+const Benchmark := preload("res://scripts/systems/benchmark.gd")
 const RadialMenu := preload("res://scripts/ui/radial_menu.gd")
 const AshOffer := preload("res://scripts/ui/ash_offer.gd")
 const Balance := preload("res://scripts/systems/balance.gd")
@@ -109,6 +110,8 @@ func _ready() -> void:
 		hud.set_hint(player.control_hint())
 		Settings.changed.connect(func(): hud.set_hint(player.control_hint()))
 	_setup()
+	if Settings.needs_benchmark() and player.has_method("control_hint"):
+		add_child(Benchmark.new())   # first time in a V3 scene: pick the graphics preset from the frame rate
 	if player.has_method("control_hint"):
 		story = StoryDirector.new()
 		story.mode = self

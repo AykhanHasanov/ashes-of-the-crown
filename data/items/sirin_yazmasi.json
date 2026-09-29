@@ -1,13 +1,18 @@
 {
 	"id": "sirin_yazmasi",
 	"name_key": "ITEM_SIRIN_YAZMASI_NAME",
-	"_about": "Şirin's red embroidered headscarf, at Eşref's cold hearth (STORY_SLICE S8). Placeholder look.",
+	"_about": "Şirin's red embroidered headscarf, at Eşref's cold hearth (STORY_SLICE S8). Placeholder look: the scarf rolled up like a scroll, with embroidered bands.",
 	"look": {
-		"shape": "cloth",
+		"shape": "rolled_cloth",
 		"color": [
 			0.62,
 			0.08,
 			0.07
+		],
+		"band_color": [
+			0.85,
+			0.62,
+			0.22
 		]
 	}
 }

@@ -10,20 +10,24 @@ extends Node3D
 const Effects := preload("res://scripts/world/effects.gd")
 const STONE := "res://assets/foliage/rock_small.scn"
 const STONE_SIZE := 0.34          # metres across each ring stone
-const LIGHT_ENERGY := 2.6
 
 var lit := true
 var radius := 0.75
 var with_ring := true
 var with_bed := true
 var with_light := true
+var light_energy := 2.2
+var light_range := 7.0
 var light: OmniLight3D            # the flickering fire light (lit, with_light)
 var _t := 0.0
 var _seed := 0.0
 
 
-func setup(is_lit: bool, ring_radius := 0.75, ring := true, bed := true, own_light := true) -> Node3D:
+func setup(is_lit: bool, ring_radius := 0.75, ring := true, bed := true, own_light := true,
+		energy := 2.2, light_reach := 7.0) -> Node3D:
 	lit = is_lit
+	light_energy = energy
+	light_range = light_reach
 	radius = ring_radius
 	with_ring = ring
 	with_bed = bed
@@ -39,7 +43,7 @@ func _ready() -> void:
 		_bed()
 	_logs()
 	if lit:
-		var flames := Effects.fire(radius * 1.2, 40)
+		var flames := Effects.hearth_flames(radius * 1.2, 40)
 		flames.name = "Flames"
 		flames.position.y = 0.15
 		add_child(flames)
@@ -51,8 +55,8 @@ func _ready() -> void:
 			light = OmniLight3D.new()
 			light.name = "FireLight"
 			light.light_color = Color(1.0, 0.52, 0.22)
-			light.light_energy = LIGHT_ENERGY
-			light.omni_range = 7.0
+			light.light_energy = light_energy
+			light.omni_range = light_range
 			light.omni_attenuation = 1.4
 			light.shadow_enabled = true
 			light.position.y = 0.7
@@ -69,7 +73,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_t += delta
 	var f := 0.82 + 0.1 * sin(_t * 9.3 + _seed) + 0.06 * sin(_t * 23.1 + _seed * 2.0) + randf() * 0.05
-	light.light_energy = LIGHT_ENERGY * f
+	light.light_energy = light_energy * f
 	light.position = Vector3(sin(_t * 3.1) * 0.05, 0.7 + sin(_t * 5.3) * 0.04, cos(_t * 2.7) * 0.05)
 
 
@@ -108,12 +112,12 @@ func _bed() -> void:
 	if lit:
 		var g := Gradient.new()
 		g.set_color(0, Color(0.05, 0.02, 0.01))
-		g.set_color(1, Color(1.0, 0.35, 0.05))
+		g.set_color(1, Color(0.9, 0.25, 0.03))
 		noise.color_ramp = g
 		m.albedo_color = Color(0.08, 0.05, 0.04)
 		m.emission_enabled = true
 		m.emission_texture = noise
-		m.emission_energy_multiplier = 2.2
+		m.emission_energy_multiplier = 1.2
 	else:
 		m.albedo_texture = noise
 		m.albedo_color = Color(0.42, 0.41, 0.4)   # pale, dead ash
@@ -130,7 +134,7 @@ func _logs() -> void:
 	if lit:
 		m.emission_enabled = true
 		m.emission = Color(0.9, 0.25, 0.04)
-		m.emission_energy_multiplier = 0.35   # glowing cracks in the charred wood
+		m.emission_energy_multiplier = 0.15   # glowing cracks in the charred wood
 	for i in 2:
 		var lg := MeshInstance3D.new()
 		var cyl := CylinderMesh.new()
