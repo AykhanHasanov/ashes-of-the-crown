@@ -241,8 +241,8 @@ func _names() -> void:
 	var rufet = spawner.body(&"rufet")
 	var blank := tr("NAME_FORGOTTEN")
 	# Known names: until Aras learns a name, labels show the epithet
-	_check("known names: at the start Aras knows only Rüfət's", WorldState.is_name_known(&"rufet")
-		and NpcRegistry.all().filter(func(d): return WorldState.is_name_known(d.id)).size() == 1)
+	_check("known names: at the start Aras knows only Rüfət's (and Kül Şahı by his title)",
+		NpcRegistry.all().filter(func(d): return WorldState.is_name_known(d.id)).map(func(d): return d.id) == [&"kul_sahi", &"rufet"])
 	_check("an unknown name shows the epithet, capitalised the Turkish way", Names.npc(&"sona") == "Dokumacı" and Names.npc(&"ibrahim") == "Saray âlimi")
 	host.dialogue.start({"start": {"speaker_id": "sona", "text": "...", "do": ["reveal_name:sona"], "next": "b"},
 		"b": {"speaker_id": "sona", "text": "...", "end": true}})

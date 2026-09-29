@@ -18,6 +18,8 @@ const PROTAGONIST_KEY := "PROTAGONIST_NAME"
 ## decides; see data/memories/own_name.tres).
 const PROTAGONIST_MEMORY := &"own_name"
 const TOKEN := "{PROTAGONIST}"
+## {NPC:<id>} in text: an NPC's name through npc() — known-name and burned-name rules apply.
+const NPC_TOKEN := "{NPC:"
 
 
 ## A name for display: tr(name_key), or the blank placeholder if `memory_id` is burned.
@@ -86,12 +88,47 @@ static func ignores_burned(speaker: StringName) -> bool:
 ## Replaces {PROTAGONIST} in text spoken by `speaker` (an NPC id; empty for the protagonist,
 ## narration and UI). Blank once the name burned, unless the speaker ignores burned names.
 static func fill(text: String, speaker: StringName = &"") -> String:
+	if text.contains(NPC_TOKEN):
+		text = _fill_npcs(text)
 	if not text.contains(TOKEN):
 		return text
 	var called := what_speaker_calls_him(speaker)
 	if called != "":
 		return text.replace(TOKEN, called)
 	return text.replace(TOKEN, protagonist_known() if ignores_burned(speaker) else protagonist())
+
+
+static var _npc_re: RegEx
+
+
+static func _fill_npcs(text: String) -> String:
+	if _npc_re == null:
+		_npc_re = RegEx.create_from_string("\\{NPC:([a-z_]+)\\}")
+	var out := text
+	for m in _npc_re.search_all(text):
+		out = out.replace(m.get_string(0), npc(StringName(m.get_string(1))))
+	return out
+
+
+## Whether Aras himself knows his name (he wakes without it; the story tells him — [TBD:
+## Rüfət]). A world flag set by the dialogue action "reveal_name:protagonist".
+static func protagonist_self_known() -> bool:
+	return WorldState.has_flag(&"protagonist_name_known")
+
+
+## His name on the HUD: the blank until he knows it, and once it is burned.
+static func protagonist_label() -> String:
+	return protagonist() if protagonist_self_known() else TranslationServer.translate("NAME_FORGOTTEN")
+
+
+## What Aras can say when asked his name: the name; "Bilmiyorum..." while he does not know
+## it; the blank once it is burned.
+static func protagonist_answer() -> String:
+	if WorldState.has_burned(PROTAGONIST_MEMORY):
+		return TranslationServer.translate("NAME_FORGOTTEN")
+	if not protagonist_self_known():
+		return TranslationServer.translate("HUB_NAME_UNKNOWN_ANSWER")
+	return protagonist()
 
 
 ## Another name `speaker` uses for the protagonist right now (NpcDefinition.

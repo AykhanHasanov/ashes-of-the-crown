@@ -719,4 +719,7 @@ func apply(action: String) -> void:
 	if action.get_slice(":", 0) == "flag":
 		set_flag(StringName(action.get_slice(":", 1)))
 	elif action.get_slice(":", 0) == "reveal_name":
-		reveal_name(StringName(action.get_slice(":", 1)))
+		if action.get_slice(":", 1) == "protagonist":
+			set_flag(&"protagonist_name_known")   # Aras learns his own name
+		else:
+			reveal_name(StringName(action.get_slice(":", 1)))

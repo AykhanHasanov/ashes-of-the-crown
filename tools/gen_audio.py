@@ -720,9 +720,26 @@ def sfx_door_hush():
     return fade(out, 0.2, 0.4)
 
 
+def loop_lament():
+    """PLACEHOLDER ağıt: an old woman's lament, hummed — a slow falling line in Shur on a
+    bowed, voice-like tone, with long breaths between phrases. Loops (~14 s)."""
+    phrases = [[(4, 1.2), (3, 0.8), (2, 1.6), (1, 1.0), (0, 2.2)],
+               [(5, 1.0), (4, 0.8), (3, 1.2), (2, 0.8), (1, 1.0), (0, 2.6)]]
+    total = 14.5
+    out = silence(total)
+    t = 0.3
+    for ph in phrases:
+        for deg, dur in ph:
+            add(out, kamancha(shur(deg, base=D3 * 2.0), dur + 0.25, gain=0.55), t, 1.0)
+            t += dur
+        t += 0.9   # a breath
+    return reverb(fade(out, 0.2, 0.6), mix=0.35, size=1.3)
+
+
 def _save_hub():
     save("door_knock", sfx_knock(), peak=0.8)
     save("door_hush", sfx_door_hush(), peak=0.4)
+    save("lament_loop", loop_lament(), peak=0.6)
 
 
 def _save_world():

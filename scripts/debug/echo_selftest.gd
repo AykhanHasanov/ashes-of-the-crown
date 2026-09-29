@@ -165,7 +165,10 @@ func _blank_name() -> void:
 	WorldState.new_game()
 	var host = get_tree().current_scene
 	_check("the name is Aras via PROTAGONIST_NAME", Names.protagonist() == "Aras" and tr("PROTAGONIST_NAME") == "Aras")
-	_check("the HUD shows it", host.hud._name_label.text == "ARAS")
+	_check("he wakes not knowing it: the HUD shows the blank", host.hud._name_label.text == tr("NAME_FORGOTTEN").to_upper())
+	WorldState.apply("reveal_name:protagonist")   # [TBD: Rüfət tells him]
+	await _frames(2)
+	_check("once he learns it, the HUD shows it", host.hud._name_label.text == "ARAS")
 	WorldState.burn_memory(Names.PROTAGONIST_MEMORY)
 	await _frames(2)
 	var blank := tr("NAME_FORGOTTEN")

@@ -123,6 +123,18 @@ static func door_open(door_id: String) -> bool:
 	return is_lived_in(p["id"]) or (p["workers"] as Array).any(func(w): return is_home(w))
 
 
+## How a room looks (hub growth, placeholder visuals): "dark" — nobody lives there now (not
+## brought in yet, or dead); "lit" — someone is home; "melted" — someone home whose grief
+## is resolved: the ash-snow round the door has melted.
+static func room_state(place_id: String) -> String:
+	if not is_lived_in(place_id):
+		return "dark"
+	for r in residents_of(place_id):
+		if r != PROTAGONIST and is_home(r) and WorldState.is_grief_resolved(StringName(r)):
+			return "melted"
+	return "lit"
+
+
 ## A hub service ("ash_upgrades", "shop", "training") is open when its NPC lives here.
 ## Placeholder hook: the services themselves come later.
 static func service_available(service: String) -> bool:

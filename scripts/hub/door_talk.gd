@@ -111,9 +111,10 @@ func knock(door) -> String:
 	var tree := {
 		"line": {"speaker_id": String(npc), "text_key": _pick(npc, "night"), "end": true},
 		"refuse": {"speaker_id": String(npc), "text_key": _data["refusal_key"], "end": true, "event": "refused"},
+		"unknown": {"speaker_id": String(npc), "text_key": "HUB_NAME_UNKNOWN_RESPONSE", "end": true},
 	}
 	if _setting(npc, "challenge"):
-		tree["start"] = {"type": "name_challenge", "speaker_id": String(npc), "text_key": _data["challenge_key"], "pass": "line", "fail": "refuse"}
+		tree["start"] = {"type": "name_challenge", "speaker_id": String(npc), "text_key": _data["challenge_key"], "pass": "line", "fail": "refuse", "unknown": "unknown"}
 	else:
 		tree["start"] = tree["line"]
 	dialogue.start(tree, "start", {"door_mode": true})
@@ -193,6 +194,7 @@ func _on_finished(event: String) -> void:
 		door_camera = null
 		mode.rig.camera.make_current()
 		level.set_door_scene(null)
+		mode.hud.visible = true
 	finished.emit()
 
 
@@ -212,6 +214,7 @@ func _door_camera(door) -> void:
 	door_camera.look_at(xf.origin + Vector3(0, 0.85, 0))
 	door_camera.make_current()
 	level.set_door_scene(door)
+	mode.hud.visible = false   # only the door, the light and the words
 
 
 func _silence(door) -> void:

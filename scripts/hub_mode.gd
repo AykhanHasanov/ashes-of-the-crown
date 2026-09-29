@@ -106,6 +106,7 @@ func _begin(mode: String) -> void:
 	player.wake()
 	npcs.queue_refresh()
 	_on_phase(WorldState.get_phase())
+	EventBus.npc_died.connect(func(_id, _c): _refresh_lament())
 	hud.title_card(tr("HUB_TITLE"), "", 2.0)
 	_demo_setup()
 
@@ -145,6 +146,12 @@ func _npc_spot(npc_id: StringName, location_id: String) -> Variant:
 		return null
 	if WorldState.get_phase() == &"night" and not _night_guests.has(npc_id):
 		return null
+	var mourned := HubNights.mourned()
+	if npc_id == &"peri_nene" and mourned != &"":
+		# the morning after a door death she sings at that door
+		var d = level.doors.get(HubData.place(HubData.room_of(String(mourned))).get("door", ""))
+		if d != null:
+			return d.global_position + d.global_basis.z * 1.6 + d.global_basis.x * 0.6
 	var place := HubData.day_place_of(String(npc_id))   # a workplace (smithy, bakery) or their room
 	return level.stand_point(place) if place != "" else null
 
@@ -152,6 +159,7 @@ func _npc_spot(npc_id: StringName, location_id: String) -> Variant:
 ## Night falls: warnings, and the shades come (roamers, the lost ones at warned doors,
 ## the small one at Aras's door). Any other phase: they are gone.
 func _on_phase(phase: StringName) -> void:
+	_refresh_lament()
 	for s in shades:
 		if is_instance_valid(s):
 			s.queue_free()
@@ -171,6 +179,16 @@ func _on_phase(phase: StringName) -> void:
 				_add_shade(HubShade.Kind.LOST, _lost_look(id), cfg, door.global_position + door.global_basis.z * 0.9, door)
 	var own = level.doors["door_protagonist"]
 	_add_shade(HubShade.Kind.NARIN, NpcRegistry.get_def(&"narin").look_id, cfg, own.global_position + own.global_basis.z * 0.9, own)
+
+
+## Peri Nene's lament at the mourned door, the morning after a door death (while she lives
+## here). Heard on entering the hub; nothing on screen.
+func _refresh_lament() -> void:
+	var mourned := HubNights.mourned()
+	var singer := HubData.is_home("peri_nene")
+	var d = level.doors.get(HubData.place(HubData.room_of(String(mourned))).get("door", "")) if mourned != &"" else null
+	level.set_lament(d if singer else null)
+	npcs.queue_refresh()
 
 
 func _lost_look(id: StringName) -> String:
@@ -294,6 +312,7 @@ func _demo_setup() -> void:
 			get_tree().create_timer(1.5).timeout.connect(func(): HubTravel.leave(get_tree()))
 		"hub_door_talk", "hub_door_burned":
 			# Night: knock on Sona's door and answer who is there (burned: the name is gone)
+			WorldState.set_flag(&"protagonist_name_known")
 			if Settings.demo == "hub_door_burned":
 				WorldState.burn_memory(&"own_name", &"echo")
 			WorldState.set_time_of_day(22.0)

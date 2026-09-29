@@ -13,7 +13,7 @@ const LEAF := "res://assets/village_mk/Door_1_Round.gltf"
 const OPEN_ANGLE := 100.0
 const WIDTH := 1.1
 const LINE_H := 0.012         # the gap under the door: a thin line of light, not a slot
-const STRIP_ENERGY := 0.8
+const STRIP_ENERGY := 1.6
 const AJAR_ANGLE := 22.0
 
 var door_id: StringName
@@ -28,7 +28,7 @@ var _hinge: Node3D
 var _blocker: CollisionShape3D
 var _tween: Tween
 var _strip: MeshInstance3D
-var _strip_light: OmniLight3D
+var _strip_light: SpotLight3D
 var _shadow: MeshInstance3D
 var _shadow_tween: Tween
 var _glow: MeshInstance3D
@@ -94,13 +94,17 @@ func _build_strip() -> void:
 	_glow.rotation.x = -PI * 0.5
 	_glow.position = Vector3(0, 0.024, 0.066 + 0.8)
 	add_child(_glow)
-	_strip_light = OmniLight3D.new()
+	# From under the door, out and down: it lights the floor in front; the door's own face,
+	# behind the light, stays dark but for the underglow of the line at its foot
+	_strip_light = SpotLight3D.new()
 	_strip_light.light_color = Color(1.0, 0.55, 0.22)
 	_strip_light.light_energy = STRIP_ENERGY
-	_strip_light.omni_range = 1.5
-	_strip_light.omni_attenuation = 2.0
-	_strip_light.position = Vector3(0, 0.03, 0.14)   # from under the door: it lights the floor, not the wall
+	_strip_light.spot_range = 1.8
+	_strip_light.spot_angle = 75.0
+	_strip_light.spot_attenuation = 1.5
+	_strip_light.position = Vector3(0, 0.05, 0.1)
 	add_child(_strip_light)
+	_strip_light.rotation = Vector3(deg_to_rad(-26.0), PI, 0)   # faces +Z (away from the door), tilted down
 	_shadow = MeshInstance3D.new()
 	_shadow.name = "StripShadow"
 	var sq := QuadMesh.new()
@@ -179,7 +183,10 @@ func hold_open(on: bool) -> void:
 
 ## Someone inside is speaking: their shadow moves back and forth across the light.
 func set_speaking(on: bool) -> void:
+	if on and speaking and _shadow_tween != null:
+		return   # already moving
 	speaking = on
+	_shadow.position.x = -WIDTH * 0.35
 	if _shadow_tween:
 		_shadow_tween.kill()
 		_shadow_tween = null

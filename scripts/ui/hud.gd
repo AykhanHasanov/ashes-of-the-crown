@@ -65,7 +65,7 @@ func _ready() -> void:
 	vig.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	# Health
-	_name_label = _label(Names.protagonist().to_upper(), 18, GOLD)
+	_name_label = _label(Names.protagonist_label().to_upper(), 18, GOLD)
 	_place(_name_label, Vector4(0, 0, 0, 0), Vector4(26, 16, 300, 40))
 	var back := ColorRect.new()
 	back.color = Color(0.05, 0.03, 0.03, 0.85)
@@ -190,6 +190,7 @@ func _ready() -> void:
 
 	EventBus.memory_burned.connect(_on_memory_burned)
 	EventBus.state_replaced.connect(_refresh_memories)
+	EventBus.flag_changed.connect(func(_k, _o, _n): _refresh_memories())
 	Fx.notified.connect(show_whisper)
 	_refresh_memories()
 
@@ -432,7 +433,7 @@ func _on_memory_burned(id: StringName) -> void:
 
 func _refresh_memories() -> void:
 	if _name_label:
-		_name_label.text = Names.protagonist().to_upper()   # blank once the name memory burned
+		_name_label.text = Names.protagonist_label().to_upper()   # blank until he knows it, and once it burned
 	_embers.queue_redraw()
 
 

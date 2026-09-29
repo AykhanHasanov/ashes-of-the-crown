@@ -13,6 +13,7 @@ extends RefCounted
 const PATH := "res://data/hub/night_events.json"
 const WARNED := &"door_warned_day"      # NPC flag: the day of the warning night
 const CAUSE := "door"
+const MOURNED := &"door_death_morning"  # NPC flag: the day whose morning found the door ajar
 
 static var _data: Dictionary = {}
 
@@ -52,9 +53,21 @@ static func resolve_morning() -> Array:
 		if not is_warned(id) or WorldState.get_npc_location(id) != WorldState.SON_OCAQ:
 			continue
 		if int(WorldState.get_npc_flag(id, WARNED, -1)) < WorldState.get_day_count() and WorldState.check(e["death_if"]):
+			WorldState.set_npc_flag(id, MOURNED, WorldState.get_day_count() + 1)   # the morning to come
 			WorldState.kill_npc(id, CAUSE)
 			died.append(id)
 	return died
+
+
+## The morning after a door death (that whole day, until night): the NPC whose door stands
+## ajar and is mourned — Peri Nene sings there. &"" otherwise.
+static func mourned() -> StringName:
+	if WorldState.get_phase() == &"night":
+		return &""
+	for id in door_dead():
+		if int(WorldState.get_npc_flag(id, MOURNED, -1)) == WorldState.get_day_count():
+			return id
+	return &""
 
 
 ## Who died at their door (the morning's aftermath): NPC ids.

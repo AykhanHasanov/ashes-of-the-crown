@@ -244,7 +244,9 @@ Permanent death risk. Epithets are given in their in-game Turkish form
 - **protagonist** — **Aras**, *Közcü* — the King's son, crown prince and Közcü of Ulu
   Ocaq (by Ateşan tradition the heir keeps the hearth until he is crowned). Complicit,
   not a villain: he helped reverse the hearth for Narin, then burned everything to undo it.
-  Wakes nameless. Name shown via `PROTAGONIST_NAME`, linked to `own_name`.
+  Wakes nameless: he does not know his own name at the start; asked who he is, he can only
+  say "Bilmiyorum..." until the story tells him [TBD: Rüfət]. Name shown via
+  `PROTAGONIST_NAME`, linked to `own_name` (burned: the blank, he cannot say it at all).
   Marketing title: **Közcü** (EN: *The Emberbearer*).
 
 ### Core cast
@@ -294,7 +296,8 @@ Permanent death risk. Epithets are given in their in-game Turkish form
   memory count as BURNED for Kül Aras?]. **Lost one:** her husband, the caravan master
   [TBD: name]. **Samir's shade never comes to her door** — he is alive — and she
   notices (placeholder line hook).
-- **kul_sahi** — **Kül Şahı**, *Ateşan'ın şahı* — **the King, Aras's father.** He gave his
+- **kul_sahi** — **Kül Şahı**, *Ateşan'ın şahı* — **the King, Aras's father.** Known to all by
+  this title; his personal name is [TBD] and is not exposed anywhere. He gave his
   body to the reversed hearth; people now call him Kül Şahı. The only antagonist.
   `npc_kind: voice_only`, no body. **Never let go.** Kept every memory anyone burned,
   including Aras's. Has a real argument:
@@ -434,7 +437,8 @@ Rüfət: story-only [TBD].
 
 - Cold open (short).
 - Valley wake-up near Geçit Ocağı, first fight, Rüfət joins.
-- Son Ocaq with **Sona** and **one** core resident [TBD: Eşref or Sabir], plus
+- Son Ocaq with **Sona** and **one** core resident — **Eşref** (rescued in the valley,
+  brought to his room; his grief arc and the door-death risk are the slice's test), plus
   **Pəri Nənə** (night go-between).
 - Night door mechanic, including one knock by the small shade.
 - **Two echoes** (one easy to burn, one hard), permanent-power burning via İbrahim
@@ -463,6 +467,14 @@ Rüfət: story-only [TBD].
 
 ## 14. Changelog
 
+- **2026-09-29 — known names; the slice resident** (owner)
+  - Aras knows a person's name only once he learns it; until then they are their epithet
+    ("Dokumacı"). Names inside lines are written {NPC:<id>} so the known/burned rules apply.
+  - Aras does not know his own name at the start ("Bilmiyorum..." at a door).
+  - Kül Şahı is known by his title; the King's personal name is [TBD], never shown.
+  - The vertical slice resident is **Eşref** (§12).
+  - The morning after a door death, Pəri Nənə sings a lament at that door (the sound leads
+    the player there; no UI).
 - **2026-09-29 — Son Ocaq and the lost ones** (owner)
   - Son Ocaq's residents live in caravanserai **rooms opening onto the courtyard** behind
     an arched gallery; every door is seen from the hearth. Kemal and Gülçin have a room

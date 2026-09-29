@@ -39,6 +39,7 @@ var hearth_pos := Vector3(0, 0, -0.8)   # a little north of centre: the gate sid
 var hearth_radius := 1.7
 var gate_pos := Vector3(0, 0, SOUTH_Z + ROOM_DEPTH - 0.4)
 var doors: Dictionary = {}           # door id -> Door
+var growth: Dictionary = {}          # place id -> {window, snow}: hub growth visuals
 var fronts: Dictionary = {}          # place id -> {door: Transform3D, window: Transform3D}
 var hearth_fire: Node3D
 var hearth_light: OmniLight3D
@@ -49,6 +50,11 @@ var _brick: StandardMaterial3D
 var _stone: StandardMaterial3D
 var _dark: StandardMaterial3D
 var _ash: StandardMaterial3D
+var _step_mat: StandardMaterial3D
+var _snow: StandardMaterial3D
+var _window_lit: StandardMaterial3D
+var lament: AudioStreamPlayer3D
+var _door_scene := false
 var _cache := {}
 
 
@@ -69,6 +75,20 @@ func build() -> void:
 	refresh_aftermath()
 	EventBus.npc_died.connect(func(_id, _c): refresh_aftermath())
 	EventBus.state_replaced.connect(refresh_aftermath)
+	lament = AudioStreamPlayer3D.new()
+	lament.name = "Lament"
+	lament.stream = load("res://assets/audio/lament_loop.wav")
+	lament.bus = "SFX"
+	lament.unit_size = 7.0
+	lament.max_distance = 60.0
+	lament.finished.connect(_on_lament_finished)
+	add_child(lament)
+	refresh_growth()
+	EventBus.npc_changed.connect(func(_id): refresh_growth())
+	EventBus.npc_moved.connect(func(_id, _a, _b): refresh_growth())
+	EventBus.npc_died.connect(func(_id, _c): refresh_growth())
+	EventBus.state_replaced.connect(refresh_growth)
+	EventBus.time_of_day_changed.connect(func(_p): refresh_growth())
 	var ash := Effects.ash_fall(Vector3(16, 6, 16), 60)
 	ash.position = Vector3(0, 8, 0)
 	add_child(ash)
@@ -96,6 +116,8 @@ func set_door_scene(door) -> void:
 	for d in doors.values():
 		d.set_strip_hidden(on and d != door)
 		d.set_key_light(on and d == door)
+	_door_scene = on
+	refresh_growth()   # lit windows go dark for the scene
 
 
 ## After a door death: ash on the threshold and a trail of ash footprints from the gate to
@@ -135,13 +157,34 @@ func refresh_aftermath() -> void:
 			step.name = "Footprint%d" % i
 			step.set_meta("footprint", true)
 			var q := QuadMesh.new()
-			q.size = Vector2(0.12, 0.26)
-			q.material = _ash
+			q.size = Vector2(0.13, 0.3)
+			q.material = _step_mat
 			step.mesh = q
 			var at := from + dir * (float(i) / n) + side * (0.11 if i % 2 == 0 else -0.11)
 			step.position = Vector3(at.x, 0.03, at.z)
 			step.rotation = Vector3(-PI * 0.5, 0, -atan2(dir.x, dir.z))
 			root.add_child(step)
+
+
+## A bare footprint in ash, drawn once: a sole, a heel and five toes (white, alpha).
+static func footprint_texture() -> ImageTexture:
+	var w := 32
+	var h := 72
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	img.fill(Color(1, 1, 1, 0))
+	var blobs := [[Vector2(16, 44), Vector2(9, 16)], [Vector2(16, 62), Vector2(7, 8)], [Vector2(21, 22), Vector2(5, 5)],
+		[Vector2(14, 18), Vector2(3.5, 3.5)], [Vector2(9, 20), Vector2(3, 3)], [Vector2(26, 26), Vector2(3, 3)], [Vector2(5, 25), Vector2(2.5, 2.5)]]
+	for y in h:
+		for x in w:
+			var a := 0.0
+			for b in blobs:
+				var c: Vector2 = b[0]
+				var r: Vector2 = b[1]
+				var d := Vector2((x - c.x) / r.x, (y - c.y) / r.y).length()
+				a = maxf(a, clampf((1.0 - d) * 3.0, 0.0, 1.0))
+			if a > 0.0:
+				img.set_pixel(x, y, Color(1, 1, 1, a * 0.9))
+	return ImageTexture.create_from_image(img)
 
 
 func footprints(door_id: String) -> Array:
@@ -151,6 +194,56 @@ func footprints(door_id: String) -> Array:
 
 func footprint_count(door_id: String) -> int:
 	return footprints(door_id).size()
+
+
+## Hub growth from WorldState (placeholder visuals, data-driven): each room dark / lit (its
+## window glows) / melted (the ash-snow at its door gone); the hearth's flame grows with the
+## resolved core grief arcs (data/hub/son_ocaq.json hearth.stages).
+func refresh_growth() -> void:
+	if not is_inside_tree():
+		return
+	for id in growth:
+		var st := HubData.room_state(id)
+		growth[id]["window"].material_override = _window_lit if st != "dark" and not _door_scene else _dark
+		growth[id]["snow"].visible = st != "melted"
+	hearth_fire.scale = Vector3.ONE * HubData.hearth_scale()
+
+
+func room_state_shown(place_id: String) -> String:
+	if growth[place_id]["window"].material_override == _dark:
+		return "dark"
+	return "lit" if growth[place_id]["snow"].visible else "melted"
+
+
+## The lament on the morning after a door death: sung at that door (placeholder audio), so
+## the sound leads to it. No UI.
+func set_lament(door) -> void:
+	lament.set_meta("on", door != null)
+	if door == null:
+		lament.stop()
+		return
+	lament.global_position = door.global_position + door.global_basis.z * 1.2 + Vector3(0, 1.4, 0)
+	if not lament.playing:
+		lament.play()
+
+
+func _on_lament_finished() -> void:
+	if lament.get_meta("on", false):
+		lament.play()   # a loop while the mourning lasts
+
+
+## A soft round patch (alpha), for ash-snow on the ground.
+static func _soft_patch() -> GradientTexture2D:
+	var g := Gradient.new()
+	g.set_color(0, Color(1, 1, 1, 0.9))
+	g.set_color(1, Color(1, 1, 1, 0.0))
+	g.add_point(0.6, Color(1, 1, 1, 0.7))
+	var tex := GradientTexture2D.new()
+	tex.gradient = g
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.fill_from = Vector2(0.5, 0.5)
+	tex.fill_to = Vector2(0.5, 0.0)
+	return tex
 
 
 func apply_quality(high: bool) -> void:
@@ -207,6 +300,17 @@ func _room(p: Dictionary, xf: Transform3D) -> void:
 	var pane := _quad(root, Vector2(1.2, 1.1), Vector3(window_x, 1.7, -0.28), "Window")
 	inside.set_meta("place", p["id"])
 	pane.set_meta("place", p["id"])
+	# Ash-snow lying at the door; it melts when the grief of this room is resolved
+	var snow := MeshInstance3D.new()
+	snow.name = "AshSnow"
+	var sq := QuadMesh.new()
+	sq.size = Vector2(3.4, 2.0)
+	sq.material = _snow
+	snow.mesh = sq
+	snow.rotation.x = -PI * 0.5
+	snow.position = Vector3(0, 0.025, 1.2)
+	root.add_child(snow)
+	growth[p["id"]] = {"window": pane, "snow": snow}
 	var d = Door.new()
 	d.name = "Door_" + p["door"]
 	d.setup(StringName(p["door"]), p["id"])
@@ -483,8 +587,21 @@ func _materials() -> void:
 	_stone.uv1_triplanar = true
 	_stone.uv1_scale = Vector3(0.4, 0.4, 0.4)
 	_ash = StandardMaterial3D.new()
-	_ash.albedo_color = Color(0.2, 0.19, 0.18)
+	_ash.albedo_color = Color(0.82, 0.8, 0.77)   # ash is pale: it must read on the dark stone
 	_ash.roughness = 1.0
+	_step_mat = StandardMaterial3D.new()
+	_step_mat.albedo_texture = footprint_texture()
+	_step_mat.albedo_color = Color(0.86, 0.84, 0.8)
+	_step_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_step_mat.roughness = 1.0
+	_snow = StandardMaterial3D.new()
+	_snow.albedo_texture = _soft_patch()
+	_snow.albedo_color = Color(0.8, 0.79, 0.77)
+	_snow.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_snow.roughness = 1.0
+	_window_lit = StandardMaterial3D.new()
+	_window_lit.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_window_lit.albedo_color = Color(0.95, 0.6, 0.28)
 	_dark = StandardMaterial3D.new()
 	_dark.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_dark.albedo_color = Color(0.02, 0.018, 0.016)

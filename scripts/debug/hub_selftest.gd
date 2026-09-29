@@ -55,6 +55,8 @@ func _run() -> void:
 	await _scene()
 	await _door_talk()
 	await _nights()
+	await _names_in_lines()
+	await _growth()
 	await _travel()
 	_wipe()
 	print("HUB TESTS DONE, failures: ", _fails)
@@ -326,6 +328,21 @@ func _door_talk() -> void:
 	var talk = hub.door_talk
 	var dlg = hub.dialogue
 	hub.wait_until(21.0)
+	await _frames(3)
+	# He wakes without his name: "who is there?" — "Bilmiyorum..."
+	var first_door = lvl.doors["door_sona"]
+	hub.player.global_position = hub.door_front(first_door)
+	hub.knock(first_door)
+	await _typed(dlg)
+	_check("name unknown: the answer reads 'Bilmiyorum...' and can be chosen", dlg.choice_texts() == [tr("HUB_NAME_UNKNOWN_ANSWER")] and dlg.choice_enabled(0))
+	_check("door mode: the whole HUD is hidden (memory diamonds too)", not hub.hud.visible)
+	dlg.choose(0)
+	await _typed(dlg)
+	_check("... it leads to a placeholder response", dlg.node_id == "unknown" and dlg._node.get("text_key", "") == "HUB_NAME_UNKNOWN_RESPONSE")
+	dlg._advance()
+	await _frames(3)
+	_check("... and the HUD comes back after the door", hub.hud.visible)
+	WorldState.apply("reveal_name:protagonist")   # the story tells him [TBD: Rüfət]
 	await _frames(4)
 	var sona_door = lvl.doors["door_sona"]
 	_check("B: a warm light under an occupied door at night", sona_door.is_lit)
@@ -350,7 +367,11 @@ func _door_talk() -> void:
 	var cam: Camera3D = talk.door_camera
 	_check("door scene: the courtyard goes almost dark", lvl.day_night.mood_scale <= 0.1 and not lvl.hearth_light.visible and not lvl.far_light.visible)
 	var others_dark: bool = lvl.doors.values().all(func(d): return d == sona_door or d.strip_light_energy() == 0.0)
-	_check("... the only warm light is the strip under this door", others_dark and sona_door.strip_light_energy() > 0.0)
+	var windows_dark: bool = lvl.growth.values().all(func(g): return g["window"].material_override == lvl._dark)
+	_check("... the only warm light is the strip under this door (no lit windows either)", others_dark and windows_dark and sona_door.strip_light_energy() > 0.0)
+	var spot: Node3D = sona_door._strip_light
+	_check("... it shines out from under the door onto the floor, away from the door's face",
+		(-spot.global_basis.z).dot(sona_door.global_basis.z) > 0.6 and (-spot.global_basis.z).y < -0.2)
 	var vp: Vector2 = hub.get_viewport().get_visible_rect().size
 	var door_c: Vector2 = cam.unproject_position(sona_door.global_position + Vector3(0, 1.0, 0)) / vp
 	var sill: Vector2 = cam.unproject_position(sona_door.global_position + Vector3(0, 0.03, 0.1)) / vp
@@ -369,7 +390,7 @@ func _door_talk() -> void:
 	_check("F: Aras's own answer is not muffled", talk.last_bus.get("protagonist") == "Voice" and talk.bus_for(&"protagonist", true) == "Voice")
 	var x0: float = sona_door.shadow_x()
 	await _seconds(0.5)
-	_check("B: while she speaks, a shadow crosses the light", sona_door.speaking and absf(sona_door.shadow_x() - x0) > 0.05)
+	_check("B: while she speaks, a shadow crosses the light", sona_door.speaking and absf(sona_door.shadow_x() - x0) > 0.05, "speaking %s lit %s x %.2f→%.2f vis %s" % [sona_door.speaking, sona_door.is_lit, x0, sona_door.shadow_x(), sona_door._shadow.visible])
 	dlg.choose(0)
 	await _typed(dlg)
 	var night_key: String = dlg._node.get("text_key", "")
@@ -406,6 +427,7 @@ func _door_talk() -> void:
 	_check("C: an empty room is silent too", hub.knock(lvl.doors["door_sahbaz"]) == "silent")
 	# Conditional lines: Nermin and Sabir (his name back first)
 	WorldState.new_game()
+	WorldState.set_flag(&"protagonist_name_known")
 	hub.wait_until(21.0)
 	WorldState.rescue_npc(&"nermin")
 	WorldState.rescue_npc(&"sabir")
@@ -531,6 +553,14 @@ func _nights() -> void:
 	_check("B: the death night passes off-screen: npc_died, cause 'door'", not WorldState.is_npc_alive(&"esref") and died == [[&"esref", "door"]]
 		and WorldState.get_npc_death_cause(&"esref") == "door")
 	EventBus.npc_died.disconnect(on_died)
+	_check("morning: Peri Nene's lament sounds at that door (placeholder audio)", lvl.lament.playing
+		and lvl.lament.global_position.distance_to(esref_door.global_position) < 2.5)
+	await _frames(4)
+	var peri = hub.npcs.body(&"peri_nene")
+	_check("... she stands there, at the open door", peri != null and peri.global_position.distance_to(esref_door.global_position) < 2.5)
+	_check("... and nothing on screen says so", hub.hud.queued().is_empty() and hub.hud._whisper.modulate.a < 0.05)
+	_check("the ash reads pale on the stone; the footprints are footprint-shaped", lvl._ash.albedo_color.v > 0.7
+		and lvl._step_mat.albedo_texture.get_image().get_pixel(16, 44).a > 0.5 and lvl._step_mat.albedo_texture.get_image().get_pixel(1, 1).a < 0.1)
 	_check("B: morning: the door is ajar, ash on the threshold, footprints from the gate", esref_door.is_ajar and not esref_door.is_open
 		and lvl.footprint_count("door_esref") > 5 and lvl.get_node_or_null("Aftermath_door_esref") != null,
 		"ajar %s open %s steps %d" % [esref_door.is_ajar, esref_door.is_open, lvl.footprint_count("door_esref")])
@@ -539,6 +569,7 @@ func _nights() -> void:
 	hub.wait_until(21.0)
 	await _frames(3)
 	_check("B: that room's light never returns", not esref_door.is_lit and not lost.any(func(x): return is_instance_valid(x)))
+	_check("the lament ends with that day", not lvl.lament.playing)
 	SaveManager.save(1)
 	WorldState.new_game()
 	await _frames(3)
@@ -546,6 +577,75 @@ func _nights() -> void:
 	await _frames(4)
 	_check("E: the aftermath persists through save and load", esref_door.is_ajar and lvl.footprint_count("door_esref") > 5
 		and WorldState.get_npc_death_cause(&"esref") == "door")
+
+
+# --- Names inside lines; the protagonist's own name ------------------------------------------------
+
+func _names_in_lines() -> void:
+	WorldState.new_game()
+	var keys: Array = []
+	for l in FileAccess.get_file_as_string("res://localization/strings.csv").split("\n"):
+		var k := l.get_slice(",", 0)
+		if k.begins_with("HUB_") or (k.begins_with("NPC_") and k.ends_with("_LOST_ONE")):
+			keys.append(k)
+	var leaks := _raw_names(keys)
+	_check("{NPC:id}: no raw name of someone he does not know appears in any hub line", leaks.is_empty(), str(leaks))
+	for d in NpcRegistry.all():
+		WorldState.reveal_name(d.id)
+	var shown := Names.fill(tr("HUB_ESREF_NIGHT_1"))
+	_check("{NPC:id}: once known, the name shows in the line", shown.contains("Eşref"))
+	WorldState.burn_memory(&"rufet_face", &"echo")
+	WorldState.burn_memory(&"narin", &"echo")
+	_check("{NPC:id}: a burned name never shows", Names.fill("{NPC:rufet} / {NPC:narin}") == "%s / %s" % [tr("NAME_FORGOTTEN"), tr("NAME_FORGOTTEN")])
+	_check("Kül Şahı is known by his title", Names.npc(&"kul_sahi") == "Kül Şahı")
+	WorldState.new_game()
+	_check("the protagonist: unknown → 'Bilmiyorum...', known → Aras, burned → the blank", Names.protagonist_answer() == tr("HUB_NAME_UNKNOWN_ANSWER"))
+	WorldState.apply("reveal_name:protagonist")
+	var known_ok := Names.protagonist_answer() == "Aras"
+	WorldState.burn_memory(Names.PROTAGONIST_MEMORY, &"echo")
+	_check("... (all three states)", known_ok and Names.protagonist_answer() == tr("NAME_FORGOTTEN"))
+
+
+## Lines (keys) in which a raw NPC name shows although Aras does not know it (or it burned).
+func _raw_names(keys: Array) -> Array:
+	var leaks: Array = []
+	for d in NpcRegistry.all():
+		var raw := tr(d.name_key)
+		if WorldState.is_name_known(d.id) and not (d.name_memory_id != &"" and WorldState.has_burned(d.name_memory_id)):
+			continue
+		var re := RegEx.create_from_string("(?<![\\p{L}])" + raw + "(?![\\p{L}])")
+		for k in keys:
+			if re.search(Names.fill(tr(k))) != null:
+				leaks.append("%s in %s" % [raw, k])
+	return leaks
+
+
+# --- Rescue and growth (stage 5, slim) -------------------------------------------------------------
+
+func _growth() -> void:
+	WorldState.new_game()
+	WorldState.set_time_of_day(10.0)
+	var hub := await _go(HUB)
+	var lvl = hub.level
+	var door = lvl.doors["door_esref"]
+	_check("before the rescue Eşref's room is dark and shut", lvl.room_state_shown("room_esref") == "dark" and not door.is_open
+		and hub.npcs.body(&"esref") == null)
+	var scale0: float = lvl.hearth_fire.scale.x
+	WorldState.rescue_npc(&"esref")
+	await _frames(4)
+	var body = hub.npcs.body(&"esref")
+	_check("rescued: Eşref appears at his room, his door opens by day", body != null and body.global_position.distance_to(lvl.stand_point("room_esref")) < 0.5
+		and door.is_open and lvl.room_state_shown("room_esref") == "lit")
+	hub.wait_until(21.0)
+	await _frames(3)
+	_check("... and at night the light shows under his door", door.is_lit and not door.is_open)
+	hub.wait_until(7.0)
+	WorldState.resolve_grief(&"esref")
+	await _frames(3)
+	_check("growth: his grief resolved, the ash-snow at his door melts", lvl.room_state_shown("room_esref") == "melted"
+		and not lvl.growth["room_esref"]["snow"].visible and lvl.growth["room_sona"]["snow"].visible)
+	_check("growth: the hearth grows with the resolved core arcs (data)", lvl.hearth_fire.scale.x > scale0
+		and is_equal_approx(lvl.hearth_fire.scale.x, float(HubData.data()["hearth"]["stages"][1])))
 
 
 func _typed(dlg) -> void:

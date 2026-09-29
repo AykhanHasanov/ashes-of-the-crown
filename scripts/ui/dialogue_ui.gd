@@ -12,9 +12,9 @@ extends CanvasLayer
 ##                             {if, then, else} with a condition (check(): WorldState's, plus
 ##                             the conversation's own, e.g. "door_mode")
 ##   type "name_challenge"   — the speaker asks who is there (text_key); the only answer is the
-##                             protagonist's name as the UI resolves it. Once his name memory
-##                             is burned it shows as the blank and cannot be chosen: after a
-##                             moment the node goes to "fail" instead of "pass".
+##                             protagonist's name as he can say it (Names.protagonist_answer):
+##                             known → "pass"; not yet known → "Bilmiyorum..." → "unknown";
+##                             burned → the blank, cannot be chosen: after a moment "fail".
 ##   set                     — flag emitted through flag_set when the node is shown
 ##   do                      — [WorldState.apply() actions] run when a node is shown or a choice taken
 ##   end + event             — closes the dialogue and emits finished(event)
@@ -228,7 +228,9 @@ func _show(id: String) -> void:
 func _name_challenge(node: Dictionary) -> Dictionary:
 	var n := node.duplicate()
 	var burned := WorldState.has_burned(Names.PROTAGONIST_MEMORY)
-	n["choices"] = [{"text": Names.TOKEN, "next": node["pass"], "disabled": burned, "own": true}]
+	var known := Names.protagonist_self_known()
+	var next: String = node["pass"] if known else node.get("unknown", node["fail"])
+	n["choices"] = [{"text": Names.protagonist_answer(), "next": next, "disabled": burned, "own": true}]
 	if burned:
 		n["auto"] = {"after": CHALLENGE_WAIT, "next": node["fail"]}
 	return n
