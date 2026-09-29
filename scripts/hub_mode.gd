@@ -341,8 +341,8 @@ func _demo_setup() -> void:
 			var shot := Camera3D.new()
 			shot.fov = 62.0
 			add_child(shot)
-			shot.global_position = Vector3(1.6, 2.3, 4.6)
-			shot.look_at(door.global_position + Vector3(-1.2, 0.4, 0.4))
+			shot.global_position = Vector3(3.2, 2.1, 5.6)
+			shot.look_at(door.global_position + Vector3(-1.0, 0.2, 0.2))
 			shot.make_current()
 		"hub_shades":
 			WorldState.set_time_of_day(22.5)
