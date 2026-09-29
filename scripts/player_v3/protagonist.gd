@@ -1386,6 +1386,11 @@ func release_token(cost: int) -> void:
 	_tokens_used = maxi(_tokens_used - cost, 0)
 
 
+## The control hints for this controller (built from the live InputMap).
+func control_hint() -> String:
+	return preload("res://scripts/ui/control_hints.gd").protagonist()
+
+
 ## Where the protagonist is facing (enemies use it to flank).
 func facing() -> Vector3:
 	return _facing

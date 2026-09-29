@@ -45,6 +45,7 @@ func _ready() -> void:
 	_model.rotation.y = _yaw + PI
 	display_name = Names.npc(npc_id)
 	EventBus.memory_burned.connect(func(_id): display_name = Names.npc(npc_id))
+	EventBus.npc_changed.connect(_on_npc_changed)
 
 
 func _physics_process(delta: float) -> void:
@@ -60,3 +61,9 @@ func _physics_process(delta: float) -> void:
 		else:
 			_yaw = _home_yaw
 	_model.rotation.y = lerp_angle(_model.rotation.y, _yaw + PI, 1.0 - exp(-6.0 * delta))   # the model faces -Z
+
+
+## A revealed name shows at once.
+func _on_npc_changed(id: StringName) -> void:
+	if id == npc_id:
+		display_name = Names.npc(npc_id)

@@ -15,10 +15,11 @@ voice_profile = ""
 personality_notes = "Sona, dokumacı (weaver) — Aras's wife, Narin's mother. Remembers what Aras burned;
 asks through the door 'Do you remember Narin?'. Does not know Aras burned her.
 Death risk: Act III, Sona's night. New model needed. See STORY_BIBLE.md §7."
-home_location_id = ""
+home_location_id = "son_ocaq"
 companion = false
 ignores_burned_names = false
 npc_kind = "human"
 presence = ""
-tags = PackedStringArray()
+tags = PackedStringArray("core_grief")
 placeholder = true
+lost_one_npc = &"narin"

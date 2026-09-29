@@ -15,11 +15,14 @@ voice_profile = "npc_nermin"
 personality_notes = "Karvan xanımı / caravan mistress. Replaces V2 Anar (same hooded model, adapted).
 Grief stance: denial — counts the dead in her ledger so she never has to feel them.
 One name is missing: her brother Samir. Dry humour. Hub: merchant; buys KEPT memories.
+Lost one: her husband, the caravan master [TBD name]. Samir's shade never comes to her door (he is alive).
 See STORY_BIBLE.md §7."
 home_location_id = ""
 companion = false
 ignores_burned_names = false
 npc_kind = "human"
 presence = ""
-tags = PackedStringArray()
+tags = PackedStringArray("core_grief")
 placeholder = false
+lost_one_name_key = "NPC_NERMIN_LOST_ONE"
+lost_one_look_id = "lost_nermin"

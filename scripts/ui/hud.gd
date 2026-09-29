@@ -65,7 +65,7 @@ func _ready() -> void:
 	vig.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	# Health
-	_name_label = _label(Names.protagonist().to_upper(), 18, GOLD)
+	_name_label = _label(Names.protagonist_label().to_upper(), 18, GOLD)
 	_place(_name_label, Vector4(0, 0, 0, 0), Vector4(26, 16, 300, 40))
 	var back := ColorRect.new()
 	back.color = Color(0.05, 0.03, 0.03, 0.85)
@@ -190,6 +190,7 @@ func _ready() -> void:
 
 	EventBus.memory_burned.connect(_on_memory_burned)
 	EventBus.state_replaced.connect(_refresh_memories)
+	EventBus.flag_changed.connect(func(_k, _o, _n): _refresh_memories())
 	Fx.notified.connect(show_whisper)
 	_refresh_memories()
 
@@ -323,7 +324,54 @@ func track_boss(boss) -> void:
 	_boss_box.visible = true
 
 
+## While a conversation is open nothing else speaks over it: title cards, banners, burn
+## notices and whispers wait in a queue and come one at a time after it closes.
+var dialogue                      # DialogueUI (set by the mode)
+var _queue: Array = []            # [method name, args]
+var _flushing := false
+
+
+func _busy() -> bool:
+	return dialogue != null and is_instance_valid(dialogue) and dialogue.is_active()
+
+
+func queued() -> Array:
+	return _queue.map(func(q): return q[0])
+
+
+## A conversation begins: whatever is on screen (a title card still fading, a banner, a
+## whisper) gives way at once.
+func hide_transients() -> void:
+	_card.visible = false
+	for n in [_banner, _whisper]:
+		n.modulate.a = 0.0
+	for t in [_banner_tween, _whisper_tween]:
+		if t:
+			t.kill()
+
+
+## After the conversation: the waiting messages, one at a time.
+func flush_queue() -> void:
+	if _flushing:
+		return
+	_flushing = true
+	while not _queue.is_empty() and not _busy():
+		var item: Array = _queue.pop_front()
+		callv(item[0], item[1])
+		var wait := 3.4
+		match item[0]:
+			"show_whisper":
+				wait = 4.2
+			"title_card":
+				wait = float(item[1][2]) + 1.4
+		await get_tree().create_timer(wait, false).timeout
+	_flushing = false
+
+
 func banner(text: String) -> void:
+	if _busy():
+		_queue.append(["banner", [text]])
+		return
 	_banner.text = text
 	if _banner_tween:
 		_banner_tween.kill()
@@ -335,6 +383,9 @@ func banner(text: String) -> void:
 
 
 func show_whisper(text: String) -> void:
+	if _busy():
+		_queue.append(["show_whisper", [text]])
+		return
 	_whisper.text = text
 	if _whisper_tween:
 		_whisper_tween.kill()
@@ -347,6 +398,9 @@ func show_whisper(text: String) -> void:
 
 ## Black title card that fades out after `hold` seconds. Await it.
 func title_card(title: String, sub: String, hold: float) -> void:
+	if _busy():
+		_queue.append(["title_card", [title, sub, hold]])
+		return
 	_set_card(title, sub, "", 1.0)
 	_card.modulate.a = 1.0
 	await get_tree().create_timer(hold).timeout
@@ -379,7 +433,7 @@ func _on_memory_burned(id: StringName) -> void:
 
 func _refresh_memories() -> void:
 	if _name_label:
-		_name_label.text = Names.protagonist().to_upper()   # blank once the name memory burned
+		_name_label.text = Names.protagonist_label().to_upper()   # blank until he knows it, and once it burned
 	_embers.queue_redraw()
 
 

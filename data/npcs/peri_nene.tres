@@ -14,10 +14,11 @@ shield_path = ""
 voice_profile = ""
 personality_notes = "Blind lament singer (ağıtçı). Recognises shades by voice: the only one who can safely
 open a door at night; Aras's go-between. New model needed. See STORY_BIBLE.md §7."
-home_location_id = ""
+home_location_id = "son_ocaq"
 companion = false
 ignores_burned_names = false
 npc_kind = "human"
 presence = "hub"
 tags = PackedStringArray()
 placeholder = true
+allows_night_open = true

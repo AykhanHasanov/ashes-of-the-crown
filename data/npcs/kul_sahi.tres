@@ -23,3 +23,4 @@ npc_kind = "voice_only"
 presence = ""
 tags = PackedStringArray()
 placeholder = false
+name_known_at_start = true

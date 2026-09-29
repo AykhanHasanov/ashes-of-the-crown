@@ -16,6 +16,7 @@ extends Node
 ## Never writes while a debug --demo is running.
 
 const EchoDirector := preload("res://scripts/echoes/echo_director.gd")
+const NpcRegistry := preload("res://scripts/core/npc_registry.gd")
 const SLOTS := 3
 
 ## Folders are variables so the headless tests can use their own.
@@ -241,7 +242,11 @@ func _migrate_step(d: Dictionary, from: int) -> Dictionary:
 			return _rename_npcs(d, {"anar": "nermin"}, 4)   # Nərmin replaces Anar (STORY_BIBLE.md §7)
 		4:
 			return _rename_npcs(d, {"kamal": "kemal"}, 5)   # the Turkish form of the name
-		# 5: return _v5_to_v6(d)
+		5:
+			return _v5_to_v6(d)
+		6:
+			return _v6_to_v7(d)
+		# 7: return _v7_to_v8(d)
 	push_warning("SaveManager: no migration from save_version %d" % from)
 	return {}
 
@@ -308,6 +313,34 @@ func _v2_to_v3(d: Dictionary) -> Dictionary:
 				rec.erase(k)
 		rec["flags"] = flags
 	d["meta"]["save_version"] = 3
+	return d
+
+
+## v6: world.hub_stage is retired — the hub's growth is derived from resolved grief arcs
+## (grief_resolved NPC flags). Hub door overrides start empty.
+func _v5_to_v6(d: Dictionary) -> Dictionary:
+	var w: Dictionary = d.get("world", {}) if d.get("world") is Dictionary else {}
+	w.erase("hub_stage")
+	if not (w.get("doors") is Dictionary):
+		w["doors"] = {}
+	d["world"] = w
+	d["meta"]["save_version"] = 6
+	return d
+
+
+## v7: known names. NPCs Aras knows from the start (NpcDefinition.name_known_at_start)
+## get the name_known flag; everyone else is known by their epithet until the story
+## reveals the name.
+func _v6_to_v7(d: Dictionary) -> Dictionary:
+	var npcs: Dictionary = d.get("npcs", {}) if d.get("npcs") is Dictionary else {}
+	for def in NpcRegistry.all():
+		if def.name_known_at_start and npcs.get(String(def.id)) is Dictionary:
+			var rec: Dictionary = npcs[String(def.id)]
+			var flags: Dictionary = rec.get("flags", {}) if rec.get("flags") is Dictionary else {}
+			flags["name_known"] = true
+			rec["flags"] = flags
+	d["npcs"] = npcs
+	d["meta"]["save_version"] = 7
 	return d
 
 

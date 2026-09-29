@@ -701,6 +701,47 @@ def sfx_swim_stroke():
     return fade(out, 0.01, 0.05)
 
 
+def sfx_knock():
+    """A knuckle on an old wooden door: a short dull thump with a woody resonance."""
+    dur = 0.32
+    out = silence(dur)
+    add(out, shape(lowpass(noise(0.05), 900.0), 0.0005, 0.02), 0.0, 0.9)
+    add(out, shape(resonant(noise(0.2), 190.0, q=8.0), 0.0005, 0.07), 0.0, 1.0)
+    add(out, shape(tone(dur, 120.0, 95.0), 0.0005, 0.06), 0.0, 0.5)
+    return fade(out, 0.0005, 0.08)
+
+
+def sfx_door_hush():
+    """Silence behind a door: a held breath of room tone and a faint creak of wood."""
+    dur = 1.4
+    out = silence(dur)
+    add(out, shape(bandpass(noise(dur), 120.0, 700.0), 0.3, 0.6), 0.0, 0.25)
+    add(out, shape(resonant(noise(0.4), 430.0, q=14.0), 0.1, 0.25), 0.5, 0.18)
+    return fade(out, 0.2, 0.4)
+
+
+def loop_lament():
+    """PLACEHOLDER ağıt: an old woman's lament, hummed — a slow falling line in Shur on a
+    bowed, voice-like tone, with long breaths between phrases. Loops (~14 s)."""
+    phrases = [[(4, 1.2), (3, 0.8), (2, 1.6), (1, 1.0), (0, 2.2)],
+               [(5, 1.0), (4, 0.8), (3, 1.2), (2, 0.8), (1, 1.0), (0, 2.6)]]
+    total = 14.5
+    out = silence(total)
+    t = 0.3
+    for ph in phrases:
+        for deg, dur in ph:
+            add(out, kamancha(shur(deg, base=D3 * 2.0), dur + 0.25, gain=0.55), t, 1.0)
+            t += dur
+        t += 0.9   # a breath
+    return reverb(fade(out, 0.2, 0.6), mix=0.35, size=1.3)
+
+
+def _save_hub():
+    save("door_knock", sfx_knock(), peak=0.8)
+    save("door_hush", sfx_door_hush(), peak=0.4)
+    save("lament_loop", loop_lament(), peak=0.6)
+
+
 def _save_world():
     save("rain_loop", loop_rain(), peak=0.55)
     save("river_loop", loop_river(), peak=0.55)
@@ -733,7 +774,10 @@ def main():
             _save_combat()
         if "world" in only:
             _save_world()
+        if "hub" in only:
+            _save_hub()
         return
+    _save_hub()
     _save_combat()
     _save_world()
     for v in range(3):

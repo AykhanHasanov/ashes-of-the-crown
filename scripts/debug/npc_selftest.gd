@@ -119,7 +119,7 @@ func _state() -> void:
 	for id in PEOPLE:
 		var r := WorldState.get_npc(id)
 		all_ok = all_ok and r == {"alive": true, "location_id": NpcRegistry.get_def(id).home_location_id, "rescued": false,
-			"relationship": 0, "death_cause": "", "flags": {}}
+			"relationship": 0, "death_cause": "", "flags": {"name_known": true} if id == &"rufet" else {}}
 	_check("a new game has every NPC alive, at home, not rescued, relationship 0", all_ok)
 	_events.clear()
 	_check("move_npc", WorldState.move_npc(&"sabir", "kurkend") and WorldState.get_npc_location(&"sabir") == "kurkend"
@@ -190,6 +190,12 @@ func _save_and_migration() -> void:
 	var from_v4 := WorldState.normalize(SaveManager.migrate(JSON.parse_string(JSON.stringify(v4))))
 	_check("migration v4 → v5: 'kamal' becomes 'kemal'", not from_v4["npcs"].has("kamal") and from_v4["npcs"]["kemal"]["relationship"] == 2)
 	SaveManager.active_slot = 1
+	var v6 := {"meta": {"save_version": 6}, "player": {"stats": {}, "memories": {}}, "story": {}, "world": {}, "flags": {},
+		"npcs": {"rufet": {"alive": true, "location_id": "", "rescued": false, "relationship": 0, "death_cause": "", "flags": {}},
+			"sona": {"alive": true, "location_id": "son_ocaq", "rescued": false, "relationship": 0, "death_cause": "", "flags": {}}}}
+	var from_v6 := WorldState.normalize(SaveManager.migrate(JSON.parse_string(JSON.stringify(v6))))
+	_check("migration v6 → v7: Rüfət's name is known, the others' are not", from_v6["npcs"]["rufet"]["flags"].get("name_known") == true
+		and not from_v6["npcs"]["sona"]["flags"].has("name_known") and int(from_v6["meta"]["save_version"]) == WorldState.SAVE_VERSION)
 	var legacy := {"version": 4, "chapter": 1, "checkpoint": "", "flags": {}, "echoes_seen": [], "memory": {"burned": ["mother_name"]}, "world": {}}
 	var from_legacy := WorldState.normalize(SaveManager.migrate(legacy))
 	_check("the whole chain v0 → v3 still works", from_legacy["player"]["burn_context"] == {"mother_name": "combat"}
@@ -234,10 +240,27 @@ func _spawning() -> void:
 func _names() -> void:
 	var rufet = spawner.body(&"rufet")
 	var blank := tr("NAME_FORGOTTEN")
+	# Known names: until Aras learns a name, labels show the epithet
+	_check("known names: at the start Aras knows only Rüfət's (and Kül Şahı by his title)",
+		NpcRegistry.all().filter(func(d): return WorldState.is_name_known(d.id)).map(func(d): return d.id) == [&"kul_sahi", &"rufet"])
+	_check("an unknown name shows the epithet, capitalised the Turkish way", Names.npc(&"sona") == "Dokumacı" and Names.npc(&"ibrahim") == "Saray âlimi")
+	host.dialogue.start({"start": {"speaker_id": "sona", "text": "...", "do": ["reveal_name:sona"], "next": "b"},
+		"b": {"speaker_id": "sona", "text": "...", "end": true}})
+	await _frames(2)
+	_check("the dialogue action reveal_name makes it known", WorldState.is_name_known(&"sona") and Names.npc(&"sona") == "Sona")
+	host.dialogue._advance()
+	await _frames(2)
+	_check("... and the dialogue label follows", host.dialogue._name.text == "Sona")
+	host.dialogue._advance()
+	WorldState.burn_memory(&"narin", &"echo")
+	_check("burning cannot take a name he never knew: the epithet stays", Names.npc(&"narin") == "Kapıdaki gölge")
+	WorldState.reveal_name(&"narin")
+	_check("... once known, a burned name is the blank", Names.npc(&"narin") == blank)
 	_check("NPC names come from their keys", Names.npc(&"rufet") == "Rüfet" and rufet.display_name == "Rüfet")
 	WorldState.burn_memory(&"rufet_face")
 	await _frames(1)
 	_check("an NPC's name is blank once its name memory burned", Names.npc(&"rufet") == blank and rufet.display_name == blank)
+	WorldState.reveal_name(&"sahbaz")
 	_check("other NPC names are untouched", Names.npc(&"sahbaz") == "Şahbaz")
 	_check("the epithet stays when the name burns", Names.npc_epithet(&"rufet") == "kan kardeşi")
 	# The protagonist's name, burned

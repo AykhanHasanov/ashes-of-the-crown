@@ -14,6 +14,10 @@ extends Resource
 ## "flag:narin_revealed=>NPC_NARIN_EPITHET_REVEALED"). The first rule whose condition
 ## holds wins; with none, epithet_key.
 @export var epithet_rules: PackedStringArray = PackedStringArray()
+## Whether Aras knows this name when the game starts. Until he learns it (WorldState npc
+## flag name_known, the dialogue action reveal_name:<id>) every label shows the epithet.
+## [TBD per NPC: only Rüfət for now.]
+@export var name_known_at_start := false
 ## Optional: the name is blank in all text once this memory is BURNED.
 @export var name_memory_id: StringName
 @export var look_id: String               # data/looks.json entry (scripts/characters/human.gd)
@@ -25,6 +29,18 @@ extends Resource
 ## Where a new game puts them: a POI id, "party" (with the protagonist), or "" (not in the
 ## world yet; the story places them).
 @export var home_location_id: String
+## The loved one they lost (STORY_BIBLE §7): the shade that knocks on their door at night
+## and, in a door death, the one they open it to. Either another NPC (lost_one_npc, e.g.
+## Sona -> Narin) or a placeholder name key and look.
+@export var lost_one_npc: StringName
+@export var lost_one_name_key: String
+@export var lost_one_look_id: String
+## What this NPC calls the protagonist, story permitting: "condition=>NAME_KEY" (first match
+## wins; with none, his own name). E.g. Sabir sometimes calls Aras "Kür".
+@export var calls_protagonist_rules: PackedStringArray = PackedStringArray()
+## Opens the door at night: the conversation is face to face (Peri Nene, who recognises
+## shades by their voice — the only one who can open safely).
+@export var allows_night_open := false
 ## Fights beside the protagonist when with him (scripts/npc/ally.gd).
 @export var companion := false
 ## Their lines always show real names, even burned ones (Kül Şahı never forgets).

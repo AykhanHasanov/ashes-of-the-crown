@@ -16,6 +16,9 @@ const Resident := preload("res://scripts/npc/resident.gd")
 
 var player: Node3D
 var place := Callable()           # (location_id: String) -> Variant (Vector3 or null)
+## Optional, asked first: (npc_id: StringName, location_id: String) -> Variant. The hub puts
+## each resident at their own door (and nowhere at night, when they are behind it).
+var place_npc := Callable()
 var height_at := Callable()       # (x, z) -> float, optional
 var bodies: Dictionary = {}       # npc id -> Node3D
 
@@ -37,6 +40,8 @@ func queue_refresh() -> void:
 ## Spawns what WorldState says should be here, frees what should not.
 func refresh() -> void:
 	_queued = false
+	if not is_inside_tree():
+		return   # a deferred refresh after the scene was left
 	var at_place: Dictionary = {}          # location -> [ids], for spreading people out
 	for def in NpcRegistry.all():
 		if def.npc_kind == "voice_only":
@@ -48,9 +53,12 @@ func refresh() -> void:
 		if WorldState.is_npc_alive(id):
 			if loc == WorldState.PARTY and def.companion and player != null:
 				want = "ally"
-			elif loc != "" and loc != WorldState.PARTY and place.is_valid():
-				pos = place.call(loc)
-				if pos != null:
+			elif loc != "" and loc != WorldState.PARTY and (place.is_valid() or place_npc.is_valid()):
+				pos = place_npc.call(id, loc) if place_npc.is_valid() else place.call(loc)
+				if pos != null and place_npc.is_valid():
+					want = "resident"
+					at_place[loc] = [id]   # an exact spot: no spreading
+				elif pos != null:
 					want = "resident"
 					at_place[loc] = at_place.get(loc, []) + [id]
 		var body = bodies.get(id)
@@ -58,7 +66,7 @@ func refresh() -> void:
 			bodies.erase(id)
 			body = null
 		var kind := "" if body == null else ("ally" if body is Ally else "resident")
-		if kind == want and (want != "resident" or body.get_meta("location", "") == loc):
+		if kind == want and (want != "resident" or (body.get_meta("location", "") == loc and body.get_meta("spot", pos) == pos)):
 			continue
 		if body != null:
 			body.queue_free()
@@ -75,19 +83,24 @@ func _spawn_ally(def: Resource) -> void:
 	a.setup(def, player)
 	a.height_at = height_at
 	add_child(a)
-	var back: Vector3 = player.facing() if player.has_method("facing") else Vector3.FORWARD
-	a.global_position = player.global_position - back * 2.0 + Vector3(0.8, 0.3, 0)
+	a.global_position = a.follow_point() + Vector3(0, 0.3, 0)   # beside him, out of the camera's view
 	bodies[def.id] = a
 
 
 func _spawn_resident(def: Resource, loc: String, center: Vector3, i: int) -> void:
 	var r = Resident.new()
-	var a := i * 2.4
-	var p := center + Vector3(cos(a), 0, sin(a)) * (3.0 + i * 0.6)
+	var p := center
+	var face := center
+	if not place_npc.is_valid():
+		var a := i * 2.4
+		p = center + Vector3(cos(a), 0, sin(a)) * (3.0 + i * 0.6)
+	else:
+		face = Vector3.ZERO   # hub residents look into the courtyard, at the hearth
 	if height_at.is_valid():
 		p.y = height_at.call(p.x, p.z)
-	r.setup(def, player, atan2(center.x - p.x, center.z - p.z))
+	r.setup(def, player, atan2(face.x - p.x, face.z - p.z))
 	r.set_meta("location", loc)
+	r.set_meta("spot", center)
 	add_child(r)
 	r.global_position = p
 	bodies[def.id] = r

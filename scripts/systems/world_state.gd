@@ -17,13 +17,15 @@ extends Node
 ##   npcs       npc_id -> {alive, location_id, rescued, relationship, death_cause, flags}
 ##              for every NpcDefinition (data/npcs); location_id is a POI id, "party"
 ##              (with the protagonist), "son_ocaq" (the hub) or "" (not in the world)
-##   world      time_of_day (hour), day_count, hub_stage, and open-world progress:
-##              hearths / chests / echoes / discovered / killed (id lists), fog, last_hearth
+##   world      time_of_day (hour), day_count, and open-world progress:
+##              hearths / chests / echoes / discovered / killed (id lists), fog, last_hearth,
+##              doors {door_id: "open" | "closed"} — story overrides of hub doors only
+##              (a door's normal state is derived from time and its residents)
 
 const MemoryRegistry := preload("res://scripts/core/memory_registry.gd")
 const NpcRegistry := preload("res://scripts/core/npc_registry.gd")
 
-const SAVE_VERSION := 5
+const SAVE_VERSION := 7
 
 ## A memory is not found yet (UNKNOWN), remembered (KEPT) or given to the fire (BURNED).
 enum MemoryState { UNKNOWN, KEPT, BURNED }
@@ -63,7 +65,7 @@ static func default_state() -> Dictionary:
 		"flags": {},
 		"story": {"chapter": 1, "checkpoint": "", "echoes_seen": []},
 		"npcs": default_npcs(),
-		"world": {"time_of_day": 8.5, "day_count": 1, "hub_stage": 0,
+		"world": {"time_of_day": 8.5, "day_count": 1, "doors": {},
 			"hearths": [], "chests": [], "echoes": [], "discovered": [], "killed": [], "fog": "", "last_hearth": ""},
 	}
 
@@ -78,7 +80,7 @@ static func default_npcs() -> Dictionary:
 
 static func new_npc_record(def: Resource) -> Dictionary:
 	return {"alive": true, "location_id": def.home_location_id, "rescued": false, "relationship": 0,
-		"death_cause": "", "flags": {}}
+		"death_cause": "", "flags": {"name_known": true} if def.name_known_at_start else {}}
 
 
 # --- Session -----------------------------------------------------------------------------------
@@ -189,7 +191,13 @@ static func normalize(data: Variant) -> Dictionary:
 		out["world"][String(k)] = w[k]   # unknown keys survive (forward compatible)
 	out["world"]["time_of_day"] = float(w.get("time_of_day", 8.5))
 	out["world"]["day_count"] = int(w.get("day_count", 1))
-	out["world"]["hub_stage"] = int(w.get("hub_stage", 0))
+	out["world"].erase("hub_stage")   # retired in v6: derived from resolved grief arcs
+	var doors := {}
+	var src_doors: Dictionary = w.get("doors", {}) if w.get("doors") is Dictionary else {}
+	for k in src_doors:
+		if String(src_doors[k]) in ["open", "closed"]:
+			doors[String(k)] = String(src_doors[k])
+	out["world"]["doors"] = doors
 	for list in WORLD_LISTS:
 		var ids: Array = []
 		for id in w.get(list, []):
@@ -535,6 +543,35 @@ func change_npc_relationship(id: StringName, delta: int) -> void:
 	EventBus.npc_relationship_changed.emit(id, old, old + delta)
 
 
+## Aras knows this NPC's name (until then every label shows their epithet). NPC flag
+## name_known; the dialogue action "reveal_name:<id>" sets it. Emits npc_changed.
+func reveal_name(id: StringName) -> void:
+	set_npc_flag(id, &"name_known", true)
+
+
+func is_name_known(id: StringName) -> bool:
+	return get_npc_flag(id, &"name_known", false) == true
+
+
+## A resident's grief arc is resolved (STORY_BIBLE §6: that room's window lights, the snow
+## melts, the hearth grows). Stored as the NPC flag grief_resolved. Emits npc_changed.
+func resolve_grief(id: StringName) -> void:
+	set_npc_flag(id, &"grief_resolved", true)
+
+
+func is_grief_resolved(id: StringName) -> bool:
+	return get_npc_flag(id, &"grief_resolved", false) == true
+
+
+## Resolved grief arcs of the NPCs tagged core_grief (what the hearth's size counts).
+func core_grief_resolved_count() -> int:
+	var n := 0
+	for def in NpcRegistry.all():
+		if def.tags.has("core_grief") and is_grief_resolved(def.id):
+			n += 1
+	return n
+
+
 func set_npc_flag(id: StringName, key: StringName, value: Variant = true) -> void:
 	if not has_npc(id):
 		return
@@ -582,15 +619,27 @@ func get_day_count() -> int:
 	return int(_state["world"]["day_count"])
 
 
-func set_hub_stage(stage: int) -> void:
-	if get_hub_stage() == stage:
+## The day phase now: &"dawn" | &"day" | &"dusk" | &"night".
+func get_phase() -> StringName:
+	return phase_of(get_time_of_day())
+
+
+## Story override of a hub door: "open", "closed", or "" to clear (back to the derived
+## state). Emits world_changed(&"doors").
+func set_door_override(door_id: StringName, state: String) -> void:
+	var doors: Dictionary = _state["world"]["doors"]
+	if String(doors.get(String(door_id), "")) == state:
 		return
-	_state["world"]["hub_stage"] = stage
-	EventBus.world_changed.emit(&"hub_stage")
+	if state == "":
+		doors.erase(String(door_id))
+	else:
+		assert(state in ["open", "closed"], "door override must be open or closed")
+		doors[String(door_id)] = state
+	EventBus.world_changed.emit(&"doors")
 
 
-func get_hub_stage() -> int:
-	return int(_state["world"]["hub_stage"])
+func get_door_override(door_id: StringName) -> String:
+	return String(_state["world"]["doors"].get(String(door_id), ""))
 
 
 ## Open-world id lists: hearths, chests, echoes, discovered, killed.
@@ -638,7 +687,8 @@ func get_world_value(key: StringName, default: Variant = null) -> Variant:
 
 ## Condition strings used by dialogue branches: "memory:<id>" (burned), "kept:<id>",
 ## "flag:<name>", "alive:<npc>", "dead:<npc>", "rescued:<npc>", "joined:<npc>" (with the
-## protagonist: location "party" — derived, never a separate flag).
+## protagonist: location "party" — derived, never a separate flag), "grief:<npc>" (grief
+## arc resolved), "time:<phase>" (dawn / day / dusk / night).
 func check(cond: String) -> bool:
 	var arg := cond.get_slice(":", 1)
 	match cond.get_slice(":", 0):
@@ -654,12 +704,22 @@ func check(cond: String) -> bool:
 			return has_npc(StringName(arg)) and not is_npc_alive(StringName(arg))
 		"rescued":
 			return is_npc_rescued(StringName(arg))
+		"grief":
+			return is_grief_resolved(StringName(arg))
+		"time":
+			return get_phase() == StringName(arg)
 		"joined":
 			return is_npc_alive(StringName(arg)) and get_npc_location(StringName(arg)) == PARTY
 	return false
 
 
-## Side effects attached to dialogue nodes and choices ("do": [...]): "flag:<name>".
+## Side effects attached to dialogue nodes and choices ("do": [...]): "flag:<name>",
+## "reveal_name:<npc>".
 func apply(action: String) -> void:
 	if action.get_slice(":", 0) == "flag":
 		set_flag(StringName(action.get_slice(":", 1)))
+	elif action.get_slice(":", 0) == "reveal_name":
+		if action.get_slice(":", 1) == "protagonist":
+			set_flag(&"protagonist_name_known")   # Aras learns his own name
+		else:
+			reveal_name(StringName(action.get_slice(":", 1)))

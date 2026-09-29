@@ -12,7 +12,7 @@ extends Node
 ##   time_of_day_changed(phase)               WorldState.set_time_of_day, when dawn/day/dusk/night changes
 ##   region_changed(region)                   WorldState.set_region (SaveManager autosaves on it)
 ##   story_changed(field)                     WorldState chapter / checkpoint / echoes setters
-##   world_changed(key)                       WorldState world-section setters (hearths, chests, fog, hub_stage...)
+##   world_changed(key)                       WorldState world-section setters (hearths, chests, fog, doors...)
 ##   npc_moved(npc_id, from, to)              WorldState.move_npc / rescue_npc (location ids)
 ##   npc_rescued(npc_id)                      WorldState.rescue_npc (then npc_moved to son_ocaq)
 ##   npc_died(npc_id, cause)                  WorldState.kill_npc — permanent
@@ -23,6 +23,9 @@ extends Node
 ## Moments (emitted by gameplay / mode scripts):
 ##   checkpoint_rested(checkpoint_id)         the mode, when the protagonist rests at an ocaq or reaches a story
 ##                                            checkpoint (SaveManager autosaves on it)
+##
+## Son Ocaq (emitted by scripts/hub/door.gd — a view of derived state):
+##   door_changed(door_id, is_open)           a hub door opened or closed
 ##
 ## Encounters (emitted by scripts/world/encounter.gd; the active mode shows banners/music):
 ##   encounter_started(id)                    the first wave is about to rise
@@ -51,6 +54,8 @@ signal npc_relationship_changed(npc_id: StringName, old_value: int, new_value: i
 signal state_replaced
 
 signal checkpoint_rested(checkpoint_id: StringName)
+
+signal door_changed(door_id: StringName, is_open: bool)
 
 signal encounter_started(encounter_id: StringName)
 signal encounter_wave_started(encounter_id: StringName, wave: int, total: int, banner_key: String)

@@ -81,6 +81,7 @@ func _ready() -> void:
 	if def.shield_path != "":
 		_model.attach(def.shield_path, "handslot.l", Vector3.ZERO, true)
 	EventBus.memory_burned.connect(func(_id): display_name = Names.npc(npc_id))
+	EventBus.npc_changed.connect(_on_npc_changed)
 	EventBus.state_replaced.connect(func(): display_name = Names.npc(npc_id))
 
 
@@ -225,7 +226,7 @@ func _think() -> Vector3:
 	var to_player := player.global_position - global_position
 	to_player.y = 0.0
 	if to_player.length() > float(_cfg["teleport_distance"]):
-		global_position = player.global_position - player.facing() * 2.0 if player.has_method("facing") else player.global_position
+		global_position = follow_point()
 		return Vector3.ZERO
 	if not _foe_ok(_foe):
 		_foe = _pick_foe()
@@ -236,12 +237,19 @@ func _think() -> Vector3:
 		_say("victory", 0.5)
 	_fighting = fighting
 	if not fighting:
+		# Beside and a little behind the protagonist as the camera sees him: never between the
+		# camera and him, never in front of him
 		_state = S.FOLLOW
-		var d := to_player.length()
-		if d > float(_cfg["follow_distance"]):
-			_yaw = atan2(to_player.x, to_player.z)
-			var speed: float = float(_cfg["run_speed"]) if d > float(_cfg["catch_up_distance"]) else float(_cfg["walk_speed"]) * 1.6
-			return to_player.normalized() * speed
+		var to_spot := follow_point() - global_position
+		to_spot.y = 0.0
+		var d := to_spot.length()
+		if d > float(_cfg["follow_slack"]):
+			_yaw = atan2(to_spot.x, to_spot.z)
+			var speed: float = float(_cfg["run_speed"]) if to_player.length() > float(_cfg["catch_up_distance"]) else float(_cfg["walk_speed"]) * 1.6
+			return to_spot.normalized() * minf(speed, d * 4.0)
+		if player.has_method("facing"):
+			var f: Vector3 = player.facing()
+			_yaw = atan2(f.x, f.z)
 		return Vector3.ZERO
 	_state = S.FIGHT
 	var to: Vector3 = _foe.global_position - global_position
@@ -252,6 +260,22 @@ func _think() -> Vector3:
 	if _cooldown <= 0.0:
 		_swing()
 	return Vector3.ZERO
+
+
+## Where he walks with the protagonist: to the side and slightly behind, measured in the
+## camera's frame (so he stays out of the view), on the side he is already on.
+func follow_point() -> Vector3:
+	var right := Vector3.RIGHT
+	var back := Vector3.BACK
+	var cam = player.get("camera")
+	if cam != null and is_instance_valid(cam):
+		right = (cam.global_basis.x * Vector3(1, 0, 1)).normalized()
+		back = (cam.global_basis.z * Vector3(1, 0, 1)).normalized()
+	elif player.has_method("facing"):
+		back = -player.facing()
+		right = back.cross(Vector3.UP).normalized() * -1.0
+	var side := 1.0 if (global_position - player.global_position).dot(right) >= 0.0 else -1.0
+	return player.global_position + right * side * float(_cfg["follow_side"]) + back * float(_cfg["follow_back"])
 
 
 func _swing() -> void:
@@ -359,3 +383,9 @@ func _enter(s: int) -> void:
 func _say(event: String, chance: float) -> void:
 	if def != null and def.voice_profile != "":
 		Barks.say(self, def.voice_profile, event, chance, 1.85)
+
+
+## A revealed name shows at once.
+func _on_npc_changed(id: StringName) -> void:
+	if id == npc_id:
+		display_name = Names.npc(npc_id)
