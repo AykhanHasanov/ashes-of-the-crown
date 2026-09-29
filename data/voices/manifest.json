@@ -1532,18 +1532,32 @@
 				},
 				{
 					"file": "res://assets/audio/voice/villager_m/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_POST_01",
+					"if": "known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/villager_m/greet_3.wav",
-					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+					"text": "Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_PRE_01",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/villager_m/greet_4.wav",
-					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+					"text": "Ocak yanıyor mu, şehzadem? Yanıyor, değil mi?",
+					"key": "BARK_VILLAGER_PRE_02",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/villager_m/greet_5.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_m/greet_6.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_m/greet_7.wav",
 					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
 				}
 			],
@@ -1606,18 +1620,32 @@
 				},
 				{
 					"file": "res://assets/audio/voice/villager_old/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_POST_01",
+					"if": "known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/villager_old/greet_3.wav",
-					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+					"text": "Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_PRE_01",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/villager_old/greet_4.wav",
-					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+					"text": "Ocak yanıyor mu, şehzadem? Yanıyor, değil mi?",
+					"key": "BARK_VILLAGER_PRE_02",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/villager_old/greet_5.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_old/greet_6.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_old/greet_7.wav",
 					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
 				}
 			],
@@ -1680,18 +1708,32 @@
 				},
 				{
 					"file": "res://assets/audio/voice/villager_f/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_POST_01",
+					"if": "known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/villager_f/greet_3.wav",
-					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+					"text": "Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_PRE_01",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/villager_f/greet_4.wav",
-					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+					"text": "Ocak yanıyor mu, şehzadem? Yanıyor, değil mi?",
+					"key": "BARK_VILLAGER_PRE_02",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/villager_f/greet_5.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_f/greet_6.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/villager_f/greet_7.wav",
 					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
 				}
 			],
@@ -1788,103 +1830,171 @@
 			"greet": [
 				{
 					"file": "res://assets/audio/voice/npc_rufet/greet_0.wav",
-					"text": "Ne gerekirse, yanındayım, {PROTAGONIST}."
+					"text": "Ne gerekirse, yanındayım, {PROTAGONIST}.",
+					"key": "BARK_RUFET_GREET_1",
+					"if": "known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_rufet/greet_1.wav",
-					"text": "Yol uzun, kardeşim. Ama birlikte yürürüz."
+					"text": "Ne gerekirse, yanındayım, kardeş.",
+					"key": "BARK_RUFET_GREET_1_PRE",
+					"if": "!known:protagonist"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/greet_2.wav",
+					"text": "Yol uzun, kardeşim. Ama birlikte yürürüz.",
+					"key": "BARK_RUFET_GREET_2"
 				}
 			],
 			"idle": [
 				{
 					"file": "res://assets/audio/voice/npc_rufet/idle_0.wav",
-					"text": "Kül hâlâ sıcak. Dikkatli ol."
+					"text": "Kül hâlâ sıcak. Dikkatli ol.",
+					"key": "BARK_RUFET_IDLE_1"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_rufet/idle_1.wav",
-					"text": "Bu sessizlik hoşuma gitmiyor."
+					"text": "Bu sessizlik hoşuma gitmiyor.",
+					"key": "BARK_RUFET_IDLE_2"
 				}
 			],
 			"spot": [
 				{
 					"file": "res://assets/audio/voice/npc_rufet/spot_0.wav",
-					"text": "Kılıcını çek, {PROTAGONIST}!"
+					"text": "Arkanı kolla!",
+					"key": "SLICE_S2_01"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_rufet/spot_1.wav",
-					"text": "Arkanı kolluyorum!"
+					"text": "Kılıcını çek, {PROTAGONIST}!",
+					"key": "BARK_RUFET_SPOT_1",
+					"if": "known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_rufet/spot_2.wav",
-					"text": "Geliyorlar!"
+					"text": "Kılıcını çek, kardeş!",
+					"key": "BARK_RUFET_SPOT_1_PRE",
+					"if": "!known:protagonist"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/spot_3.wav",
+					"text": "Arkanı kolluyorum!",
+					"key": "BARK_RUFET_SPOT_2"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/spot_4.wav",
+					"text": "Geliyorlar!",
+					"key": "BARK_RUFET_SPOT_3"
 				}
 			],
 			"attack": [
 				{
 					"file": "res://assets/audio/voice/npc_rufet/attack_0.wav",
-					"text": "Al bunu!"
+					"text": "Al bunu!",
+					"key": "BARK_RUFET_ATTACK_1"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_rufet/attack_1.wav",
-					"text": "Geri çekil!"
+					"text": "Geri çekil!",
+					"key": "BARK_RUFET_ATTACK_2"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_rufet/attack_2.wav",
-					"text": "Hah!"
+					"text": "Hah!",
+					"key": "BARK_RUFET_ATTACK_3"
 				}
 			],
 			"hurt": [
 				{
 					"file": "res://assets/audio/voice/npc_rufet/hurt_0.wav",
-					"text": "Ah!"
+					"text": "Ah!",
+					"key": "BARK_RUFET_HURT_1"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_rufet/hurt_1.wav",
-					"text": "Sıyırdı sadece."
+					"text": "Sıyırdı sadece.",
+					"key": "BARK_RUFET_HURT_2"
 				}
 			],
 			"downed": [
 				{
 					"file": "res://assets/audio/voice/npc_rufet/downed_0.wav",
-					"text": "{PROTAGONIST}... kalkamıyorum..."
+					"text": "{PROTAGONIST}... kalkamıyorum...",
+					"key": "BARK_RUFET_DOWNED_1",
+					"if": "known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_rufet/downed_1.wav",
-					"text": "Yardım et, {PROTAGONIST}!"
+					"text": "Kardeş... kalkamıyorum...",
+					"key": "BARK_RUFET_DOWNED_1_PRE",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_rufet/downed_2.wav",
-					"text": "Dizim... gitti..."
+					"text": "Yardım et, {PROTAGONIST}!",
+					"key": "BARK_RUFET_DOWNED_2",
+					"if": "known:protagonist"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/downed_3.wav",
+					"text": "Yardım et, kardeş!",
+					"key": "BARK_RUFET_DOWNED_2_PRE",
+					"if": "!known:protagonist"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/downed_4.wav",
+					"text": "Dizim... gitti...",
+					"key": "BARK_RUFET_DOWNED_3"
 				}
 			],
 			"helped": [
 				{
 					"file": "res://assets/audio/voice/npc_rufet/helped_0.wav",
-					"text": "Sağ ol, kardeşim."
+					"text": "Sağ ol, kardeşim.",
+					"key": "BARK_RUFET_HELPED_1"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_rufet/helped_1.wav",
-					"text": "Hâlâ ayaktayız, {PROTAGONIST}."
+					"text": "Hâlâ ayaktayız, {PROTAGONIST}.",
+					"key": "BARK_RUFET_HELPED_2",
+					"if": "known:protagonist"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/helped_2.wav",
+					"text": "Hâlâ ayaktayız, kardeş.",
+					"key": "BARK_RUFET_HELPED_2_PRE",
+					"if": "!known:protagonist"
 				}
 			],
 			"recovered": [
 				{
 					"file": "res://assets/audio/voice/npc_rufet/recovered_0.wav",
-					"text": "Kendime geldim... Devam."
+					"text": "Kendime geldim... Devam.",
+					"key": "BARK_RUFET_RECOVERED_1"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_rufet/recovered_1.wav",
-					"text": "Bitmedi daha."
+					"text": "Bitmedi daha.",
+					"key": "BARK_RUFET_RECOVERED_2"
 				}
 			],
 			"victory": [
 				{
 					"file": "res://assets/audio/voice/npc_rufet/victory_0.wav",
-					"text": "Bitti... şimdilik."
+					"text": "Bitti... şimdilik.",
+					"key": "BARK_RUFET_VICTORY_1"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_rufet/victory_1.wav",
-					"text": "Kılıcın hâlâ keskin, {PROTAGONIST}."
+					"text": "Kılıcın hâlâ keskin, {PROTAGONIST}.",
+					"key": "BARK_RUFET_VICTORY_2",
+					"if": "known:protagonist"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_rufet/victory_2.wav",
+					"text": "Kılıcın hâlâ keskin, kardeş.",
+					"key": "BARK_RUFET_VICTORY_2_PRE",
+					"if": "!known:protagonist"
 				}
 			]
 		},
@@ -1900,18 +2010,32 @@
 				},
 				{
 					"file": "res://assets/audio/voice/npc_sabir/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_POST_01",
+					"if": "known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_sabir/greet_3.wav",
-					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+					"text": "Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_PRE_01",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_sabir/greet_4.wav",
-					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+					"text": "Ocak yanıyor mu, şehzadem? Yanıyor, değil mi?",
+					"key": "BARK_VILLAGER_PRE_02",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_sabir/greet_5.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sabir/greet_6.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sabir/greet_7.wav",
 					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
 				}
 			],
@@ -1974,18 +2098,32 @@
 				},
 				{
 					"file": "res://assets/audio/voice/npc_sahbaz/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_POST_01",
+					"if": "known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_sahbaz/greet_3.wav",
-					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+					"text": "Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_PRE_01",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_sahbaz/greet_4.wav",
-					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+					"text": "Ocak yanıyor mu, şehzadem? Yanıyor, değil mi?",
+					"key": "BARK_VILLAGER_PRE_02",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_sahbaz/greet_5.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sahbaz/greet_6.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_sahbaz/greet_7.wav",
 					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
 				}
 			],
@@ -2048,18 +2186,32 @@
 				},
 				{
 					"file": "res://assets/audio/voice/npc_elvin/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_POST_01",
+					"if": "known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_elvin/greet_3.wav",
-					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+					"text": "Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_PRE_01",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_elvin/greet_4.wav",
-					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+					"text": "Ocak yanıyor mu, şehzadem? Yanıyor, değil mi?",
+					"key": "BARK_VILLAGER_PRE_02",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_elvin/greet_5.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_elvin/greet_6.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_elvin/greet_7.wav",
 					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
 				}
 			],
@@ -2122,18 +2274,32 @@
 				},
 				{
 					"file": "res://assets/audio/voice/npc_esref/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_POST_01",
+					"if": "known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_esref/greet_3.wav",
-					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+					"text": "Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_PRE_01",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_esref/greet_4.wav",
-					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+					"text": "Ocak yanıyor mu, şehzadem? Yanıyor, değil mi?",
+					"key": "BARK_VILLAGER_PRE_02",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_esref/greet_5.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_esref/greet_6.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_esref/greet_7.wav",
 					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
 				}
 			],
@@ -2196,18 +2362,32 @@
 				},
 				{
 					"file": "res://assets/audio/voice/npc_ibrahim/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_POST_01",
+					"if": "known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_ibrahim/greet_3.wav",
-					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+					"text": "Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_PRE_01",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_ibrahim/greet_4.wav",
-					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+					"text": "Ocak yanıyor mu, şehzadem? Yanıyor, değil mi?",
+					"key": "BARK_VILLAGER_PRE_02",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_ibrahim/greet_5.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ibrahim/greet_6.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ibrahim/greet_7.wav",
 					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
 				}
 			],
@@ -2270,19 +2450,45 @@
 				},
 				{
 					"file": "res://assets/audio/voice/npc_ehliman/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_POST_01",
+					"if": "known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_ehliman/greet_3.wav",
-					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+					"text": "Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_PRE_01",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_ehliman/greet_4.wav",
-					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+					"text": "Ocak yanıyor mu, şehzadem? Yanıyor, değil mi?",
+					"key": "BARK_VILLAGER_PRE_02",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_ehliman/greet_5.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/greet_6.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/greet_7.wav",
 					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/greet_8.wav",
+					"text": "Hafifle, evlat.",
+					"key": "BARK_EHLIMAN_01",
+					"if": "!time:night & any_burned"
+				},
+				{
+					"file": "res://assets/audio/voice/npc_ehliman/greet_9.wav",
+					"text": "Tuttuğun her anı bir taş. Taşla yüzülmez, evlat.",
+					"key": "BARK_EHLIMAN_02",
+					"if": "!time:night & any_kept"
 				}
 			],
 			"idle": [
@@ -2344,18 +2550,32 @@
 				},
 				{
 					"file": "res://assets/audio/voice/npc_nermin/greet_2.wav",
-					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun."
+					"text": "Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_POST_01",
+					"if": "known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_nermin/greet_3.wav",
-					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+					"text": "Şehzadem... demek yaşıyorsun.",
+					"key": "BARK_VILLAGER_PRE_01",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_nermin/greet_4.wav",
-					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+					"text": "Ocak yanıyor mu, şehzadem? Yanıyor, değil mi?",
+					"key": "BARK_VILLAGER_PRE_02",
+					"if": "!known:protagonist"
 				},
 				{
 					"file": "res://assets/audio/voice/npc_nermin/greet_5.wav",
+					"text": "Gözlerin yorgun, evlat. Biraz otur, dinlen."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_nermin/greet_6.wav",
+					"text": "Kuyudan su iç, serindir. Kül henüz ona ulaşmadı."
+				},
+				{
+					"file": "res://assets/audio/voice/npc_nermin/greet_7.wav",
 					"text": "Kül çökmeden önce buralar ne güzeldi, bilir misin?"
 				}
 			],
@@ -2403,6 +2623,26 @@
 				{
 					"file": "res://assets/audio/voice/npc_nermin/night_1.wav",
 					"text": "Geç oldu. Kapımı kilitleyeceğim."
+				}
+			]
+		},
+		"npc_gulcin": {
+			"greet": [
+				{
+					"file": "res://assets/audio/voice/npc_gulcin/greet_0.wav",
+					"text": "Ekmek sıcak. Soğuk her yeri alsa da ekmeği almasın.",
+					"key": "BARK_GULCIN_01",
+					"if": "!time:night"
+				}
+			]
+		},
+		"npc_kemal": {
+			"greet": [
+				{
+					"file": "res://assets/audio/voice/npc_kemal/greet_0.wav",
+					"text": "Demir de ateşi sever. Ama unutmaz, iz tutar.",
+					"key": "BARK_KEMAL_01",
+					"if": "!time:night"
 				}
 			]
 		}

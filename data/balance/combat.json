@@ -1,6 +1,5 @@
 {
 	"_comment": "V3 combat numbers (spec sections 3.2-3.8). Edit freely; DataDB reloads them on start.",
-
 	"player": {
 		"health": 120,
 		"walk_speed": 3.2,
@@ -14,7 +13,6 @@
 		"stance_recover_delay": 3.0,
 		"stance_recover_rate": 0.15
 	},
-
 	"stamina": {
 		"max": 100,
 		"regen": 35,
@@ -30,7 +28,6 @@
 		"shield_block_cost_factor": 0.3,
 		"input_buffer": 0.35
 	},
-
 	"dodge": {
 		"speed": 12.5,
 		"time": 0.32,
@@ -42,7 +39,6 @@
 		"perfect_slowmo_time": 0.4,
 		"perfect_ember": 20
 	},
-
 	"parry": {
 		"window": 0.15,
 		"shield_window": 0.2,
@@ -51,7 +47,6 @@
 		"slowmo_scale": 0.4,
 		"slowmo_time": 0.15
 	},
-
 	"stance": {
 		"light_mult": 1.0,
 		"heavy_mult": 2.5,
@@ -62,29 +57,24 @@
 		"execution_mult": 2.5,
 		"execution_range": 2.6
 	},
-
 	"hitstop": {
 		"light": 0.05,
 		"heavy": 0.09,
 		"execution": 0.15
 	},
-
 	"charge": {
 		"hold_to_charge": 0.35,
 		"full_charge": 1.0
 	},
-
 	"flask": {
 		"charges": 4,
 		"max_charges": 10,
 		"heal_fraction": 0.4,
 		"drink_time": 0.9
 	},
-
 	"tokens": {
 		"player_budget": 3
 	},
-
 	"ember": {
 		"max": 100,
 		"on_hit": 6,
@@ -105,9 +95,27 @@
 		"burn_hold_seconds": 1.5,
 		"offer_health_fraction": 0.125,
 		"offer_time_scale": 0.3,
-		"offer_duration": 3.0
+		"offer_duration": 3.0,
+		"burn_power": {
+			"_about": "Permanent power of burned memories (scripts/combat/burn_power.gd). weight >= charge_weight: +charge_ember max Köz (one more Köz Darbesi). weight 1: per hit / per kill Köz from light_curve by the order of the burn; past the end the last step repeats (never zero). Balance rule: every slice encounter is beatable at base values (no burns).",
+			"charge_weight": 2,
+			"charge_ember": 50,
+			"light_curve": [
+				[
+					2,
+					4
+				],
+				[
+					2,
+					4
+				],
+				[
+					1,
+					2
+				]
+			]
+		}
 	},
-
 	"camera": {
 		"distance": 4.2,
 		"combat_distance": 5.4,
@@ -123,5 +131,36 @@
 		"pitch_min": -65,
 		"pitch_max": 35,
 		"lock_range": 22.0
+	},
+	"balance_check": {
+		"_about": "The balance rule (STORY_SLICE §2): every slice encounter is comfortably beatable at base values (100 Köz, 2 Köz Darbesi, no burns). scripts/debug/balance_selftest.gd plays each one with a plain, deliberately average bot (walks in, attacks no faster than attack_interval, dodges only dodge_chance of the windups it sees, drinks below drink_below, a Köz Darbesi when strike_when_near enemies crowd it; reaction: seconds before it goes for a new target) and requires a win with at least min_health left and at most max_flasks used, in every seed. allies: who fights beside him from the start; companions the story's beats bring in (move_npc:<id>:party) join as they would in the game.",
+		"min_health": 0.4,
+		"max_flasks_used": 2,
+		"seeds": [
+			1,
+			2,
+			3
+		],
+		"time_limit": 150.0,
+		"bot": {
+			"dodge_chance": 0.35,
+			"drink_below": 0.4,
+			"strike_when_near": 2,
+			"attack_interval": 1.1,
+			"reaction": 0.35
+		},
+		"encounters": [
+			{
+				"id": "slice_s2_first_fight",
+				"allies": [],
+				"_about": "Solo at first; Rüfət joins through the act 1 beats (wave 2, or Aras under 30%), as in the script."
+			},
+			{
+				"id": "slice_s8_hut",
+				"allies": [
+					"rufet"
+				]
+			}
+		]
 	}
 }

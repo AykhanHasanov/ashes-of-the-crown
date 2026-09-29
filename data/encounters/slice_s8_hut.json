@@ -1,0 +1,9 @@
+{
+	"id": "slice_s8_hut",
+	"_about": "STORY_SLICE §S8: shades circle Eşref's hut; Eşref fights them at his door with an axe, Rüfət fights too. Placeholder numbers. Balance rule: comfortably beatable at base values with Rüfət alone (Eşref's help is extra; checked by scripts/debug/balance_selftest.gd).",
+	"spawn": {"radius": [6.0, 10.0]},
+	"waves": [
+		{"banner_key": "", "delay": 1.0, "enemies": [{"id": "ash_shade", "count": 3, "level": 1}]},
+		{"banner_key": "", "delay": 2.0, "enemies": [{"id": "ash_shade", "count": 2, "level": 1}]}
+	]
+}

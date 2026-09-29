@@ -11,7 +11,7 @@ name_memory_id = &""
 look_id = "npc_gulcin"
 weapon_path = ""
 shield_path = ""
-voice_profile = ""
+voice_profile = "npc_gulcin"
 personality_notes = "Gülçin, ekmekçi (baker) — young wife, expecting a child with Kemal.
 Everyday life: arguing, laughing, preparing. Act III naming scene. Never dies.
 See STORY_BIBLE.md §7."

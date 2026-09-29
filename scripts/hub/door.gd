@@ -22,7 +22,8 @@ var is_open := false
 var is_lit := false
 var speaking := false
 var held_open := false
-var is_ajar := false                # someone of this room opened it to a shade: it never closes again
+var is_ajar := false
+var lights_out := false             # the story put this room's light out for tonight (cleared at the next phase)                # someone of this room opened it to a shade: it never closes again
 
 var _hinge: Node3D
 var _blocker: CollisionShape3D
@@ -59,7 +60,9 @@ func _ready() -> void:
 	body.add_child(_blocker)
 	add_child(body)
 	_build_strip()
-	EventBus.time_of_day_changed.connect(func(_p): refresh())
+	EventBus.time_of_day_changed.connect(func(_p):
+		lights_out = false
+		refresh())
 	EventBus.npc_moved.connect(func(_a, _b, _c): refresh())
 	EventBus.npc_died.connect(func(_a, _b): refresh())
 	EventBus.world_changed.connect(_on_world_changed)
@@ -197,12 +200,27 @@ func set_speaking(on: bool) -> void:
 		_shadow_tween.tween_property(_shadow, "position:x", -WIDTH * 0.35, 1.3).set_trans(Tween.TRANS_SINE)
 
 
+## A pause in what they say ("(…)"): the shadow stops where it is, then moves on.
+func freeze_shadow(on: bool) -> void:
+	if _shadow_tween:
+		if on:
+			_shadow_tween.pause()
+		else:
+			_shadow_tween.play()
+
+
+## Tonight this room's light is out (the story's "lights_out:<door>").
+func set_lights_out(on: bool) -> void:
+	lights_out = on
+	refresh()
+
+
 func shadow_x() -> float:
 	return _shadow.position.x
 
 
 func _update_strip() -> void:
-	is_lit = not _wants_open() and WorldState.get_phase() == &"night" and HubData.is_lived_in(place_id)
+	is_lit = not _wants_open() and WorldState.get_phase() == &"night" and HubData.is_lived_in(place_id) and not lights_out
 	var shown := is_lit and not _hidden_by_scene
 	_strip.visible = shown
 	_glow.visible = shown

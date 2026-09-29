@@ -217,6 +217,7 @@ func night_guest(npc_id: StringName, on: bool) -> void:
 
 func _tick(_delta: float) -> void:
 	_update_mouse()
+	_process_rest()
 	if player.dead or get_tree().paused or dialogue.is_active():
 		return
 	_interact()
@@ -239,11 +240,19 @@ func _interact() -> void:
 		HubTravel.leave(get_tree())
 		return
 	if WorldState.get_phase() == &"night":
+		if level.in_room(player.global_position):
+			# In his own room at night: listen at the door, or step out
+			if near_prompt(level.room_spots["inside_door"].origin, DOOR_RANGE, tr("HUB_PROMPT_ROOM_DOOR")):
+				room_door_choice()
+			return
 		var door = nearest_door()
 		if door != null:
 			var own := HubData.residents_of(door.place_id).has(HubData.PROTAGONIST)
-			if near_prompt(door_front(door), DOOR_RANGE, tr("HUB_PROMPT_LISTEN") if own else tr("HUB_PROMPT_KNOCK")):
-				knock(door)
+			if near_prompt(door_front(door), DOOR_RANGE, tr("HUB_PROMPT_ENTER_ROOM") if own else tr("HUB_PROMPT_KNOCK")):
+				if own:
+					enter_room()
+				else:
+					knock(door)
 			return
 	else:
 		var who = nearest_resident()
@@ -253,6 +262,54 @@ func _interact() -> void:
 			door_talk.talk(who.npc_id)
 			return
 	hud.set_prompt("")
+
+
+## At night his door is shut: he slips into his room (the door opens and closes behind him).
+func enter_room() -> void:
+	_place(level.room_spots["inside_door"], true)
+	Audio.play("door_hush", -10.0, 0.05)
+
+
+## At night, inside his room at the door: "Dinle" (the small shade's knock) or "Dışarı çık".
+func room_door_choice() -> void:
+	player.input_locked = true
+	dialogue.start({"start": {"text": "", "choices": [
+		{"text_key": "HUB_ROOM_LISTEN", "event": "listen"},
+		{"text_key": "HUB_ROOM_OUT", "event": "out"}]}})
+	var ev: String = await dialogue.finished
+	player.input_locked = false
+	if ev == "listen":
+		knock(level.doors["door_protagonist"])
+	elif ev == "out":
+		leave_room()
+
+
+func leave_room() -> void:
+	var door = level.doors["door_protagonist"]
+	_place(Transform3D(door.global_basis, door_front(door)), false)
+	Audio.play("door_hush", -10.0, 0.05)
+
+
+## Puts the protagonist at `spot`; `inward`: facing into the room (away from the door).
+func _place(spot: Transform3D, inward: bool) -> void:
+	player.global_position = spot.origin + Vector3(0, 0.1, 0)
+	player.velocity = Vector3.ZERO
+	var ahead: Vector3 = -spot.basis.z if inward else spot.basis.z
+	player.face_towards(player.global_position + ahead)
+	rig.yaw = atan2(-ahead.x, -ahead.z)
+	rig.snap()
+
+
+## Rüfət (in the party) sits awake on his bed at night (STORY_SLICE §S4) and follows again by day.
+func _process_rest() -> void:
+	var ally = npcs.bodies.get(&"rufet")
+	if ally == null or not is_instance_valid(ally) or not ally.has_method("rest_at"):
+		return
+	var night: bool = WorldState.get_phase() == &"night"
+	if night and ally.rest_spot == null:
+		ally.rest_at(level.room_spots["bed_rufet"])
+	elif not night and ally.rest_spot != null:
+		ally.rest_at(null)
 
 
 ## Knock on (or, his own, listen at) a door at night.
@@ -325,14 +382,13 @@ func _demo_setup() -> void:
 					if dialogue.is_active() and dialogue.choice_texts().size() > 0:
 						dialogue.choose(0)))
 		"hub_morning_after":
-			# Eşref warned last night, gone this morning (placeholder flags)
+			# Eşref's warning heard on hub night 2 at his door; night 3 he opens it
 			WorldState.rescue_npc(&"esref")
-			WorldState.set_flag(&"esref_quest_failing")
-			WorldState.set_flag(&"esref_quest_failed")
-			wait_until(21.0)
-			wait_until(7.0)
-			wait_until(21.0)
-			wait_until(7.0)
+			for n in 3:
+				wait_until(21.0)
+				if n == 1:
+					HubNights.mark_heard(&"esref")
+				wait_until(7.0)
 			WorldState.set_time_of_day(9.0)
 			level.day_night.set_hour(9.0)
 			# A still of the morning after: the ajar door, the ash, the footprints from the gate
@@ -352,6 +408,47 @@ func _demo_setup() -> void:
 			WorldState.set_time_of_day(22.0)
 			level.day_night.set_hour(22.0)
 			_demo_view(Vector3(0, 0, 2.4), Vector3(0, 1.5, -6.0))
+		"hub_room", "hub_room_day":
+			# Aras's room: at night Rüfət on his bed, the lamp lit; by day the door open
+			var hour := 10.5 if Settings.demo == "hub_room_day" else 22.0
+			WorldState.set_time_of_day(hour)
+			level.day_night.set_hour(hour)
+			WorldState.move_npc(&"rufet", WorldState.PARTY)
+			npcs.queue_refresh()
+			var room: Transform3D = level.room_xf
+			var beds: Vector3 = level.room_spots["bed_rufet"].origin.lerp(level.room_spots["bed_protagonist"].origin, 0.5)
+			var shot := Camera3D.new()
+			shot.fov = 68.0
+			add_child(shot)
+			if Settings.demo == "hub_room":
+				# From the front corner by the door, high: Aras in the middle of the room, Rüfət on his bed
+				enter_room()
+				player.global_position = room * Vector3(-0.9, 0.1, -2.5)
+				player.face_towards(level.room_spots["bed_rufet"].origin)
+				shot.global_position = room * Vector3(-1.75, 2.55, -0.45)
+			else:
+				# By day, from the gallery through the open door; he is at the hearth, out of view
+				_demo_view(Vector3(0, 0, 2.4), Vector3(0, 1.5, -6.0))
+				shot.global_position = room * Vector3(-1.0, 1.65, 2.6)
+			shot.look_at(beds + Vector3(0, 0.6, 0))
+			shot.make_current()
+		"hub_journal":
+			# The Közcü journal after a little of the story (placeholder state for the capture)
+			WorldState.set_time_of_day(10.5)
+			level.day_night.set_hour(10.5)
+			WorldState.set_flag(&"protagonist_name_known")
+			for pair in [["rufet", ""], ["sona", "HUB_SONA_DAY_1"], ["esref", "HUB_ESREF_DAY_1"], ["domrul", "HUB_DOMRUL_DAY_1"]]:
+				WorldState.set_npc_flag(StringName(pair[0]), &"met", true)
+				if pair[1] != "":
+					WorldState.set_npc_flag(StringName(pair[0]), &"last_line", pair[1])
+			WorldState.rescue_npc(&"esref")
+			WorldState.apply("thread:JOURNAL_ESREF_THREAD")
+			WorldState.keep_memory(&"first_sword")
+			WorldState.burn_memory(&"mother_name", &"combat")
+			WorldState.burn_memory(&"hearth_lesson", &"echo")
+			_demo_view(Vector3(0, 0, 2.4), Vector3(0, 1.5, -6.0))
+			process_mode = Node.PROCESS_MODE_ALWAYS   # keep counting frames for the capture while the journal pauses
+			get_tree().create_timer(2.5).timeout.connect(journal.open)
 
 
 func _demo_view(at: Vector3, look: Vector3) -> void:

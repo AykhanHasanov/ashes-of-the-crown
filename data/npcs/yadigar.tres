@@ -16,7 +16,7 @@ personality_notes = "Yadigar, başka bir Közcü (world) — a Közcü further d
 every meeting (advice → forgets why he hunts → forgets his name → attacks Aras or is found
 dead [TBD]). The in-story warning against burning everything. Model: Közcü variant.
 See STORY_BIBLE.md §7."
-home_location_id = ""
+home_location_id = "hearth_north"
 companion = false
 ignores_burned_names = false
 npc_kind = "human"

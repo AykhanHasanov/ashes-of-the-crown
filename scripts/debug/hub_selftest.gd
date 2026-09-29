@@ -78,7 +78,8 @@ func _data() -> void:
 	_check("every resident is Aras or a known NPC", residents.all(func(r): return r == HubData.PROTAGONIST or NpcRegistry.has(StringName(r))))
 	var at_start: Array = NpcRegistry.all().filter(func(d): return d.home_location_id == "son_ocaq").map(func(d): return d.id)
 	_check("a new game starts these in Son Ocaq: Sona, Ehliman, Peri Nene, Kemal, Gülçin, Domrul", at_start == START_IN_HUB, str(at_start))
-	_check("the others have a room but are brought in later", RESCUED_LATER.all(func(id): return NpcRegistry.get_def(id).home_location_id == "" and HubData.room_of(String(id)) != ""))
+	_check("the others have a room but are brought in later (Eşref waits on Kartal Yamacı)", RESCUED_LATER.all(func(id):
+		return NpcRegistry.get_def(id).home_location_id in ["", "kartal_yamaci"] and HubData.room_of(String(id)) != ""))
 	_check("Rüfət lives in Aras's room; Samir with Nermin; Sona in her own room", HubData.room_of("rufet") == "room_protagonist"
 		and HubData.room_of("samir") == "room_nermin" and HubData.room_of("sona") == "room_sona")
 	_check("Kemal and Gülçin sleep in a caravanserai room", HubData.room_of("kemal") == "room_kemal_gulcin" and HubData.room_of("gulcin") == "room_kemal_gulcin"
@@ -172,8 +173,8 @@ func _lost_ones() -> void:
 			ok = false
 			print("   no lost one: ", id)
 	_check("every core NPC (and Domrul) has a lost one", ok)
-	_check("Sona's lost one is Narin; Eşref's is his wife (placeholder)", NpcRegistry.get_def(&"sona").lost_one_npc == &"narin"
-		and tr(NpcRegistry.get_def(&"esref").lost_one_name_key).contains("karısı"))
+	_check("Sona's lost one is Narin; Eşref's is his wife, Şirin", NpcRegistry.get_def(&"sona").lost_one_npc == &"narin"
+		and tr(NpcRegistry.get_def(&"esref").lost_one_name_key) == "Şirin")
 	_check("Sabir's lost one is Kür; Elvin's his mother, Nermin's her husband (placeholders)", NpcRegistry.get_def(&"sabir").lost_one_npc == &"kur"
 		and tr(NpcRegistry.get_def(&"elvin").lost_one_name_key).contains("annesi") and tr(NpcRegistry.get_def(&"nermin").lost_one_name_key).contains("kocası"))
 	var living_lost: Array = NpcRegistry.all().filter(func(d): return d.lost_one_npc != &"" and NpcRegistry.get_def(d.lost_one_npc).npc_kind == "human")
@@ -532,18 +533,29 @@ func _nights() -> void:
 	var on_died := func(id, cause): died.append([id, cause])
 	EventBus.npc_died.connect(on_died)
 	WorldState.rescue_npc(&"esref")
-	WorldState.set_flag(&"esref_quest_failing")
-	WorldState.set_flag(&"esref_quest_failed")   # death condition already true: still only after the warning night
 	hub.wait_until(21.0)
 	await _frames(4)
-	_check("B: the warning night: Eşref is warned", HubNights.is_warned(&"esref"))
+	_check("S10: hub night 1 with Eşref: no warning yet", HubNights.hub_nights(&"esref") == 1 and not HubNights.is_warned(&"esref"))
+	hub.wait_until(7.0)
+	hub.wait_until(21.0)
+	await _frames(4)
+	_check("B: the warning night (hub night 2): Eşref is warned", HubNights.is_warned(&"esref"))
 	_check("B: ... his night line turns into the warning (placeholder key)", hub.door_talk._pick(&"esref", "night") == "HUB_WARNING_ESREF")
 	var lost: Array = hub.shades.filter(func(x): return x.kind == HubShade.Kind.LOST)
 	var esref_door = lvl.doors["door_esref"]
 	_check("C: the shade at his door is his own lost one (placeholder look)", lost.size() == 1 and lost[0].home_door == esref_door and lost[0].identity == "lost_esref")
 	hub.wait_until(7.0)
 	await _frames(3)
-	_check("E: no death on the warning night itself", WorldState.is_npc_alive(&"esref") and died.is_empty())
+	_check("fairness: the warning was never heard, so nobody dies", WorldState.is_npc_alive(&"esref") and died.is_empty())
+	hub.wait_until(21.0)
+	await _frames(3)
+	_check("fairness: unheard, the warning repeats the next hub night", HubNights.is_warned(&"esref")
+		and hub.door_talk._pick(&"esref", "night") == "HUB_WARNING_ESREF" and not HubNights.was_heard(&"esref"))
+	hub.dialogue.line_shown.emit({"speaker_id": "esref", "text_key": "HUB_WARNING_ESREF"})   # the line shows at his door
+	_check("fairness: hearing the warning at his door starts the countdown", HubNights.was_heard(&"esref"))
+	hub.wait_until(7.0)
+	await _frames(3)
+	_check("E: no death on the night it was heard", WorldState.is_npc_alive(&"esref") and died.is_empty())
 	hub.wait_until(21.0)
 	await _frames(2)
 	WorldState.set_time_of_day(7.0)   # the story moves the clock: nobody waited at the hearth
@@ -569,6 +581,12 @@ func _nights() -> void:
 	_check("ground language: ambient ash-snow light grey, the footprints pale ash, the threshold scorched dark",
 		ash_c.v > 0.75 and absf(ash_c.r - ash_c.b) < 0.06 and step_c.v > 0.75 and scorch_c.v < 0.12
 		and lvl.get_node("Aftermath_door_esref/Scorch") != null)
+	var burn_img: Image = lvl._scorch.albedo_texture.get_image()
+	var edge_alphas: Array = []
+	for i in 16:
+		var ang := TAU * i / 16.0
+		edge_alphas.append(burn_img.get_pixel(int(48 + cos(ang) * 30.0), int(48 + sin(ang) * 30.0)).a)
+	_check("the scorch mark is an irregular burn, not a circle", edge_alphas.max() - edge_alphas.min() > 0.3, str(edge_alphas))
 	_check("... cleared (resolved) stones are warm — none of the three look alike", warm_c.r - warm_c.b > 0.35
 		and absf(warm_c.v - ash_c.v) > 0.0 and (warm_c.r - warm_c.b) - (ash_c.r - ash_c.b) > 0.3 and ash_c.v - scorch_c.v > 0.6)
 	_check("the footprints are footprint-shaped", lvl._step_mat.albedo_texture.get_image().get_pixel(16, 44).a > 0.5

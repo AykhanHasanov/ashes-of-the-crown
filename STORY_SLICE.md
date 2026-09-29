@@ -14,8 +14,11 @@
   If **BURNED**, they stay unknown.
 - **Cold open name rule:** the cold open happens before the fire night burned
   everything, so all names resolve as known there (scene-level override).
-- Condition notation: `[if memory:<id>=KEPT]`, `[if flag:<name>]`, `[if known:<id>]`.
-  Action notation: `{reveal_name:<id>}`, `{set:<flag>}`, `{item:+<id>}`.
+- Condition notation (the game's condition language): `mem:<id>=KEPT|BURNED|UNKNOWN`,
+  `flag:<name>`, `known:<id>` (`known:protagonist` = Aras knows his own name), `has_item:<id>`,
+  `rescued:<npc>`, `dead:<npc>`, `grief:<npc>`, `joined:<npc>`, `time:<phase>`, `any_burned`,
+  `any_kept`; `!` negates, `&` joins. Written `[if …]` below.
+  Action notation: `{reveal_name:<id>}`, `{set:<flag>}`, `{item:+<id>}`, `{move_npc:<id>:<location>}`.
 - `(…)` in a line = a written pause/silence in delivery, not text shown.
 - Speaker labels always resolve through the Names function (epithet until known).
 - Placeholder art/audio is fine. **Lines are not placeholders** — use them as written.
@@ -49,17 +52,22 @@ the path; S11 must react correctly to every state of `hearth_lesson`
 
 | Type | id | Details |
 |---|---|---|
-| Memory | `hearth_lesson` | Title key `MEM_HEARTH_LESSON_TITLE` = "Ocak başında". weight 2, combat_burnable **true** (a temptation). Echo S9. |
-| Echo | `echo_first_sword` | Uses existing memory `first_sword`. Echo S6. |
+| Memory | `hearth_lesson` | Title key `MEMORY_HEARTH_LESSON_NAME` = "Ocak başında". weight 2, combat_burnable **true** (a temptation). Echo S9. |
+| Echo | `echo_first_sword` | Uses existing memory `first_sword`. Echo S6. `reveals_on_keep`: sahbaz, kur. (Replaces the placeholder `test_echo`.) |
 | Echo | `echo_hearth_lesson` | Memory `hearth_lesson`. Echo S9. |
 | Item | `sirin_yazmasi` | "Şirin'in yazması" — red embroidered headscarf. Found at Eşref's cold hearth. |
 | Lost one | esref → `sirin` | Name key `LOST_SIRIN_NAME` = "Şirin". |
-| Location | `kartal_yamaci` | Eşref's hut on the mountain slope, with a cold stone hearth. Placeholder. |
-| Flags | `sona_seen`, `esref_rescued`, `esref_warning`, `esref_resolved`, `esref_dead`, `heard_domrul_3`, `act1_complete` | Plus existing `joined:rufet`, name_known flags. |
+| Location | `kartal_yamaci` | Eşref's hut on the mountain slope, with a cold stone hearth. Placeholder. A separate scene reached by a trail from the valley road (like Son Ocak); integrated into the terrain later. |
+| Flags | `sona_seen`, `heard_domrul_3`, `act1_complete` | The only real flags. Everything else is a condition on state that already exists (one fact, one owner): |
+| Conditions | `rescued:esref` (was esref_rescued), `dead:esref` (esref_dead), `grief:esref` (esref_resolved), the warning (esref_warning: HubNights), `joined:rufet` (Rüfət's location `party`, set with `{move_npc:rufet:party}`), `known:<id>` | |
 
 **Design note (slice-only, until the İbrahim system exists):** every BURN grants a
-small **permanent** fire upgrade automatically (e.g. +1 max ember / Köz charge).
-This is the stand-in for the MUST-FIX so the slice's choices carry real weight.
+**permanent** fire upgrade, designed by breakpoints so it is felt: burning
+`hearth_lesson` alone unlocks one extra Köz Darbesi charge; burning `first_sword` alone
+gives a smaller but visible gain (faster Köz regeneration). Final numbers in the
+changelog (A2). This is the stand-in for the MUST-FIX.
+**Balance rule:** every slice encounter is comfortably beatable at base values (100 Köz,
+2 Köz Darbesi, no burns): burning makes fights easier, never required. Checked headless.
 
 ---
 
@@ -68,6 +76,7 @@ This is the stand-in for the MUST-FIX so the slice's choices carry real weight.
 Used in S9 (first two lines only) and in the final game (complete, once).
 Narin's knock rhythm = the syllables of line 1: **"U-yu, kö-züm, u-yu"** →
 `tak-tak · tak-tak · tak-tak` (short pause between pairs, long pause after).
+Data: `data/hub/door_talk.json` → `knocks.narin.rhythm`.
 
 | Key | Line |
 |---|---|
@@ -115,7 +124,9 @@ horizon. Existing prompt: "Geçit Ocağı'nı yak". No dialogue — silence is t
 
 ## S2 — First fight, Rüfət
 
-**Direction.** A small placeholder encounter (3 enemies). Midway, Rüfət charges in.
+**Direction.** A small placeholder encounter (3 enemies). Midway, Rüfət charges in:
+when wave 2 rises, or at once if Aras drops below 30% health first — whichever comes
+first. The first fight is practically unloseable.
 After the fight, Rüfət stares at Aras for a long beat before speaking.
 
 | Key | Speaker | Line | Notes |
@@ -128,7 +139,7 @@ After the fight, Rüfət stares at Aras for a long beat before speaking.
 | `SLICE_S2_06` | Aras | Ben kimim? | |
 | `SLICE_S2_07` | Rüfət | Adını sorma bana. Adın ağır. Önce ayakta dur. | He deliberately withholds it. |
 | `SLICE_S2_08` | Rüfət | Rüfət. Benim adım Rüfət. Bunu da unutursan kafana vururum. | Dry humour. |
-| `SLICE_S2_09` | Rüfət | Son Ocak'a gidiyoruz. Hava kararmadan. | `{set:joined:rufet}` |
+| `SLICE_S2_09` | Rüfət | Son Ocak'a gidiyoruz. Hava kararmadan. | `{move_npc:rufet:party}` (joined is derived from his location, never a flag) |
 
 ---
 
@@ -188,7 +199,10 @@ courtyard. Recommended order is guided by where light strips glow, not forced.
 | `SLICE_S4_09` | Sona | (…) Ben biliyorum. | The shadow under the door stops moving during the pause. |
 | `SLICE_S4_10` | Sona | Git uyu. Gece uzun. | Door silent until morning. |
 
-**Aras's room.** The small shade knocks in the lullaby rhythm. Rüfət is in bed.
+**Aras's room.** The small shade knocks in the lullaby rhythm. Rüfət does not sleep: he
+sits awake on the edge of his bed, listening to the knocks, and tells Aras "Kimse yok.
+Uyu." (key [TBD], phase B). This is permanent design, not a placeholder. Inside at night
+the player chooses "Dinle" or "Dışarı çık".
 
 | Key | Speaker | Line | Notes |
 |---|---|---|---|
@@ -241,7 +255,8 @@ lands in Act II (Şahbaz reconciliation) and with Sabir.
 ## S7 — Yadigar
 
 **Direction.** A man by a small dead fire on the road, pressing a faint ember into
-his palm. Calm, tired, sharp.
+his palm. Calm, tired, sharp. He waits beside the trail sign up to Kartal Yamacı (at
+Karaağaç Ocağı), so the player cannot reach Eşref without passing him.
 
 | Key | Speaker | Line | Notes |
 |---|---|---|---|
@@ -321,9 +336,13 @@ held her hand. BURN grants a bigger upgrade (weight 2).
 
 ## S10 — Eşref in the hub (nights 1–3)
 
-**Timeline after rescue.** Day 0 arrival → Night 1 normal talk → Night 2 **warning**
-(`{set:esref_warning}`) → if not resolved, Night 3 death while waiting until morning.
+**Timeline after rescue.** Nights are counted in the hub only (waiting at the Son Ocak
+hearth). Day 0 arrival → Night 1 normal talk → Night 2 **warning** (HubNights; condition
+"warned") → if not resolved, the death on a later night while waiting until morning.
 Resolving at any point before the death night cancels the warning.
+**Fairness rule:** permanent loss never comes before the player has actually received a
+warning. The death countdown starts only once the player has heard Eşref's warning at his
+door **or** Domrul's line 3. If neither was heard, the warning repeats on the next hub night.
 
 **Day 0 — arrival.**
 
@@ -356,7 +375,7 @@ Resolving at any point before the death night cancels the warning.
 | `SLICE_D3_01` | Domrul | {NPC:esref}'in karısı dün gece üç kez çaldı! Dördüncüde açılır o kapı. Dördüncüde hep açılır! | Literally true: the next knock is the death night. |
 
 **Resolution (day, requires `sirin_yazmasi`).** If the player does not have it,
-E�ref's day lines point nowhere; the player must remember (or read in the journal)
+Eşref's day lines point nowhere; the player must remember (or read in the journal)
 that the scarf was at the cold hearth. Journal thread line: `JOURNAL_ESREF_THREAD` =
 "Eşref'in ocağında bir yazma vardı."
 
@@ -436,7 +455,7 @@ UNKNOWN (echo 2 never found)
 | `SLICE_SF_END` | Sona | Git uyu, {PROTAGONIST}. Bu gece kapını çalan olursa... açma. | |
 
 Aras returns to his room. The small shade knocks: `tak-tak · tak-tak · tak-tak`.
-Rüfət is asleep. The player can "Dinle". Hold for a few seconds, fade to black.
+Rüfət sits awake on his bed, as every night. The player can "Dinle". Hold for a few seconds, fade to black.
 End card: `SLICE_END_CARD` = "I. Perde — Kül" / `SLICE_END_SUB` = "Devam edecek."
 `{set:act1_complete}`
 
@@ -460,7 +479,8 @@ slice — the payoffs are close enough to land alone.
 
 ## 5. Barks
 
-Before `known:protagonist`, no bark may contain `{PROTAGONIST}`.
+Before `known:protagonist`, no bark may contain `{PROTAGONIST}` (enforced by the bark
+system). Rüfət's combat barks have name-free variants until then ("Kılıcını çek, kardeş!").
 
 | Key | Speaker | Line | Condition |
 |---|---|---|---|
@@ -476,7 +496,10 @@ Before `known:protagonist`, no bark may contain `{PROTAGONIST}`.
 
 ## 6. Implementation notes for Claude Code
 
-- New token `{NPC_LOST:<id>}` resolves to that NPC's lost_one name key.
+- New token `{NPC_LOST:<id>}` resolves to that NPC's lost_one name key and **always shows the
+  name** (it is the NPC who says it).
+- Aras is **silent** in the slice: his lines are subtitles only.
+- Story beats run in the `StoryDirector` (the whole game's), data per act: `data/story/act1_beats.json`.
 - Inside echoes, unknown names show as known, but **burned** names still blank
   (use `{PROTAGONIST}` for Aras's label in echoes: "Küçük {PROTAGONIST}").
 - S11 must be tested in all three `hearth_lesson` states and with/without `esref_dead`.
@@ -508,3 +531,42 @@ genuinely hard, and Eşref's fate feels caused by their own actions.
 2. Turkish title for the game card after S0 (keep "ASHES OF THE CROWN" for now).
 3. Eşref's day lines between nights (placeholder pool is fine for the slice).
 4. Music cues per scene.
+
+---
+
+## 9. Changelog
+
+- **2026-09-29 — owner decisions after the conflict report**
+  - Condition language as in §0 (`known:`, `!`, `&`, `mem:`, `has_item:`, `any_burned`,
+    `any_kept`); `joined:rufet` comes from `{move_npc:rufet:party}`, not a flag.
+  - Real flags only `sona_seen`, `heard_domrul_3`, `act1_complete`; the `esref_*` states are
+    conditions (`rescued:`, `dead:`, `grief:`, the warning).
+  - Key `MEMORY_HEARTH_LESSON_NAME` (was `MEM_HEARTH_LESSON_TITLE`).
+  - `{NPC_LOST:<id>}` always shows the name. Echoes and the cold open: all names known
+    (burned names still blank); an echo KEPT reveals its names (`reveals_on_keep`).
+  - Permanent burn power by breakpoints (hearth_lesson alone = +1 Köz Darbesi charge;
+    first_sword = faster Köz regeneration).
+  - Eşref's nights counted in the hub only, with the fairness rule (§S10).
+  - Kartal Yamacı is a separate scene for now.
+  - Aras is silent in the slice (subtitles only).
+  - Rüfət's combat barks are name-free until Aras knows his name.
+  - New Game → S0 → valley; V2 chapters only from the dev menu.
+  - The placeholder `test_echo` is removed; `echo_first_sword` replaces it.
+  - Encoding fixed (S10: "Eşref"); the file is UTF-8.
+
+- **2026-09-29 — A2 (owner decisions)**
+  - Burn power, final: weight ≥ 2 (`hearth_lesson`) = +50 max Köz = +1 Köz Darbesi
+    (100 → 150, 2 → 3 charges); general rule: every weight ≥ 2 memory adds one charge.
+    Weight 1: no cap, diminishing — the 1st and 2nd burns +2 Köz per hit / +4 per kill,
+    every later one +1 / +2; never zero. The curve is data (`combat.json`
+    `ember.burn_power`).
+  - The journal shows the power next to BURNED memories only; never a future value for
+    KEPT ones.
+  - Balance rule (§2) with a headless check: each slice encounter must be won by a plain
+    bot at base values with at least 40% health in every seed (S2 with Rüfət joining as
+    scripted, S8 with Rüfət).
+  - S2: Rüfət arrives at wave 2 or when Aras drops below 30% health, whichever first.
+  - S4 / S11: Rüfət sits awake on his bed at night ("Kimse yok. Uyu.") — permanent design.
+  - S7: Yadigar stands by the trail sign to Kartal Yamacı.
+  - The death countdown (S10) counts hub nights and starts only once the warning was
+    heard (his door, or Domrul's line 3); unheard, it repeats the next hub night.

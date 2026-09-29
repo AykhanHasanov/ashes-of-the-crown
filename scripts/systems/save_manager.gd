@@ -246,7 +246,9 @@ func _migrate_step(d: Dictionary, from: int) -> Dictionary:
 			return _v5_to_v6(d)
 		6:
 			return _v6_to_v7(d)
-		# 7: return _v7_to_v8(d)
+		7:
+			return _v7_to_v8(d)
+		# 8: return _v8_to_v9(d)
 	push_warning("SaveManager: no migration from save_version %d" % from)
 	return {}
 
@@ -341,6 +343,23 @@ func _v6_to_v7(d: Dictionary) -> Dictionary:
 			rec["flags"] = flags
 	d["npcs"] = npcs
 	d["meta"]["save_version"] = 7
+	return d
+
+
+## v8: story beats (StoryDirector's once-only beats, story.beats). The hub's door warnings
+## are counted in hub nights now, with the fairness rule (scripts/hub/hub_nights.gd): the
+## old day-based warning flag is dropped, so a pending warning simply starts over.
+func _v7_to_v8(d: Dictionary) -> Dictionary:
+	var story: Dictionary = d.get("story", {}) if d.get("story") is Dictionary else {}
+	if not (story.get("beats") is Array):
+		story["beats"] = []
+	d["story"] = story
+	var npcs: Dictionary = d.get("npcs", {}) if d.get("npcs") is Dictionary else {}
+	for k in npcs:
+		if npcs[k] is Dictionary and npcs[k].get("flags") is Dictionary:
+			npcs[k]["flags"].erase("door_warned_day")
+	d["npcs"] = npcs
+	d["meta"]["save_version"] = 8
 	return d
 
 

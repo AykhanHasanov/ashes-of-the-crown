@@ -45,10 +45,24 @@ func voice_for(enemy_id: String, seed_value: int) -> String:
 	return "" if list.is_empty() else list[absi(seed_value) % list.size()]
 
 
+## The lines of `profile` for `event` that may play now: their `if` holds, and — until Aras
+## knows his own name — none that says it (STORY_SLICE §5).
+func playable(profile: String, event: String) -> Array:
+	var knows_name: bool = WorldState.check("known:protagonist")
+	var out: Array = []
+	for e in _profiles.get(profile, {}).get(event, []):
+		if e.has("if") and not WorldState.check(String(e["if"])):
+			continue
+		if not knows_name and String(e.get("text", "")).contains("{PROTAGONIST}"):
+			continue
+		out.append(e)
+	return out
+
+
 ## A voice clip of `profile` for `event` (a random line), or null — for callers that play
 ## it themselves (e.g. a voice through a door, on its own muffled bus).
 func voice_stream(profile: String, event: String) -> AudioStream:
-	var lines: Array = _profiles.get(profile, {}).get(event, [])
+	var lines: Array = playable(profile, event)
 	if lines.is_empty():
 		return null
 	return load(lines[randi() % lines.size()]["file"])
@@ -62,7 +76,7 @@ func has_line(profile: String, event: String) -> bool:
 func say(speaker: Node3D, profile: String, event: String, chance := 1.0, head_height := 1.9) -> bool:
 	if profile == "" or not is_instance_valid(speaker) or randf() > chance:
 		return false
-	var lines: Array = _profiles.get(profile, {}).get(event, [])
+	var lines: Array = playable(profile, event)
 	if lines.is_empty():
 		return false
 	var now := Time.get_ticks_msec()
@@ -77,7 +91,7 @@ func say(speaker: Node3D, profile: String, event: String, chance := 1.0, head_he
 			return false
 	_event_until[event] = now + int(float(EVENT_COOLDOWN.get(event, 1.0)) * 1000.0)
 	# Pick a line, never the one we just heard
-	var key := profile + "/" + event
+	var key := profile + "/" + event   # (not repeated back to back)
 	var i := randi() % lines.size()
 	if lines.size() > 1 and i == int(_last.get(key, -1)):
 		i = (i + 1) % lines.size()
@@ -100,10 +114,11 @@ func say(speaker: Node3D, profile: String, event: String, chance := 1.0, head_he
 	p.finished.connect(p.queue_free)
 	_speaking.append(p)
 	speaker.set_meta("bark_until", now + int(stream.get_length() * 1000.0) + 1800)
-	if entry.get("text", "") != "" and Settings.subtitles:
+	var line_text: String = tr(entry["key"]) if entry.has("key") else String(entry.get("text", ""))
+	if line_text != "" and Settings.subtitles:
 		# The voice says the name; the subtitle blanks a burned one unless this speaker never forgets
 		var who := StringName(speaker.get("npc_id")) if speaker.get("npc_id") != null else &""
-		_subtitle(speaker, Names.fill(entry["text"], who), head_height, stream.get_length())
+		_subtitle(speaker, Names.fill(line_text, who), head_height, stream.get_length())
 	return true
 
 

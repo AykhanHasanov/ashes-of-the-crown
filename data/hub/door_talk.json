@@ -146,15 +146,15 @@
 			"door": "door_protagonist",
 			"rhythm": [
 				0.0,
-				0.32,
-				0.64,
-				1.28,
-				1.6,
-				2.24
+				0.18,
+				0.62,
+				0.8,
+				1.24,
+				1.42
 			],
 			"every": 24.0,
 			"near": 16.0,
-			"_about": "The small shade's knock on Aras's door: the first notes of the family lullaby. PLACEHOLDER rhythm (seconds) until the melody exists [TBD]."
+			"_about": "The small shade's knock on Aras's door: the syllables of the lullaby's first line, \"U-yu, kö-züm, u-yu\" → tak-tak · tak-tak · tak-tak (short pause between pairs, long after; `every` gives the long pause). Seconds. Exact timing [TBD] (STORY_SLICE §3)."
 		}
 	}
 }

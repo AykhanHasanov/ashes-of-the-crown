@@ -11,6 +11,11 @@ extends CanvasLayer
 ##   branch                  — {memory, burned, intact}: jump depending on Yaddaş Yanğını, or
 ##                             {if, then, else} with a condition (check(): WorldState's, plus
 ##                             the conversation's own, e.g. "door_mode")
+##   switch                  — [{if?, next}]: the first entry whose condition holds (graphs' "branch")
+##   choices: if / disabled_if — an answer shown only when `if` holds; greyed when `disabled_if` holds
+##   label_key               — a speaker label of its own (e.g. "Küçük kız")
+##   sfx                     — a sound when the line shows
+##   "(…)" in a line         — a pause in delivery, not shown: typing stops, pause_changed(true/false)
 ##   type "name_challenge"   — the speaker asks who is there (text_key); the only answer is the
 ##                             protagonist's name as he can say it (Names.protagonist_answer):
 ##                             known → "pass"; not yet known → "Bilmiyorum..." → "unknown";
@@ -24,8 +29,13 @@ signal finished(event: String)
 signal flag_set(flag: String)
 signal line_shown(node: Dictionary)      # after a node's text is set (voices, door shadows)
 signal started
+signal pause_changed(paused: bool)       # a "(…)" in the line: the speaker falls silent
+signal action_requested(action: String)  # a "do" action that is not WorldState's (the mode's)
 
 const CHALLENGE_WAIT := 1.8              # a blank name hangs in the air this long
+const PAUSE_MARK := "(…)"
+const PAUSE_SECONDS := 1.3
+const TYPE_SPEED := 0.022                # seconds per character
 
 const GOLD := Color(0.92, 0.74, 0.42)
 const EMBER := Color(1.0, 0.55, 0.22)
@@ -50,6 +60,8 @@ var _text: RichTextLabel
 var _choices: VBoxContainer
 var _continue: Label
 var _type_tween: Tween
+var _shown_choices: Array = []           # the node's choices whose `if` holds, in order
+var paused := false
 
 
 func _ready() -> void:
@@ -143,11 +155,24 @@ func _subtitle_style(on: bool) -> void:
 
 ## For tests and tools: the answers on screen and whether each can be taken.
 func choice_texts() -> Array:
-	return (_node.get("choices", []) as Array).map(func(c): return Names.fill(c["text"]))
+	return _shown_choices.map(func(c): return _choice_label(c))
 
 
 func choice_enabled(i: int) -> bool:
-	return not bool(_node["choices"][i].get("disabled", false))
+	return not _choice_disabled(_shown_choices[i])
+
+
+func _choice_label(c: Dictionary) -> String:
+	return Names.fill(tr(c["text_key"]) if c.has("text_key") else String(c.get("text", "")))
+
+
+func _choice_disabled(c: Dictionary) -> bool:
+	return bool(c.get("disabled", false)) or (c.has("disabled_if") and check(c["disabled_if"]))
+
+
+## The text on screen, as the reader sees it (pauses removed).
+func shown_text() -> String:
+	return _text.text
 
 
 func choose(i: int) -> void:
@@ -173,7 +198,7 @@ func _process(delta: float) -> void:
 		return
 	if _typing or not _node.has("choices"):
 		return
-	var count: int = _node["choices"].size()
+	var count: int = _shown_choices.size()
 	for i in mini(count, 9):
 		if Input.is_action_just_pressed("choice_%d" % (i + 1)):
 			_choose(i)
@@ -182,6 +207,19 @@ func _process(delta: float) -> void:
 
 func _show(id: String) -> void:
 	var node: Dictionary = _data[id]
+	if node.has("if") and not check(node["if"]):
+		if node.has("next"):
+			_show(node["next"])
+		else:
+			_end(node.get("event", ""))
+		return
+	if node.has("switch"):
+		for s in node["switch"]:
+			if not s.has("if") or check(s["if"]):
+				_show(s["next"])
+				return
+		_end(node.get("event", ""))
+		return
 	if node.has("branch"):
 		var b: Dictionary = node["branch"]
 		if b.has("if"):
@@ -194,9 +232,12 @@ func _show(id: String) -> void:
 	if node.has("set"):
 		flag_set.emit(node["set"])
 	for action in node.get("do", []):
-		WorldState.apply(action)
+		_do(action)
 	_node = node
 	node_id = id
+	_shown_choices = (node.get("choices", []) as Array).filter(func(c): return not c.has("if") or check(c["if"]))
+	if node.has("sfx"):
+		Audio.play(String(node["sfx"]), -4.0, 0.0)
 	_auto_t = float(node["auto"]["after"]) if node.has("auto") else -1.0
 	Audio.play("ui_click", -12.0, 0.05)
 	# "speaker_id" (an NPC id) names the speaker through Names; old trees give "speaker" text.
@@ -204,11 +245,22 @@ func _show(id: String) -> void:
 	var speaker: String = node.get("speaker", "")
 	var speaker_id := StringName(node.get("speaker_id", ""))
 	var own_line := speaker == Names.TOKEN
-	_name.text = Names.npc(speaker_id) if speaker_id != &"" else Names.fill(speaker)
+	if node.has("label_key"):
+		_name.text = Names.fill(tr(node["label_key"]))
+	elif speaker_id != &"":
+		_name.text = Names.npc(speaker_id)
+	elif own_line:
+		_name.text = Names.protagonist_label()   # his own name only once he knows it
+	else:
+		_name.text = Names.fill(speaker)
 	_name.add_theme_color_override("font_color", EMBER if own_line else GOLD)
 	var text: String = tr(node["text_key"]) if node.has("text_key") else node.get("text", "")
-	_text.text = Names.fill(text, speaker_id)
-	_text.visible_ratio = 0.0
+	# "(…)" is a pause in delivery, not text: the segments are typed with silences between
+	var segments: Array = Names.fill(text, speaker_id).split(PAUSE_MARK)
+	for i in segments.size():
+		segments[i] = String(segments[i]).strip_edges() if i > 0 else String(segments[i]).strip_edges(false, true)
+	_text.text = " ".join(PackedStringArray(segments.filter(func(x): return x != ""))).strip_edges()
+	_text.visible_characters = 0
 	for c in _choices.get_children():
 		c.queue_free()
 	_choices.visible = false
@@ -218,9 +270,31 @@ func _show(id: String) -> void:
 	if _type_tween:
 		_type_tween.kill()
 	_type_tween = create_tween()
-	_type_tween.tween_property(_text, "visible_ratio", 1.0, maxf(0.3, _text.text.length() * 0.022))
+	var shown := 0
+	for i in segments.size():
+		var seg: String = segments[i]
+		if i > 0:
+			_type_tween.tween_callback(_set_paused.bind(true))
+			_type_tween.tween_interval(PAUSE_SECONDS)
+			_type_tween.tween_callback(_set_paused.bind(false))
+		if seg == "":
+			continue
+		var start := shown
+		shown = mini(start + seg.length() + (1 if start > 0 else 0), _text.text.length())
+		_type_tween.tween_property(_text, "visible_characters", shown, maxf(0.2, seg.length() * TYPE_SPEED)).from(start)
 	_type_tween.tween_callback(_finish_typing)
 	line_shown.emit(node)
+
+
+func _set_paused(on: bool) -> void:
+	paused = on
+	pause_changed.emit(on)
+
+
+## A node's or answer's action: WorldState's, or handed to the mode (door actions...).
+func _do(action: String) -> void:
+	if not WorldState.apply(action):
+		action_requested.emit(action)
 
 
 ## "Who is there?" — answered only by the protagonist's name as the UI shows it. A burned
@@ -239,20 +313,22 @@ func _name_challenge(node: Dictionary) -> Dictionary:
 func _finish_typing() -> void:
 	if _type_tween:
 		_type_tween.kill()
-	_text.visible_ratio = 1.0
+	_text.visible_characters = -1
 	_typing = false
+	if paused:
+		_set_paused(false)
 	if _node.has("choices"):
-		var choices: Array = _node["choices"]
+		var choices: Array = _shown_choices
 		for i in choices.size():
 			var btn := Button.new()
-			btn.text = "%d.  %s" % [i + 1, Names.fill(choices[i]["text"])]
+			btn.text = "%d.  %s" % [i + 1, _choice_label(choices[i])]
 			btn.flat = true
 			btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 			btn.add_theme_font_size_override("font_size", 19)
 			btn.add_theme_color_override("font_color", Color(0.95, 0.72, 0.45))
 			btn.add_theme_color_override("font_hover_color", Color(1.0, 0.85, 0.6))
 			btn.pressed.connect(_choose.bind(i))
-			btn.disabled = bool(choices[i].get("disabled", false))
+			btn.disabled = _choice_disabled(choices[i])
 			_choices.add_child(btn)
 		_choices.visible = true
 	else:
@@ -269,14 +345,16 @@ func _advance() -> void:
 func _choose(i: int) -> void:
 	if not _active or _typing:
 		return
-	var c: Dictionary = _node["choices"][i]
-	if bool(c.get("disabled", false)):
+	if i >= _shown_choices.size():
+		return
+	var c: Dictionary = _shown_choices[i]
+	if _choice_disabled(c):
 		return
 	Audio.play("ui_select", -10.0, 0.0)
 	if c.has("set"):
 		flag_set.emit(c["set"])
 	for action in c.get("do", []):
-		WorldState.apply(action)
+		_do(action)
 	if c.has("next"):
 		_show(c["next"])
 	else:

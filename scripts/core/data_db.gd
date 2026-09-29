@@ -10,6 +10,7 @@ const DIRS := {
 	"world": "res://data/world/",
 	"prefabs": "res://data/world/prefabs/",
 	"encounters": "res://data/encounters/",
+	"items": "res://data/items/",
 }
 
 var _tables := {}   # category -> {id -> Dictionary}
@@ -63,6 +64,11 @@ func encounter(id: String) -> Dictionary:
 
 func prefab(id: String) -> Dictionary:
 	return _tables["prefabs"].get(id, {})
+
+
+## An item definition (data/items/<id>.json): name_key, look.
+func item(id: String) -> Dictionary:
+	return _tables.get("items", {}).get(id, {})
 
 
 func ids(category: String) -> Array:

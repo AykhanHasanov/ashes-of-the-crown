@@ -23,6 +23,7 @@ const Wildlife := preload("res://scripts/world/wildlife.gd")
 const Effects := preload("res://scripts/world/effects.gd")
 
 const AUTOSAVE_SECONDS := 300.0
+const TRAILS := {"kartal_yamaci": "res://scenes/kartal_yamaci.tscn"}   # trail signs: where they lead
 
 var debug
 var compass
@@ -81,6 +82,7 @@ func _setup() -> void:
 	npcs.player = player
 	npcs.height_at = level.height_at
 	npcs.place = _npc_place
+	npcs.place_npc = _npc_stand
 	add_child(npcs)
 	hud._place(hud._objective, Vector4(0.5, 0, 0.5, 0), Vector4(-420, 64, 420, 96))
 	compass = Compass.new()
@@ -165,7 +167,7 @@ func _apply_saved_state() -> void:
 	var fire: Variant = WorldState.get_player_stat(&"fire")
 	if fire != null:
 		player.ember = float(fire)
-		player.ember_changed.emit(player.ember, DataDB.balance("combat")["ember"]["max"])
+		player.ember_changed.emit(player.ember, player.ember_max())
 	level.day_night.set_hour(WorldState.get_time_of_day())
 	_last_hearth = String(WorldState.get_world_value(&"last_hearth", ""))
 	if _last_hearth != "":
@@ -337,6 +339,8 @@ func _use(it) -> void:
 			EchoDirector.enter(StringName(it.data["echo"]), self, player, level.day_night.hour)
 		"hub_gate":
 			HubTravel.enter(self, player, level.day_night.hour)
+		"trail":
+			HubTravel.enter(self, player, level.day_night.hour, TRAILS[String(it.data["to"])])
 		"echo":
 			WorldState.add_world_entry("echoes", it.key)
 			hud.show_whisper(Names.fill(it.data["text"]))
@@ -550,6 +554,25 @@ func _npc_place(location_id: String) -> Variant:
 	return c
 
 
+## An NPC with a spot of their own at a loaded POI: a prefab interact entry with
+## "stand": {npc, p, face} (Yadigar by the trail sign to Kartal Yamacı). null otherwise.
+func _npc_stand(npc_id: StringName, location_id: String) -> Variant:
+	if not _loaded_pois.has(location_id):
+		return null
+	var p: Dictionary = _loaded_pois[location_id]
+	var c: Vector3 = level.streamer.poi_pos(p)
+	for d in DataDB.prefab(String(p["type"])).get("interact", []):
+		var st: Dictionary = d.get("stand", {})
+		if st.get("npc", "") != String(npc_id) or d.get("only", location_id) != location_id:
+			continue
+		var at := c + Vector3(float(st["p"][0]), 0, float(st["p"][2]))
+		at.y = level.height_at(at.x, at.z)
+		var look := c + Vector3(float(st["face"][0]), 0, float(st["face"][2]))
+		look.y = at.y
+		return Transform3D(Basis.looking_at(look - at, Vector3.UP), at)
+	return null
+
+
 func _on_actors_released(poi_id: String) -> void:
 	_loaded_pois.erase(poi_id)
 	npcs.queue_refresh()
@@ -676,6 +699,11 @@ func _build_debug() -> void:
 	debug.section("Karşılaşma")
 	debug.button("Deneme karşılaşması (placeholder)", func():
 		start_encounter(&"test_ash_rising", player.global_position))
+	for enc in ["slice_s2_first_fight", "slice_s8_hut"]:
+		var e_id := StringName(enc)
+		debug.button("Slice: " + enc, func(): start_encounter(e_id, player.global_position))
+	debug.section("Eski")
+	debug.button("V2 Bölüm 1 (eski giriş)", func(): go_to_chapter(1, "fresh"))
 	debug.section("NPC")
 	debug.button("Rüfet katılsın / ayrılsın", func():
 		WorldState.move_npc(&"rufet", "" if WorldState.get_npc_location(&"rufet") == WorldState.PARTY else WorldState.PARTY))

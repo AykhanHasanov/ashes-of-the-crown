@@ -11,5 +11,7 @@ extends Resource
 @export var prompt_key: String            # choice screen: the question
 @export var keep_key: String              # choice screen: KEEP label
 @export var burn_key: String              # choice screen: BURN label (hold to confirm)
+## NPCs named inside this echo: KEEP makes their names known (BURN leaves them unknown).
+@export var reveals_on_keep: PackedStringArray = PackedStringArray()
 ## Placeholder content: not written by the story yet.
 @export var placeholder := false

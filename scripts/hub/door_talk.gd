@@ -21,6 +21,7 @@ signal finished
 const HubData := preload("res://scripts/hub/hub_data.gd")
 const NpcRegistry := preload("res://scripts/core/npc_registry.gd")
 const HubNights := preload("res://scripts/hub/hub_nights.gd")
+const DialogueGraphs := preload("res://scripts/story/dialogue_graphs.gd")
 const PATH := "res://data/hub/door_talk.json"
 const DOOR_BUS := "Door"
 const VOICE_BUS := "Voice"
@@ -35,7 +36,10 @@ var mode                           # the hub mode (camera, player, spawner)
 ## What happened last (for the mode and the tests): "talk" | "door" | "open" | "silent" | "listen".
 var last_outcome := ""
 var last_bus := {}                 # speaker ("protagonist" or NPC id) -> bus of their last line
-var knock_log: Array = []          # seconds after the first knock of the last rhythm played
+var knock_log: Array = []
+## The story's own conversations at a door, per NPC: npc id -> dialogue graph id
+## (data/story/dialogue). Set by the story (StoryDirector); cleared with clear_script().
+var scripted: Dictionary = {}          # seconds after the first knock of the last rhythm played
 var door_camera: Camera3D
 var talking_door = null            # Door
 var talking_npc: StringName = &""
@@ -55,6 +59,8 @@ func _ready() -> void:
 	EventBus.time_of_day_changed.connect(func(_p): _refused.clear())   # a new night, a new chance
 	dialogue.line_shown.connect(_on_line)
 	dialogue.finished.connect(_on_finished)
+	dialogue.pause_changed.connect(_on_pause)
+	dialogue.action_requested.connect(on_action)
 
 
 ## The muffled bus for voices through a door: a low-pass into the Voice bus.
@@ -104,10 +110,18 @@ func knock(door) -> String:
 		last_outcome = "open"
 		door.hold_open(true)
 		mode.night_guest(npc, true)
-		dialogue.start({"start": {"speaker_id": String(npc), "text_key": _pick(npc, "night"), "end": true}}, "start", {"door_mode": false})
+		if scripted.has(npc):
+			var g: String = scripted[npc]
+			dialogue.start(DialogueGraphs.load_graph(g), DialogueGraphs.start_of(g), {"door_mode": false})
+		else:
+			dialogue.start({"start": {"speaker_id": String(npc), "text_key": _pick(npc, "night"), "end": true}}, "start", {"door_mode": false})
 		return last_outcome
 	last_outcome = "door"
 	_door_camera(door)
+	if scripted.has(npc):
+		var gid: String = scripted[npc]
+		dialogue.start(DialogueGraphs.load_graph(gid), DialogueGraphs.start_of(gid), {"door_mode": true})
+		return last_outcome
 	var tree := {
 		"line": {"speaker_id": String(npc), "text_key": _pick(npc, "night"), "end": true},
 		"refuse": {"speaker_id": String(npc), "text_key": _data["refusal_key"], "end": true, "event": "refused"},
@@ -141,6 +155,39 @@ func play_knock_rhythm(door, who: StringName) -> void:
 				Audio.play("door_knock", -4.0, 0.02, door.global_position + Vector3(0, 0.9, 0.3)))
 
 
+## The story's door actions (dialogue "do"): "silence_door:<door id>" — that door stays
+## silent until morning; "lights_out:<door id>" — its light is out tonight;
+## "warning_heard:<npc>" — a line told the player of that NPC's warning (Domrul's line 3).
+func on_action(action: String) -> void:
+	var door = level.doors.get(action.get_slice(":", 1))
+	match action.get_slice(":", 0):
+		"silence_door":
+			if door != null:
+				_refused[door.door_id] = true
+		"lights_out":
+			if door != null:
+				door.set_lights_out(true)
+		"warning_heard":
+			HubNights.mark_heard(StringName(action.get_slice(":", 1)))
+
+
+func _on_pause(paused: bool) -> void:
+	if talking_door != null:
+		talking_door.freeze_shadow(paused)   # the shadow under the door stops while they fall silent
+
+
+func set_script_for(npc: StringName, graph_id: String) -> void:
+	scripted[npc] = graph_id
+
+
+func clear_script(npc: StringName) -> void:
+	scripted.erase(npc)
+
+
+func is_silenced(door_id: StringName) -> bool:
+	return _refused.has(door_id)
+
+
 # --- Night rhythm on Aras's door -----------------------------------------------------------------
 
 func _process(delta: float) -> void:
@@ -166,6 +213,8 @@ func _on_line(node: Dictionary) -> void:
 		talking_door.set_speaking(door_mode and speaker != &"")
 	if speaker == &"":
 		return
+	if String(node.get("text_key", "")) == "HUB_WARNING_%s" % String(speaker).to_upper():
+		HubNights.mark_heard(speaker)   # the fairness rule: now the countdown may start
 	last_bus[String(speaker)] = bus_for(speaker, door_mode)
 	var def: Resource = NpcRegistry.get_def(speaker) if NpcRegistry.has(speaker) else null
 	var stream: AudioStream = Barks.voice_stream(def.voice_profile, "idle") if def != null and def.voice_profile != "" else null

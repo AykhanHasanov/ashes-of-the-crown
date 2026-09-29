@@ -1,7 +1,7 @@
 extends Node
 ## Automated checks for the V3 open world, run with --demo=world_selftest on
 ## scenes/world.tscn: discovery, hearths, chests, swimming, fall damage, slope sliding,
-## streaming + enemy spawns, aggro/leash, fast travel and save data. Prints PASS/FAIL
+## streaming + enemy spawns, aggro/leash, fast travel (the Kartal trail, Yadigar) and save data. Prints PASS/FAIL
 ## per check and quits with the failure count as exit code.
 
 var mode      # world_mode
@@ -211,6 +211,14 @@ func _travel() -> void:
 	_check("fast travel puts the protagonist at the hearth", player.global_position.distance_to(Vector3(h["pos"][0], player.global_position.y, h["pos"][2])) < 8.0)
 	await _wait(1.5)
 	_check("the destination streams in", mode.level.streamer.is_full("hearth_north"))
+	# The trail to Kartal Yamacı, with Yadigar beside its sign (STORY_SLICE §S7)
+	var trail = _interactable("trail", "hearth_north")
+	_check("Karaağaç Ocağı has the trail sign up to Kartal Yamacı", trail != null and trail.prompt() == tr("WORLD_PROMPT_TRAIL_KARTAL_YAMACI"))
+	mode.npcs.refresh()
+	await _wait(0.3)
+	var yad = mode.npcs.body(&"yadigar")
+	_check("Yadigar waits beside the sign: the way to Eşref passes him", yad != null and trail != null
+		and Vector2(yad.global_position.x - trail.global_position.x, yad.global_position.z - trail.global_position.z).length() < 3.0)
 
 
 func _save_data() -> void:

@@ -16,6 +16,7 @@ extends "res://scripts/combat/combatant.gd"
 ## (fall_lethal kills), and low obstacles up to vault_height are vaulted while running.
 
 const Names := preload("res://scripts/core/names.gd")
+const BurnPower := preload("res://scripts/combat/burn_power.gd")
 signal ember_changed(current: float, maximum: float)
 signal flasks_changed(current: int, maximum: int)
 signal weapon_changed(weapon_name: String)
@@ -143,13 +144,14 @@ func _ready() -> void:
 	equip("sword")
 	EventBus.memory_burned.connect(func(_id: StringName): _refresh_burn_look())
 	EventBus.state_replaced.connect(_refresh_burn_look)
+	EventBus.memory_burned.connect(func(_id): ember_changed.emit(ember, ember_max()))
 	_emit_all.call_deferred()
 
 
 func _emit_all() -> void:
 	health_changed.emit(health, max_health)
 	stamina_changed.emit(stamina, max_stamina)
-	ember_changed.emit(ember, _cfg["ember"]["max"])
+	ember_changed.emit(ember, ember_max())
 	flasks_changed.emit(flasks, max_flasks)
 
 
@@ -573,7 +575,7 @@ func _impact(a: Dictionary) -> void:
 				hits += 1
 	var weight: String = weapon.get("hitstop", "light")
 	if hits > 0:
-		gain_ember(_cfg["ember"]["on_hit"])
+		gain_ember(_cfg["ember"]["on_hit"] + BurnPower.total()["hit"])
 		var heavy_blow := _attack_kind in ["heavy", "charged"]
 		Audio.play("hit_heavy" if heavy_blow or weight == "heavy" else "hit", -2.0 if heavy_blow else -3.0, 0.08, null, 0 if heavy_blow or weight == "heavy" else 3)
 		Fx.hitstop(_cfg["hitstop"]["heavy" if heavy_blow or weight == "heavy" else "light"] * (1.3 if _attack_kind == "charged" else 1.0))
@@ -844,21 +846,31 @@ func is_drinking() -> bool:
 
 # --- Ember, Köz Zərbəsi, memory wheel (V2) ------------------------------------------------------
 
+## Max Köz: the base plus what burned memories gave (scripts/combat/burn_power.gd).
+func ember_max() -> float:
+	return float(_cfg["ember"]["max"]) + BurnPower.total()["max"]
+
+
+## How many Köz Darbesi a full bar holds.
+func strike_charges() -> int:
+	return int(ember_max() / float(_cfg["ember"]["strike_cost"]))
+
+
 func gain_ember(amount: float) -> void:
 	_last_ember_ms = Time.get_ticks_msec()
-	ember = clampf(ember + amount, 0.0, _cfg["ember"]["max"])
-	ember_changed.emit(ember, _cfg["ember"]["max"])
+	ember = clampf(ember + amount, 0.0, ember_max())
+	ember_changed.emit(ember, ember_max())
 
 
 func on_enemy_killed() -> void:
-	gain_ember(_cfg["ember"]["on_kill"])
+	gain_ember(_cfg["ember"]["on_kill"] + BurnPower.total()["kill"])
 
 
 func _tick_ember(delta: float) -> void:
 	var e: Dictionary = _cfg["ember"]
 	if ember > 0.0 and Time.get_ticks_msec() - _last_ember_ms > e["decay_delay"] * 1000.0:
 		ember = maxf(ember - e["decay"] * delta, 0.0)
-		ember_changed.emit(ember, e["max"])
+		ember_changed.emit(ember, ember_max())
 
 
 func _ember_strike() -> void:
@@ -869,7 +881,7 @@ func _ember_strike() -> void:
 	_end_attack()
 	_strike_cd = e["strike_cooldown"]
 	ember -= e["strike_cost"]
-	ember_changed.emit(ember, e["max"])
+	ember_changed.emit(ember, ember_max())
 	_aim_at_target()
 	_model.play_action("Spellcast_Shoot", 2.2, 0.04)
 	Fx.ember_cone(global_position, _facing, e["strike_range"])

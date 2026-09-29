@@ -12,7 +12,7 @@ extends Node
 ##              burn_context {memory_id: "echo" | "combat"} — where each burned memory burned
 ##   inventory  item_id -> count
 ##   flags      story flags, key -> bool / int / float / String
-##   story      chapter, checkpoint, echoes_seen — story progress lives here and nowhere
+##   story      chapter, checkpoint, echoes_seen, beats — story progress lives here and nowhere
 ##              else (one fact, one owner: never mirror these in flags)
 ##   npcs       npc_id -> {alive, location_id, rescued, relationship, death_cause, flags}
 ##              for every NpcDefinition (data/npcs); location_id is a POI id, "party"
@@ -24,13 +24,14 @@ extends Node
 
 const MemoryRegistry := preload("res://scripts/core/memory_registry.gd")
 const NpcRegistry := preload("res://scripts/core/npc_registry.gd")
+const Conditions := preload("res://scripts/core/conditions.gd")
 
-const SAVE_VERSION := 7
+const SAVE_VERSION := 8
 
 ## A memory is not found yet (UNKNOWN), remembered (KEPT) or given to the fire (BURNED).
 enum MemoryState { UNKNOWN, KEPT, BURNED }
 const STATE_NAMES := {MemoryState.KEPT: "kept", MemoryState.BURNED: "burned"}
-const WORLD_LISTS := ["hearths", "chests", "echoes", "discovered", "killed"]
+const WORLD_LISTS := ["hearths", "chests", "echoes", "discovered", "killed", "pickups"]
 const INT_STATS := ["flasks", "max_flasks", "level"]
 const FLOAT_STATS := ["health", "max_health", "fire"]
 const STRING_STATS := ["weapon"]
@@ -63,10 +64,10 @@ static func default_state() -> Dictionary:
 		"player": {"stats": {"level": 1}, "current_region": "", "position": [0.0, 0.0, 0.0], "memories": {}, "burn_context": {}},
 		"inventory": {},
 		"flags": {},
-		"story": {"chapter": 1, "checkpoint": "", "echoes_seen": []},
+		"story": {"chapter": 1, "checkpoint": "", "echoes_seen": [], "beats": []},
 		"npcs": default_npcs(),
 		"world": {"time_of_day": 8.5, "day_count": 1, "doors": {},
-			"hearths": [], "chests": [], "echoes": [], "discovered": [], "killed": [], "fog": "", "last_hearth": ""},
+			"hearths": [], "chests": [], "echoes": [], "discovered": [], "killed": [], "pickups": [], "fog": "", "last_hearth": ""},
 	}
 
 
@@ -169,6 +170,10 @@ static func normalize(data: Variant) -> Dictionary:
 	for i in s.get("echoes_seen", []):
 		echoes.append(int(i))
 	out["story"]["echoes_seen"] = echoes
+	var beats: Array = []
+	for b in s.get("beats", []):
+		beats.append(String(b))
+	out["story"]["beats"] = beats
 
 	var npcs: Dictionary = d.get("npcs", {}) if d.get("npcs") is Dictionary else {}
 	for k in npcs:
@@ -449,6 +454,20 @@ func mark_echo_seen(index: int) -> bool:
 	return true
 
 
+## StoryDirector's once-only beats that have played (data/story/act*_beats.json ids).
+func is_beat_done(id: String) -> bool:
+	return id in _state["story"]["beats"]
+
+
+## Records a story beat as played. False if it already was. Emits story_changed(&"beats").
+func mark_beat_done(id: String) -> bool:
+	if is_beat_done(id):
+		return false
+	_state["story"]["beats"].append(id)
+	EventBus.story_changed.emit(&"beats")
+	return true
+
+
 ## Debug demos jump into the middle of the story with some echoes already seen.
 func set_echoes_seen(list: Array) -> void:
 	var out: Array = []
@@ -688,10 +707,29 @@ func get_world_value(key: StringName, default: Variant = null) -> Variant:
 ## Condition strings used by dialogue branches: "memory:<id>" (burned), "kept:<id>",
 ## "flag:<name>", "alive:<npc>", "dead:<npc>", "rescued:<npc>", "joined:<npc>" (with the
 ## protagonist: location "party" — derived, never a separate flag), "grief:<npc>" (grief
-## arc resolved), "time:<phase>" (dawn / day / dusk / night).
+## arc resolved), "time:<phase>" (dawn / day / dusk / night), "known:<npc|protagonist>",
+## "mem:<id>=KEPT|BURNED|UNKNOWN", "has_item:<id>", "any_burned", "any_kept".
+## Joined with "&", negated with "!" (scripts/core/conditions.gd).
 func check(cond: String) -> bool:
+	return Conditions.eval(cond, check_leaf)
+
+
+## One leaf of the condition language.
+func check_leaf(cond: String) -> bool:
 	var arg := cond.get_slice(":", 1)
 	match cond.get_slice(":", 0):
+		"known":
+			return has_flag(&"protagonist_name_known") if arg == "protagonist" else is_name_known(StringName(arg))
+		"mem":
+			var want := arg.get_slice("=", 1).to_upper()
+			var st := get_memory_state(StringName(arg.get_slice("=", 0)))
+			return want == {MemoryState.UNKNOWN: "UNKNOWN", MemoryState.KEPT: "KEPT", MemoryState.BURNED: "BURNED"}[st]
+		"has_item":
+			return item_count(StringName(arg)) > 0
+		"any_burned":
+			return not burned_memories().is_empty()
+		"any_kept":
+			return _state["player"]["memories"].values().has("kept")
 		"memory":
 			return has_burned(StringName(arg))
 		"kept":
@@ -713,13 +751,37 @@ func check(cond: String) -> bool:
 	return false
 
 
-## Side effects attached to dialogue nodes and choices ("do": [...]): "flag:<name>",
-## "reveal_name:<npc>".
-func apply(action: String) -> void:
-	if action.get_slice(":", 0) == "flag":
-		set_flag(StringName(action.get_slice(":", 1)))
-	elif action.get_slice(":", 0) == "reveal_name":
-		if action.get_slice(":", 1) == "protagonist":
-			set_flag(&"protagonist_name_known")   # Aras learns his own name
-		else:
-			reveal_name(StringName(action.get_slice(":", 1)))
+## Side effects attached to dialogue nodes and choices ("do": [...]): "flag:<name>" /
+## "set:<name>", "reveal_name:<npc|protagonist>", "item:+<id>" / "item:-<id>",
+## "move_npc:<npc>:<location>", "grief:<npc>", "thread:<KEY>". Returns false for an action that is not
+## WorldState's (the conversation hands those to the mode: e.g. "silence_door:<door>").
+func apply(action: String) -> bool:
+	var verb := action.get_slice(":", 0)
+	var arg := action.get_slice(":", 1)
+	match verb:
+		"flag", "set":
+			set_flag(StringName(arg))
+			return true
+		"item":
+			var id := StringName(arg.substr(1))
+			if arg.begins_with("-"):
+				remove_item(id)
+			else:
+				add_item(id)
+			return true
+		"move_npc":
+			move_npc(StringName(arg), action.get_slice(":", 2))
+			return true
+		"grief":
+			resolve_grief(StringName(arg))
+			return true
+		"thread":
+			set_world_value(&"thread", arg)   # the journal's one current goal line (a key)
+			return true
+		"reveal_name":
+			if arg == "protagonist":
+				set_flag(&"protagonist_name_known")   # Aras learns his own name
+			else:
+				reveal_name(StringName(arg))
+			return true
+	return false

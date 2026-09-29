@@ -13,7 +13,7 @@ profile changes.
 Needs: pip install edge-tts numpy miniaudio.
 Usage: python tools/gen_voices.py [profile ...]
 """
-import asyncio, hashlib, json, os, sys, wave
+import asyncio, csv, hashlib, json, os, sys, wave
 import numpy as np
 import edge_tts
 import miniaudio
@@ -338,8 +338,29 @@ def protagonist_name():
     raise SystemExit("PROTAGONIST_NAME missing from localization/strings.csv")
 
 
-async def tts(text, prof, path):
+_STRINGS = None
+
+
+def strings():
+    """localization/strings.csv as {key: text} (lines may come by key)."""
+    global _STRINGS
+    if _STRINGS is None:
+        with open(os.path.join(ROOT, "localization", "strings.csv"), encoding="utf-8") as f:
+            _STRINGS = {row["keys"]: row["tr"] for row in csv.DictReader(f)}
+    return _STRINGS
+
+
+def spoken_text(text):
+    """What the voice says: real names for every token (the voice knows them all)."""
     text = text.replace("{PROTAGONIST}", protagonist_name())
+    for key, value in strings().items():
+        if key.startswith("NPC_") and key.endswith("_NAME"):
+            text = text.replace("{NPC:%s}" % key[4:-5].lower(), value)
+    return text.replace("(…)", "…")
+
+
+async def tts(text, prof, path):
+    text = spoken_text(text)
     c = edge_tts.Communicate(text, prof["voice"], rate=prof["rate"], pitch=prof["pitch"])
     await c.save(path)
 
@@ -378,10 +399,17 @@ def main():
         made = 0
         for ev, texts in lines.items():
             events[ev] = []
-            for i, text in enumerate(texts):
+            for i, entry in enumerate(texts):
+                # A line is plain text, or {key, if}: the text from strings.csv, a condition to play
+                extra = {}
+                if isinstance(entry, dict):
+                    text = strings()[entry["key"]]
+                    extra = {k: entry[k] for k in ("key", "if") if k in entry}
+                else:
+                    text = entry
                 rel = f"{pname}/{ev}_{i}.wav"
                 path = os.path.join(OUT, rel)
-                spoken = text.replace("{PROTAGONIST}", protagonist_name())   # a new name re-synthesises
+                spoken = spoken_text(text)   # a new name re-synthesises
                 key = hashlib.sha1(json.dumps([spoken, prof], sort_keys=True).encode()).hexdigest()
                 if cache.get(rel) != key or not os.path.exists(path) or (only and pname in only):
                     for attempt in range(3):
@@ -396,7 +424,7 @@ def main():
                     save_wav(path, x, 0.92)
                     cache[rel] = key
                     made += 1
-                events[ev].append({"file": "res://assets/audio/voice/" + rel, "text": text})
+                events[ev].append(dict({"file": "res://assets/audio/voice/" + rel, "text": text}, **extra))
         manifest["profiles"][pname] = events
         print(f"{pname}: {sum(len(v) for v in events.values())} lines ({made} new)")
         json.dump(cache, open(CACHE, "w", encoding="utf-8"), indent=0)
