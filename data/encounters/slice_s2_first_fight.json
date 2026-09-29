@@ -1,0 +1,9 @@
+{
+	"id": "slice_s2_first_fight",
+	"_about": "STORY_SLICE §S2: the first fight, a small placeholder encounter of 3 enemies. Rüfət charges in midway: StoryDirector beat on encounter_wave 'slice_s2_first_fight:2' ({move_npc:rufet:party}, phase B). Balance rule: comfortably beatable at base values, solo (checked by scripts/debug/balance_selftest.gd).",
+	"spawn": {"radius": [7.0, 10.0]},
+	"waves": [
+		{"banner_key": "", "delay": 0.8, "enemies": [{"id": "ash_shade", "count": 2, "level": 1}]},
+		{"banner_key": "", "delay": 1.5, "enemies": [{"id": "ash_shade", "count": 1, "level": 1}]}
+	]
+}

@@ -12,7 +12,7 @@ extends Node
 ##              burn_context {memory_id: "echo" | "combat"} — where each burned memory burned
 ##   inventory  item_id -> count
 ##   flags      story flags, key -> bool / int / float / String
-##   story      chapter, checkpoint, echoes_seen — story progress lives here and nowhere
+##   story      chapter, checkpoint, echoes_seen, beats — story progress lives here and nowhere
 ##              else (one fact, one owner: never mirror these in flags)
 ##   npcs       npc_id -> {alive, location_id, rescued, relationship, death_cause, flags}
 ##              for every NpcDefinition (data/npcs); location_id is a POI id, "party"
@@ -26,7 +26,7 @@ const MemoryRegistry := preload("res://scripts/core/memory_registry.gd")
 const NpcRegistry := preload("res://scripts/core/npc_registry.gd")
 const Conditions := preload("res://scripts/core/conditions.gd")
 
-const SAVE_VERSION := 7
+const SAVE_VERSION := 8
 
 ## A memory is not found yet (UNKNOWN), remembered (KEPT) or given to the fire (BURNED).
 enum MemoryState { UNKNOWN, KEPT, BURNED }
@@ -64,7 +64,7 @@ static func default_state() -> Dictionary:
 		"player": {"stats": {"level": 1}, "current_region": "", "position": [0.0, 0.0, 0.0], "memories": {}, "burn_context": {}},
 		"inventory": {},
 		"flags": {},
-		"story": {"chapter": 1, "checkpoint": "", "echoes_seen": []},
+		"story": {"chapter": 1, "checkpoint": "", "echoes_seen": [], "beats": []},
 		"npcs": default_npcs(),
 		"world": {"time_of_day": 8.5, "day_count": 1, "doors": {},
 			"hearths": [], "chests": [], "echoes": [], "discovered": [], "killed": [], "pickups": [], "fog": "", "last_hearth": ""},
@@ -170,6 +170,10 @@ static func normalize(data: Variant) -> Dictionary:
 	for i in s.get("echoes_seen", []):
 		echoes.append(int(i))
 	out["story"]["echoes_seen"] = echoes
+	var beats: Array = []
+	for b in s.get("beats", []):
+		beats.append(String(b))
+	out["story"]["beats"] = beats
 
 	var npcs: Dictionary = d.get("npcs", {}) if d.get("npcs") is Dictionary else {}
 	for k in npcs:
@@ -447,6 +451,20 @@ func mark_echo_seen(index: int) -> bool:
 		return false
 	_state["story"]["echoes_seen"].append(index)
 	EventBus.story_changed.emit(&"echoes_seen")
+	return true
+
+
+## StoryDirector's once-only beats that have played (data/story/act*_beats.json ids).
+func is_beat_done(id: String) -> bool:
+	return id in _state["story"]["beats"]
+
+
+## Records a story beat as played. False if it already was. Emits story_changed(&"beats").
+func mark_beat_done(id: String) -> bool:
+	if is_beat_done(id):
+		return false
+	_state["story"]["beats"].append(id)
+	EventBus.story_changed.emit(&"beats")
 	return true
 
 
@@ -735,7 +753,7 @@ func check_leaf(cond: String) -> bool:
 
 ## Side effects attached to dialogue nodes and choices ("do": [...]): "flag:<name>" /
 ## "set:<name>", "reveal_name:<npc|protagonist>", "item:+<id>" / "item:-<id>",
-## "move_npc:<npc>:<location>", "grief:<npc>". Returns false for an action that is not
+## "move_npc:<npc>:<location>", "grief:<npc>", "thread:<KEY>". Returns false for an action that is not
 ## WorldState's (the conversation hands those to the mode: e.g. "silence_door:<door>").
 func apply(action: String) -> bool:
 	var verb := action.get_slice(":", 0)
@@ -756,6 +774,9 @@ func apply(action: String) -> bool:
 			return true
 		"grief":
 			resolve_grief(StringName(arg))
+			return true
+		"thread":
+			set_world_value(&"thread", arg)   # the journal's one current goal line (a key)
 			return true
 		"reveal_name":
 			if arg == "protagonist":

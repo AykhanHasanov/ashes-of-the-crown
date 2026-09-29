@@ -18,7 +18,7 @@ var player: Node3D
 var place := Callable()           # (location_id: String) -> Variant (Vector3 or null)
 ## Optional, asked first: (npc_id: StringName, location_id: String) -> Variant. The hub puts
 ## each resident at their own door (and nowhere at night, when they are behind it).
-var place_npc := Callable()
+var place_npc := Callable()      # (npc_id, location_id) -> an exact spot (Vector3 / Transform3D) or null
 var height_at := Callable()       # (x, z) -> float, optional
 var bodies: Dictionary = {}       # npc id -> Node3D
 
@@ -43,6 +43,7 @@ func refresh() -> void:
 	if not is_inside_tree():
 		return   # a deferred refresh after the scene was left
 	var at_place: Dictionary = {}          # location -> [ids], for spreading people out
+	var exact: Dictionary = {}             # ids given an exact spot (no spreading)
 	for def in NpcRegistry.all():
 		if def.npc_kind == "voice_only":
 			continue
@@ -53,14 +54,17 @@ func refresh() -> void:
 		if WorldState.is_npc_alive(id):
 			if loc == WorldState.PARTY and def.companion and player != null:
 				want = "ally"
-			elif loc != "" and loc != WorldState.PARTY and (place.is_valid() or place_npc.is_valid()):
-				pos = place_npc.call(id, loc) if place_npc.is_valid() else place.call(loc)
-				if pos != null and place_npc.is_valid():
+			elif loc != "" and loc != WorldState.PARTY:
+				# An exact spot for this NPC first (place_npc), else the place's centre (spread out)
+				pos = place_npc.call(id, loc) if place_npc.is_valid() else null
+				if pos != null:
 					want = "resident"
-					at_place[loc] = [id]   # an exact spot: no spreading
-				elif pos != null:
-					want = "resident"
-					at_place[loc] = at_place.get(loc, []) + [id]
+					exact[id] = true
+				elif place.is_valid():
+					pos = place.call(loc)
+					if pos != null:
+						want = "resident"
+						at_place[loc] = at_place.get(loc, []) + [id]
 		var body = bodies.get(id)
 		if body != null and not is_instance_valid(body):
 			bodies.erase(id)
@@ -74,8 +78,7 @@ func refresh() -> void:
 		if want == "ally":
 			_spawn_ally(def)
 		elif want == "resident":
-			var i: int = at_place[loc].size() - 1
-			_spawn_resident(def, loc, pos, i)
+			_spawn_resident(def, loc, pos, -1 if exact.has(id) else at_place[loc].size() - 1)
 
 
 func _spawn_ally(def: Resource) -> void:
@@ -87,20 +90,25 @@ func _spawn_ally(def: Resource) -> void:
 	bodies[def.id] = a
 
 
-func _spawn_resident(def: Resource, loc: String, center: Vector3, i: int) -> void:
+## `spot`: a Vector3, or a Transform3D (where, facing its -Z); `i` < 0 = exactly there,
+## else the i-th person spread round a place's centre.
+func _spawn_resident(def: Resource, loc: String, spot: Variant, i: int) -> void:
 	var r = Resident.new()
+	var center: Vector3 = (spot as Transform3D).origin if spot is Transform3D else spot
 	var p := center
 	var face := center
-	if not place_npc.is_valid():
+	if i >= 0:
 		var a := i * 2.4
 		p = center + Vector3(cos(a), 0, sin(a)) * (3.0 + i * 0.6)
+	elif spot is Transform3D:
+		face = center - (spot as Transform3D).basis.z
 	else:
 		face = Vector3.ZERO   # hub residents look into the courtyard, at the hearth
 	if height_at.is_valid():
 		p.y = height_at.call(p.x, p.z)
 	r.setup(def, player, atan2(face.x - p.x, face.z - p.z))
 	r.set_meta("location", loc)
-	r.set_meta("spot", center)
+	r.set_meta("spot", spot)
 	add_child(r)
 	r.global_position = p
 	bodies[def.id] = r

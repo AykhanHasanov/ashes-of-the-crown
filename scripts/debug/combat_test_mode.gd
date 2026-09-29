@@ -1,8 +1,8 @@
 extends "res://scripts/chapter_base.gd"
-## Headless test run for combat, enemy AI and encounters, on the test yard with the real
-## The protagonist, TPCamera and Foe nodes. Runs the three suites one after another, prints
-## PASS/FAIL per check and quits with the total failure count as exit code.
-## Run: godot --headless --path . res://scenes/tests/combat_test.tscn
+## Headless test run for combat, enemy AI, encounters and the balance rule, on the test
+## yard with the real protagonist, TPCamera and Foe nodes. Runs the four suites one after
+## another, prints PASS/FAIL per check and quits with the total failure count as exit code.
+## Run: godot --headless --path . res://scenes/tests/combat_test.tscn  (env BALANCE_DEBUG=1: only the balance suite)
 ## (without --headless it opens a window, which is handy to watch a failing check).
 
 const TestYard := preload("res://scripts/debug/test_yard.gd")
@@ -12,6 +12,7 @@ const Foe := preload("res://scripts/enemies/foe.gd")
 const CombatSelfTest := preload("res://scripts/debug/combat_selftest.gd")
 const AiSelfTest := preload("res://scripts/debug/ai_selftest.gd")
 const EncounterSelfTest := preload("res://scripts/debug/encounter_selftest.gd")
+const BalanceSelfTest := preload("res://scripts/debug/balance_selftest.gd")
 
 
 func _make_level() -> Node3D:
@@ -35,7 +36,10 @@ func _begin(_mode: String) -> void:
 
 func _run() -> void:
 	var fails := 0
-	for suite_script in [CombatSelfTest, AiSelfTest, EncounterSelfTest]:
+	var suites := [CombatSelfTest, AiSelfTest, EncounterSelfTest, BalanceSelfTest]
+	if OS.has_environment("BALANCE_DEBUG"):
+		suites = [BalanceSelfTest]
+	for suite_script in suites:
 		var suite = suite_script.new()
 		suite.mode = self
 		suite.player = player

@@ -10,7 +10,7 @@ const CHEST_OPEN := "res://assets/quaternius/rpg_items_pack/Chest_Open.glb"
 
 const EchoRegistry := preload("res://scripts/core/echo_registry.gd")
 
-var kind := ""            # hearth | chest | echo | memory_echo | hub_gate
+var kind := ""            # hearth | chest | echo | memory_echo | hub_gate | trail
 var poi: Dictionary
 var data: Dictionary
 var key := ""
@@ -42,7 +42,7 @@ func _ready() -> void:
 		"memory_echo":
 			use_range = 2.2
 			_build_memory_ember()
-		"hub_gate":
+		"hub_gate", "trail":
 			use_range = 2.6
 			_build_gate_sign()
 
@@ -124,6 +124,8 @@ func prompt() -> String:
 			return "" if is_used() else tr("ECHO_PROMPT_EMBER")
 		"hub_gate":
 			return tr("WORLD_PROMPT_HUB_GATE")
+		"trail":
+			return tr("WORLD_PROMPT_TRAIL_" + String(data.get("to", "")).to_upper())
 	return ""
 
 

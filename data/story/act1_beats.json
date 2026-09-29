@@ -1,0 +1,36 @@
+{
+	"_about": "Act 1 beats for StoryDirector (scripts/story/story_director.gd; format in its header). Phase A2 ships the machinery and the beats whose content STORY_SLICE.md already fixes; the S0-S11 scenes are added in phase B.",
+	"beats": [
+		{
+			"id": "s2_rufet_joins",
+			"_about": "STORY_SLICE §S2: Rüfət charges in midway — when wave 2 rises.",
+			"on": "encounter_wave",
+			"arg": "slice_s2_first_fight:2",
+			"if": "!joined:rufet",
+			"do": [
+				"move_npc:rufet:party"
+			]
+		},
+		{
+			"id": "s2_rufet_rescue",
+			"_about": "The first fight is practically unloseable: Rüfət arrives at once if Aras drops below 30% health first.",
+			"on": "health_below",
+			"below": 0.3,
+			"during": "slice_s2_first_fight",
+			"if": "!joined:rufet",
+			"do": [
+				"move_npc:rufet:party"
+			]
+		},
+		{
+			"id": "esref_yazma_thread",
+			"_about": "STORY_SLICE §S10 / §5: if the yazma was left at the cold hearth, the journal keeps it as the thread.",
+			"on": "enter",
+			"arg": "son_ocaq",
+			"if": "rescued:esref & !has_item:sirin_yazmasi & !grief:esref",
+			"do": [
+				"thread:JOURNAL_ESREF_THREAD"
+			]
+		}
+	]
+}

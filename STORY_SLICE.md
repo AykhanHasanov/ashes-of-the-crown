@@ -65,7 +65,9 @@ the path; S11 must react correctly to every state of `hearth_lesson`
 **permanent** fire upgrade, designed by breakpoints so it is felt: burning
 `hearth_lesson` alone unlocks one extra Köz Darbesi charge; burning `first_sword` alone
 gives a smaller but visible gain (faster Köz regeneration). Final numbers in the
-changelog once approved. This is the stand-in for the MUST-FIX.
+changelog (A2). This is the stand-in for the MUST-FIX.
+**Balance rule:** every slice encounter is comfortably beatable at base values (100 Köz,
+2 Köz Darbesi, no burns): burning makes fights easier, never required. Checked headless.
 
 ---
 
@@ -122,7 +124,9 @@ horizon. Existing prompt: "Geçit Ocağı'nı yak". No dialogue — silence is t
 
 ## S2 — First fight, Rüfət
 
-**Direction.** A small placeholder encounter (3 enemies). Midway, Rüfət charges in.
+**Direction.** A small placeholder encounter (3 enemies). Midway, Rüfət charges in:
+when wave 2 rises, or at once if Aras drops below 30% health first — whichever comes
+first. The first fight is practically unloseable.
 After the fight, Rüfət stares at Aras for a long beat before speaking.
 
 | Key | Speaker | Line | Notes |
@@ -195,7 +199,10 @@ courtyard. Recommended order is guided by where light strips glow, not forced.
 | `SLICE_S4_09` | Sona | (…) Ben biliyorum. | The shadow under the door stops moving during the pause. |
 | `SLICE_S4_10` | Sona | Git uyu. Gece uzun. | Door silent until morning. |
 
-**Aras's room.** The small shade knocks in the lullaby rhythm. Rüfət is in bed.
+**Aras's room.** The small shade knocks in the lullaby rhythm. Rüfət does not sleep: he
+sits awake on the edge of his bed, listening to the knocks, and tells Aras "Kimse yok.
+Uyu." (key [TBD], phase B). This is permanent design, not a placeholder. Inside at night
+the player chooses "Dinle" or "Dışarı çık".
 
 | Key | Speaker | Line | Notes |
 |---|---|---|---|
@@ -248,7 +255,8 @@ lands in Act II (Şahbaz reconciliation) and with Sabir.
 ## S7 — Yadigar
 
 **Direction.** A man by a small dead fire on the road, pressing a faint ember into
-his palm. Calm, tired, sharp.
+his palm. Calm, tired, sharp. He waits beside the trail sign up to Kartal Yamacı (at
+Karaağaç Ocağı), so the player cannot reach Eşref without passing him.
 
 | Key | Speaker | Line | Notes |
 |---|---|---|---|
@@ -447,7 +455,7 @@ UNKNOWN (echo 2 never found)
 | `SLICE_SF_END` | Sona | Git uyu, {PROTAGONIST}. Bu gece kapını çalan olursa... açma. | |
 
 Aras returns to his room. The small shade knocks: `tak-tak · tak-tak · tak-tak`.
-Rüfət is asleep. The player can "Dinle". Hold for a few seconds, fade to black.
+Rüfət sits awake on his bed, as every night. The player can "Dinle". Hold for a few seconds, fade to black.
 End card: `SLICE_END_CARD` = "I. Perde — Kül" / `SLICE_END_SUB` = "Devam edecek."
 `{set:act1_complete}`
 
@@ -545,3 +553,20 @@ genuinely hard, and Eşref's fate feels caused by their own actions.
   - New Game → S0 → valley; V2 chapters only from the dev menu.
   - The placeholder `test_echo` is removed; `echo_first_sword` replaces it.
   - Encoding fixed (S10: "Eşref"); the file is UTF-8.
+
+- **2026-09-29 — A2 (owner decisions)**
+  - Burn power, final: weight ≥ 2 (`hearth_lesson`) = +50 max Köz = +1 Köz Darbesi
+    (100 → 150, 2 → 3 charges); general rule: every weight ≥ 2 memory adds one charge.
+    Weight 1: no cap, diminishing — the 1st and 2nd burns +2 Köz per hit / +4 per kill,
+    every later one +1 / +2; never zero. The curve is data (`combat.json`
+    `ember.burn_power`).
+  - The journal shows the power next to BURNED memories only; never a future value for
+    KEPT ones.
+  - Balance rule (§2) with a headless check: each slice encounter must be won by a plain
+    bot at base values with at least 40% health in every seed (S2 with Rüfət joining as
+    scripted, S8 with Rüfət).
+  - S2: Rüfət arrives at wave 2 or when Aras drops below 30% health, whichever first.
+  - S4 / S11: Rüfət sits awake on his bed at night ("Kimse yok. Uyu.") — permanent design.
+  - S7: Yadigar stands by the trail sign to Kartal Yamacı.
+  - The death countdown (S10) counts hub nights and starts only once the warning was
+    heard (his door, or Domrul's line 3); unheard, it repeats the next hub night.

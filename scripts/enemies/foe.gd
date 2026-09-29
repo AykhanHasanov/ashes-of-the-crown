@@ -805,10 +805,15 @@ func _think(to: Vector3, dist: float) -> void:
 		var attack := _attack_by_id(best.substr(7))
 		var kind: String = attack.get("kind", "melee")
 		var free: bool = kind in ["ranged", "ward", "buff", "resurrect", "explode"] or data["behavior"].get("ignores_tokens", false)
-		if not free and target.has_method("request_token") and not target.request_token(_token_cost):
+		# One token at a time: a foe that still holds one never asks again (that leaked the
+		# protagonist's budget until enemies stopped attacking); a free attack gives it back
+		if not free and not _has_token and target.has_method("request_token") and not target.request_token(_token_cost):
 			best = "flank" if b.get("flank", false) else "circle"
 		else:
-			_has_token = not free
+			if free:
+				_release_token()
+			else:
+				_has_token = true
 			_begin_attack(attack)
 			return
 	if best == "block":
@@ -1139,8 +1144,14 @@ func is_attacking() -> bool:
 	return _state in [S.WINDUP, S.STRIKE]
 
 
+## Freed while holding an attack token (streamed out, an aborted encounter): give it back,
+## or the protagonist's token budget shrinks for good and enemies stop attacking.
+func _exit_tree() -> void:
+	_release_token()
+
+
 func _release_token() -> void:
-	if _has_token and _target_ok() and target.has_method("release_token"):
+	if _has_token and target != null and is_instance_valid(target) and target.has_method("release_token"):
 		target.release_token(_token_cost)
 	_has_token = false
 

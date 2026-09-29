@@ -78,7 +78,8 @@ func _data() -> void:
 	_check("every resident is Aras or a known NPC", residents.all(func(r): return r == HubData.PROTAGONIST or NpcRegistry.has(StringName(r))))
 	var at_start: Array = NpcRegistry.all().filter(func(d): return d.home_location_id == "son_ocaq").map(func(d): return d.id)
 	_check("a new game starts these in Son Ocaq: Sona, Ehliman, Peri Nene, Kemal, Gülçin, Domrul", at_start == START_IN_HUB, str(at_start))
-	_check("the others have a room but are brought in later", RESCUED_LATER.all(func(id): return NpcRegistry.get_def(id).home_location_id == "" and HubData.room_of(String(id)) != ""))
+	_check("the others have a room but are brought in later (Eşref waits on Kartal Yamacı)", RESCUED_LATER.all(func(id):
+		return NpcRegistry.get_def(id).home_location_id in ["", "kartal_yamaci"] and HubData.room_of(String(id)) != ""))
 	_check("Rüfət lives in Aras's room; Samir with Nermin; Sona in her own room", HubData.room_of("rufet") == "room_protagonist"
 		and HubData.room_of("samir") == "room_nermin" and HubData.room_of("sona") == "room_sona")
 	_check("Kemal and Gülçin sleep in a caravanserai room", HubData.room_of("kemal") == "room_kemal_gulcin" and HubData.room_of("gulcin") == "room_kemal_gulcin"
@@ -532,18 +533,29 @@ func _nights() -> void:
 	var on_died := func(id, cause): died.append([id, cause])
 	EventBus.npc_died.connect(on_died)
 	WorldState.rescue_npc(&"esref")
-	WorldState.set_flag(&"esref_quest_failing")
-	WorldState.set_flag(&"esref_quest_failed")   # death condition already true: still only after the warning night
 	hub.wait_until(21.0)
 	await _frames(4)
-	_check("B: the warning night: Eşref is warned", HubNights.is_warned(&"esref"))
+	_check("S10: hub night 1 with Eşref: no warning yet", HubNights.hub_nights(&"esref") == 1 and not HubNights.is_warned(&"esref"))
+	hub.wait_until(7.0)
+	hub.wait_until(21.0)
+	await _frames(4)
+	_check("B: the warning night (hub night 2): Eşref is warned", HubNights.is_warned(&"esref"))
 	_check("B: ... his night line turns into the warning (placeholder key)", hub.door_talk._pick(&"esref", "night") == "HUB_WARNING_ESREF")
 	var lost: Array = hub.shades.filter(func(x): return x.kind == HubShade.Kind.LOST)
 	var esref_door = lvl.doors["door_esref"]
 	_check("C: the shade at his door is his own lost one (placeholder look)", lost.size() == 1 and lost[0].home_door == esref_door and lost[0].identity == "lost_esref")
 	hub.wait_until(7.0)
 	await _frames(3)
-	_check("E: no death on the warning night itself", WorldState.is_npc_alive(&"esref") and died.is_empty())
+	_check("fairness: the warning was never heard, so nobody dies", WorldState.is_npc_alive(&"esref") and died.is_empty())
+	hub.wait_until(21.0)
+	await _frames(3)
+	_check("fairness: unheard, the warning repeats the next hub night", HubNights.is_warned(&"esref")
+		and hub.door_talk._pick(&"esref", "night") == "HUB_WARNING_ESREF" and not HubNights.was_heard(&"esref"))
+	hub.dialogue.line_shown.emit({"speaker_id": "esref", "text_key": "HUB_WARNING_ESREF"})   # the line shows at his door
+	_check("fairness: hearing the warning at his door starts the countdown", HubNights.was_heard(&"esref"))
+	hub.wait_until(7.0)
+	await _frames(3)
+	_check("E: no death on the night it was heard", WorldState.is_npc_alive(&"esref") and died.is_empty())
 	hub.wait_until(21.0)
 	await _frames(2)
 	WorldState.set_time_of_day(7.0)   # the story moves the clock: nobody waited at the hearth

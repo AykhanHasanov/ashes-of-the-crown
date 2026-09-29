@@ -87,7 +87,7 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
   - `player`: stats, region, position, memory states
   - `inventory`
   - `flags`
-  - `story`: chapter, checkpoint, echoes seen
+  - `story`: chapter, checkpoint, echoes seen, beats (StoryDirector's played once-only beats)
   - `npcs`: one record per NPC definition (alive, location_id, rescued, relationship, death_cause, flags)
   - `world`: clock, day, hub stage, open-world progress
 - **Never mutate its dictionaries.** Use the typed accessors (`set_flag`, `burn_memory`, `add_item`, `set_player_stats`, `add_world_entry`, ...).
@@ -110,7 +110,7 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 - Every memory has one of three states in WorldState (`player.memories`, id → state): UNKNOWN (not found; absent), KEPT, BURNED. Change them only with `keep_memory` (UNKNOWN → KEPT, emits `memory_kept`) and `burn_memory(id, context)` (UNKNOWN/KEPT → BURNED, emits `memory_burned`); read with `get_memory_state` / `has_burned`. Each burn records where it happened (`player.burn_context`: `echo` or `combat`; `get_burn_context`). Dialogue conditions: `memory:<id>` (burned), `kept:<id>`, `flag:<name>`, `alive:<npc>`, `dead:<npc>`, `rescued:<npc>`.
 - `Memory` (the autoload) is only the rules layer. Memories with `combat_burnable = false` (e.g. `own_name`) are never offered to the fire wheel; they burn only in their echo.
 - The fire wheel (`scripts/ui/radial_menu.gd`) burns KEPT memories too (intended). It needs hold-to-confirm: point at a memory and keep pointing for `ember.burn_hold_seconds` (`data/balance/combat.json`, 1.5 s, shared with the echo's BURN) while time is slowed; letting go early cancels.
-- A burn's power is still the one-time Alov Dalğası — a placeholder (see `BACKLOG.md`, must-fix).
+- A burn's power is PERMANENT (the slice's stand-in for İbrahim's upgrades): `scripts/combat/burn_power.gd`, derived from the burned memories every time, never stored. Weight ≥ 2 = +50 max Köz (one more Köz Darbesi); weight 1 = faster Köz, diminishing, never zero (curve in `combat.json` `ember.burn_power`). The echo choice shows the gain; the journal shows it next to BURNED memories only. The one-time Alov Dalğası still fires on a burn.
 - Refer to memories by id (`&"mother_name"`), never by title.
 
 **Echoes** (the protagonist's lost memories, played as short scenes)
@@ -141,16 +141,23 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 - Names: `{NPC_LOST:<id>}` always shows the lost one's name; `Names.scene_all_known` in echoes and the cold open; `EchoDefinition.reveals_on_keep`.
 - Barks: a line in `data/voices/voices.json` may be `{key, if}`; `Barks.playable()` filters by condition and never plays a line with `{PROTAGONIST}` before `known:protagonist`.
 - Items: `data/items/<id>.json`, `scripts/world/item_pickup.gd` (taken pickups in the world list `pickups`).
-- Tests: `"$G" --headless --path . res://scenes/tests/story_test.tscn`.
+- StoryDirector (`scripts/story/story_director.gd`, every V3 mode owns one as `story`): beats in `data/story/act1_beats.json` — `on` (enter, phase, flag, dialogue_end, interact, rest, encounter_end, encounter_wave `<id>:<n>`, near `<spot>`, health_below + `during`), `if`, `where`, `repeat`, `do` (dialogue:, whisper:, banner:, card:, encounter:, wait:, any WorldState action, else the mode's `on_story_action`). Once-only beats are stored in `story.beats` (save v8). Modes name places for it with `story_spot(id)`.
+- Közcü journal (`scripts/ui/kozcu_journal.gd`, Tab, V3 modes): people met (NPC flags `met` / `last_line`, recorded by chapter_base from every shown line; `NpcDefinition.relation_key`), the one-line thread (world value `thread`, action `thread:<KEY>`), kept/burned memories.
+- Hub nights (`scripts/hub/hub_nights.gd`): counted per NPC in the hub only (`hub_nights`); warning from `warning_night`; FAIRNESS: death only on a hub night after the warning was HEARD (the line at his door, or `warning_heard:<npc>` — Domrul's line 3); unheard it repeats; `cancel_if` (grief resolved) ends it.
+- Aras's room (hub): hollow room behind `door_protagonist` (`hub_level.room_spots`, `in_room`); by day walk in; at night "Odana gir", inside "Dinle / Dışarı çık"; Rüfət sits awake on his bed at night (`ally.rest_at`) — permanent design.
+- Kartal Yamacı: `scenes/kartal_yamaci.tscn` (`scripts/kartal_mode.gd`, `scripts/world/kartal_level.gd`), region `kartal_yamaci`, reached by the trail sign at Karaağaç Ocağı (`hearth.json` interact `trail`; `HubTravel.enter(..., target)`), Yadigar stands by that sign (`stand` in the entry → world_mode `_npc_stand`). Views `--demo=kartal | kartal_hut`.
+- Balance rule: every slice encounter is comfortably beatable at base values (no burns). The balance suite in combat_test plays each (`combat.json` `balance_check`) with a plain bot, with the story's beats live (Rüfət joins S2 at wave 2 or below 30% health); every seed must win with ≥ 40% health.
+- Tests: `"$G" --headless --path . res://scenes/tests/story_test.tscn` (99 checks).
 
 **Tests:** `"$G" --headless --path . res://scenes/tests/state_test.tscn` covers state, saves, migration and every main-menu case. It uses its own save folders.
 
-**Combat, AI and encounters:** `"$G" --headless --path . res://scenes/tests/combat_test.tscn`. It runs three suites on a primitive test yard (`scripts/debug/test_yard.gd`, the old arena's layout) with the real protagonist and Foe nodes:
+**Combat, AI, encounters and balance:** `"$G" --headless --path . res://scenes/tests/combat_test.tscn` (env `BALANCE_DEBUG=1`: the balance suite only). It runs four suites on a primitive test yard (`scripts/debug/test_yard.gd`, the old arena's layout) with the real protagonist and Foe nodes:
 - combat: 19 checks;
 - enemy AI: 41 checks;
-- encounters: 13 checks.
+- encounters: 13 checks;
+- balance: 10 checks (the slice encounters at base values, the S2 rescue, attack tokens returned).
 
-It exits with the failure count and takes about 80 s headless.
+It exits with the failure count and takes about 4 minutes headless.
 
 **Echoes, memory states, names, migration:** `"$G" --headless --path . res://scenes/tests/echo_test.tscn` plays the real KEEP and BURN flows (host `scenes/tests/echo_host.tscn` → test echo → back), checks hold-to-confirm, position/clock restore, save/load of the three states, v1/v0 migration incl. the name rename, the blank name, and scans the project for the old protagonist name.
 
@@ -162,7 +169,7 @@ Set `G="C:/Users/User/Documents/games/_tools/godot/Godot_v4.7.2-stable_win64_con
 
 **Main menu** (`scripts/ui/main_menu.gd`, shown by `main.gd`): Continue, New Game, Settings and Quit, all from translation keys (`MENU_*`). Settings opens the same screen as the pause menu.
 - *Continue* (`MENU_CONTINUE`) loads the most recently written slot. It falls back to the slot's `.bak`, is greyed out when no slot can be read, and on a failed load stays on the menu with `MENU_LOAD_FAILED` (it never starts a new game instead). A save whose region is `kur_vadisi` continues in the open world, otherwise in its chapter.
-- *New Game* (`MENU_NEW_GAME`) takes the first empty slot, or asks before overwriting the oldest one (`MENU_OVERWRITE_*`). It then starts Chapter 1.
+- *New Game* (`MENU_NEW_GAME`) takes the first empty slot, or asks before overwriting the oldest one (`MENU_OVERWRITE_*`). It then starts the slice in Kür Vadisi (`main.prepare_new_game`; the cold open S0 comes in phase C). V2's Chapter 1 is only reachable from the world's F10 menu (*Eski*).
 
 **Main story (Chapter 1 → 2)**
 - Play: `"$G" --path .` opens the title screen.
@@ -170,8 +177,8 @@ Set `G="C:/Users/User/Documents/games/_tools/godot/Godot_v4.7.2-stable_win64_con
 - Chapter 2 directly: `"$G" --path . res://scenes/chapter2.tscn`.
 
 **Open world (Kür Vadisi)**
-- The open world has no menu entry and no story path leads there yet. It is reached by *Continue* on a save made in the world, or from the command line: `"$G" --path . res://scenes/world.tscn` (loads the newest slot, or starts a new game in the first empty one).
-- Self-test: `"$G" --path . res://scenes/world.tscn -- --demo=world_selftest` (28 checks). It turns off elite affix rolls (`world_mode.roll_affixes`) and waits for landings instead of fixed times, so it stays deterministic under load.
+- New Game starts here. It is also reached by *Continue* on a save made in the world, or from the command line: `"$G" --path . res://scenes/world.tscn` (loads the newest slot, or starts a new game in the first empty one).
+- Self-test: `"$G" --path . res://scenes/world.tscn -- --demo=world_selftest` (30 checks). It turns off elite affix rolls (`world_mode.roll_affixes`) and waits for landings instead of fixed times, so it stays deterministic under load.
 - Views: `--demo=world_village | world_square | world_evening | world_deer | world_forest | world_dusk | world_night | world_rain | world_lake`.
 
 **Encounters** (`scripts/world/encounter.gd`, data in `data/encounters/*.json`)
@@ -192,6 +199,6 @@ Set `G="C:/Users/User/Documents/games/_tools/godot/Godot_v4.7.2-stable_win64_con
 
 **Content pipelines:** see `docs/WORLD_PIPELINE.md` for the cards → trees → foliage bake → houses → world order.
 
-**State and save tests:** `"$G" --headless --path . res://scenes/tests/state_test.tscn`. **Echo tests:** `"$G" --headless --path . res://scenes/tests/echo_test.tscn`. NPC tests: `"$G" --headless --path . res://scenes/tests/npc_test.tscn`. Son Ocaq (hub, in progress — step 4): `"$G" --headless --path . res://scenes/tests/hub_test.tscn` (138 checks); control hints on the HUD come only from `scripts/ui/control_hints.gd` (the live InputMap) — never write them in a mode; scene `res://scenes/son_ocaq.tscn`, views `--demo=hub_day | hub_night | hub_doors | hub_leave | hub_door_talk | hub_door_burned`; talking by day and through doors at night: `scripts/hub/door_talk.gd` with `data/hub/door_talk.json` (placeholder keys, day/night pools, silent_if, challenge, knock rhythms), dialogue node type `name_challenge`, muffled `Door` audio bus for NPC voices only; nights: `scripts/hub/hub_nights.gd` with `data/hub/night_events.json` (warning night → death night, resolved only while waiting at the hearth until morning; aftermath derived from death_cause "door"), shades `scripts/hub/hub_shade.gd` (never combatants), views `--demo=hub_shades | hub_morning_after`, valley road `--demo=world_hub_gate`. NPC views: `--demo=world_npcs` (the residents in Kürköy's square, Rüfət with the protagonist), `--demo=world_ally` (Rüfət and a bandit). Echo views: `--demo=world_echo` (walk to the ember and enter), `res://scenes/echoes/test_echo.tscn -- --demo=echo_choice` (straight to the choice screen). **Animation isolation:** `"$G" --headless --path . -s tools/test_anim_isolation.gd`.
+**State and save tests:** `"$G" --headless --path . res://scenes/tests/state_test.tscn`. **Echo tests:** `"$G" --headless --path . res://scenes/tests/echo_test.tscn`. NPC tests: `"$G" --headless --path . res://scenes/tests/npc_test.tscn`. Son Ocaq (hub, in progress — step 4): `"$G" --headless --path . res://scenes/tests/hub_test.tscn` (138 checks); control hints on the HUD come only from `scripts/ui/control_hints.gd` (the live InputMap) — never write them in a mode; scene `res://scenes/son_ocaq.tscn`, views `--demo=hub_day | hub_night | hub_doors | hub_leave | hub_door_talk | hub_door_burned | hub_room | hub_room_day | hub_journal`; talking by day and through doors at night: `scripts/hub/door_talk.gd` with `data/hub/door_talk.json` (placeholder keys, day/night pools, silent_if, challenge, knock rhythms), dialogue node type `name_challenge`, muffled `Door` audio bus for NPC voices only; nights: `scripts/hub/hub_nights.gd` with `data/hub/night_events.json` (warning night → death night, resolved only while waiting at the hearth until morning; aftermath derived from death_cause "door"), shades `scripts/hub/hub_shade.gd` (never combatants), views `--demo=hub_shades | hub_morning_after`, valley road `--demo=world_hub_gate`. NPC views: `--demo=world_npcs` (the residents in Kürköy's square, Rüfət with the protagonist), `--demo=world_ally` (Rüfət and a bandit). Echo views: `--demo=world_echo` (walk to the ember and enter), `res://scenes/echoes/test_echo.tscn -- --demo=echo_choice` (straight to the choice screen). **Animation isolation:** `"$G" --headless --path . -s tools/test_anim_isolation.gd`.
 
 **Known tool issue:** `tools/check_scripts.gd` reports false failures, because autoloads do not exist in `-s` mode. Use the self-tests or run a scene to check scripts.

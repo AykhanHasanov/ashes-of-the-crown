@@ -1,12 +1,15 @@
 {
-	"_about": "Door deaths in Son Ocaq (STORY_BIBLE §6: opening the door to a shade kills the one who opens). Off-screen, never in front of the player. At nightfall, if warning_if holds, the NPC is WARNED: that night their night pool gives HUB_WARNING_<ID> and their lost one's shade knocks at their door. If the warning condition stops holding before the death, the warning lapses (the player acted). The DEATH resolves only while Aras waits at the hearth until morning, on a night after the warning night, if death_if holds: kill_npc(id, 'door'). The morning shows the aftermath (door ajar, ash, footprints from the gate). The conditions below are PLACEHOLDER flags until the story writes the real ones.",
+	"_about": "Door deaths in Son Ocaq (STORY_BIBLE §6: opening the door to a shade kills the one who opens). Off-screen, never in front of the player. Rules: scripts/hub/hub_nights.gd. Nights are counted in the hub only, per NPC. From warning_night (default 1) on, while warning_if holds (\"\" = always), the NPC is WARNED: their night line is HUB_WARNING_<ID> and their lost one's shade knocks at their door. FAIRNESS: the death countdown starts only once the warning was HEARD (the line at the door, or \"warning_heard:<npc>\" from a story line such as Domrul's line 3); unheard, it repeats the next hub night. The death resolves only while Aras waits at the hearth until morning, on a hub night after the heard one, if death_if holds (\"\" = always). cancel_if ends the warning for good. Sona's and Domrul's conditions are PLACEHOLDER flags until the story writes them.",
 	"events": [
 		{
 			"id": "esref_opens_door",
 			"npc": "esref",
 			"event": "door_death",
-			"warning_if": "flag:esref_quest_failing",
-			"death_if": "flag:esref_quest_failed"
+			"_about": "STORY_SLICE §S10: night 1 normal talk, night 2 the warning; the next hub night after it is heard, he opens the door — unless his grief is resolved (the yazma).",
+			"warning_night": 2,
+			"warning_if": "",
+			"cancel_if": "grief:esref",
+			"death_if": ""
 		},
 		{
 			"id": "sona_opens_door",

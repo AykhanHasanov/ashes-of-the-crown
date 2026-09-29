@@ -29,6 +29,8 @@ extends Resource
 ## Where a new game puts them: a POI id, "party" (with the protagonist), or "" (not in the
 ## world yet; the story places them).
 @export var home_location_id: String
+## One line on who they are to Aras, shown in the Közcü journal ("" = none written yet).
+@export var relation_key: String
 ## The loved one they lost (STORY_BIBLE §7): the shade that knocks on their door at night
 ## and, in a door death, the one they open it to. Either another NPC (lost_one_npc, e.g.
 ## Sona -> Narin) or a placeholder name key and look.

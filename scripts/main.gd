@@ -85,7 +85,7 @@ func _begin(mode: String) -> void:
 			if mode == "checkpoint" and SaveManager.load_slot(SaveManager.active_slot if SaveManager.active_slot > 0 else SaveManager.most_recent_slot()):
 				_continue_save()
 			elif mode == "fresh":
-				_start_new_game()
+				_start_v2()   # V2's own restart after its chapter end, and the dev menu's V2 entry
 			else:
 				_menu()
 
@@ -109,7 +109,9 @@ func _menu() -> void:
 
 
 ## Regions that have their own scene; any other region is a V2 chapter.
-const REGION_SCENES := {&"kur_vadisi": "res://scenes/world.tscn", &"son_ocaq": "res://scenes/son_ocaq.tscn"}
+const NEW_GAME_REGION := &"kur_vadisi"
+const REGION_SCENES := {&"kur_vadisi": "res://scenes/world.tscn", &"son_ocaq": "res://scenes/son_ocaq.tscn",
+	&"kartal_yamaci": "res://scenes/kartal_yamaci.tscn"}
 
 
 func _continue_save() -> void:
@@ -128,9 +130,24 @@ func _leave_menu() -> void:
 	hud.visible = true
 
 
+## New Game: the slice starts in Kür Vadisi (the cold open S0 comes before it in phase C).
 func _start_new_game() -> void:
+	prepare_new_game()
+	restart_mode = "new"
+	get_tree().change_scene_to_file(REGION_SCENES[WorldState.get_region()])
+
+
+## The state of a new game (the menu has already chosen SaveManager.active_slot). The region
+## change autosaves into that slot.
+static func prepare_new_game() -> void:
+	WorldState.new_game()
+	WorldState.set_region(NEW_GAME_REGION)
+
+
+## V2's Chapter 1 (legacy; reached only from the world's F10 menu).
+func _start_v2() -> void:
 	_leave_menu()
-	WorldState.new_game()   # the menu has already chosen SaveManager.active_slot
+	WorldState.new_game()
 	WorldState.set_region(&"kozqala")
 	save_checkpoint("start")
 	_intro()

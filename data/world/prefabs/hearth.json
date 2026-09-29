@@ -73,6 +73,30 @@
 			],
 			"only": "hearth_west",
 			"_about": "The road to Son Ocaq (placeholder sign). 'only': this POI alone."
+		},
+		{
+			"kind": "trail",
+			"p": [
+				-5.5,
+				0,
+				4.0
+			],
+			"only": "hearth_north",
+			"to": "kartal_yamaci",
+			"_about": "The trail up to Kartal Yamacı (a separate scene until the terrain integration, BACKLOG). Placeholder sign. stand: Yadigar waits beside it (STORY_SLICE §S7), facing the hearth, so the way to Eşref passes him.",
+			"stand": {
+				"npc": "yadigar",
+				"p": [
+					-3.9,
+					0,
+					5.9
+				],
+				"face": [
+					0,
+					0,
+					0
+				]
+			}
 		}
 	]
 }

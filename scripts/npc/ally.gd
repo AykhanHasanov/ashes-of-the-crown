@@ -20,7 +20,7 @@ const Human := preload("res://scripts/characters/human.gd")
 const Melee := preload("res://scripts/combat/melee.gd")
 const Names := preload("res://scripts/core/names.gd")
 
-enum S { FOLLOW, FIGHT, WINDUP, RECOVER, HURT, DOWNED, RISING }
+enum S { FOLLOW, FIGHT, WINDUP, RECOVER, HURT, DOWNED, RISING, REST }
 
 var npc_id: StringName
 var def: Resource                 # NpcDefinition
@@ -42,6 +42,9 @@ var _calm_t := 0.0
 var _tokens_used := 0
 var _drawn: Dictionary = {}       # foe -> ms when it goes back to the protagonist
 var _fighting := false
+var rest_spot: Variant = null     # Transform3D: resting there (his bed in the hub at night); null follows
+var _idle_before := ""
+const REST_CLIP := "Sit_Chair_Idle"   # awake on his bed's edge, listening (STORY_SLICE §S4: he does not sleep)
 
 
 func setup(definition: Resource, protagonist: Node3D) -> void:
@@ -100,6 +103,31 @@ func release_token(cost: int) -> void:
 
 func facing() -> Vector3:
 	return Vector3(sin(_yaw), 0, cos(_yaw))
+
+
+## Rest at `spot` (a Transform3D: where, and facing its -Z like the model) until called with
+## null — then he follows again. The hub sits him on his bed at night: awake, never asleep.
+func rest_at(spot: Variant) -> void:
+	if spot is Transform3D:
+		rest_spot = spot
+		global_position = (spot as Transform3D).origin + Vector3(0, 0.05, 0)
+		var f: Vector3 = -(spot as Transform3D).basis.z
+		_yaw = atan2(f.x, f.z)
+		_model.rotation.y = _yaw + PI
+		if _idle_before == "":
+			_idle_before = _model.idle_anim
+		_model.set_idle(REST_CLIP)
+		velocity = Vector3.ZERO
+		_enter(S.REST)
+	elif rest_spot != null:
+		rest_spot = null
+		_model.set_idle(_idle_before if _idle_before != "" else _model.idle_anim)
+		_idle_before = ""
+		_enter(S.FOLLOW)
+
+
+func is_resting() -> bool:
+	return _state == S.REST
 
 
 func is_down() -> bool:
@@ -187,6 +215,9 @@ func _physics_process(delta: float) -> void:
 	tick_statuses(delta)
 	_expire_drawn()
 	var move := Vector3.ZERO
+	if _state == S.REST:
+		_model.set_locomotion(false)
+		return
 	match _state:
 		S.FOLLOW, S.FIGHT:
 			move = _think()

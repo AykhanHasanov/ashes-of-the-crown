@@ -3,8 +3,19 @@ extends Node
 ## language, name tokens and the scene-level "all names known", echo KEEP revealing names,
 ## dialogue graphs (branches, conditional and disabled answers, "(…)" pauses, sfx, actions),
 ## barks with conditions and the name guard, items, and the story's door actions.
+## Phase A2: burn power (the curve, never zero, charges), the Közcü journal, StoryDirector
+## beats, the hub night counter with the fairness rule, Aras's room, the New Game path,
+## Kartal Yamacı and the save migration to v8.
 ## Run: godot --headless --path . res://scenes/tests/story_test.tscn   (exit code = failures)
 
+const BurnPower := preload("res://scripts/combat/burn_power.gd")
+const KozcuJournal := preload("res://scripts/ui/kozcu_journal.gd")
+const StoryDirector := preload("res://scripts/story/story_director.gd")
+const HubNights := preload("res://scripts/hub/hub_nights.gd")
+const HubTravel := preload("res://scripts/hub/hub_travel.gd")
+const MemoryRegistry := preload("res://scripts/core/memory_registry.gd")
+const Main := preload("res://scripts/main.gd")
+const KARTAL := "res://scenes/kartal_yamaci.tscn"
 const Names := preload("res://scripts/core/names.gd")
 const Conditions := preload("res://scripts/core/conditions.gd")
 const DialogueGraphs := preload("res://scripts/story/dialogue_graphs.gd")
@@ -39,6 +50,13 @@ func _run() -> void:
 	_barks()
 	await _items()
 	await _door_actions()
+	_burn_power()
+	_journal_content()
+	_fairness()
+	_new_game_path()
+	_migration_v8()
+	await _hub_a2()
+	await _kartal()
 	_wipe()
 	print("STORY TESTS DONE, failures: ", _fails)
 	get_tree().quit(_fails)
@@ -251,6 +269,262 @@ func _door_actions() -> void:
 	await _frames(3)
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(gpath))
 	talk.clear_script(&"sona")
+
+
+# --- A2: burn power -------------------------------------------------------------------------------
+
+func _burn_power() -> void:
+	WorldState.new_game()
+	var t := BurnPower.total()
+	_check("burn power: nothing burned, nothing gained", t["max"] == 0.0 and t["hit"] == 0.0 and t["kill"] == 0.0)
+	var lights: Array = []
+	for def in MemoryRegistry.all():
+		if def.combat_burnable and int(def.weight) < 2:
+			lights.append(def.id)
+	var totals: Array = []
+	for id in lights:
+		WorldState.burn_memory(id, &"combat")
+		var tt := BurnPower.total()
+		totals.append([tt["hit"], tt["kill"]])
+	_check("weight 1: the 1st and 2nd burns +2 / +4, every later one +1 / +2 (diminishing)", lights.size() >= 4
+		and totals[0] == [2.0, 4.0] and totals[1] == [4.0, 8.0] and totals[2] == [5.0, 10.0] and totals[3] == [6.0, 12.0], str(totals))
+	var every_gain := BurnPower.gains().all(func(g): return float(g["max"]) + float(g["hit"]) + float(g["kill"]) > 0.0)
+	_check("... no cap: burning never gives zero", every_gain and BurnPower.total()["max"] == 0.0)
+	var pv := BurnPower.preview(&"hearth_lesson")
+	_check("weight 2 (hearth_lesson) previews one more Köz Darbesi", pv["max"] == 50.0 and BurnPower.describe(pv) == "+1 Köz Darbesi")
+	WorldState.burn_memory(&"hearth_lesson", &"combat")
+	var strike := float(DataDB.balance("combat")["ember"]["strike_cost"])
+	_check("... burned: max Köz 150 = 3 Köz Darbesi", int((100.0 + BurnPower.total()["max"]) / strike) == 3)
+	var curve: Array = DataDB.balance("combat")["ember"]["burn_power"]["light_curve"]
+	_check("the curve lives in combat.json", curve.map(func(st): return [int(st[0]), int(st[1])]) == [[2, 4], [2, 4], [1, 2]])
+	WorldState.new_game()
+
+
+# --- A2: the Közcü journal --------------------------------------------------------------------------
+
+func _journal_content() -> void:
+	WorldState.new_game()
+	_check("journal: no thread yet", KozcuJournal.thread_text() == tr("JOURNAL_NO_THREAD"))
+	WorldState.apply("thread:JOURNAL_ESREF_THREAD")
+	_check("journal: the thread is one goal line (thread: action)", KozcuJournal.thread_text() == "Eşref'in ocağında bir yazma vardı.")
+	_check("... nobody met yet", KozcuJournal.people().is_empty())
+	WorldState.set_npc_flag(&"esref", &"met", true)
+	WorldState.set_npc_flag(&"esref", &"last_line", "TEST_ASK")
+	var p: Array = KozcuJournal.people()
+	_check("journal: a met person, by epithet until the name is known, with the last thing said", p.size() == 1
+		and p[0]["name"] == Names.npc(&"esref") and p[0]["last"] == "Seni tanıyor muyum?", str(p))
+	WorldState.keep_memory(&"first_sword")
+	WorldState.burn_memory(&"mother_name", &"combat")
+	var m: Array = KozcuJournal.memories()
+	var kept: Array = m.filter(func(x): return x["id"] == &"first_sword")
+	var burned: Array = m.filter(func(x): return x["id"] == &"mother_name")
+	_check("journal: a BURNED memory shows the power it gave", burned.size() == 1 and burned[0]["state"] == "burned"
+		and burned[0]["power"] == BurnPower.describe({"max": 0.0, "hit": 2.0, "kill": 4.0}))
+	_check("... a KEPT one never shows a future value", kept.size() == 1 and kept[0]["state"] == "kept" and kept[0]["power"] == "")
+	_check("... unknown memories are not listed", m.size() == 2)
+	WorldState.new_game()
+
+
+# --- A2: hub nights and the fairness rule ------------------------------------------------------------
+
+func _night() -> void:
+	WorldState.set_time_of_day(21.0)
+	HubNights.on_nightfall()
+
+
+func _morning() -> void:
+	HubNights.resolve_morning()
+	WorldState.set_time_of_day(7.0)
+
+
+func _fairness() -> void:
+	WorldState.new_game()
+	_night()
+	_check("nights count in the hub only: Eşref on the mountain counts none", HubNights.hub_nights(&"esref") == 0)
+	_morning()
+	WorldState.rescue_npc(&"esref")
+	_night()
+	_check("hub night 1: no warning", HubNights.hub_nights(&"esref") == 1 and not HubNights.is_warned(&"esref"))
+	HubNights.on_nightfall()
+	_check("... a night counts once, however often night is announced", HubNights.hub_nights(&"esref") == 1)
+	_morning()
+	_night()
+	_check("hub night 2: the warning", HubNights.is_warned(&"esref") and not HubNights.was_heard(&"esref"))
+	_morning()
+	_check("fairness: not heard, nobody dies", WorldState.is_npc_alive(&"esref"))
+	HubNights.mark_heard(&"esref")   # the day after: Domrul's line 3
+	_night()
+	_morning()
+	_check("Domrul's line 3 counts as heard: the next hub night is the fourth knock", not WorldState.is_npc_alive(&"esref")
+		and WorldState.get_npc_death_cause(&"esref") == "door")
+	# Resolving his grief in time cancels the warning for good
+	WorldState.new_game()
+	WorldState.rescue_npc(&"esref")
+	_night()
+	_morning()
+	_night()
+	HubNights.mark_heard(&"esref")
+	_morning()
+	WorldState.resolve_grief(&"esref")
+	_night()
+	_morning()
+	_night()
+	_morning()
+	_check("grief resolved (the yazma): the warning ends, he lives", WorldState.is_npc_alive(&"esref") and not HubNights.is_warned(&"esref"))
+	WorldState.new_game()
+
+
+# --- A2: New Game, saves ------------------------------------------------------------------------------
+
+func _new_game_path() -> void:
+	WorldState.set_region(&"kozqala")
+	Main.prepare_new_game()
+	_check("New Game starts the slice in Kür Vadisi (the open world)", WorldState.get_region() == &"kur_vadisi"
+		and Main.REGION_SCENES[WorldState.get_region()] == "res://scenes/world.tscn" and WorldState.get_chapter() == 1)
+	_check("Continue on a save made on Kartal Yamacı comes back there", Main.REGION_SCENES[&"kartal_yamaci"] == KARTAL)
+
+
+func _migration_v8() -> void:
+	var v7 := WorldState.default_state()
+	v7["meta"]["save_version"] = 7
+	v7["story"].erase("beats")
+	v7["npcs"]["esref"]["flags"]["door_warned_day"] = 3
+	var clean: Dictionary = SaveManager.migrate(v7)
+	_check("save v7 -> v8: story beats added, the old day-based warning dropped", int(clean["meta"]["save_version"]) == WorldState.SAVE_VERSION
+		and clean["story"]["beats"] == [] and not clean["npcs"]["esref"]["flags"].has("door_warned_day"))
+
+
+# --- A2: the hub — StoryDirector, journal, Aras's room ---------------------------------------------------
+
+func _hub_a2() -> void:
+	WorldState.new_game()
+	SaveManager.active_slot = 1
+	WorldState.rescue_npc(&"esref")
+	var hub := await _go(HUB)
+	await _frames(4)
+	var story = hub.story
+	_check("a V3 mode has a StoryDirector and the Közcü journal", story != null and story.get_script() == StoryDirector
+		and hub.journal.get_script() == KozcuJournal)
+	_check("act 1 data: entering the hub with Eşref rescued and the yazma left behind sets the thread",
+		WorldState.get_world_value(&"thread", "") == "JOURNAL_ESREF_THREAD" and WorldState.is_beat_done("esref_yazma_thread"))
+	hub.dialogue.line_shown.emit({"speaker_id": "sona", "text_key": "TEST_A"})
+	_check("a line spoken to him: met, and remembered as the last thing said", WorldState.get_npc_flag(&"sona", &"met", false) == true
+		and WorldState.get_npc_flag(&"sona", &"last_line", "") == "TEST_A")
+	hub.journal.enabled = true
+	hub.journal.open()
+	await _frames(2)
+	_check("the journal opens (Tab) and lists what it knows", hub.journal.visible and hub.journal._people.get_child_count() >= 1)
+	hub.journal.close()
+	await _frames(1)
+	# Beats: trigger, condition, once, repeat, region, actions in order, dialogue awaited
+	var gpath := "res://data/story/dialogue/slice_test_beat.json"
+	var f := FileAccess.open(gpath, FileAccess.WRITE)
+	f.store_string(JSON.stringify({"id": "slice_test_beat", "nodes": {"start": {"speaker": "sona", "key": "TEST_END", "end": true, "event": "test_over"}}}))
+	f.close()
+	story._beats = [
+		{"id": "t_once", "on": "flag", "arg": "test_go", "if": "!flag:test_block", "do": ["dialogue:slice_test_beat", "set:test_after", "item:+sirin_yazmasi"]},
+		{"id": "t_repeat", "on": "interact", "arg": "bell", "repeat": true, "do": ["thread:TEST_A"]},
+		{"id": "t_elsewhere", "on": "interact", "arg": "bell", "where": "kur_vadisi", "do": ["set:test_wrong_region"]},
+		{"id": "t_after", "on": "dialogue_end", "arg": "test_over", "do": ["set:test_chained"]}]
+	WorldState.set_flag(&"test_go")
+	await _frames(2)
+	_check("beat: a trigger plays its dialogue first ...", hub.dialogue.is_active() and not WorldState.has_flag(&"test_after") and story.is_busy())
+	await _typed(hub.dialogue)
+	hub.dialogue._advance()
+	await _frames(3)
+	_check("... then the rest of its actions, in order", WorldState.has_flag(&"test_after") and WorldState.check("has_item:sirin_yazmasi") and not story.is_busy())
+	_check("... and a dialogue's end event triggers the next beat", WorldState.has_flag(&"test_chained"))
+	WorldState.clear_flag(&"test_go")
+	WorldState.remove_item(&"sirin_yazmasi")
+	WorldState.set_flag(&"test_go")
+	await _frames(2)
+	_check("beats play once (story.beats)", not hub.dialogue.is_active() and not WorldState.check("has_item:sirin_yazmasi") and WorldState.is_beat_done("t_once"))
+	story.fire("interact", "bell")
+	WorldState.set_world_value(&"thread", "")
+	story.fire("interact", "bell")
+	await _frames(1)
+	_check("repeat beats play every time; 'where' keeps a beat to its region", WorldState.get_world_value(&"thread", "") == "TEST_A"
+		and not WorldState.has_flag(&"test_wrong_region") and not WorldState.is_beat_done("t_repeat"))
+	SaveManager.save(1)
+	WorldState.new_game()
+	_check("... a new game forgets the played beats", not WorldState.is_beat_done("t_once"))
+	SaveManager.load_slot(1)
+	_check("... a load remembers them", WorldState.is_beat_done("t_once") and WorldState.is_beat_done("esref_yazma_thread"))
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(gpath))
+	story._beats = StoryDirector.load_beats()
+	hub.door_talk.on_action("warning_heard:esref")
+	_check("warning_heard: only counts for a warned NPC", not HubNights.was_heard(&"esref"))
+	# Aras's room
+	var lvl = hub.level
+	var own = lvl.doors["door_protagonist"]
+	hub.wait_until(10.0)
+	await _frames(3)
+	_check("Aras's room: by day his door is open and the room is hollow (two beds, a lamp)", own.is_open
+		and lvl.room_spots.has("bed_protagonist") and lvl.room_spots.has("bed_rufet") and lvl.room_lamp != null
+		and lvl.in_room(lvl.room_spots["inside_door"].origin) and not lvl.in_room(hub.door_front(own)))
+	WorldState.move_npc(&"rufet", WorldState.PARTY)
+	await _frames(4)
+	hub.wait_until(21.0)
+	await _frames(4)
+	var rufet = hub.npcs.bodies.get(&"rufet")
+	_check("at night Rüfət rests on his bed", rufet != null and rufet.is_resting()
+		and rufet.global_position.distance_to(lvl.room_spots["bed_rufet"].origin) < 0.6)
+	hub.player.global_position = hub.door_front(own) + Vector3(0, 0.1, 0)
+	await _frames(2)
+	_check("at night his closed door: he can go in", not own.is_open and hub.hud._prompt.text == tr("HUB_PROMPT_ENTER_ROOM"))
+	hub.enter_room()
+	await _frames(2)
+	_check("... and he is inside", lvl.in_room(hub.player.global_position))
+	hub.room_door_choice()
+	await _typed(hub.dialogue)
+	_check("inside at night: the choice Dinle / Dışarı çık", hub.dialogue.choice_texts() == [tr("HUB_ROOM_LISTEN"), tr("HUB_ROOM_OUT")])
+	hub.dialogue.choose(0)
+	await _frames(3)
+	_check("... Dinle: the small shade's knock at his door", hub.door_talk.last_outcome == "listen" and lvl.in_room(hub.player.global_position))
+	hub.room_door_choice()
+	await _typed(hub.dialogue)
+	hub.dialogue.choose(1)
+	await _frames(3)
+	_check("... Dışarı çık: back in the courtyard", not lvl.in_room(hub.player.global_position)
+		and hub.player.global_position.distance_to(hub.door_front(own)) < 1.0)
+	hub.wait_until(7.0)
+	await _frames(3)
+	_check("by day Rüfət follows again", rufet != null and is_instance_valid(rufet) and not rufet.is_resting())
+
+
+# --- A2: Kartal Yamacı ------------------------------------------------------------------------------------
+
+func _kartal() -> void:
+	WorldState.new_game()
+	_check("Eşref lives on Kartal Yamacı at the start", WorldState.get_npc_location(&"esref") == "kartal_yamaci")
+	var k := await _go(KARTAL)
+	await _frames(6)
+	var lvl = k.level
+	_check("Kartal Yamacı: its own region, him at the top of the trail", WorldState.get_region() == &"kartal_yamaci"
+		and k.player.global_position.distance_to(lvl.player_spawn) < 1.5)
+	var esref = k.npcs.bodies.get(&"esref")
+	_check("... Eşref at his hut's door", esref != null and esref.global_position.distance_to(lvl.hut_door) < 1.5)
+	_check("... the cold hearth (no fire) with the yazma on its stones", lvl.yazma != null and not lvl.yazma.is_taken()
+		and lvl.yazma.global_position.distance_to(lvl.hearth_pos) < 1.2 and lvl.get_node("ColdHearth").find_children("*", "GPUParticles3D").is_empty())
+	_check("... story spots for the beats", k.story_spot("hearth") == lvl.hearth_pos and k.story_spot("hut") == lvl.hut_door)
+	k.player.global_position = lvl.yazma.global_position + Vector3(0.6, 0.2, 0.6)
+	await _frames(3)
+	_check("... the yazma's prompt", k.hud._prompt.text == lvl.yazma.prompt(), "'%s' / '%s', %.2f m" % [k.hud._prompt.text, lvl.yazma.prompt(),
+		k.player.global_position.distance_to(lvl.yazma.global_position)])
+	lvl.yazma.take()
+	_check("... in his hands", WorldState.check("has_item:sirin_yazmasi"))
+	var e = k.start_encounter(&"slice_s8_hut", lvl.arena_center)
+	await _until(func(): return e != null and is_instance_valid(e) and e.alive.size() == 3, 5.0)
+	_check("the S8 encounter runs here (3 shades round the hut first)", e != null and is_instance_valid(e) and e.alive.size() == 3)
+	if e != null and is_instance_valid(e):
+		e.abort()
+	for foe in get_tree().get_nodes_in_group("enemies"):
+		foe.queue_free()
+	HubTravel._ctx = {"scene": KARTAL}
+	_check("the trail leads back down to the valley", HubTravel.return_scene() == HubTravel.VALLEY_SCENE)
+	HubTravel._ctx = {}
+	var trail: Array = DataDB.prefab("hearth")["interact"].filter(func(d): return d["kind"] == "trail")
+	_check("the valley's trail sign stands at Karaağaç Ocağı only", trail.size() == 1 and trail[0]["only"] == "hearth_north" and trail[0]["to"] == "kartal_yamaci")
 
 
 # --- Helpers --------------------------------------------------------------------------------------

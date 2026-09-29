@@ -12,8 +12,10 @@ signal chosen(choice: StringName)   # &"keep" | &"burn"
 
 const UITheme := preload("res://scripts/ui/ui_theme.gd")
 const MemoryRegistry := preload("res://scripts/core/memory_registry.gd")
+const BurnPower := preload("res://scripts/combat/burn_power.gd")
 
 var definition: Resource            # EchoDefinition
+var power_text := ""                # what BURN would give, for good
 
 var _hold_from_ms := -1
 var _mouse_burn := false
@@ -46,7 +48,8 @@ func _ready() -> void:
 	prompt.text = tr(definition.prompt_key)
 	prompt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(prompt)
-	box.add_child(UITheme.title(tr("ECHO_FIRE_POWER") % int(memory.fire_power_value), 20, UITheme.EMBER))
+	power_text = tr("ECHO_POWER_PERMANENT") % BurnPower.describe(BurnPower.preview(definition.memory_id))
+	box.add_child(UITheme.title(power_text, 20, UITheme.EMBER))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 20)
 	box.add_child(row)

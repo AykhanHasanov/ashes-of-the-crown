@@ -13,6 +13,8 @@ const Hud := preload("res://scripts/ui/hud.gd")
 const DialogueUI := preload("res://scripts/ui/dialogue_ui.gd")
 const PauseMenu := preload("res://scripts/ui/pause_menu.gd")
 const Journal := preload("res://scripts/ui/journal.gd")
+const KozcuJournal := preload("res://scripts/ui/kozcu_journal.gd")
+const StoryDirector := preload("res://scripts/story/story_director.gd")
 const RadialMenu := preload("res://scripts/ui/radial_menu.gd")
 const AshOffer := preload("res://scripts/ui/ash_offer.gd")
 const Balance := preload("res://scripts/systems/balance.gd")
@@ -23,7 +25,8 @@ const CHAPTER_SCENES := {1: "res://scenes/main.tscn", 2: "res://scenes/chapter2.
 const TALK_RANGE := 3.0
 
 ## How the next scene should start: "" = title screen, "checkpoint" = load the
-## save and resume it, "fresh" = brand-new game.
+## save and resume it, "new" = a new game main.gd already prepared (V3), "fresh" = a
+## brand-new V2 Chapter 1 (legacy).
 static var restart_mode := ""
 
 var level
@@ -33,6 +36,7 @@ var hud
 var dialogue
 var pause_menu
 var journal
+var story: Node       # StoryDirector (V3 modes): the act's beats
 var radial
 var offer
 
@@ -74,8 +78,10 @@ func _ready() -> void:
 	pause_menu = PauseMenu.new()
 	add_child(pause_menu)
 	pause_menu.main_menu_requested.connect(to_main_menu)
-	journal = Journal.new()
+	# V3's protagonist keeps the Közcü journal (people, thread, memories); V2 the old one
+	journal = KozcuJournal.new() if player.has_method("control_hint") else Journal.new()
 	add_child(journal)
+	dialogue.line_shown.connect(_remember_line)
 	radial = RadialMenu.new()
 	add_child(radial)
 	offer = AshOffer.new()
@@ -103,9 +109,15 @@ func _ready() -> void:
 		hud.set_hint(player.control_hint())
 		Settings.changed.connect(func(): hud.set_hint(player.control_hint()))
 	_setup()
+	if player.has_method("control_hint"):
+		story = StoryDirector.new()
+		story.mode = self
+		add_child(story)
 	var mode := restart_mode
 	restart_mode = ""
 	_begin(mode)
+	if story != null:
+		story.fire.call_deferred("enter", String(WorldState.get_region()))   # the region we start in
 	if EchoDirector.returning:
 		_return_from_echo(EchoDirector.consume_return())
 	if HubTravel.returning:
@@ -231,6 +243,16 @@ func _on_saving(_slot: int) -> void:
 		stats["weapon"] = player.weapon["id"]
 	WorldState.set_player_stats(stats)
 	WorldState.set_player_position(player.global_position)
+
+
+## The journal remembers for him: whom he has met and the last thing they said.
+func _remember_line(node: Dictionary) -> void:
+	var id := StringName(node.get("speaker_id", ""))
+	if id == &"" or not WorldState.has_npc(id):
+		return
+	WorldState.set_npc_flag(id, &"met", true)
+	if node.has("text_key"):
+		WorldState.set_npc_flag(id, &"last_line", String(node["text_key"]))
 
 
 func set_controls(on: bool) -> void:

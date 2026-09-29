@@ -24,6 +24,9 @@ var _marker_target: Variant = null  # Vector3 world position or null
 var _marker_camera: Camera3D
 var _ember_pulse := 0.0
 var _ember_back: ColorRect
+var _ember_max := 100.0
+var _ember_notches: Control
+const EMBER_BAR_BASE := 240.0
 var _stamina_back: ColorRect
 var _stamina_fill: ColorRect
 var _stamina_ratio := 1.0
@@ -97,6 +100,11 @@ func _ready() -> void:
 	_ember_fill.color = Color(1.0, 0.55, 0.15)
 	_ember_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ember_back.add_child(_ember_fill)
+	_ember_notches = Control.new()
+	_ember_notches.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_ember_notches.set_anchors_preset(Control.PRESET_FULL_RECT)
+	ember_back.add_child(_ember_notches)
+	_ember_notches.draw.connect(_draw_notches)
 	_ember_fill.position = Vector2(1, 1)
 	_ember_fill.size = Vector2(0, 6)
 	var cost_tick := ColorRect.new()
@@ -250,6 +258,25 @@ func set_lock(target) -> void:
 
 func set_ember(current: float, maximum: float) -> void:
 	_ember_ratio = current / maximum
+	_ember_max = maximum
+	# the bar is as long as the Köz it holds (240 px per base 100), cut at every charge
+	var width := EMBER_BAR_BASE * maximum / float(DataDB.balance("combat")["ember"]["max"])
+	_ember_back.offset_right = _ember_back.offset_left + width
+	_ember_notches.queue_redraw()
+
+
+## Köz Darbesi charges the bar holds (its segments).
+func ember_charges() -> int:
+	return int(_ember_max / float(DataDB.balance("combat")["ember"]["strike_cost"]))
+
+
+func _draw_notches() -> void:
+	var cost := float(DataDB.balance("combat")["ember"]["strike_cost"])
+	var n := int(_ember_max / cost)
+	var w: float = _ember_back.size.x
+	for i in range(1, n):
+		var x := w * (cost * i) / _ember_max
+		_ember_notches.draw_line(Vector2(x, -1), Vector2(x, _ember_back.size.y + 1), Color(0.02, 0.01, 0.01, 0.95), 2.0)
 
 
 func set_health(current: float, maximum: float) -> void:

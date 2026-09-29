@@ -11,7 +11,7 @@ extends Node
 ##   inventory_changed(item_id, count)        WorldState.add_item / remove_item (count = new total)
 ##   time_of_day_changed(phase)               WorldState.set_time_of_day, when dawn/day/dusk/night changes
 ##   region_changed(region)                   WorldState.set_region (SaveManager autosaves on it)
-##   story_changed(field)                     WorldState chapter / checkpoint / echoes setters
+##   story_changed(field)                     WorldState chapter / checkpoint / echoes / beats setters
 ##   world_changed(key)                       WorldState world-section setters (hearths, chests, fog, doors...)
 ##   npc_moved(npc_id, from, to)              WorldState.move_npc / rescue_npc (location ids)
 ##   npc_rescued(npc_id)                      WorldState.rescue_npc (then npc_moved to son_ocaq)

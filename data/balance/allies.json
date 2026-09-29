@@ -33,5 +33,39 @@
 			"recover_health": 0.3,
 			"invulnerable_after": 2.0
 		}
+	},
+	"esref": {
+		"health": 140,
+		"walk_speed": 2.2,
+		"run_speed": 4.6,
+		"follow_side": 1.6,
+		"follow_back": 0.6,
+		"follow_slack": 0.9,
+		"catch_up_distance": 7.0,
+		"teleport_distance": 35.0,
+		"engage_range": 14.0,
+		"reach": 1.9,
+		"arc": 110,
+		"damage": 17,
+		"stance": 20,
+		"windup": 0.6,
+		"recovery": 0.7,
+		"cooldown": 1.6,
+		"clips": [
+			"2H_Melee_Attack_Chop",
+			"2H_Melee_Attack_Slice"
+		],
+		"draw_aggro_chance": 0.35,
+		"draw_aggro_seconds": 8.0,
+		"tokens": 2,
+		"downed": {
+			"help_range": 2.2,
+			"help_health": 0.5,
+			"recover_calm": 6.0,
+			"calm_range": 15.0,
+			"recover_health": 0.3,
+			"invulnerable_after": 2.0
+		},
+		"_about": "Eşref at his door in S8 (STORY_SLICE): an old bey with an axe — slower, harder hits. Placeholder numbers; he fights only in that scene (wired in phase B)."
 	}
 }

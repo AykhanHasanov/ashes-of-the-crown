@@ -60,6 +60,12 @@ var lament: AudioStreamPlayer3D
 var _door_scene := false
 var moon_rim: DirectionalLight3D   # the door scene's faint cool light: the door's silhouette reads
 var _cache := {}
+var room_spots: Dictionary = {}      # Aras's room: spot -> global Transform3D (see _interior)
+var room_bounds := AABB()            # Aras's room, inside
+var room_xf := Transform3D.IDENTITY   # Aras's room: its front's middle, +Z out of the room
+var room_lamp: OmniLight3D
+var _floor: StandardMaterial3D
+var _rug: StandardMaterial3D
 
 
 func build() -> void:
@@ -333,6 +339,62 @@ func stand_point(place_id: String) -> Variant:
 
 # --- The room module ---------------------------------------------------------------------------
 
+## Aras's room (STORY_SLICE §2): a plain hollow room behind his door — two beds (his and
+## Rüfət's), a lamp, a rug, a chest. Placeholder blockout until the mood pass. Its spots
+## (room_spots, global): bed_protagonist, bed_rufet, inside_door, lamp.
+func _interior(root: Node3D, door_x: float) -> void:
+	var w := MODULE * 2.0
+	var back := -ROOM_DEPTH - 0.3
+	var inner := Node3D.new()
+	inner.name = "Interior"
+	root.add_child(inner)
+	_box(inner, Vector3(w + 0.4, 0.1, ROOM_DEPTH + 0.3), Vector3(0, -0.02, back * 0.5), _floor)            # floor
+	_box(inner, Vector3(0.2, ROOM_H, ROOM_DEPTH + 0.3), Vector3(-w * 0.5 - 0.1, ROOM_H * 0.5, back * 0.5), _plaster)
+	_box(inner, Vector3(0.2, ROOM_H, ROOM_DEPTH + 0.3), Vector3(w * 0.5 + 0.1, ROOM_H * 0.5, back * 0.5), _plaster)
+	_box(inner, Vector3(w + 0.4, ROOM_H, 0.2), Vector3(0, ROOM_H * 0.5, back - 0.1), _plaster)            # back wall
+	_box(inner, Vector3(w + 0.4, 0.2, ROOM_DEPTH + 0.3), Vector3(0, ROOM_H + 0.1, back * 0.5), _plaster)  # ceiling
+	# Two beds along the back wall, heads to the wall; the rug between; the lamp in the corner
+	var bed_side := -door_x   # the far side from the door stays free to walk in
+	_prop(inner, "res://assets/props_mk/Bed_Twin1.gltf", Vector3(-bed_side * 0.15, 0, back + 1.25), 0.0)
+	_prop(inner, "res://assets/props_mk/Bed_Twin2.gltf", Vector3(bed_side * 1.45, 0, back + 1.25), 0.0)
+	var rug := MeshInstance3D.new()
+	rug.name = "Rug"
+	var rq := QuadMesh.new()
+	rq.size = Vector2(1.6, 2.2)
+	rq.material = _rug
+	rug.mesh = rq
+	rug.rotation.x = -PI * 0.5
+	rug.position = Vector3(0, 0.012, back + 3.1)
+	inner.add_child(rug)
+	_prop(inner, "res://assets/props_mk/Chest_Wood.gltf", Vector3(-bed_side * 1.5, 0, back + 0.55), 0.0)
+	var lamp_at := Vector3(-bed_side * 1.6, 0, back + 1.5)
+	_prop(inner, "res://assets/props_mk/CandleStick_Stand.gltf", lamp_at, 0.0)
+	room_lamp = OmniLight3D.new()
+	room_lamp.name = "RoomLamp"
+	room_lamp.light_color = Color(1.0, 0.62, 0.3)
+	room_lamp.light_energy = 1.4
+	room_lamp.omni_range = 5.5
+	room_lamp.shadow_enabled = true
+	room_lamp.position = lamp_at + Vector3(0, 1.5, 0.3)
+	inner.add_child(room_lamp)
+	var xf: Transform3D = root.transform
+	room_xf = xf
+	var face_in := Basis(Vector3.UP, PI)   # the model faces -Z: turned to the room's front
+	room_spots = {
+		"bed_protagonist": xf * Transform3D(face_in, Vector3(-bed_side * 0.15, 0.0, back + 1.4)),
+		# Rüfət sits awake on his bed's edge, feet on the floor, facing the room and the door
+		"bed_rufet": xf * Transform3D(Basis(Vector3.UP, bed_side * PI * 0.5), Vector3(bed_side * 0.93, 0.08, back + 1.7)),
+		"inside_door": xf * Transform3D(Basis.IDENTITY, Vector3(door_x, 0.0, -1.3)),
+		"lamp": xf * Transform3D(Basis.IDENTITY, lamp_at),
+	}
+	room_bounds = AABB(xf * Vector3(-w * 0.5, 0, back), Vector3.ZERO).expand(xf * Vector3(w * 0.5, ROOM_H, -0.2))
+
+
+## Inside Aras's room (the protagonist's position `at`).
+func in_room(at: Vector3) -> bool:
+	return room_bounds.has_volume() and room_bounds.grow(0.05).has_point(at + Vector3(0, 0.5, 0))
+
+
 func _room(p: Dictionary, xf: Transform3D) -> void:
 	var variant: Array = FAMILY[int(p.get("variant", 0)) % FAMILY.size()]
 	var root := Node3D.new()
@@ -345,13 +407,16 @@ func _room(p: Dictionary, xf: Transform3D) -> void:
 	_put(root, variant[0], Vector3(door_x, 0, 0))
 	_put(root, variant[1], Vector3(window_x, 0, 0))
 	_put(root, variant[2], Vector3(window_x, 0, 0))
-	# The room behind: a plaster mass under the flat roof
-	_box(root, Vector3(MODULE * 2.0, ROOM_H, ROOM_DEPTH), Vector3(0, ROOM_H * 0.5, -ROOM_DEPTH * 0.5 - 0.3), _plaster)
-	# What an open door or the window shows: dark inside (lit later by hub growth)
-	var inside := _quad(root, Vector2(1.1, 2.3), Vector3(door_x, 1.15, -0.28), "Inside")
 	var pane := _quad(root, Vector2(1.2, 1.1), Vector3(window_x, 1.7, -0.28), "Window")
-	inside.set_meta("place", p["id"])
 	pane.set_meta("place", p["id"])
+	if HubData.residents_of(p["id"]).has(HubData.PROTAGONIST):
+		_interior(root, door_x)   # Aras's own room: he can walk in
+	else:
+		# The room behind: a plaster mass under the flat roof
+		_box(root, Vector3(MODULE * 2.0, ROOM_H, ROOM_DEPTH), Vector3(0, ROOM_H * 0.5, -ROOM_DEPTH * 0.5 - 0.3), _plaster)
+		# What an open door shows: dark inside
+		var inside := _quad(root, Vector2(1.1, 2.3), Vector3(door_x, 1.15, -0.28), "Inside")
+		inside.set_meta("place", p["id"])
 	# Resolved grief: the ash-snow at this door cleared, warm-toned stones showing
 	var cleared := MeshInstance3D.new()
 	cleared.name = "ClearedStones"
@@ -648,6 +713,14 @@ func _materials() -> void:
 	_stone.albedo_color = Color(0.72, 0.7, 0.68)
 	_stone.uv1_triplanar = true
 	_stone.uv1_scale = Vector3(0.4, 0.4, 0.4)
+	_floor = StandardMaterial3D.new()
+	_floor.albedo_texture = load("res://assets/village_mk/T_WoodTrim_BaseColor.png")
+	_floor.albedo_color = Color(0.55, 0.42, 0.32)
+	_floor.uv1_triplanar = true
+	_floor.uv1_scale = Vector3(0.6, 0.6, 0.6)
+	_rug = StandardMaterial3D.new()
+	_rug.albedo_color = Color(0.46, 0.12, 0.08)   # a plain red kilim (placeholder)
+	_rug.roughness = 1.0
 	_ash = StandardMaterial3D.new()
 	_ash.albedo_color = Color(0.82, 0.8, 0.77)   # ash is pale: it must read on the dark stone
 	_ash.roughness = 1.0

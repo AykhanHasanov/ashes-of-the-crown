@@ -16,7 +16,7 @@ personality_notes = "Eşref, Kartal Dağları'nın beyi. Grief stance: loyal mem
 he would never forget her; honour makes him a small mirror of the King.
 Highest death risk: if his quest fails, one night he opens the door to her shade.
 See STORY_BIBLE.md §7."
-home_location_id = ""
+home_location_id = "kartal_yamaci"
 companion = false
 ignores_burned_names = false
 npc_kind = "human"

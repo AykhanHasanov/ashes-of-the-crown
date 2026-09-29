@@ -156,7 +156,8 @@ func play_knock_rhythm(door, who: StringName) -> void:
 
 
 ## The story's door actions (dialogue "do"): "silence_door:<door id>" — that door stays
-## silent until morning; "lights_out:<door id>" — its light is out tonight.
+## silent until morning; "lights_out:<door id>" — its light is out tonight;
+## "warning_heard:<npc>" — a line told the player of that NPC's warning (Domrul's line 3).
 func on_action(action: String) -> void:
 	var door = level.doors.get(action.get_slice(":", 1))
 	match action.get_slice(":", 0):
@@ -166,6 +167,8 @@ func on_action(action: String) -> void:
 		"lights_out":
 			if door != null:
 				door.set_lights_out(true)
+		"warning_heard":
+			HubNights.mark_heard(StringName(action.get_slice(":", 1)))
 
 
 func _on_pause(paused: bool) -> void:
@@ -210,6 +213,8 @@ func _on_line(node: Dictionary) -> void:
 		talking_door.set_speaking(door_mode and speaker != &"")
 	if speaker == &"":
 		return
+	if String(node.get("text_key", "")) == "HUB_WARNING_%s" % String(speaker).to_upper():
+		HubNights.mark_heard(speaker)   # the fairness rule: now the countdown may start
 	last_bus[String(speaker)] = bus_for(speaker, door_mode)
 	var def: Resource = NpcRegistry.get_def(speaker) if NpcRegistry.has(speaker) else null
 	var stream: AudioStream = Barks.voice_stream(def.voice_profile, "idle") if def != null and def.voice_profile != "" else null
