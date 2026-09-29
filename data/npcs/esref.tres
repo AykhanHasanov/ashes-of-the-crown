@@ -23,5 +23,5 @@ npc_kind = "human"
 presence = ""
 tags = PackedStringArray("core_grief")
 placeholder = false
-lost_one_name_key = "NPC_ESREF_LOST_ONE"
+lost_one_name_key = "LOST_SIRIN_NAME"
 lost_one_look_id = "lost_esref"

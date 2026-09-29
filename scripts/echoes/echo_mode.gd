@@ -12,6 +12,7 @@ const Protagonist := preload("res://scripts/player_v3/protagonist.gd")
 const TPCamera := preload("res://scripts/camera/third_person_camera.gd")
 const EchoChoice := preload("res://scripts/ui/echo_choice.gd")
 const EchoRegistry := preload("res://scripts/core/echo_registry.gd")
+const Names := preload("res://scripts/core/names.gd")
 
 var definition: Resource
 var choice_screen: CanvasLayer
@@ -32,6 +33,7 @@ func _on_saving(_slot: int) -> void:
 
 
 func _begin(_mode: String) -> void:
+	Names.scene_all_known = true   # a memory from before: every name is known here
 	definition = EchoDirector.definition()
 	if definition == null:
 		# Opened directly (editor / --demo): play it as the echo this scene belongs to
@@ -73,5 +75,6 @@ func _tick(_delta: float) -> void:
 
 
 func _exit_tree() -> void:
+	Names.scene_all_known = false
 	if EchoDirector.active:
 		EchoDirector.abandon()   # left without choosing: the memory stays undecided

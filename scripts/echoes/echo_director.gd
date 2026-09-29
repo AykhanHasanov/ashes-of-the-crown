@@ -47,11 +47,7 @@ static func definition() -> Resource:
 static func resolve(choice: StringName, tree: SceneTree) -> void:
 	if not active:
 		return
-	var def: Resource = definition()
-	if choice == &"burn":
-		WorldState.burn_memory(def.memory_id, &"echo")
-	else:
-		WorldState.keep_memory(def.memory_id)
+	apply_choice(definition(), choice)
 	_ctx["outcome"] = choice
 	active = false
 	# The save must hold the world he returns to, not the echo he leaves
@@ -61,6 +57,17 @@ static func resolve(choice: StringName, tree: SceneTree) -> void:
 	returning = true
 	tree.paused = false
 	tree.change_scene_to_file(String(_ctx["scene"]))
+
+
+## The choice itself: BURN — the memory burns (context "echo"); KEEP — it is kept, and the
+## people named in it become known (reveals_on_keep). Nothing else happens here.
+static func apply_choice(def: Resource, choice: StringName) -> void:
+	if choice == &"burn":
+		WorldState.burn_memory(def.memory_id, &"echo")
+	else:
+		WorldState.keep_memory(def.memory_id)
+		for npc in def.reveals_on_keep:
+			WorldState.reveal_name(StringName(npc))   # remembered: now he knows who they were
 
 
 ## Leaving an echo without choosing (quit to the menu): the memory stays undecided.

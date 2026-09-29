@@ -20,6 +20,12 @@ const PROTAGONIST_MEMORY := &"own_name"
 const TOKEN := "{PROTAGONIST}"
 ## {NPC:<id>} in text: an NPC's name through npc() — known-name and burned-name rules apply.
 const NPC_TOKEN := "{NPC:"
+## {NPC_LOST:<id>}: the name of that NPC's lost one — always shown (the NPC says it).
+const LOST_TOKEN := "{NPC_LOST:"
+
+## Scene-level override (STORY_SLICE §0): inside an echo and in the cold open — memories
+## from before — every name is known. Burned names still blank.
+static var scene_all_known := false
 
 
 ## A name for display: tr(name_key), or the blank placeholder if `memory_id` is burned.
@@ -47,7 +53,7 @@ static func npc(npc_id: StringName) -> String:
 	if not NpcRegistry.has(npc_id):
 		return ""
 	var def: Resource = NpcRegistry.get_def(npc_id)
-	if not WorldState.is_name_known(npc_id):
+	if not WorldState.is_name_known(npc_id) and not scene_all_known:
 		return capitalize(npc_epithet(npc_id))
 	return resolve(def.name_key, def.name_memory_id)
 
@@ -88,6 +94,8 @@ static func ignores_burned(speaker: StringName) -> bool:
 ## Replaces {PROTAGONIST} in text spoken by `speaker` (an NPC id; empty for the protagonist,
 ## narration and UI). Blank once the name burned, unless the speaker ignores burned names.
 static func fill(text: String, speaker: StringName = &"") -> String:
+	if text.contains(LOST_TOKEN):
+		text = _fill_lost(text)
 	if text.contains(NPC_TOKEN):
 		text = _fill_npcs(text)
 	if not text.contains(TOKEN):
@@ -99,6 +107,27 @@ static func fill(text: String, speaker: StringName = &"") -> String:
 
 
 static var _npc_re: RegEx
+static var _lost_re: RegEx
+
+
+## The name of an NPC's lost one: another NPC's name (Sona → Narin) or its own name key.
+## Always the name — no known-name rule: it is the grieving one who says it.
+static func lost_one(npc_id: StringName) -> String:
+	if not NpcRegistry.has(npc_id):
+		return ""
+	var def: Resource = NpcRegistry.get_def(npc_id)
+	if def.lost_one_npc != &"" and NpcRegistry.has(def.lost_one_npc):
+		return TranslationServer.translate(NpcRegistry.get_def(def.lost_one_npc).name_key)
+	return TranslationServer.translate(def.lost_one_name_key) if def.lost_one_name_key != "" else ""
+
+
+static func _fill_lost(text: String) -> String:
+	if _lost_re == null:
+		_lost_re = RegEx.create_from_string("\\{NPC_LOST:([a-z_]+)\\}")
+	var out := text
+	for m in _lost_re.search_all(text):
+		out = out.replace(m.get_string(0), lost_one(StringName(m.get_string(1))))
+	return out
 
 
 static func _fill_npcs(text: String) -> String:
@@ -113,7 +142,7 @@ static func _fill_npcs(text: String) -> String:
 ## Whether Aras himself knows his name (he wakes without it; the story tells him — [TBD:
 ## Rüfət]). A world flag set by the dialogue action "reveal_name:protagonist".
 static func protagonist_self_known() -> bool:
-	return WorldState.has_flag(&"protagonist_name_known")
+	return scene_all_known or WorldState.has_flag(&"protagonist_name_known")
 
 
 ## His name on the HUD: empty while he does not know it; the blank ("———", reserved for

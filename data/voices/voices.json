@@ -1,5 +1,5 @@
 {
-	"_about": "Düşman sesleri. Her profil: TTS sesi (edge-tts), hız/perde, efekt zinciri ve olay → replik listesi. tools/gen_voices.py bunları assets/audio/voice/ altına üretir. Geçici prototip sesleridir: ticari sürümden önce gerçek seslendirmeyle değiştirilmelidir.",
+	"_about": "Düşman sesleri. Her profil: TTS sesi (edge-tts), hız/perde, efekt zinciri ve olay → replik listesi. tools/gen_voices.py bunları assets/audio/voice/ altına üretir. Geçici prototip sesleridir: ticari sürümden önce gerçek seslendirmeyle değiştirilmelidir. Bir replik düz metin ya da {key, if} olabilir: key → localization/strings.csv, if → koşul dili (scripts/core/conditions.gd).",
 	"enemies": {
 		"ash_shade": [
 			"ash",
@@ -193,7 +193,7 @@
 			"rate": "-12%",
 			"pitch": "-14Hz",
 			"fx": "villager",
-			"lines": "villager"
+			"lines": "ehliman"
 		},
 		"npc_nermin": {
 			"voice": "tr-TR-EmelNeural",
@@ -201,6 +201,20 @@
 			"pitch": "-4Hz",
 			"fx": "villager",
 			"lines": "villager"
+		},
+		"npc_gulcin": {
+			"voice": "tr-TR-EmelNeural",
+			"rate": "+2%",
+			"pitch": "+4Hz",
+			"fx": "villager",
+			"lines": "gulcin"
+		},
+		"npc_kemal": {
+			"voice": "tr-TR-AhmetNeural",
+			"rate": "+4%",
+			"pitch": "+2Hz",
+			"fx": "villager",
+			"lines": "kemal"
 		}
 	},
 	"lines": {
@@ -446,7 +460,18 @@
 			"greet": [
 				"Hoş geldin yolcu. Kürköy'de ekmek de var, dert de.",
 				"Selam sana. Yolun açık olsun.",
-				"Sen {PROTAGONIST}'sın, değil mi? Şehzadem... demek yaşıyorsun.",
+				{
+					"key": "BARK_VILLAGER_POST_01",
+					"if": "known:protagonist"
+				},
+				{
+					"key": "BARK_VILLAGER_PRE_01",
+					"if": "!known:protagonist"
+				},
+				{
+					"key": "BARK_VILLAGER_PRE_02",
+					"if": "!known:protagonist"
+				},
 				"Gözlerin yorgun, evlat. Biraz otur, dinlen.",
 				"Kuyudan su iç, serindir. Kül henüz ona ulaşmadı.",
 				"Kül çökmeden önce buralar ne güzeldi, bilir misin?"
@@ -488,43 +513,179 @@
 		},
 		"rufet": {
 			"greet": [
-				"Ne gerekirse, yanındayım, {PROTAGONIST}.",
-				"Yol uzun, kardeşim. Ama birlikte yürürüz."
+				{
+					"key": "BARK_RUFET_GREET_1",
+					"if": "known:protagonist"
+				},
+				{
+					"key": "BARK_RUFET_GREET_1_PRE",
+					"if": "!known:protagonist"
+				},
+				{
+					"key": "BARK_RUFET_GREET_2"
+				}
 			],
 			"idle": [
-				"Kül hâlâ sıcak. Dikkatli ol.",
-				"Bu sessizlik hoşuma gitmiyor."
+				{
+					"key": "BARK_RUFET_IDLE_1"
+				},
+				{
+					"key": "BARK_RUFET_IDLE_2"
+				}
 			],
 			"spot": [
-				"Kılıcını çek, {PROTAGONIST}!",
-				"Arkanı kolluyorum!",
-				"Geliyorlar!"
+				{
+					"key": "SLICE_S2_01"
+				},
+				{
+					"key": "BARK_RUFET_SPOT_1",
+					"if": "known:protagonist"
+				},
+				{
+					"key": "BARK_RUFET_SPOT_1_PRE",
+					"if": "!known:protagonist"
+				},
+				{
+					"key": "BARK_RUFET_SPOT_2"
+				},
+				{
+					"key": "BARK_RUFET_SPOT_3"
+				}
 			],
 			"attack": [
-				"Al bunu!",
-				"Geri çekil!",
-				"Hah!"
+				{
+					"key": "BARK_RUFET_ATTACK_1"
+				},
+				{
+					"key": "BARK_RUFET_ATTACK_2"
+				},
+				{
+					"key": "BARK_RUFET_ATTACK_3"
+				}
 			],
 			"hurt": [
-				"Ah!",
-				"Sıyırdı sadece."
+				{
+					"key": "BARK_RUFET_HURT_1"
+				},
+				{
+					"key": "BARK_RUFET_HURT_2"
+				}
 			],
 			"downed": [
-				"{PROTAGONIST}... kalkamıyorum...",
-				"Yardım et, {PROTAGONIST}!",
-				"Dizim... gitti..."
+				{
+					"key": "BARK_RUFET_DOWNED_1",
+					"if": "known:protagonist"
+				},
+				{
+					"key": "BARK_RUFET_DOWNED_1_PRE",
+					"if": "!known:protagonist"
+				},
+				{
+					"key": "BARK_RUFET_DOWNED_2",
+					"if": "known:protagonist"
+				},
+				{
+					"key": "BARK_RUFET_DOWNED_2_PRE",
+					"if": "!known:protagonist"
+				},
+				{
+					"key": "BARK_RUFET_DOWNED_3"
+				}
 			],
 			"helped": [
-				"Sağ ol, kardeşim.",
-				"Hâlâ ayaktayız, {PROTAGONIST}."
+				{
+					"key": "BARK_RUFET_HELPED_1"
+				},
+				{
+					"key": "BARK_RUFET_HELPED_2",
+					"if": "known:protagonist"
+				},
+				{
+					"key": "BARK_RUFET_HELPED_2_PRE",
+					"if": "!known:protagonist"
+				}
 			],
 			"recovered": [
-				"Kendime geldim... Devam.",
-				"Bitmedi daha."
+				{
+					"key": "BARK_RUFET_RECOVERED_1"
+				},
+				{
+					"key": "BARK_RUFET_RECOVERED_2"
+				}
 			],
 			"victory": [
-				"Bitti... şimdilik.",
-				"Kılıcın hâlâ keskin, {PROTAGONIST}."
+				{
+					"key": "BARK_RUFET_VICTORY_1"
+				},
+				{
+					"key": "BARK_RUFET_VICTORY_2",
+					"if": "known:protagonist"
+				},
+				{
+					"key": "BARK_RUFET_VICTORY_2_PRE",
+					"if": "!known:protagonist"
+				}
+			]
+		},
+		"ehliman": {
+			"greet": [
+				"Hoş geldin yolcu. Kürköy'de ekmek de var, dert de.",
+				"Selam sana. Yolun açık olsun.",
+				{
+					"key": "BARK_VILLAGER_POST_01",
+					"if": "known:protagonist"
+				},
+				{
+					"key": "BARK_VILLAGER_PRE_01",
+					"if": "!known:protagonist"
+				},
+				{
+					"key": "BARK_VILLAGER_PRE_02",
+					"if": "!known:protagonist"
+				},
+				"Gözlerin yorgun, evlat. Biraz otur, dinlen.",
+				"Kuyudan su iç, serindir. Kül henüz ona ulaşmadı.",
+				"Kül çökmeden önce buralar ne güzeldi, bilir misin?",
+				{
+					"key": "BARK_EHLIMAN_01",
+					"if": "!time:night & any_burned"
+				},
+				{
+					"key": "BARK_EHLIMAN_02",
+					"if": "!time:night & any_kept"
+				}
+			],
+			"idle": [
+				"Bu yıl nar erken kızardı...",
+				"Ah, belim... Yaşlandık be.",
+				"Rüzgâr yine külü getiriyor.",
+				"Akşama çorba var, ocak başında.",
+				"Kür'ün suyu çekildi, balık da azaldı."
+			],
+			"flee": [
+				"Kaçın! Gölgeler geldi!",
+				"Kapıları kapatın, çabuk!",
+				"Eyvah! Saklanın!"
+			],
+			"night": [
+				"Gece oldu, içeri girelim. Gölgeler gece daha açtır.",
+				"Geç oldu. Kapımı kilitleyeceğim."
+			]
+		},
+		"gulcin": {
+			"greet": [
+				{
+					"key": "BARK_GULCIN_01",
+					"if": "!time:night"
+				}
+			]
+		},
+		"kemal": {
+			"greet": [
+				{
+					"key": "BARK_KEMAL_01",
+					"if": "!time:night"
+				}
 			]
 		}
 	}

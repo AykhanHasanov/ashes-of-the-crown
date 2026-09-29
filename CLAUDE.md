@@ -72,7 +72,7 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
    - Player-facing text uses translation keys via `tr()`, defined in `localization/strings.csv`. **Current language: Turkish (text and voice). New text must never be hardcoded.** Only the memories and the save-slot dialog use keys so far; moving the remaining legacy strings is a separate task.
    - Code, comments and commit messages: English.
    - Chat with the owner: Azerbaijani.
-6. **Keep the tests green.** Run ALL the suites before EVERY commit — state_test, echo_test, npc_test, hub_test, combat_test, tools/test_anim_isolation.gd and the windowed world_selftest — not only the ones that look affected (the HUD, dialogue and WorldState are shared by every mode). Add checks for new systems to the relevant self-test.
+6. **Keep the tests green.** Run ALL the suites before EVERY commit — state_test, echo_test, npc_test, hub_test, story_test, combat_test, tools/test_anim_isolation.gd and the windowed world_selftest — not only the ones that look affected (the HUD, dialogue and WorldState are shared by every mode). Add checks for new systems to the relevant self-test.
 7. **Git.** Work on a `v3/<topic>` branch, commit per stage, merge to `main` with `--no-ff` after the tests pass, then `git push` (remote: private `github.com/AykhanHasanov/ashes-of-the-crown`). End commit messages with the attribution line the harness provides.
 8. **Story.** Read `STORY_BIBLE.md` before any story-related task. Never invent story content; use placeholders for [TBD] items and flag them in the report.
 9. **Assets.** CC0 (or clearly licensed) only. Record the source in a `CREDITS` file. Before downloading, state the file, source and size (the owner has given blanket approval).
@@ -134,6 +134,14 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 - State: `WorldState` NPC accessors (`move_npc`, `rescue_npc` → location `son_ocaq`, `kill_npc` — permanent, `change_npc_relationship`, `set_npc_flag`) with `npc_moved` / `npc_rescued` / `npc_died` / `npc_relationship_changed`. Locations: a POI id, `party` (with the protagonist), `son_ocaq` (hub, not built), or `""`.
 - Bodies come only from WorldState: `scripts/npc/npc_spawner.gd` (world_mode owns one) builds a `resident.gd` at a loaded POI or an `ally.gd` for a companion in the party; the dead never get a body again. Never hand-place a named NPC. Generic villagers (`data/world/villagers.json`) are separate and unchanged.
 - The ally (`scripts/npc/ally.gd`, numbers in `data/balance/allies.json`): a player-side Combatant that follows, fights, sometimes draws an enemy off the protagonist (`Foe.retarget`). At 0 health he is DOWNED, never dead: the protagonist helps him up ([E], `help_up()`), or he rises alone when no enemy is near. Only the story kills him (`kill_npc`).
+
+**Story foundation** (vertical slice, `STORY_SLICE.md`)
+- Conditions: `scripts/core/conditions.gd` — leaves joined with `&`, negated with `!`; WorldState leaves include `known:`, `mem:<id>=KEPT|BURNED|UNKNOWN`, `has_item:`, `any_burned`, `any_kept`, `rescued:`, `dead:`, `grief:`, `joined:`, `time:`, `flag:`. Actions (`WorldState.apply`): `set:`, `reveal_name:`, `item:+/-`, `move_npc:<id>:<loc>`, `grief:`; anything else goes to the mode through `DialogueUI.action_requested` (`silence_door:<door>`, `lights_out:<door>`).
+- Dialogue graphs: `data/story/dialogue/<id>.json` through `scripts/story/dialogue_graphs.gd` (speaker, key, next, choices with `if` / `disabled_if`, `branch`, `name_challenge`, `do`, `sfx`, `label_key`). A `(…)` in a line is a pause, not text (`pause_changed`; the door shadow freezes).
+- Names: `{NPC_LOST:<id>}` always shows the lost one's name; `Names.scene_all_known` in echoes and the cold open; `EchoDefinition.reveals_on_keep`.
+- Barks: a line in `data/voices/voices.json` may be `{key, if}`; `Barks.playable()` filters by condition and never plays a line with `{PROTAGONIST}` before `known:protagonist`.
+- Items: `data/items/<id>.json`, `scripts/world/item_pickup.gd` (taken pickups in the world list `pickups`).
+- Tests: `"$G" --headless --path . res://scenes/tests/story_test.tscn`.
 
 **Tests:** `"$G" --headless --path . res://scenes/tests/state_test.tscn` covers state, saves, migration and every main-menu case. It uses its own save folders.
 

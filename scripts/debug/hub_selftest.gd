@@ -172,8 +172,8 @@ func _lost_ones() -> void:
 			ok = false
 			print("   no lost one: ", id)
 	_check("every core NPC (and Domrul) has a lost one", ok)
-	_check("Sona's lost one is Narin; Eşref's is his wife (placeholder)", NpcRegistry.get_def(&"sona").lost_one_npc == &"narin"
-		and tr(NpcRegistry.get_def(&"esref").lost_one_name_key).contains("karısı"))
+	_check("Sona's lost one is Narin; Eşref's is his wife, Şirin", NpcRegistry.get_def(&"sona").lost_one_npc == &"narin"
+		and tr(NpcRegistry.get_def(&"esref").lost_one_name_key) == "Şirin")
 	_check("Sabir's lost one is Kür; Elvin's his mother, Nermin's her husband (placeholders)", NpcRegistry.get_def(&"sabir").lost_one_npc == &"kur"
 		and tr(NpcRegistry.get_def(&"elvin").lost_one_name_key).contains("annesi") and tr(NpcRegistry.get_def(&"nermin").lost_one_name_key).contains("kocası"))
 	var living_lost: Array = NpcRegistry.all().filter(func(d): return d.lost_one_npc != &"" and NpcRegistry.get_def(d.lost_one_npc).npc_kind == "human")
