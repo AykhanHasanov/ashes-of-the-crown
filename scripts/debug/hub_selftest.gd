@@ -10,6 +10,8 @@ const NpcRegistry := preload("res://scripts/core/npc_registry.gd")
 const HubTravel := preload("res://scripts/hub/hub_travel.gd")
 const HubLevel := preload("res://scripts/hub/hub_level.gd")
 const ControlHints := preload("res://scripts/ui/control_hints.gd")
+const HubShade := preload("res://scripts/hub/hub_shade.gd")
+const HubNights := preload("res://scripts/hub/hub_nights.gd")
 const Names := preload("res://scripts/core/names.gd")
 const HUB := "res://scenes/son_ocaq.tscn"
 const HOST := "res://scenes/tests/echo_host.tscn"
@@ -52,6 +54,7 @@ func _run() -> void:
 		d.queue_free()
 	await _scene()
 	await _door_talk()
+	await _nights()
 	await _travel()
 	_wipe()
 	print("HUB TESTS DONE, failures: ", _fails)
@@ -330,7 +333,9 @@ func _door_talk() -> void:
 	WorldState.kill_npc(&"ehliman", "test")
 	await _frames(2)
 	_check("... none for the dead", not lvl.doors["door_ehliman"].is_lit)
-	# UI priority: nothing talks over a conversation
+	# UI priority: nothing talks over a conversation — not even a card already on screen
+	hub.hud.title_card("ALREADY UP", "", 3.0)
+	await _frames(2)
 	hub.player.global_position = hub.door_front(sona_door)
 	var out: String = hub.knock(sona_door)
 	await _typed(dlg)
@@ -338,6 +343,7 @@ func _door_talk() -> void:
 	hub.hud.banner("banner")
 	WorldState.burn_memory(&"mother_name")   # a burn notice
 	await _frames(2)
+	_check("UI: a card already on screen gives way when the conversation begins", not hub.hud._card.visible or hub.hud._card_title.text != "ALREADY UP")
 	_check("UI: title cards, banners and burn notices wait while a dialogue is open", hub.hud.queued() == ["title_card", "banner", "show_whisper"]
 		and hub.hud._card_title.text != "TEST" and hub.hud._banner.text != "banner", "%s %s %.2f" % [hub.hud.queued(), hub.hud._card_title.text, hub.hud._whisper.modulate.a])
 	# Door scene: almost dark, the strip the only warm light; Aras out of frame
@@ -452,6 +458,94 @@ func _door_talk() -> void:
 	_check("G: by day she talks face to face from her day pool", talk.pool(&"sona", "day").has(day_key) and not dlg.check("door_mode") and talk.last_bus.get("sona") == "Voice")
 	dlg._advance()
 	await _frames(2)
+
+
+# --- Night shades and door deaths (stage 4) ------------------------------------------------------
+
+func _nights() -> void:
+	WorldState.new_game()
+	SaveManager.active_slot = 1
+	var hub := await _go(HUB)
+	var lvl = hub.level
+	var cfg: Dictionary = HubData.data()["night_shades"]
+	_check("A: no shades by day", hub.shades.is_empty())
+	hub.wait_until(21.0)
+	await _frames(4)
+	var roamers: Array = hub.shades.filter(func(x): return x.kind == HubShade.Kind.ROAMER)
+	var narin_list: Array = hub.shades.filter(func(x): return x.kind == HubShade.Kind.NARIN)
+	_check("A: at night shades roam the courtyard, and a small one stands at Aras's door", roamers.size() == int(cfg["count"]) and narin_list.size() == 1
+		and narin_list[0].home_door == lvl.doors["door_protagonist"])
+	var peaceful := true
+	for x in hub.shades:
+		if x.is_in_group("enemies") or x.is_in_group("combatants") or x.has_method("receive_hit") or x.has_method("take_damage"):
+			peaceful = false
+	_check("A: shades are not in the combat system", peaceful)
+	var r0 = roamers[0]
+	r0.global_position = r0._goal
+	await _frames(4)
+	_check("A: a shade knocks on doors", r0.knocks >= 1)
+	var hp: float = hub.player.health
+	hub.player.global_position = r0.global_position + Vector3(1.2, 0, 0)
+	await _frames(4)
+	_check("A: when Aras comes close it breaks into ash", r0.state == HubShade.S.GONE and not r0._model.visible)
+	hub.player.global_position = Vector3(0, 0.1, 2.4)
+	r0.reform_in = 0.3
+	await _seconds(0.7)
+	_check("... and re-forms elsewhere, out of his way", r0.is_present() and r0.global_position.distance_to(hub.player.global_position) > float(cfg["break_range"]))
+	var narin = narin_list[0]
+	hub.player.global_position = narin.global_position + Vector3(0.8, 0, 0.8)
+	await _seconds(1.0)
+	_check("D: Narin's shade does not break into ash", narin.is_present())
+	hub.player.global_position = Vector3(0, 0.1, 2.4)
+	await _seconds(1.5)
+	_check("E: shades never deal damage", is_equal_approx(hub.player.health, hp))
+	hub.wait_until(7.0)
+	await _frames(3)
+	_check("D: by morning every shade is gone, Narin's too", hub.shades.is_empty() and get_tree().get_nodes_in_group("hub_shades").all(func(x): return x.is_queued_for_deletion()))
+	# B / C: the warning night, then the death night — off-screen
+	var died: Array = []
+	var on_died := func(id, cause): died.append([id, cause])
+	EventBus.npc_died.connect(on_died)
+	WorldState.rescue_npc(&"esref")
+	WorldState.set_flag(&"esref_quest_failing")
+	WorldState.set_flag(&"esref_quest_failed")   # death condition already true: still only after the warning night
+	hub.wait_until(21.0)
+	await _frames(4)
+	_check("B: the warning night: Eşref is warned", HubNights.is_warned(&"esref"))
+	_check("B: ... his night line turns into the warning (placeholder key)", hub.door_talk._pick(&"esref", "night") == "HUB_WARNING_ESREF")
+	var lost: Array = hub.shades.filter(func(x): return x.kind == HubShade.Kind.LOST)
+	var esref_door = lvl.doors["door_esref"]
+	_check("C: the shade at his door is his own lost one (placeholder look)", lost.size() == 1 and lost[0].home_door == esref_door and lost[0].identity == "lost_esref")
+	hub.wait_until(7.0)
+	await _frames(3)
+	_check("E: no death on the warning night itself", WorldState.is_npc_alive(&"esref") and died.is_empty())
+	hub.wait_until(21.0)
+	await _frames(2)
+	WorldState.set_time_of_day(7.0)   # the story moves the clock: nobody waited at the hearth
+	await _frames(2)
+	_check("E: death resolves only while waiting until morning", WorldState.is_npc_alive(&"esref"))
+	hub.wait_until(21.0)
+	await _frames(2)
+	hub.wait_until(7.0)
+	await _frames(4)
+	_check("B: the death night passes off-screen: npc_died, cause 'door'", not WorldState.is_npc_alive(&"esref") and died == [[&"esref", "door"]]
+		and WorldState.get_npc_death_cause(&"esref") == "door")
+	EventBus.npc_died.disconnect(on_died)
+	_check("B: morning: the door is ajar, ash on the threshold, footprints from the gate", esref_door.is_ajar and not esref_door.is_open
+		and lvl.footprint_count("door_esref") > 5 and lvl.get_node_or_null("Aftermath_door_esref") != null,
+		"ajar %s open %s steps %d" % [esref_door.is_ajar, esref_door.is_open, lvl.footprint_count("door_esref")])
+	var first_step: Vector3 = lvl.footprints("door_esref")[0].global_position
+	_check("... the trail starts at the gate", first_step.distance_to(Vector3(0, 0, HubLevel.SOUTH_Z)) < 1.5)
+	hub.wait_until(21.0)
+	await _frames(3)
+	_check("B: that room's light never returns", not esref_door.is_lit and not lost.any(func(x): return is_instance_valid(x)))
+	SaveManager.save(1)
+	WorldState.new_game()
+	await _frames(3)
+	SaveManager.load_slot(1)
+	await _frames(4)
+	_check("E: the aftermath persists through save and load", esref_door.is_ajar and lvl.footprint_count("door_esref") > 5
+		and WorldState.get_npc_death_cause(&"esref") == "door")
 
 
 func _typed(dlg) -> void:

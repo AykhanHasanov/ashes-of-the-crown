@@ -338,6 +338,17 @@ func queued() -> Array:
 	return _queue.map(func(q): return q[0])
 
 
+## A conversation begins: whatever is on screen (a title card still fading, a banner, a
+## whisper) gives way at once.
+func hide_transients() -> void:
+	_card.visible = false
+	for n in [_banner, _whisper]:
+		n.modulate.a = 0.0
+	for t in [_banner_tween, _whisper_tween]:
+		if t:
+			t.kill()
+
+
 ## After the conversation: the waiting messages, one at a time.
 func flush_queue() -> void:
 	if _flushing:

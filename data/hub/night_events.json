@@ -1,23 +1,26 @@
 {
-	"_about": "Night events in Son Ocaq, checked when night falls (first match per NPC). door_death: the NPC opens the door to the shade of their lost one (NpcDefinition.lost_one_*) and dies (npc_died, cause 'door'). Only story conditions trigger them. The conditions below are PLACEHOLDER flags until the story writes the real ones.",
+	"_about": "Door deaths in Son Ocaq (STORY_BIBLE §6: opening the door to a shade kills the one who opens). Off-screen, never in front of the player. At nightfall, if warning_if holds, the NPC is WARNED: that night their night pool gives HUB_WARNING_<ID> and their lost one's shade knocks at their door. If the warning condition stops holding before the death, the warning lapses (the player acted). The DEATH resolves only while Aras waits at the hearth until morning, on a night after the warning night, if death_if holds: kill_npc(id, 'door'). The morning shows the aftermath (door ajar, ash, footprints from the gate). The conditions below are PLACEHOLDER flags until the story writes the real ones.",
 	"events": [
 		{
 			"id": "esref_opens_door",
 			"npc": "esref",
 			"event": "door_death",
-			"condition": "flag:esref_quest_failed"
+			"warning_if": "flag:esref_quest_failing",
+			"death_if": "flag:esref_quest_failed"
 		},
 		{
 			"id": "sona_opens_door",
 			"npc": "sona",
 			"event": "door_death",
-			"condition": "flag:sona_night_lost"
+			"warning_if": "flag:sona_night_warning",
+			"death_if": "flag:sona_night_lost"
 		},
 		{
 			"id": "domrul_goes_with_her",
 			"npc": "domrul",
 			"event": "door_death",
-			"condition": "flag:domrul_released"
+			"warning_if": "flag:domrul_last_night_near",
+			"death_if": "flag:domrul_released"
 		}
 	]
 }

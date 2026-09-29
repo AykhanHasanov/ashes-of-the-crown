@@ -23,6 +23,7 @@ const Names := preload("res://scripts/core/names.gd")
 signal finished(event: String)
 signal flag_set(flag: String)
 signal line_shown(node: Dictionary)      # after a node's text is set (voices, door shadows)
+signal started
 
 const CHALLENGE_WAIT := 1.8              # a blank name hangs in the air this long
 
@@ -107,6 +108,7 @@ func start(data: Dictionary, start_id := "start", ctx: Dictionary = {}) -> void:
 	_data = data
 	context = ctx
 	_subtitle_style(bool(ctx.get("door_mode", false)))
+	started.emit()
 	_active = true
 	_panel.visible = true
 	_panel.modulate.a = 0.0

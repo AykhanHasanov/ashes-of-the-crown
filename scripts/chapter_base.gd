@@ -68,6 +68,7 @@ func _ready() -> void:
 	add_child(dialogue)
 	dialogue.finished.connect(_on_dialogue_finished)
 	hud.dialogue = dialogue
+	dialogue.started.connect(hud.hide_transients)
 	dialogue.finished.connect(func(_e): hud.flush_queue())
 	dialogue.flag_set.connect(func(f): WorldState.set_flag(StringName(f)))
 	pause_menu = PauseMenu.new()

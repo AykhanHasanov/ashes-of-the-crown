@@ -20,6 +20,7 @@ signal finished
 
 const HubData := preload("res://scripts/hub/hub_data.gd")
 const NpcRegistry := preload("res://scripts/core/npc_registry.gd")
+const HubNights := preload("res://scripts/hub/hub_nights.gd")
 const PATH := "res://data/hub/door_talk.json"
 const DOOR_BUS := "Door"
 const VOICE_BUS := "Voice"
@@ -243,6 +244,8 @@ func _silent(npc: StringName) -> bool:
 ## A line from the NPC's day or night pool: the first {key, condition} whose condition
 ## holds, else the plain keys in turn.
 func _pick(npc: StringName, pool: String) -> String:
+	if pool == "night" and HubNights.is_warned(npc):
+		return "HUB_WARNING_%s" % String(npc).to_upper()   # the warning night: their line turns
 	var entries: Array = _data["npcs"].get(String(npc), {}).get(pool, [])
 	var plain: Array = []
 	for e in entries:

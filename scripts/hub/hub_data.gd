@@ -95,6 +95,15 @@ static func is_home(resident_id: String) -> bool:
 	return WorldState.is_npc_alive(id) and WorldState.get_npc_location(id) == WorldState.SON_OCAQ
 
 
+## Someone of this place died opening its door to a shade (death_cause "door").
+static func is_door_death_place(place_id: String) -> bool:
+	for r in residents_of(place_id):
+		var id := StringName(r)
+		if r != PROTAGONIST and not WorldState.is_npc_alive(id) and WorldState.get_npc_death_cause(id) == "door":
+			return true
+	return false
+
+
 ## Someone lives in this place and is home.
 static func is_lived_in(place_id: String) -> bool:
 	return residents_of(place_id).any(func(r): return is_home(r))

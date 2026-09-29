@@ -15,6 +15,9 @@ const TPCamera := preload("res://scripts/camera/third_person_camera.gd")
 const NpcSpawner := preload("res://scripts/npc/npc_spawner.gd")
 const DebugMenu := preload("res://scripts/debug/debug_menu.gd")
 const DoorTalk := preload("res://scripts/hub/door_talk.gd")
+const HubNights := preload("res://scripts/hub/hub_nights.gd")
+const HubShade := preload("res://scripts/hub/hub_shade.gd")
+const NpcRegistry := preload("res://scripts/core/npc_registry.gd")
 
 const HEARTH_RANGE := 2.9
 const DOOR_RANGE := 1.9          # from the point just in front of a door
@@ -27,6 +30,7 @@ var hearth_menu
 var debug
 var door_talk                     # DoorTalk
 var _night_guests := {}           # NPCs at their open door at night (Peri Nene)
+var shades: Array = []            # HubShade — only at night
 
 
 func _make_level() -> Node3D:
@@ -58,6 +62,7 @@ func _setup() -> void:
 	add_child(door_talk)
 	door_talk.finished.connect(func(): player.input_locked = false)
 	EventBus.time_of_day_changed.connect(func(_p): npcs.queue_refresh())
+	EventBus.time_of_day_changed.connect(_on_phase)
 	EventBus.flag_changed.connect(func(_k, _o, _n): npcs.queue_refresh())
 	debug = DebugMenu.new()
 	add_child(debug)
@@ -100,6 +105,7 @@ func _begin(mode: String) -> void:
 	rig.snap()
 	player.wake()
 	npcs.queue_refresh()
+	_on_phase(WorldState.get_phase())
 	hud.title_card(tr("HUB_TITLE"), "", 2.0)
 	_demo_setup()
 
@@ -121,7 +127,10 @@ func _apply_saved_state() -> void:
 
 
 ## Time passes only here: set the hour (the phase event follows), rest, and autosave.
+## Waiting through the night is when its door deaths happen — off-screen.
 func wait_until(hour: float) -> void:
+	if hour < 12.0 and WorldState.get_phase() == &"night":
+		HubNights.resolve_morning()
 	WorldState.set_time_of_day(hour)   # emits time_of_day_changed on a new phase (wraps into the next day)
 	level.day_night.set_hour(hour)
 	player.heal(player.max_health)
@@ -138,6 +147,45 @@ func _npc_spot(npc_id: StringName, location_id: String) -> Variant:
 		return null
 	var place := HubData.day_place_of(String(npc_id))   # a workplace (smithy, bakery) or their room
 	return level.stand_point(place) if place != "" else null
+
+
+## Night falls: warnings, and the shades come (roamers, the lost ones at warned doors,
+## the small one at Aras's door). Any other phase: they are gone.
+func _on_phase(phase: StringName) -> void:
+	for s in shades:
+		if is_instance_valid(s):
+			s.queue_free()
+	shades.clear()
+	if phase != &"night":
+		return
+	HubNights.on_nightfall()
+	var cfg: Dictionary = HubData.data()["night_shades"]
+	for i in int(cfg["count"]):
+		var d = level.doors.values().pick_random()
+		_add_shade(HubShade.Kind.ROAMER, cfg["look"], cfg, d.global_position + d.global_basis.z * 1.5)
+	for e in HubNights.events():
+		var id := StringName(e["npc"])
+		if HubNights.is_warned(id) and WorldState.get_npc_location(id) == WorldState.SON_OCAQ:
+			var door = level.doors.get(HubData.place(HubData.room_of(String(id))).get("door", ""))
+			if door != null:
+				_add_shade(HubShade.Kind.LOST, _lost_look(id), cfg, door.global_position + door.global_basis.z * 0.9, door)
+	var own = level.doors["door_protagonist"]
+	_add_shade(HubShade.Kind.NARIN, NpcRegistry.get_def(&"narin").look_id, cfg, own.global_position + own.global_basis.z * 0.9, own)
+
+
+func _lost_look(id: StringName) -> String:
+	var def: Resource = NpcRegistry.get_def(id)
+	if def.lost_one_npc != &"":
+		return NpcRegistry.get_def(def.lost_one_npc).look_id
+	return def.lost_one_look_id
+
+
+func _add_shade(kind: int, look: String, cfg: Dictionary, at: Vector3, door = null) -> void:
+	var s = HubShade.new()
+	s.setup(kind, look, level, player, cfg, door)
+	add_child(s)
+	s.global_position = Vector3(at.x, 0.02, at.z)
+	shades.append(s)
 
 
 ## Someone who opens their door at night (allows_night_open) stands in it for the talk.
@@ -257,6 +305,30 @@ func _demo_setup() -> void:
 				get_tree().create_timer(2.4).timeout.connect(func():
 					if dialogue.is_active() and dialogue.choice_texts().size() > 0:
 						dialogue.choose(0)))
+		"hub_morning_after":
+			# Eşref warned last night, gone this morning (placeholder flags)
+			WorldState.rescue_npc(&"esref")
+			WorldState.set_flag(&"esref_quest_failing")
+			WorldState.set_flag(&"esref_quest_failed")
+			wait_until(21.0)
+			wait_until(7.0)
+			wait_until(21.0)
+			wait_until(7.0)
+			WorldState.set_time_of_day(9.0)
+			level.day_night.set_hour(9.0)
+			# A still of the morning after: the ajar door, the ash, the footprints from the gate
+			var door = level.doors["door_esref"]
+			player.global_position = Vector3(-4.0, 0.1, -2.0)
+			var shot := Camera3D.new()
+			shot.fov = 62.0
+			add_child(shot)
+			shot.global_position = Vector3(1.6, 2.3, 4.6)
+			shot.look_at(door.global_position + Vector3(-1.2, 0.4, 0.4))
+			shot.make_current()
+		"hub_shades":
+			WorldState.set_time_of_day(22.5)
+			level.day_night.set_hour(22.5)
+			_demo_view(Vector3(0, 0, 2.4), Vector3(0, 1.2, -6.0))
 		"hub_night":
 			WorldState.set_time_of_day(22.0)
 			level.day_night.set_hour(22.0)
@@ -267,6 +339,6 @@ func _demo_view(at: Vector3, look: Vector3) -> void:
 	player.global_position = at + Vector3(0, 0.1, 0)
 	player.face_towards(look)
 	var to := look - at
+	rig.snap()   # (snap resets the yaw to the body's: set it after)
 	rig.yaw = atan2(-to.x, -to.z)
 	rig.pitch = deg_to_rad(-6.0)
-	rig.snap()

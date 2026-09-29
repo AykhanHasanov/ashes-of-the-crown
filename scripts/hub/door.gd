@@ -14,6 +14,7 @@ const OPEN_ANGLE := 100.0
 const WIDTH := 1.1
 const LINE_H := 0.012         # the gap under the door: a thin line of light, not a slot
 const STRIP_ENERGY := 0.8
+const AJAR_ANGLE := 22.0
 
 var door_id: StringName
 var place_id := ""
@@ -21,6 +22,7 @@ var is_open := false
 var is_lit := false
 var speaking := false
 var held_open := false
+var is_ajar := false                # someone of this room opened it to a shade: it never closes again
 
 var _hinge: Node3D
 var _blocker: CollisionShape3D
@@ -64,6 +66,7 @@ func _ready() -> void:
 	EventBus.flag_changed.connect(func(_k, _o, _n): refresh())
 	EventBus.state_replaced.connect(refresh)
 	is_open = _wants_open()
+	is_ajar = HubData.is_door_death_place(place_id)
 	_apply(false)
 	_update_strip()
 
@@ -158,9 +161,11 @@ func _wants_open() -> bool:
 func refresh() -> void:
 	_update_strip()
 	var want := _wants_open()
-	if want == is_open:
+	var ajar := HubData.is_door_death_place(place_id)
+	if want == is_open and ajar == is_ajar:
 		return
 	is_open = want
+	is_ajar = ajar
 	_apply(true)
 	_update_strip()
 	EventBus.door_changed.emit(door_id, is_open)
@@ -200,7 +205,7 @@ func _update_strip() -> void:
 
 
 func _apply(animate: bool) -> void:
-	var angle := deg_to_rad(-OPEN_ANGLE if is_open else 0.0)
+	var angle := deg_to_rad(-OPEN_ANGLE if is_open else (-AJAR_ANGLE if is_ajar else 0.0))
 	_blocker.set_deferred("disabled", is_open)
 	if _tween:
 		_tween.kill()

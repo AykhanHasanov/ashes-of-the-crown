@@ -40,6 +40,8 @@ func queue_refresh() -> void:
 ## Spawns what WorldState says should be here, frees what should not.
 func refresh() -> void:
 	_queued = false
+	if not is_inside_tree():
+		return   # a deferred refresh after the scene was left
 	var at_place: Dictionary = {}          # location -> [ids], for spreading people out
 	for def in NpcRegistry.all():
 		if def.npc_kind == "voice_only":

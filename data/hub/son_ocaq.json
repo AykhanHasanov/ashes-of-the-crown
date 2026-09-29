@@ -179,5 +179,21 @@
 			3.0,
 			3.3
 		]
+	},
+	"night_shades": {
+		"_about": "Placeholder Küllüler roaming the courtyard at night: they walk from door to door and knock, never attack; within break_range of Aras a shade breaks into ash and re-forms elsewhere after reform_seconds. Narin's small shade at Aras's door never breaks; it is simply gone by morning.",
+		"count": 3,
+		"look": "ash",
+		"speed": 0.8,
+		"break_range": 3.0,
+		"reform_seconds": [
+			14.0,
+			24.0
+		],
+		"knock_wait": [
+			4.0,
+			7.0
+		],
+		"narin_scale": 0.6
 	}
 }

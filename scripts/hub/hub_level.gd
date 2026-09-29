@@ -30,6 +30,7 @@ const SIDE_X := 8.0
 const SOUTH_Z := 6.0
 const GATE_HALF := 2.0
 const EYVAN_H := 7.0         # the entrance portal rises above the 3.3 m roofs
+const FOOTSTEP := 0.55
 
 var player_spawn := Vector3(0, 0.1, 2.4)   # the open courtyard: sky, hearth and upper storey in view
 var braziers: Array = []
@@ -47,6 +48,7 @@ var _plaster: StandardMaterial3D
 var _brick: StandardMaterial3D
 var _stone: StandardMaterial3D
 var _dark: StandardMaterial3D
+var _ash: StandardMaterial3D
 var _cache := {}
 
 
@@ -64,6 +66,9 @@ func build() -> void:
 	_upper_storey()
 	_hearth()
 	_outer_village()
+	refresh_aftermath()
+	EventBus.npc_died.connect(func(_id, _c): refresh_aftermath())
+	EventBus.state_replaced.connect(refresh_aftermath)
 	var ash := Effects.ash_fall(Vector3(16, 6, 16), 60)
 	ash.position = Vector3(0, 8, 0)
 	add_child(ash)
@@ -91,6 +96,61 @@ func set_door_scene(door) -> void:
 	for d in doors.values():
 		d.set_strip_hidden(on and d != door)
 		d.set_key_light(on and d == door)
+
+
+## After a door death: ash on the threshold and a trail of ash footprints from the gate to
+## that door. Derived from WorldState (death_cause "door"), so it is there after any load.
+func refresh_aftermath() -> void:
+	if not is_inside_tree():
+		return
+	for n in get_children():
+		if n.is_in_group("hub_aftermath"):
+			remove_child(n)   # at once: the new one takes its name
+			n.queue_free()
+	for d in doors.values():
+		if not HubData.is_door_death_place(d.place_id):
+			continue
+		var root := Node3D.new()
+		root.name = "Aftermath_" + String(d.door_id)
+		root.add_to_group("hub_aftermath")
+		add_child(root)
+		var xf: Transform3D = d.global_transform
+		var pile := MeshInstance3D.new()
+		var disc := CylinderMesh.new()
+		disc.top_radius = 0.55
+		disc.bottom_radius = 0.7
+		disc.height = 0.03
+		disc.material = _ash
+		pile.mesh = disc
+		pile.position = xf.origin + xf.basis.z * 0.35 + Vector3(0, 0.03, 0)
+		root.add_child(pile)
+		var from := Vector3(0, 0, SOUTH_Z - 0.6)
+		var to: Vector3 = xf.origin + xf.basis.z * 0.7
+		var dir := (to - from)
+		dir.y = 0.0
+		var n := int(dir.length() / FOOTSTEP)
+		var side := Vector3(-dir.z, 0, dir.x).normalized()
+		for i in n:
+			var step := MeshInstance3D.new()
+			step.name = "Footprint%d" % i
+			step.set_meta("footprint", true)
+			var q := QuadMesh.new()
+			q.size = Vector2(0.12, 0.26)
+			q.material = _ash
+			step.mesh = q
+			var at := from + dir * (float(i) / n) + side * (0.11 if i % 2 == 0 else -0.11)
+			step.position = Vector3(at.x, 0.03, at.z)
+			step.rotation = Vector3(-PI * 0.5, 0, -atan2(dir.x, dir.z))
+			root.add_child(step)
+
+
+func footprints(door_id: String) -> Array:
+	var root := get_node_or_null("Aftermath_" + door_id)
+	return [] if root == null else root.get_children().filter(func(n): return n.has_meta("footprint"))
+
+
+func footprint_count(door_id: String) -> int:
+	return footprints(door_id).size()
 
 
 func apply_quality(high: bool) -> void:
@@ -422,6 +482,9 @@ func _materials() -> void:
 	_stone.albedo_color = Color(0.72, 0.7, 0.68)
 	_stone.uv1_triplanar = true
 	_stone.uv1_scale = Vector3(0.4, 0.4, 0.4)
+	_ash = StandardMaterial3D.new()
+	_ash.albedo_color = Color(0.2, 0.19, 0.18)
+	_ash.roughness = 1.0
 	_dark = StandardMaterial3D.new()
 	_dark.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_dark.albedo_color = Color(0.02, 0.018, 0.016)
