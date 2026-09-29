@@ -327,3 +327,83 @@ static func arc_mesh(inner: float, outer: float, angle_deg: float, segments := 1
 		st.set_color(Color(1, 1, 1, f0)); st.add_vertex(out0)
 		st.set_color(Color(1, 1, 1, f1)); st.add_vertex(out1)
 	return st.commit()
+
+
+## Dust in the air: faint motes that hang and drift slowly, catching the light (shaded,
+## so the sun lights them and shade hides them). Fills `extents` around its node.
+static func dust_motes(extents: Vector3, amount: int) -> GPUParticles3D:
+	var pm := ParticleProcessMaterial.new()
+	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	pm.emission_box_extents = extents
+	pm.direction = Vector3(1, 0.2, 0.3)
+	pm.spread = 180.0
+	pm.initial_velocity_min = 0.02
+	pm.initial_velocity_max = 0.12
+	pm.gravity = Vector3(0.05, 0.01, 0.02)
+	pm.turbulence_enabled = true
+	pm.turbulence_noise_strength = 0.6
+	pm.turbulence_noise_scale = 3.0
+	pm.turbulence_influence_min = 0.02
+	pm.turbulence_influence_max = 0.06
+	pm.scale_min = 0.4
+	pm.scale_max = 1.0
+	pm.color_ramp = ramp([
+		[0.0, Color(1.0, 0.95, 0.85, 0.0)],
+		[0.2, Color(1.0, 0.95, 0.85, 0.55)],
+		[0.8, Color(1.0, 0.95, 0.85, 0.45)],
+		[1.0, Color(1.0, 0.95, 0.85, 0.0)],
+	])
+	var m := particle_material(false)
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL   # lit by the sun, dark in shade
+	var p := make_particles(amount, 14.0, pm, 0.035, m, maxf(extents.x, extents.z) + 2.0)
+	p.preprocess = 14.0
+	return p
+
+
+## Sparks leaping from a fire: a few hot points thrown up, fading as they fall.
+static func sparks(scale := 1.0, amount := 14) -> GPUParticles3D:
+	var pm := ParticleProcessMaterial.new()
+	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	pm.emission_sphere_radius = 0.25 * scale
+	pm.direction = Vector3.UP
+	pm.spread = 22.0
+	pm.initial_velocity_min = 1.6 * scale
+	pm.initial_velocity_max = 3.2 * scale
+	pm.gravity = Vector3(0.3, -1.2, 0.1)
+	pm.turbulence_enabled = true
+	pm.turbulence_noise_strength = 2.0
+	pm.turbulence_influence_min = 0.1
+	pm.turbulence_influence_max = 0.3
+	pm.scale_min = 0.4
+	pm.scale_max = 1.0
+	pm.color_ramp = ramp([
+		[0.0, Color(6.0, 2.4, 0.5, 1.0)],
+		[0.6, Color(4.0, 1.0, 0.15, 0.9)],
+		[1.0, Color(1.0, 0.2, 0.0, 0.0)],
+	])
+	var p := make_particles(amount, 1.6, pm, 0.05 * scale, particle_material(true), 4.0 * scale)
+	p.randomness = 0.6
+	return p
+
+
+## A thin thread of smoke from cold ash: a few pale puffs rising slowly and leaning.
+static func smoke_wisp() -> GPUParticles3D:
+	var pm := ParticleProcessMaterial.new()
+	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	pm.emission_sphere_radius = 0.08
+	pm.direction = Vector3.UP
+	pm.spread = 6.0
+	pm.initial_velocity_min = 0.25
+	pm.initial_velocity_max = 0.4
+	pm.gravity = Vector3(0.12, 0.08, 0.05)
+	pm.angle_min = -180.0
+	pm.angle_max = 180.0
+	pm.scale_curve = curve([Vector2(0, 0.3), Vector2(0.5, 0.8), Vector2(1, 1.4)])
+	pm.color_ramp = ramp([
+		[0.0, Color(0.55, 0.54, 0.52, 0.0)],
+		[0.15, Color(0.58, 0.57, 0.55, 0.22)],
+		[1.0, Color(0.65, 0.65, 0.65, 0.0)],
+	])
+	var p := make_particles(14, 5.0, pm, 0.45, particle_material(false), 4.0)
+	p.preprocess = 5.0
+	return p

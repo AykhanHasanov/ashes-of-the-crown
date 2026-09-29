@@ -10,6 +10,7 @@ extends Node3D
 const DayNight := preload("res://scripts/world/day_night.gd")
 const Effects := preload("res://scripts/world/effects.gd")
 const ItemPickup := preload("res://scripts/world/item_pickup.gd")
+const HearthFire := preload("res://scripts/world/hearth_fire.gd")
 
 const SIZE := 96                 # the slope's grid: SIZE × SIZE metres, 1 m cells
 const RISE := 0.3                # metres of height per metre north
@@ -27,6 +28,7 @@ var hut_door := Vector3.ZERO     # in front of the hut's door (Eşref stands her
 var hut_inside := Vector3.ZERO
 var hearth_pos := Vector3.ZERO
 var yazma: Node3D                # ItemPickup
+var hearth: Node3D               # HearthFire (the view of the cold hearth)
 var arena_center := Vector3.ZERO # where the shades circle the hut
 var _noise := FastNoiseLite.new()
 var _stone: StandardMaterial3D
@@ -48,6 +50,21 @@ func build() -> void:
 	var ash := Effects.ash_fall(Vector3(30, 8, 30), 160)   # wind-driven ash over the slope
 	ash.position = TERRACE + Vector3(0, height_at(TERRACE.x, TERRACE.z) + 8.0, 6)
 	add_child(ash)
+	# Dust hanging in the air along the trail and round the hut: it catches the low sun
+	for at in [Vector3(0, 0, 22), Vector3(0, 0, 8), TERRACE + Vector3(0, 0, 4)]:
+		var dust := Effects.dust_motes(Vector3(9, 2.5, 9), 90)
+		dust.position = _at(at.x, at.z) + Vector3(0, 2.0, 0)
+		add_child(dust)
+
+
+## Debug view only (--demo=kartal_lit): the hearth as it would look lit. Nothing in the
+## story lights it; this shows the lit HearthFire variant beside the cold one.
+func show_hearth(lit: bool) -> void:
+	var root := hearth.get_parent()
+	hearth.queue_free()
+	hearth = HearthFire.new().setup(lit, 0.75)
+	hearth.name = "Fire"
+	root.add_child(hearth)
 
 
 func apply_quality(high: bool) -> void:
@@ -158,42 +175,17 @@ func _hut() -> void:
 
 
 ## The cold hearth in front of the hut: a ring of stones round old ash — never lit since
-## Şirin died — and her red headscarf lying on its stones (taken once: the pickup).
+## Şirin died — and her red headscarf lying on its stones (taken once: the pickup). The
+## look is a HearthFire (scripts/world/hearth_fire.gd), cold variant.
 func _hearth() -> void:
 	hearth_pos = _at(TERRACE.x + 3.4, TERRACE.z + 5.0)
 	var root := Node3D.new()
 	root.name = "ColdHearth"
 	root.position = hearth_pos
 	add_child(root)
-	for i in 9:
-		var a := TAU * i / 9.0
-		var s := 0.28 + 0.06 * sin(i * 2.3)
-		_box(root, Vector3(s * 1.4, s, s), Vector3(cos(a) * 0.75, s * 0.5, sin(a) * 0.75), _stone)
-	var ash := MeshInstance3D.new()
-	ash.name = "OldAsh"
-	var q := QuadMesh.new()
-	q.size = Vector2(1.3, 1.3)
-	var am := StandardMaterial3D.new()
-	am.albedo_color = Color(0.22, 0.21, 0.2)
-	am.roughness = 1.0
-	q.material = am
-	ash.mesh = q
-	ash.rotation.x = -PI * 0.5
-	ash.position.y = 0.03
-	root.add_child(ash)
-	var log_mat := StandardMaterial3D.new()
-	log_mat.albedo_color = Color(0.08, 0.06, 0.05)
-	for i in 2:
-		var lg := MeshInstance3D.new()
-		var cyl := CylinderMesh.new()
-		cyl.top_radius = 0.07
-		cyl.bottom_radius = 0.08
-		cyl.height = 0.8
-		cyl.material = log_mat
-		lg.mesh = cyl
-		lg.rotation = Vector3(PI * 0.5, 0.6 + i * 1.2, 0)
-		lg.position = Vector3(0, 0.1, 0)
-		root.add_child(lg)
+	hearth = HearthFire.new().setup(false, 0.75)   # cold: ash, charred logs, a thread of smoke
+	hearth.name = "Fire"
+	root.add_child(hearth)
 	yazma = ItemPickup.new()
 	yazma.name = "Yazma"
 	yazma.setup(YAZMA_KEY, "sirin_yazmasi")

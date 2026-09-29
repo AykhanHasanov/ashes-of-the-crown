@@ -2,7 +2,7 @@ extends Node
 ## Player settings (saved to user://settings.cfg), input bindings and debug options.
 ##
 ## Command-line user args (after `--`):
-##   --quality=low|high     force a graphics preset (default: saved value or GPU auto-detect)
+##   --quality=low|medium|high  force a graphics preset (default: saved value or GPU auto-detect)
 ##   --capture=<path.png>   save a screenshot at --frame and quit
 ##   --frame=<n>            frame number for --capture (default 150)
 ##   --demo=<mode>          menu | explore | dialogue | fight | combat | victory | pause |
@@ -16,7 +16,9 @@ extends Node
 
 signal changed
 
-enum Quality { LOW, HIGH }
+enum Quality { LOW, MEDIUM, HIGH }
+const QUALITY_IDS := ["low", "medium", "high"]
+const QUALITY_KEYS := ["QUALITY_LOW", "QUALITY_MEDIUM", "QUALITY_HIGH"]
 
 const PATH := "user://settings.cfg"
 
@@ -44,8 +46,27 @@ func _ready() -> void:
 	apply.call_deferred()
 
 
+## High only: full shadows, SSIL, SDFGI, dense foliage.
 func is_high() -> bool:
 	return quality == Quality.HIGH
+
+
+## Medium or high: the cheaper screen effects (SSAO, volumetric fog) are on.
+func at_least_medium() -> bool:
+	return quality != Quality.LOW
+
+
+func quality_id() -> String:
+	return QUALITY_IDS[quality]
+
+
+func quality_name() -> String:
+	return tr(QUALITY_KEYS[quality])
+
+
+static func quality_from(id: String) -> Quality:
+	var i := QUALITY_IDS.find(id)
+	return Quality.LOW if i < 0 else i as Quality
 
 
 ## Pushes the current values to the engine (window, audio buses) and notifies listeners.
@@ -61,7 +82,7 @@ func apply() -> void:
 
 func save() -> void:
 	var cfg := ConfigFile.new()
-	cfg.set_value("video", "quality", "high" if is_high() else "low")
+	cfg.set_value("video", "quality", quality_id())
 	cfg.set_value("video", "fullscreen", fullscreen)
 	cfg.set_value("audio", "music", music_volume)
 	cfg.set_value("audio", "sfx", sfx_volume)
@@ -73,7 +94,7 @@ func save() -> void:
 
 
 func toggle_quality() -> void:
-	quality = Quality.HIGH if quality == Quality.LOW else Quality.LOW
+	quality = ((quality + 1) % QUALITY_IDS.size()) as Quality   # low → medium → high → low
 	save()
 	apply()
 
@@ -94,7 +115,7 @@ func _load() -> void:
 	if cfg.load(PATH) != OK:
 		return
 	if cfg.has_section_key("video", "quality"):
-		quality = Quality.HIGH if cfg.get_value("video", "quality") == "high" else Quality.LOW
+		quality = quality_from(String(cfg.get_value("video", "quality")))
 	fullscreen = cfg.get_value("video", "fullscreen", fullscreen)
 	music_volume = cfg.get_value("audio", "music", music_volume)
 	sfx_volume = cfg.get_value("audio", "sfx", sfx_volume)
@@ -116,7 +137,7 @@ func _parse_args() -> void:
 	for arg in OS.get_cmdline_user_args():
 		var value := arg.get_slice("=", 1)
 		if arg.begins_with("--quality="):
-			quality = Quality.HIGH if value == "high" else Quality.LOW
+			quality = quality_from(value)
 		elif arg.begins_with("--capture="):
 			capture_path = value
 		elif arg.begins_with("--frame="):

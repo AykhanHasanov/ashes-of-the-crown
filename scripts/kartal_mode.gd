@@ -215,10 +215,13 @@ func _on_encounter_wave(_id: StringName, _wave: int, _total: int, banner_key: St
 
 # --- Capture demos -------------------------------------------------------------------------------
 
-## kartal (arrival, the hut up the slope) | kartal_hut (Eşref at his door, the cold hearth)
+## kartal (arrival, the hut up the slope) | kartal_hut (Eşref at his door, the cold hearth) |
+## kartal_lit (the same still at dusk with the hearth lit: the lit HearthFire variant, debug only)
 func _demo_setup() -> void:
+	if Settings.demo.begins_with("kartal"):
+		player.input_locked = true   # a still: keys typed into the focused window must not move him
 	match Settings.demo:
-		"kartal_hut":
+		"kartal_hut", "kartal_lit":
 			WorldState.set_time_of_day(15.5)
 			level.day_night.set_hour(15.5)
 			WorldState.move_npc(&"esref", String(REGION))
@@ -236,6 +239,10 @@ func _demo_setup() -> void:
 			shot.global_position = level.hearth_pos + Vector3(3.2, 2.3, 4.6)
 			shot.look_at(mid + Vector3(0, 0.6, 0))
 			shot.make_current()
+			if Settings.demo == "kartal_lit":
+				level.show_hearth(true)
+				WorldState.set_time_of_day(19.2)   # dusk, so the fire's light reads
+				level.day_night.set_hour(19.2)
 		"kartal":
 			WorldState.set_time_of_day(15.5)
 			level.day_night.set_hour(15.5)

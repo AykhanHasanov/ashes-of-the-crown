@@ -145,7 +145,7 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 - Közcü journal (`scripts/ui/kozcu_journal.gd`, Tab, V3 modes): people met (NPC flags `met` / `last_line`, recorded by chapter_base from every shown line; `NpcDefinition.relation_key`), the one-line thread (world value `thread`, action `thread:<KEY>`), kept/burned memories.
 - Hub nights (`scripts/hub/hub_nights.gd`): counted per NPC in the hub only (`hub_nights`); warning from `warning_night`; FAIRNESS: death only on a hub night after the warning was HEARD (the line at his door, or `warning_heard:<npc>` — Domrul's line 3); unheard it repeats; `cancel_if` (grief resolved) ends it.
 - Aras's room (hub): hollow room behind `door_protagonist` (`hub_level.room_spots`, `in_room`); by day walk in; at night "Odana gir", inside "Dinle / Dışarı çık"; Rüfət sits awake on his bed at night (`ally.rest_at`) — permanent design.
-- Kartal Yamacı: `scenes/kartal_yamaci.tscn` (`scripts/kartal_mode.gd`, `scripts/world/kartal_level.gd`), region `kartal_yamaci`, reached by the trail sign at Karaağaç Ocağı (`hearth.json` interact `trail`; `HubTravel.enter(..., target)`), Yadigar stands by that sign (`stand` in the entry → world_mode `_npc_stand`). Views `--demo=kartal | kartal_hut`.
+- Kartal Yamacı: `scenes/kartal_yamaci.tscn` (`scripts/kartal_mode.gd`, `scripts/world/kartal_level.gd`), region `kartal_yamaci`, reached by the trail sign at Karaağaç Ocağı (`hearth.json` interact `trail`; `HubTravel.enter(..., target)`), Yadigar stands by that sign (`stand` in the entry → world_mode `_npc_stand`). Views `--demo=kartal | kartal_hut | kartal_lit` (the lit hearth variant, debug only).
 - Balance rule: every slice encounter is comfortably beatable at base values (no burns). The balance suite in combat_test plays each (`combat.json` `balance_check`) with a plain bot, with the story's beats live (Rüfət joins S2 at wave 2 or below 30% health); every seed must win with ≥ 40% health.
 - Tests: `"$G" --headless --path . res://scenes/tests/story_test.tscn` (99 checks).
 
@@ -190,8 +190,14 @@ Set `G="C:/Users/User/Documents/games/_tools/godot/Godot_v4.7.2-stable_win64_con
 
 **Common flags and hotkeys**
 - `--capture=captures/x.png --frame=240` saves a screenshot and quits. It also prints a `PROFILE` line (fps, draw calls, primitives, VRAM).
-- `--quality=low|high` forces the graphics preset.
+- `--quality=low|medium|high` forces the graphics preset (F9 cycles them; the settings screen offers all three).
 - In game: F10 debug menu, F4 AI overlay, F6 streaming overlay, F3 FPS, F9 quality.
+
+**Look (lighting and presets)**
+- Every outdoor mode lights through `scripts/world/day_night.gd`; its look is data in `data/world/lighting.json`: warm low sun, cool blue ambient, soft shadows, AgX, glow, haze and valley mist, and per preset what is on.
+- Low: glow, 2 shadow splits. Medium: + SSAO and coarse volumetric fog. High: + SSIL, SDFGI, finer volumetric fog, 4 splits, contact-hardening shadows. `Settings.is_high()` is High only; `Settings.at_least_medium()` for Medium and up.
+- SDFGI does not read the sky (on the dev Intel UHD it turned characters and trees chrome-white); two shadowless cool "sky fill" lights stand in for the sky while SDFGI is on. Re-check on the target machine.
+- Hearths look through `scripts/world/hearth_fire.gd` (lit: stone ring, embers, flames, sparks, flickering light; cold: ash, charred logs, a thread of smoke). Air dust: `Effects.dust_motes`.
 
 **Labs**
 - `res://scenes/char_lab.tscn`: `CHAR_LAB_LOOKS`, `CHAR_LAB_WEAPON`, `CHAR_LAB_OVERLAY`.
