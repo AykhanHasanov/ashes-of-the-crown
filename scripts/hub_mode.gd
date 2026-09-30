@@ -218,6 +218,10 @@ func night_guest(npc_id: StringName, on: bool) -> void:
 func _tick(_delta: float) -> void:
 	_update_mouse()
 	_process_rest()
+	# the room lamp casts shadows only while he is in the room (195 draw calls otherwise, for nothing)
+	var in_room: bool = level.in_room(player.global_position)
+	if level.room_lamp != null and level.room_lamp.shadow_enabled != in_room:
+		level.room_lamp.shadow_enabled = in_room
 	if player.dead or get_tree().paused or dialogue.is_active():
 		return
 	_interact()

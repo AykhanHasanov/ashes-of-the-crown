@@ -375,7 +375,7 @@ func _interior(root: Node3D, door_x: float) -> void:
 	room_lamp.light_color = Color(1.0, 0.62, 0.3)
 	room_lamp.light_energy = 1.4
 	room_lamp.omni_range = 5.5
-	room_lamp.shadow_enabled = true
+	room_lamp.shadow_enabled = false   # on only while he is in the room (hub_mode._tick)
 	room_lamp.position = lamp_at + Vector3(0, 1.5, 0.3)
 	inner.add_child(room_lamp)
 	var xf: Transform3D = root.transform
