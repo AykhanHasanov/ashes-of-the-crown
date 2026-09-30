@@ -47,6 +47,15 @@ static func exemption(material_name: String, model_path := "") -> String:
 	return ""
 
 
+## The metal word in a material's name that exempts it ("" = none): for the audit's list.
+static func metal_word(material_name: String) -> String:
+	var n := material_name.to_lower()
+	for h in config().get("metal_hints", []):
+		if n.contains(String(h)):
+			return String(h)
+	return ""
+
+
 static func is_glossy(material_name: String) -> bool:
 	return _has(material_name, config().get("glossy_hints", []))
 

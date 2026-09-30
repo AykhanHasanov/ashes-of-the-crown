@@ -22,20 +22,21 @@
 		],
 		"sky_contribution": 0.55,
 		"energy_scale": 0.95,
-		"min_energy": 0.62,
+		"min_energy": 0.36,
 		"night_sky_contribution": 0.1,
 		"night_color": [
-			0.34,
-			0.44,
-			0.72
+			0.25,
+			0.3,
+			0.43
 		],
 		"camera_fill": {
-			"_about": "Night only: a weak cool shadowless light along the camera's view, so the side of the character the camera sees (his back, away from a fire) is never a black cut-out. energy at full night, times mood_scale.",
-			"energy": 0.4,
+			"_about": "Night only: a weak cool shadowless light AT the camera with a short range, so the side of the character the camera sees (his back, away from a fire) and the ground before him are readable, while far walls keep the night. energy at full night, times mood_scale.",
+			"energy": 1.1,
+			"range": 7.5,
 			"color": [
-				0.55,
-				0.66,
-				0.95
+				0.5,
+				0.57,
+				0.74
 			]
 		}
 	},

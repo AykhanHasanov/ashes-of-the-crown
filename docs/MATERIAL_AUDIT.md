@@ -30,6 +30,58 @@ new, and the exception is an explicit decision recorded on the asset or in one d
 After changing the exceptions, re-import the models (delete the model's files under `.godot/imported/` or reimport in
 the editor) and run the audit: `godot --headless --path . -s tools/audit_materials.gd`.
 
+## Kept by the keyword rule (review list)
+
+211 materials in 158 models are left as authored only because a metal word is in their
+name. They are listed here so a wrong match is easy to spot (a cloth called "GoldenThread" would show up). Checked
+2026-09-30: all 13 names are real metal. Regenerate with the audit (`KEYWORD` lines).
+
+| Material | Matched word | metallic / roughness | Models |
+|---|---|---|---|
+| `DarkMetal` | metal | 0.40 / 0.42 | 9 |
+| `DarkSteel` | steel | 0.40 / 0.42 | 16 |
+| `Gold` | gold | 0.40 / 0.42 | 22 |
+| `Gold.001` | gold | 0.40 / 0.42 | 1 |
+| `Golden` | gold | 0.40 / 0.42 | 22 |
+| `LightGold` | gold | 0.40 / 0.42 | 7 |
+| `LightMetal` | metal | 0.40 / 0.42 | 5 |
+| `LightSteel` | steel | 0.40 / 0.42 | 21 |
+| `MI_MetalOrnaments` | metal | 1.00 / 1.00 | 9 |
+| `MI_Trim_Metal` | metal | 1.00 / 1.00 | 55 |
+| `MI_Trim_Metal_Vertex` | metal | 1.00 / 1.00 | 5 |
+| `Metal` | metal | 0.40 / 0.42 | 15 |
+| `Steel` | steel | 0.40 / 0.42 | 24 |
+
+<details><summary>Every model, by material</summary>
+
+**`DarkMetal`** (word: metal) — `quaternius/medieval_village_pack/Cauldron.glb`, `quaternius/rpg_items_pack/Chest_Closed.glb`, `quaternius/rpg_items_pack/Chest_Ingots.glb`, `quaternius/rpg_items_pack/Chest_Open.glb`, `quaternius/survival_pack/Pistol_1.glb`, `quaternius/survival_pack/Shotgun_1.glb`, `quaternius/survival_pack/Shotgun_2.glb`, `quaternius/survival_pack/Shotgun_SawedOff.glb`, `quaternius/survival_pack/Shotgun_ShortStock.glb`
+
+**`DarkSteel`** (word: steel) — `quaternius/medieval_weapons_pack/Claymore.glb`, `quaternius/medieval_weapons_pack/Dagger.glb`, `quaternius/medieval_weapons_pack/Sword.glb`, `quaternius/medieval_weapons_pack/Sword_2.glb`, `quaternius/medieval_weapons_pack/Sword_Big.glb`, `quaternius/medieval_weapons_pack/Sword_Golden.glb`, `quaternius/modular_dungeon_pack/Chest.glb`, `quaternius/modular_dungeon_pack/Chest_gold.glb`, `quaternius/modular_dungeon_pack/Torch.glb`, `quaternius/modular_dungeon_pack/Torch_wall.glb`, `quaternius/modular_dungeon_pack/Window.glb`, `quaternius/rpg_items_pack/Armor_Metal.glb`, `quaternius/rpg_items_pack/Dagger_Golden.glb`, `quaternius/rpg_items_pack/Key3.glb`, `quaternius/rpg_items_pack/Sword_big.glb`, `quaternius/rpg_items_pack/Sword_big_Golden.glb`
+
+**`Gold`** (word: gold) — `quaternius/medieval_weapons_pack/Bow_Golden.glb`, `quaternius/medieval_weapons_pack/Dagger_2.glb`, `quaternius/medieval_weapons_pack/Shield_Celtic_Golden.glb`, `quaternius/medieval_weapons_pack/Sword_Golden.glb`, `quaternius/modular_dungeon_pack/Candelabrum.glb`, `quaternius/modular_dungeon_pack/Candelabrum_tall.glb`, `quaternius/modular_dungeon_pack/Carpet.glb`, `quaternius/modular_dungeon_pack/Chest_gold.glb`, `quaternius/modular_dungeon_pack/Potion.glb`, `quaternius/rpg_items_pack/Backpack.glb`, `quaternius/rpg_items_pack/Bag.glb`, `quaternius/rpg_items_pack/Book3_Closed.glb`, `quaternius/rpg_items_pack/Book3_Open.glb`, `quaternius/rpg_items_pack/Chalice.glb`, `quaternius/rpg_items_pack/Chest_Ingots.glb`, `quaternius/rpg_items_pack/Coin.glb`, `quaternius/rpg_items_pack/Coin_Skull.glb`, `quaternius/rpg_items_pack/Coin_Star.glb`, `quaternius/rpg_items_pack/Crown.glb`, `quaternius/rpg_items_pack/Crown2.glb`, `quaternius/rpg_items_pack/Gold_Ingots.glb`, `quaternius/rpg_items_pack/Star.glb`
+
+**`Gold.001`** (word: gold) — `quaternius/modular_dungeon_pack/Candle.glb`
+
+**`Golden`** (word: gold) — `quaternius/rpg_items_pack/Armor_Golden.glb`, `quaternius/rpg_items_pack/Arrow_Golden.glb`, `quaternius/rpg_items_pack/Axe_Double_Golden.glb`, `quaternius/rpg_items_pack/Axe_small_Golden.glb`, `quaternius/rpg_items_pack/Book2_Closed.glb`, `quaternius/rpg_items_pack/Book2_Open.glb`, `quaternius/rpg_items_pack/Bow_Golden.glb`, `quaternius/rpg_items_pack/Dagger_Golden.glb`, `quaternius/rpg_items_pack/Dart_Golden.glb`, `quaternius/rpg_items_pack/Hammer_Double_Golden.glb`, `quaternius/rpg_items_pack/Key4.glb`, `quaternius/rpg_items_pack/Necklace1.glb`, `quaternius/rpg_items_pack/Necklace2.glb`, `quaternius/rpg_items_pack/Necklace3.glb`, `quaternius/rpg_items_pack/Ring1.glb`, `quaternius/rpg_items_pack/Ring2.glb`, `quaternius/rpg_items_pack/Ring3.glb`, `quaternius/rpg_items_pack/Ring4.glb`, `quaternius/rpg_items_pack/Ring5.glb`, `quaternius/rpg_items_pack/Ring6.glb`, `quaternius/rpg_items_pack/Sword_Golden.glb`, `quaternius/rpg_items_pack/Sword_big_Golden.glb`
+
+**`LightGold`** (word: gold) — `quaternius/medieval_weapons_pack/Shield_Celtic_Golden.glb`, `quaternius/medieval_weapons_pack/Sword_Golden.glb`, `quaternius/rpg_items_pack/Axe_Double_Golden.glb`, `quaternius/rpg_items_pack/Axe_small_Golden.glb`, `quaternius/rpg_items_pack/Dagger_Golden.glb`, `quaternius/rpg_items_pack/Hammer_Double_Golden.glb`, `quaternius/rpg_items_pack/Sword_big_Golden.glb`
+
+**`LightMetal`** (word: metal) — `quaternius/survival_pack/Pistol_2.glb`, `quaternius/survival_pack/Revolver_1.glb`, `quaternius/survival_pack/Revolver_2.glb`, `quaternius/survival_pack/Revolver_3.glb`, `quaternius/survival_pack/Shotgun_1.glb`
+
+**`LightSteel`** (word: steel) — `quaternius/medieval_weapons_pack/Arrow.glb`, `quaternius/medieval_weapons_pack/Axe.glb`, `quaternius/medieval_weapons_pack/Axe_Double.glb`, `quaternius/medieval_weapons_pack/Axe_Small.glb`, `quaternius/medieval_weapons_pack/Dagger.glb`, `quaternius/medieval_weapons_pack/Dagger_2.glb`, `quaternius/medieval_weapons_pack/Hammer_Double.glb`, `quaternius/medieval_weapons_pack/Hammer_Small.glb`, `quaternius/medieval_weapons_pack/Scythe.glb`, `quaternius/medieval_weapons_pack/Shield_Heater.glb`, `quaternius/medieval_weapons_pack/Shield_Heater_2.glb`, `quaternius/medieval_weapons_pack/Shield_Round.glb`, `quaternius/medieval_weapons_pack/Shield_Round_2.glb`, `quaternius/medieval_weapons_pack/Spear.glb`, `quaternius/medieval_weapons_pack/Sword.glb`, `quaternius/medieval_weapons_pack/Sword_2.glb`, `quaternius/medieval_weapons_pack/Sword_Big.glb`, `quaternius/rpg_items_pack/Armor_Metal2.glb`, `quaternius/rpg_items_pack/Axe_small.glb`, `quaternius/rpg_items_pack/Dart.glb`, `quaternius/rpg_items_pack/Sword_big.glb`
+
+**`MI_MetalOrnaments`** (word: metal) — `village_mk/Door_2_Flat.gltf`, `village_mk/Door_2_Round.gltf`, `village_mk/Door_4_Flat.gltf`, `village_mk/Door_4_Round.gltf`, `village_mk/Door_8_Flat.gltf`, `village_mk/Door_8_Round.gltf`, `village_mk/Prop_MetalFence_Ornament.gltf`, `village_mk/Prop_MetalFence_Simple.gltf`, `village_mk/Roof_Tower_RoundTiles.gltf`
+
+**`MI_Trim_Metal`** (word: metal) — `props_mk/Anvil.gltf`, `props_mk/Anvil_Log.gltf`, `props_mk/Banner_1.gltf`, `props_mk/Banner_1_Cloth.gltf`, `props_mk/Banner_2.gltf`, `props_mk/Banner_2_Cloth.gltf`, `props_mk/Barrel.gltf`, `props_mk/Barrel_Apples.gltf`, `props_mk/Barrel_Holder.gltf`, `props_mk/Bed_Twin1.gltf`, `props_mk/Bed_Twin2.gltf`, `props_mk/Bench.gltf`, `props_mk/Book_7.gltf`, `props_mk/Book_Stack_2.gltf`, `props_mk/Bookcase_2.gltf`, `props_mk/Bucket_Metal.gltf`, `props_mk/Bucket_Wooden_1.gltf`, `props_mk/Cabinet.gltf`, `props_mk/Cage_Small.gltf`, `props_mk/CandleStick.gltf`, `props_mk/CandleStick_Stand.gltf`, `props_mk/CandleStick_Triple.gltf`, `props_mk/Cauldron.gltf`, `props_mk/Chain_Coil.gltf`, `props_mk/Chair_1.gltf`, `props_mk/Chalice.gltf`, `props_mk/Chandelier.gltf`, `props_mk/Chest_Wood.gltf`, `props_mk/Crate_Metal.gltf`, `props_mk/Crate_Wooden.gltf`, `props_mk/Dummy.gltf`, `props_mk/FarmCrate_Apple.gltf`, `props_mk/FarmCrate_Carrot.gltf`, `props_mk/FarmCrate_Empty.gltf`, `props_mk/Key_Metal.gltf`, `props_mk/Lantern_Wall.gltf`, `props_mk/Mug.gltf`, `props_mk/Peg_Rack.gltf`, `props_mk/Pot_1.gltf`, `props_mk/Pot_1_Lid.gltf`, `props_mk/Pouch_Large.gltf`, `props_mk/Shelf_Arch.gltf`, `props_mk/Shelf_Small_Bottles.gltf`, `props_mk/Stall_Cart_Empty.gltf`, `props_mk/Stall_Empty.gltf`, `props_mk/Table_Fork.gltf`, `props_mk/Table_Knife.gltf`, `props_mk/Table_Large.gltf`, `props_mk/Table_Plate.gltf`, `props_mk/Table_Spoon.gltf`, `props_mk/Torch_Metal.gltf`, `props_mk/WeaponStand.gltf`, `props_mk/Whetstone.gltf`, `props_mk/Workbench.gltf`, `props_mk/Workbench_Drawers.gltf`
+
+**`MI_Trim_Metal_Vertex`** (word: metal) — `props_mk/Coin.gltf`, `props_mk/Coin_Pile.gltf`, `props_mk/Coin_Pile_2.gltf`, `props_mk/Key_Gold.gltf`, `props_mk/Shield_Wooden.gltf`
+
+**`Metal`** (word: metal) — `quaternius/medieval_village_pack/Door_Straight.glb`, `quaternius/medieval_village_pack/Sawmill.glb`, `quaternius/medieval_village_pack/Sawmill_saw.glb`, `quaternius/rpg_items_pack/Chest_Closed.glb`, `quaternius/rpg_items_pack/Chest_Ingots.glb`, `quaternius/rpg_items_pack/Chest_Open.glb`, `quaternius/survival_pack/Pistol_1.glb`, `quaternius/survival_pack/Pistol_2.glb`, `quaternius/survival_pack/Revolver_1.glb`, `quaternius/survival_pack/Revolver_2.glb`, `quaternius/survival_pack/Revolver_3.glb`, `quaternius/survival_pack/Shotgun_1.glb`, `quaternius/survival_pack/Shotgun_2.glb`, `quaternius/survival_pack/Shotgun_SawedOff.glb`, `quaternius/survival_pack/Shotgun_ShortStock.glb`
+
+**`Steel`** (word: steel) — `quaternius/medieval_weapons_pack/Arrow.glb`, `quaternius/medieval_weapons_pack/Axe.glb`, `quaternius/medieval_weapons_pack/Axe_Double.glb`, `quaternius/medieval_weapons_pack/Axe_Small.glb`, `quaternius/medieval_weapons_pack/Dagger.glb`, `quaternius/medieval_weapons_pack/Dagger_2.glb`, `quaternius/medieval_weapons_pack/Hammer_Double.glb`, `quaternius/medieval_weapons_pack/Hammer_Small.glb`, `quaternius/medieval_weapons_pack/Scythe.glb`, `quaternius/medieval_weapons_pack/Shield_Heater.glb`, `quaternius/medieval_weapons_pack/Shield_Heater_2.glb`, `quaternius/medieval_weapons_pack/Shield_Round.glb`, `quaternius/medieval_weapons_pack/Shield_Round_2.glb`, `quaternius/medieval_weapons_pack/Spear.glb`, `quaternius/medieval_weapons_pack/Sword.glb`, `quaternius/medieval_weapons_pack/Sword_2.glb`, `quaternius/medieval_weapons_pack/Sword_Big.glb`, `quaternius/modular_dungeon_pack/Barrel.glb`, `quaternius/modular_dungeon_pack/Bars.glb`, `quaternius/modular_dungeon_pack/Chest.glb`, `quaternius/modular_dungeon_pack/Chest_gold.glb`, `quaternius/rpg_items_pack/Axe_small.glb`, `quaternius/rpg_items_pack/Dart.glb`, `quaternius/rpg_items_pack/Sword_big.glb`
+
+</details>
+
 **1145 materials changed.** Most common before → after:
 
 - 940 × metallic 0.40, roughness 0.42 → metallic 0.00, roughness 0.70

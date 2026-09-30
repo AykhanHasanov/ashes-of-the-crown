@@ -15,6 +15,7 @@ const MaterialPolicy := preload("res://scripts/core/material_policy.gd")
 
 var _seen := {}
 var _bad: Array = []
+var _by_word: Array = []   # materials exempt because of a metal word in their name
 
 
 func _init() -> void:
@@ -23,6 +24,9 @@ func _init() -> void:
 	print("---- %d unique materials, %d non-metals breaking the rule ----" % [_seen.size(), _bad.size()])
 	for b in _bad:
 		print("FIX  ", b)
+	print("---- %d materials kept by the keyword rule ----" % _by_word.size())
+	for k in _by_word:
+		print(k)
 	quit()
 
 
@@ -72,6 +76,10 @@ func _material(path: String, m: Material) -> void:
 		bm.metallic, " (tex)" if bm.metallic_texture else "", bm.roughness, " (tex)" if bm.roughness_texture else "",
 		"" if why == "" else "  (%s)" % why]
 	print(line)
+	if why == "metal":
+		# passed by the keyword rule: listed on its own so a wrong match is easy to spot
+		_by_word.append("KEYWORD  %s | %s | %s | %.2f | %.2f" % [path.trim_prefix("res://assets/"), m.resource_name,
+			MaterialPolicy.metal_word(m.resource_name), bm.metallic, bm.roughness])
 	# texture-driven values are the texture's business (an ORM map marks the few metal pixels)
 	var bad_metal := bm.metallic > 0.0 and bm.metallic_texture == null
 	var bad_rough := bm.roughness < float(MaterialPolicy.config()["min_roughness"]) - 0.001 and bm.roughness_texture == null
