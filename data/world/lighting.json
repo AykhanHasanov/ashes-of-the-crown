@@ -105,7 +105,7 @@
 		"sky_fill": 1.7
 	},
 	"presets": {
-		"_about": "What each graphics preset (Settings.quality) turns on. SDFGI is not a preset: it is the separate, experimental Settings.global_illumination (off by default).",
+		"_about": "What each graphics preset (Settings.quality) turns on. SDFGI is not a preset: it is the separate, experimental Settings.global_illumination (off by default). ssao_quality (very_low | low | medium | high | ultra) and ssao_half (half resolution): Medium runs SSAO at its cheapest (docs/PERF_PROFILE.md: it was 4-10 ms of the frame on the Intel UHD).",
 		"low": {
 			"ssao": false,
 			"ssil": false,
@@ -120,7 +120,9 @@
 			"volumetric": true,
 			"glow": true,
 			"shadow_splits": 2,
-			"shadow_distance": 90.0
+			"shadow_distance": 90.0,
+			"ssao_quality": "very_low",
+			"ssao_half": true
 		},
 		"high": {
 			"ssao": true,
@@ -128,7 +130,9 @@
 			"volumetric": true,
 			"glow": true,
 			"shadow_splits": 4,
-			"shadow_distance": 140.0
+			"shadow_distance": 140.0,
+			"ssao_quality": "medium",
+			"ssao_half": true
 		}
 	},
 	"benchmark": {
