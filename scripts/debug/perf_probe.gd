@@ -12,7 +12,7 @@ extends Node
 ##     time, and whether it comes back on a second entry (PERF_REENTER=1).
 ## One scene and preset per run; it prints one line "PERF_JSON {...}" (docs/PERF_PROFILE.md
 ## is written from those). Run on a clean profile so nothing is saved over the player's files:
-##   APPDATA="<empty folder>" PERF_SCENE=world|hub|kartal [PERF_SPOT=village] [PERF_REENTER=1] \
+##   APPDATA="<empty folder>" PERF_SCENE=world|hub|kartal [PERF_SPOT=village] [PERF_REENTER=1] [PERF_FAST=1] \
 ##     "$G" --path . res://scenes/tests/perf_probe.tscn -- --demo=perf --quality=low|medium
 
 const SCENES := {"world": "res://scenes/world.tscn", "hub": "res://scenes/son_ocaq.tscn", "kartal": "res://scenes/kartal_yamaci.tscn"}
@@ -66,7 +66,8 @@ func _start(dummy: Node) -> void:
 	out["base"] = await _measure(MEASURE)
 	out["counts"] = _counts(mode)
 	out["monitors"] = _monitors()
-	out["toggles"] = await _toggles(mode, float(out["base"]["median_ms"]))
+	if OS.get_environment("PERF_FAST") != "1":   # PERF_FAST=1: the baseline only (a quick before / after)
+		out["toggles"] = await _toggles(mode, float(out["base"]["median_ms"]))
 	print("PERF_JSON ", JSON.stringify(out))
 	get_tree().quit()
 

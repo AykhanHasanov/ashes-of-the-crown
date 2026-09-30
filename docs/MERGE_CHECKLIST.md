@@ -27,7 +27,24 @@ The flow test plays the real game on a clean user profile (it never touches the 
 New Game → the valley and the first-launch benchmark → light a hearth → Son Ocak → change the preset in the settings →
 save → quit; then a restart → Continue → the preset and the lit hearth are still there.
 
-## 3. Then
+## 3. Performance (only when the merge touches lighting, materials, shaders, presets or scene geometry)
+
+Run the probe at **Medium** for the valley (start and Kürköy) and the hub, each on a clean profile, and compare the
+median frame time with the previous baseline (the last table in `docs/PERF_PROFILE.md`):
+
+```
+P="$TEMP/aotc_perf_$(date +%H%M%S)"; mkdir -p "$P"; export APPDATA="$(cygpath -w "$P")"
+PERF_FAST=1 PERF_SCENE=world "$G" --path . res://scenes/tests/perf_probe.tscn -- --demo=perf --quality=medium
+PERF_FAST=1 PERF_SCENE=world PERF_SPOT=village "$G" --path . res://scenes/tests/perf_probe.tscn -- --demo=perf --quality=medium
+PERF_FAST=1 PERF_SCENE=hub "$G" --path . res://scenes/tests/perf_probe.tscn -- --demo=perf --quality=medium
+```
+
+Each prints `PERF_JSON {...}` (`base.median_ms`, `base.low1_fps`, `monitors.draw_calls`). Nothing else may run on the
+machine meanwhile. **If any of the three is more than 1 ms worse than the baseline, write down why** in the merge
+commit (and in `docs/PERF_PROFILE.md` if it is there to stay) — a known, explained cost is fine; an unexplained one
+is not merged. Update the baseline table when the numbers change on purpose.
+
+## 4. Then
 
 - Models or materials changed: `"$G" --headless --path . -s tools/audit_materials.gd` reports 0 violations.
 - `git merge --no-ff <branch>` on `main`, tag if the owner asked for one, `git push` (and push the tag).
