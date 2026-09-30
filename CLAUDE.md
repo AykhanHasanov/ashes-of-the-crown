@@ -201,6 +201,8 @@ Set `G="C:/Users/User/Documents/games/_tools/godot/Godot_v4.7.2-stable_win64_con
 - Materials: non-metals are `metallic 0`, `roughness >= 0.7` (`scripts/core/material_policy.gd`), applied at glTF import (`tools/import/material_policy_import.gd` is every model's import script — keep it when adding models) and to baked foliage (`tools/fix_materials.gd`). Audit: `-s tools/audit_materials.gd`; list in `docs/MATERIAL_AUDIT.md`.
 - Hearths look through `scripts/world/hearth_fire.gd` (lit: stone ring, embers, flames — mixed blend, so no white blob — sparks, flickering light; cold: ash, charred logs, a thread of smoke): Kartal Yamacı, the Son Ocak hearth, every valley hearth (cold until lit). Air dust: `Effects.dust_motes`. Views `--demo=world_hearth | world_hearth_lit`.
 
+**Session flow (before a merge to main):** `scenes/tests/flow_test.tscn` plays the real game in two launches on a clean user profile (New Game → valley, the benchmark → light a hearth → Son Ocak → change the preset in the settings → save → quit; then restart → Continue → the preset and the lit hearth are still there). Windowed, not part of the headless suites; the commands (APPDATA pointed at an empty folder, `FLOW_PHASE=1` then `2`) are in the header of `scripts/debug/flow_selftest.gd`.
+
 **Labs**
 - `res://scenes/char_lab.tscn`: `CHAR_LAB_LOOKS`, `CHAR_LAB_WEAPON`, `CHAR_LAB_OVERLAY`.
 - `res://scenes/tree_lab.tscn`: `TREE_LAB_IDS`, `TREE_LAB_DIST`.
