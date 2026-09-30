@@ -139,12 +139,15 @@ func wait_until(hour: float) -> void:
 	EventBus.checkpoint_rested.emit(&"son_ocaq_hearth")   # SaveManager autosaves
 
 
-## Where a resident of Son Ocaq stands: by day at their workplace or their own door; at night
-## behind their door (nowhere).
+## Where a resident of Son Ocaq stands, by the hour (data/hub/son_ocaq.json life.routine):
+## dawn at their own door, by day at their workplace or their spot in the market, in the
+## evening round the hearth, at night behind a closed door (nowhere). Mourning comes first.
 func _npc_spot(npc_id: StringName, location_id: String) -> Variant:
 	if location_id != WorldState.SON_OCAQ:
 		return null
-	if WorldState.get_phase() == &"night" and not _night_guests.has(npc_id):
+	var id := String(npc_id)
+	var phase := WorldState.get_phase()
+	if phase == &"night" and not _night_guests.has(npc_id):
 		return null
 	var mourned := HubNights.mourned()
 	if npc_id == &"peri_nene" and mourned != &"":
@@ -152,8 +155,22 @@ func _npc_spot(npc_id: StringName, location_id: String) -> Variant:
 		var d = level.doors.get(HubData.place(HubData.room_of(String(mourned))).get("door", ""))
 		if d != null:
 			return d.global_position + d.global_basis.z * 1.6 + d.global_basis.x * 0.6
-	var place := HubData.day_place_of(String(npc_id))   # a workplace (smithy, bakery) or their room
-	return level.stand_point(place) if place != "" else null
+	match HubData.routine_for(phase):
+		"inside":
+			return null if not _night_guests.has(npc_id) else level.stand_point(HubData.room_of(id))
+		"hearth":
+			var home: Array = HubData.home_npcs()
+			var i: int = home.find(id)
+			return level.hearth_spot(i, home.size()) if i >= 0 else level.stand_point(HubData.room_of(id))
+		"work":
+			var work := HubData.day_place_of(id)
+			if work != HubData.room_of(id):
+				return level.stand_point(work)   # the smithy, the bakery
+			var stall = HubData.market_spot(id)
+			if stall != null:
+				return stall
+	var room := HubData.room_of(id)
+	return level.stand_point(room) if room != "" else null
 
 
 ## Night falls: warnings, and the shades come (roamers, the lost ones at warned doors,
@@ -412,6 +429,23 @@ func _demo_setup() -> void:
 			WorldState.set_time_of_day(22.0)
 			level.day_night.set_hour(22.0)
 			_demo_view(Vector3(0, 0, 2.4), Vector3(0, 1.5, -6.0))
+		"hub_life_dawn", "hub_life_day", "hub_life_dusk", "hub_life_night":
+			# The courtyard at one hour of the day, from the gate: who is out, what moves
+			var hours := {"hub_life_dawn": 6.5, "hub_life_day": 11.0, "hub_life_dusk": 19.3, "hub_life_night": 22.5}
+			var hour: float = hours[Settings.demo]
+			WorldState.set_time_of_day(hour)
+			level.day_night.set_hour(hour)
+			player.input_locked = true
+			player.global_position = Vector3(1.4, 0.1, 1.5)
+			player.face_towards(level.hearth_pos)
+			rig.snap()
+			# a still from inside the courtyard: hearth and north gallery left, market right
+			var shot := Camera3D.new()
+			shot.fov = 68.0
+			add_child(shot)
+			shot.global_position = Vector3(3.4, 2.5, 4.8)
+			shot.look_at(Vector3(-0.6, 0.9, -1.2))
+			shot.make_current()
 		"hub_light_hearth", "hub_light_corner":
 			# Night readability stills (fixed cameras): him by the hearth, and in the far corner
 			WorldState.set_time_of_day(22.0)

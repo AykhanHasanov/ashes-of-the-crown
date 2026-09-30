@@ -18,6 +18,8 @@ var with_bed := true
 var with_light := true
 var light_energy := 2.2
 var light_range := 7.0
+## Which layers this fire draws into its shadow map (the hub keeps far walls out: layer 2).
+var shadow_caster_mask := 0xFFFFFFFF
 var light: OmniLight3D            # the flickering fire light (lit, with_light)
 var _t := 0.0
 var _seed := 0.0
@@ -59,6 +61,7 @@ func _ready() -> void:
 			light.omni_range = light_range
 			light.omni_attenuation = 1.4
 			light.shadow_enabled = true
+			light.shadow_caster_mask = shadow_caster_mask
 			light.position.y = 0.7
 			add_child(light)
 	else:

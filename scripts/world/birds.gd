@@ -22,6 +22,7 @@ void fragment() {
 }
 """
 
+var flocks := FLOCKS     # fewer where little sky is visible (the hub's courtyard)
 var clock: Node          # DayNight
 var height_at: Callable
 var _flocks: Array = []  # {mmi, center, radius, height, speed, glide, birds: [[angle, dr, dh, phase]]}
@@ -35,7 +36,7 @@ func _ready() -> void:
 	mat.shader.code = SHADER
 	var mesh := _bird_mesh()
 	mesh.surface_set_material(0, mat)
-	for f in FLOCKS:
+	for f in flocks:
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
 		mm.use_custom_data = true

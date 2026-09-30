@@ -37,6 +37,37 @@ static func places() -> Array:
 	return out
 
 
+## data/hub/son_ocaq.json `life`: ambience, smoke, laundry, market, the routine.
+static func life() -> Dictionary:
+	return data().get("life", {})
+
+
+## Where people are in this phase: "door" | "work" | "hearth" | "inside" (life.routine).
+static func routine_for(phase: StringName) -> String:
+	return String(life().get("routine", {}).get(String(phase), "door"))
+
+
+## An NPC's own spot in the market by day, or null (life.market.spots).
+static func market_spot(npc_id: String) -> Variant:
+	for s in life().get("market", {}).get("spots", []):
+		if String(s["npc"]) == npc_id:
+			var at: Array = s["at"]
+			return Vector3(float(at[0]), 0.0, float(at[1]))
+	return null
+
+
+## Everyone living in Son Ocaq and home now, by id, in a stable order (the hearth ring).
+static func home_npcs() -> Array:
+	var out: Array = []
+	for p in places():
+		for r in p["residents"]:
+			var id := String(r)
+			if id != PROTAGONIST and not out.has(id) and is_home(id) and room_of(id) != "":
+				out.append(id)
+	out.sort()
+	return out
+
+
 static func place(id: String) -> Dictionary:
 	for p in places():
 		if p["id"] == id:

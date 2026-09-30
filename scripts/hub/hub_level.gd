@@ -17,6 +17,7 @@ const DayNight := preload("res://scripts/world/day_night.gd")
 const Effects := preload("res://scripts/world/effects.gd")
 const Visuals := preload("res://scripts/world/visuals.gd")
 const HearthFire := preload("res://scripts/world/hearth_fire.gd")
+const HubLife := preload("res://scripts/hub/hub_life.gd")
 const KIT := "res://assets/village_mk/%s.gltf"
 const FAMILY := [
 	["Wall_Plaster_Door_Round", "Wall_Plaster_Window_Wide_Round", "Window_Wide_Round1"],
@@ -33,6 +34,12 @@ const SOUTH_Z := 6.0
 const GATE_HALF := 2.0
 const EYVAN_H := 7.0         # the entrance portal rises above the 3.3 m roofs
 const FOOTSTEP := 0.55
+## Render layer 2 = "the hearth's fire does not cast your shadow": the far walls, the upper
+## storey and the outer village are lit by the fire but stay out of its shadow cube, which is
+## redrawn whenever someone moves near the fire (docs/PERF_PROFILE.md).
+const NO_FIRE_SHADOW_LAYER := 2
+const WINDOW_LIT := Color(0.95, 0.6, 0.28)    # a lamp behind the glass, at night
+const WINDOW_OUT := Color(0.09, 0.08, 0.075)  # the same glass by day
 
 var player_spawn := Vector3(0, 0.1, 2.4)   # the open courtyard: sky, hearth and upper storey in view
 var braziers: Array = []
@@ -66,6 +73,7 @@ var room_spots: Dictionary = {}      # Aras's room: spot -> global Transform3D (
 var room_bounds := AABB()            # Aras's room, inside
 var room_xf := Transform3D.IDENTITY   # Aras's room: its front's middle, +Z out of the room
 var room_lamp: OmniLight3D
+var life: Node3D                     # HubLife: sound, smoke, cloth, market, birds
 var _floor: StandardMaterial3D
 var _rug: StandardMaterial3D
 
@@ -101,6 +109,13 @@ func build() -> void:
 	lament.max_distance = 60.0
 	lament.finished.connect(_on_lament_finished)
 	add_child(lament)
+	for far in [get_node_or_null("UpperStorey"), get_node_or_null("OuterVillage")]:
+		if far != null:
+			keep_out_of_fire_shadow(far)
+	life = HubLife.new()
+	life.name = "Life"
+	life.level = self
+	add_child(life)
 	refresh_growth()
 	EventBus.npc_changed.connect(func(_id): refresh_growth())
 	EventBus.npc_moved.connect(func(_id, _a, _b): refresh_growth())
@@ -231,6 +246,31 @@ func refresh_growth() -> void:
 		growth[id]["window"].material_override = _window_lit if st != "dark" and not _door_scene else _dark
 		growth[id]["cleared"].visible = st == "melted"
 	hearth_fire.scale = Vector3.ONE * HubData.hearth_scale()
+
+
+## Everything under `node` is lit by the hearth but never drawn into its shadow map.
+static func keep_out_of_fire_shadow(node: Node) -> void:
+	var meshes: Array = node.find_children("*", "VisualInstance3D", true, false)
+	if node is VisualInstance3D:
+		meshes.append(node)
+	for mi in meshes:
+		(mi as VisualInstance3D).layers = NO_FIRE_SHADOW_LAYER
+
+
+## How brightly a lit window glows: 0 by day, 1 deep at night (HubLife drives it from the
+## clock). Which rooms may glow at all is refresh_growth's business.
+func set_window_glow(amount: float) -> void:
+	if _window_lit == null:
+		return
+	_window_lit.albedo_color = WINDOW_OUT.lerp(WINDOW_LIT, clampf(amount * 1.7, 0.0, 1.0))
+
+
+## Where the i-th of `n` people stands round the fire in the evening (life.hearth_ring).
+func hearth_spot(i: int, n: int) -> Vector3:
+	var ring: Dictionary = HubData.life().get("hearth_ring", {})
+	var r := float(ring.get("radius", 3.0))
+	var a := deg_to_rad(float(ring.get("start_angle", 0.0))) + TAU * float(i) / maxf(n, 1)
+	return hearth_pos + Vector3(cos(a) * r, 0.0, sin(a) * r)
 
 
 func room_state_shown(place_id: String) -> String:
@@ -637,6 +677,7 @@ func _hearth() -> void:
 	hearth_fire.position = hearth_pos
 	add_child(hearth_fire)
 	var fire = HearthFire.new().setup(true, hearth_radius - 0.2, false, true, true, 4.2, 15.0)
+	fire.shadow_caster_mask = ~NO_FIRE_SHADOW_LAYER   # the far walls are lit by it, never cast by it
 	fire.name = "Fire"
 	hearth_fire.add_child(fire)
 	hearth_light = fire.light
@@ -645,6 +686,9 @@ func _hearth() -> void:
 
 ## Dark flat-roofed houses round the caravanserai: background only.
 func _outer_village() -> void:
+	var village := Node3D.new()
+	village.name = "OuterVillage"
+	add_child(village)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1107
 	for i in 16:
@@ -657,7 +701,7 @@ func _outer_village() -> void:
 		var root := Node3D.new()
 		root.position = pos
 		root.rotation.y = atan2(-pos.x, -pos.z) + rng.randf_range(-0.25, 0.25)
-		add_child(root)
+		village.add_child(root)
 		var mat := _plaster if rng.randf() < 0.5 else _brick
 		_box(root, size, Vector3(0, size.y * 0.5, 0), mat)
 		_box(root, Vector3(size.x + 0.2, 0.35, 0.22), Vector3(0, size.y + 0.17, size.z * 0.5), _brick)
@@ -719,7 +763,7 @@ func _materials() -> void:
 	_scorch.roughness = 1.0
 	_window_lit = StandardMaterial3D.new()
 	_window_lit.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	_window_lit.albedo_color = Color(0.95, 0.6, 0.28)
+	_window_lit.albedo_color = WINDOW_LIT
 	_dark = StandardMaterial3D.new()
 	_dark.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_dark.albedo_color = Color(0.02, 0.018, 0.016)
