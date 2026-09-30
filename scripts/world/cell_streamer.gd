@@ -294,6 +294,12 @@ func _make_light(def: Dictionary, center: Vector3) -> Node3D:
 	return root
 
 
+## Work still to do: places a worker is building plus jobs waiting for the main thread.
+## 0 = everything around the focus is in (the benchmark and the loading screen wait for it).
+func pending_count() -> int:
+	return _pending.size() + _main_jobs.size()
+
+
 func loaded_count() -> Dictionary:
 	var v := 0
 	var f := 0

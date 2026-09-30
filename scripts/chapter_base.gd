@@ -38,6 +38,7 @@ var dialogue
 var pause_menu
 var journal
 var story: Node       # StoryDirector (V3 modes): the act's beats
+var begun := false    # _begin() has run: the scene is set up (scripts/core/scene_ready.gd)
 var radial
 var offer
 
@@ -110,8 +111,6 @@ func _ready() -> void:
 		hud.set_hint(player.control_hint())
 		Settings.changed.connect(func(): hud.set_hint(player.control_hint()))
 	_setup()
-	if Settings.needs_benchmark() and player.has_method("control_hint"):
-		add_child(Benchmark.new())   # first time in a V3 scene: pick the graphics preset from the frame rate
 	if player.has_method("control_hint"):
 		story = StoryDirector.new()
 		story.mode = self
@@ -119,6 +118,11 @@ func _ready() -> void:
 	var mode := restart_mode
 	restart_mode = ""
 	_begin(mode)
+	begun = true
+	if Settings.needs_benchmark() and player.has_method("control_hint"):
+		var bench = Benchmark.new()   # first time in a V3 scene: pick the graphics preset from the frame rate
+		bench.mode = self
+		add_child(bench)
 	if story != null:
 		story.fire.call_deferred("enter", String(WorldState.get_region()))   # the region we start in
 	if EchoDirector.returning:

@@ -48,10 +48,11 @@ func _phase_1() -> void:
 	menu._on_new_game()
 	var world = await _scene(WORLD)
 	_check("New Game: the valley, slot 1", world != null and WorldState.get_region() == &"kur_vadisi" and SaveManager.active_slot == 1)
-	var benched := func() -> bool: return Settings.benchmark_done
-	await _until(benched, 20.0)
-	_check("first launch: the benchmark picked a preset and saved it", Settings.benchmark_done and FileAccess.file_exists(Settings.PATH),
-		"picked " + Settings.quality_id())
+	# a clear result is final at once; a dead-zone one runs Medium and waits for the next launch
+	var benched := func() -> bool: return Settings.benchmark_done or Settings.bench_candidate != ""
+	await _until(benched, 40.0)
+	_check("first launch: the benchmark measured and wrote its result", benched.call() and FileAccess.file_exists(Settings.PATH),
+		"%s, final %s" % [Settings.quality_id(), Settings.benchmark_done])
 	var it = await _hearth(world)
 	_check("the hearth is there, cold (ash and smoke)", it != null and not it.is_used() and it._fire != null and not it._fire.lit)
 	world._use(it)

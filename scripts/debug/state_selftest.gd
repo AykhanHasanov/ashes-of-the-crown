@@ -4,6 +4,7 @@ extends Node
 ## never the player's saves.
 ## Run: godot --headless --path . res://scenes/tests/state_test.tscn   (exit code = failures)
 
+const SceneReady := preload("res://scripts/core/scene_ready.gd")
 const Benchmark := preload("res://scripts/systems/benchmark.gd")
 const MaterialPolicy := preload("res://scripts/core/material_policy.gd")
 const MainMenu := preload("res://scripts/ui/main_menu.gd")
@@ -46,14 +47,29 @@ func _graphics_presets() -> void:
 	var Q = Settings.Quality
 	_check("presets: low / medium / high by id, unknown → low", Settings.quality_from("medium") == Q.MEDIUM
 		and Settings.quality_from("high") == Q.HIGH and Settings.quality_from("x") == Q.LOW)
-	_check("benchmark: fast → High, fast enough → Medium, slow → Low, no measurement → Medium",
-		Settings.quality_for_fps(float(cfg["high_fps"]) + 1.0, cfg) == Q.HIGH
-		and Settings.quality_for_fps(float(cfg["medium_fps"]) + 1.0, cfg) == Q.MEDIUM
-		and Settings.quality_for_fps(float(cfg["medium_fps"]) - 1.0, cfg) == Q.LOW
-		and Settings.quality_for_fps(0.0, cfg) == Q.MEDIUM)
+	var hi := float(cfg["high_fps"])
+	var med := float(cfg["medium_fps"])
+	var low := float(cfg["low_fps"])
+	_check("benchmark zones: fast → high, >= medium_fps → medium, <= low_fps → low, between → the dead zone, nothing → medium",
+		Settings.benchmark_zone(hi + 1.0, cfg) == "high" and Settings.benchmark_zone(med + 1.0, cfg) == "medium"
+		and Settings.benchmark_zone(low - 1.0, cfg) == "low" and Settings.benchmark_zone((med + low) * 0.5, cfg) == "between"
+		and Settings.benchmark_zone(0.0, cfg) == "medium" and med > low)
+	# the dead zone: Medium now, saved only when the next launch agrees (a dry run: no file written)
+	var was_dry: bool = Settings.benchmark_dry_run
+	var was_q = Settings.quality
+	Settings.benchmark_dry_run = true
+	Settings.bench_candidate = ""
+	var first: bool = Settings.finish_benchmark((med + low) * 0.5)
+	_check("benchmark dead zone: the first result runs Medium but is not final", not first and Settings.quality == Q.MEDIUM)
+	Settings.bench_candidate = "medium"   # what a real run would have remembered
+	_check("... the next launch agreeing makes it final", Settings.finish_benchmark((med + low) * 0.5) and Settings.quality == Q.MEDIUM)
+	_check("... a clear result is final at once", Settings.finish_benchmark(low - 5.0) and Settings.quality == Q.LOW)
+	Settings.bench_candidate = ""
+	Settings.benchmark_dry_run = was_dry
+	Settings.quality = was_q
 	_check("benchmark never runs headless or in a --demo", not Settings.needs_benchmark())
 	_check("benchmark: an integrated GPU never gets High automatically",
-		Settings.quality_for_fps(float(cfg["high_fps"]) + 30.0, cfg, true) == Q.MEDIUM
+		Settings.benchmark_zone(hi + 30.0, cfg, true) == "medium"
 		and Benchmark.is_integrated_name("Intel(R) UHD Graphics") and Benchmark.is_integrated_name("Intel(R) Iris(R) Xe Graphics")
 		and Benchmark.is_integrated_name("AMD Radeon(TM) Vega 8 Graphics") and Benchmark.is_integrated_name("AMD Radeon(TM) Graphics")
 		and not Benchmark.is_integrated_name("NVIDIA GeForce RTX 3060") and not Benchmark.is_integrated_name("AMD Radeon RX 6600"))
@@ -65,8 +81,11 @@ func _graphics_presets() -> void:
 	var st: Dictionary = Benchmark.stats(times)
 	_check("benchmark: median frame rate, not the mean; 1% low from the slowest frames", is_equal_approx(st["median"], 50.0)
 		and st["mean"] < 49.0 and st["low1"] < st["median"] and int(st["frames"]) == 100)
-	_check("benchmark: the first 1.5 s are not measured; the notice stays 3-4 s", float(cfg["discard"]) >= 1.5
-		and float(cfg["notice_seconds"]) >= 3.0 and float(cfg["notice_seconds"]) <= 4.0)
+	_check("benchmark: starts on ready (+30 frames, 10 s cap); the notice stays 3-4 s", int(cfg["ready_frames"]) == 30
+		and is_equal_approx(float(cfg["ready_cap"]), 10.0) and float(cfg["notice_seconds"]) >= 3.0 and float(cfg["notice_seconds"]) <= 4.0)
+	var fake := Node.new()
+	_check("scene ready: a mode is not ready before its _begin has run", not SceneReady.is_ready(fake) and not SceneReady.is_ready(null))
+	fake.free()
 	var look: Dictionary = DataDB.world("lighting")
 	_check("SDFGI is not in any preset: it is the separate experimental setting (off by default)",
 		["low", "medium", "high"].all(func(p): return not look["presets"][p].has("sdfgi")) and not Settings.global_illumination)

@@ -34,7 +34,7 @@ func _ready() -> void:
 	_slider(grid, "Konuşma sesi", Settings.voice_volume, func(v: float): Settings.voice_volume = v)
 	_slider(grid, "Ekran sarsıntısı", Settings.screen_shake, func(v: float): Settings.screen_shake = v)
 	_choice(grid, "Qrafika", [tr("QUALITY_LOW"), tr("QUALITY_MEDIUM"), tr("QUALITY_HIGH")], int(Settings.quality),
-		func(i: int): Settings.quality = i as Settings.Quality)
+		func(i: int): Settings.choose_quality(i as Settings.Quality))
 	_toggle(grid, tr("SETTINGS_GI"), Settings.global_illumination, func(on: bool): Settings.global_illumination = on)
 	_toggle(grid, "Tam ekran", Settings.fullscreen, func(on: bool): Settings.fullscreen = on)
 	_toggle(grid, "Hasar sayıları", Settings.damage_numbers, func(on: bool): Settings.damage_numbers = on)

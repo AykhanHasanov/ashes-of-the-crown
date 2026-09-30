@@ -27,6 +27,7 @@ const PATH := "user://settings.cfg"
 var quality: Quality = Quality.LOW
 var global_illumination := false   # SDFGI, experimental: off unless the player turns it on
 var benchmark_done := false         # the first-launch benchmark has picked a preset (or the player did)
+var bench_candidate := ""          # a dead-zone result waiting for the next launch to agree
 var _quality_forced := false        # --quality on the command line: no benchmark this run
 var benchmark_dry_run := false      # --benchmark: measure now (even in a capture) but save nothing
 var music_volume := 0.8
@@ -91,6 +92,7 @@ func save() -> void:
 	cfg.set_value("video", "quality", quality_id())
 	cfg.set_value("video", "global_illumination", global_illumination)
 	cfg.set_value("video", "benchmarked", benchmark_done)
+	cfg.set_value("video", "bench_candidate", bench_candidate)
 	cfg.set_value("video", "fullscreen", fullscreen)
 	cfg.set_value("audio", "music", music_volume)
 	cfg.set_value("audio", "sfx", sfx_volume)
@@ -102,7 +104,7 @@ func save() -> void:
 
 
 func toggle_quality() -> void:
-	quality = ((quality + 1) % QUALITY_IDS.size()) as Quality   # low → medium → high → low
+	choose_quality(((quality + 1) % QUALITY_IDS.size()) as Quality)   # low → medium → high → low
 	save()
 	apply()
 
@@ -126,6 +128,7 @@ func _load() -> void:
 		quality = quality_from(String(cfg.get_value("video", "quality")))
 	# an older settings file with a quality in it: that was the player's choice
 	benchmark_done = cfg.get_value("video", "benchmarked", cfg.has_section_key("video", "quality"))
+	bench_candidate = String(cfg.get_value("video", "bench_candidate", ""))
 	fullscreen = cfg.get_value("video", "fullscreen", fullscreen)
 	global_illumination = cfg.get_value("video", "global_illumination", global_illumination)
 	music_volume = cfg.get_value("audio", "music", music_volume)
@@ -145,27 +148,44 @@ func needs_benchmark() -> bool:
 	return not benchmark_done and not _quality_forced and demo == "" and capture_path == "" 		and DisplayServer.get_name() != "headless"
 
 
-## The preset for a measured (median) frame rate (data/world/lighting.json benchmark),
-## measured at Medium: comfortably fast → High, fast enough → Medium, else Low. No
-## measurement → Medium. An integrated GPU never gets High automatically.
-static func quality_for_fps(fps: float, cfg: Dictionary, integrated_gpu := false) -> Quality:
+## What a measured (median) frame rate means (data/world/lighting.json benchmark), measured
+## at Medium: "high" (fast, and not an integrated GPU), "medium", "low", or "between" — the
+## dead zone between low_fps and medium_fps, where one measurement is not enough to decide.
+## No measurement (fps <= 0) → "medium".
+static func benchmark_zone(fps: float, cfg: Dictionary, integrated_gpu := false) -> String:
 	if fps <= 0.0:
-		return Quality.MEDIUM
+		return "medium"
 	if fps >= float(cfg["high_fps"]) and not integrated_gpu:
-		return Quality.HIGH
+		return "high"
 	if fps >= float(cfg["medium_fps"]):
-		return Quality.MEDIUM
-	return Quality.LOW
+		return "medium"
+	if fps <= float(cfg["low_fps"]):
+		return "low"
+	return "between"
 
 
-func finish_benchmark(fps: float, integrated_gpu := false) -> void:
-	quality = quality_for_fps(fps, DataDB.world("lighting")["benchmark"], integrated_gpu)
+## Applies a benchmark result. A clear result is saved at once. In the dead zone the game
+## runs at Medium and remembers a candidate; the preset is saved only when the NEXT launch's
+## measurement agrees (two agreeing results). Returns true when the choice is final.
+func finish_benchmark(fps: float, integrated_gpu := false) -> bool:
+	var zone := benchmark_zone(fps, DataDB.world("lighting")["benchmark"], integrated_gpu)
+	var decided := zone != "between" or bench_candidate == "medium"
+	quality = quality_from("medium" if zone == "between" else zone)
 	if benchmark_dry_run:
 		apply()   # a dry run changes this session only
-		return
-	benchmark_done = true
+		return decided
+	benchmark_done = decided
+	bench_candidate = "" if decided else "medium"
 	save()
 	apply()
+	return decided
+
+
+## The player picked a preset (settings screen, F9): that is final, no benchmark after it.
+func choose_quality(q: Quality) -> void:
+	quality = q
+	benchmark_done = true
+	bench_candidate = ""
 
 
 func _parse_args() -> void:
