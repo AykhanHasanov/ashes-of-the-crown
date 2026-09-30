@@ -145,20 +145,21 @@ func needs_benchmark() -> bool:
 	return not benchmark_done and not _quality_forced and demo == "" and capture_path == "" 		and DisplayServer.get_name() != "headless"
 
 
-## The preset for a measured frame rate (data/world/lighting.json benchmark), measured at
-## Medium: comfortably fast → High, fast enough → Medium, else Low. No measurement → Medium.
-static func quality_for_fps(fps: float, cfg: Dictionary) -> Quality:
+## The preset for a measured (median) frame rate (data/world/lighting.json benchmark),
+## measured at Medium: comfortably fast → High, fast enough → Medium, else Low. No
+## measurement → Medium. An integrated GPU never gets High automatically.
+static func quality_for_fps(fps: float, cfg: Dictionary, integrated_gpu := false) -> Quality:
 	if fps <= 0.0:
 		return Quality.MEDIUM
-	if fps >= float(cfg["high_fps"]):
+	if fps >= float(cfg["high_fps"]) and not integrated_gpu:
 		return Quality.HIGH
 	if fps >= float(cfg["medium_fps"]):
 		return Quality.MEDIUM
 	return Quality.LOW
 
 
-func finish_benchmark(fps: float) -> void:
-	quality = quality_for_fps(fps, DataDB.world("lighting")["benchmark"])
+func finish_benchmark(fps: float, integrated_gpu := false) -> void:
+	quality = quality_for_fps(fps, DataDB.world("lighting")["benchmark"], integrated_gpu)
 	if benchmark_dry_run:
 		apply()   # a dry run changes this session only
 		return

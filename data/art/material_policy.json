@@ -1,0 +1,9 @@
+{
+	"_about": "The material rule's exceptions (scripts/core/material_policy.gd; see docs/MATERIAL_AUDIT.md). A material is left exactly as authored when ANY of these holds: its name ends with keep_suffix (mark it in Blender: \"Steel_keep\"); its name is in keep_materials; its model's path matches a keep_models pattern (* wildcards); its name contains a metal_hints word. glossy_hints names (glass, water, eyes) lose metallic but keep their roughness. Everything else: metallic 0, roughness >= min_roughness, unless a texture drives the value.",
+	"min_roughness": 0.7,
+	"keep_suffix": "_keep",
+	"keep_materials": [],
+	"keep_models": [],
+	"metal_hints": ["metal", "iron", "steel", "sword", "blade", "axe", "gold", "silver", "copper", "bronze", "chain", "armor", "armour", "helmet", "nail", "lantern", "hinge", "ornament", "coin", "weapon", "anvil"],
+	"glossy_hints": ["eye", "water", "glass"]
+}

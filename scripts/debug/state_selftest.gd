@@ -4,6 +4,8 @@ extends Node
 ## never the player's saves.
 ## Run: godot --headless --path . res://scenes/tests/state_test.tscn   (exit code = failures)
 
+const Benchmark := preload("res://scripts/systems/benchmark.gd")
+const MaterialPolicy := preload("res://scripts/core/material_policy.gd")
 const MainMenu := preload("res://scripts/ui/main_menu.gd")
 const MemoryRegistry := preload("res://scripts/core/memory_registry.gd")
 const TEST_DIR := "user://test_saves/"
@@ -50,10 +52,52 @@ func _graphics_presets() -> void:
 		and Settings.quality_for_fps(float(cfg["medium_fps"]) - 1.0, cfg) == Q.LOW
 		and Settings.quality_for_fps(0.0, cfg) == Q.MEDIUM)
 	_check("benchmark never runs headless or in a --demo", not Settings.needs_benchmark())
+	_check("benchmark: an integrated GPU never gets High automatically",
+		Settings.quality_for_fps(float(cfg["high_fps"]) + 30.0, cfg, true) == Q.MEDIUM
+		and Benchmark.is_integrated_name("Intel(R) UHD Graphics") and Benchmark.is_integrated_name("Intel(R) Iris(R) Xe Graphics")
+		and Benchmark.is_integrated_name("AMD Radeon(TM) Vega 8 Graphics") and Benchmark.is_integrated_name("AMD Radeon(TM) Graphics")
+		and not Benchmark.is_integrated_name("NVIDIA GeForce RTX 3060") and not Benchmark.is_integrated_name("AMD Radeon RX 6600"))
+	# 99 frames of 20 ms and one 100 ms hitch: the median ignores the hitch, the 1% low shows it
+	var times := PackedInt64Array()
+	for i in 99:
+		times.append(20000)
+	times.append(100000)
+	var st: Dictionary = Benchmark.stats(times)
+	_check("benchmark: median frame rate, not the mean; 1% low from the slowest frames", is_equal_approx(st["median"], 50.0)
+		and st["mean"] < 49.0 and st["low1"] < st["median"] and int(st["frames"]) == 100)
+	_check("benchmark: the first 1.5 s are not measured; the notice stays 3-4 s", float(cfg["discard"]) >= 1.5
+		and float(cfg["notice_seconds"]) >= 3.0 and float(cfg["notice_seconds"]) <= 4.0)
 	var look: Dictionary = DataDB.world("lighting")
 	_check("SDFGI is not in any preset: it is the separate experimental setting (off by default)",
 		["low", "medium", "high"].all(func(p): return not look["presets"][p].has("sdfgi")) and not Settings.global_illumination)
 	_check("F9 cycles low → medium → high → low", ((Q.LOW + 1) % 3) == Q.MEDIUM and ((Q.HIGH + 1) % 3) == Q.LOW)
+	# The material rule and its exceptions
+	var cloth := _mat("Cloth", 0.4, 0.42)
+	var kept := _mat("Plate_keep", 1.0, 0.2)
+	var steel := _mat("SteelTrim", 1.0, 0.3)
+	var glass := _mat("WindowGlass", 0.4, 0.1)
+	var listed := _mat("Cloth", 0.4, 0.42)
+	_check("material rule: a non-metal becomes matte (metallic 0, roughness 0.7)", MaterialPolicy.fix_material(cloth)
+		and cloth.metallic == 0.0 and is_equal_approx(cloth.roughness, 0.7))
+	_check("... the _keep suffix is the artist's do-not-touch mark", not MaterialPolicy.fix_material(kept)
+		and kept.metallic == 1.0 and is_equal_approx(kept.roughness, 0.2) and MaterialPolicy.exemption("Plate_keep") == "keep")
+	_check("... a metal name stays metal", not MaterialPolicy.fix_material(steel) and steel.metallic == 1.0
+		and MaterialPolicy.exemption("SteelTrim") == "metal")
+	_check("... glass loses metallic but stays glossy", MaterialPolicy.fix_material(glass) and glass.metallic == 0.0
+		and is_equal_approx(glass.roughness, 0.1))
+	var policy: Dictionary = MaterialPolicy.config()
+	policy["keep_models"] = ["res://assets/hero/*"]
+	_check("... a model listed in keep_models is left alone", not MaterialPolicy.fix_material(listed, "res://assets/hero/armour.glb")
+		and listed.metallic > 0.0 and MaterialPolicy.exemption("Cloth", "res://assets/other/x.glb") == "")
+	policy["keep_models"] = []
+
+
+func _mat(mat_name: String, metallic: float, roughness: float) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.resource_name = mat_name
+	m.metallic = metallic
+	m.roughness = roughness
+	return m
 
 
 func _translations() -> void:

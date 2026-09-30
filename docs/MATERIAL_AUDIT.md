@@ -6,6 +6,30 @@ name) keeps its values; glass, water and eyes lose metallic but stay glossy. App
 (`tools/import/material_policy_import.gd`) and to baked foliage (`tools/fix_materials.gd`; the foliage generators apply
 it too). Check: `godot --headless --path . -s tools/audit_materials.gd` (now 0 violations of 1822 materials).
 
+## Exceptions: keeping a material exactly as authored
+
+The rule runs on every model at import, so an asset that is metal on purpose (a sword, armour, a lantern) needs a way
+to say "do not touch". A material is left alone when ANY of these holds (data: `data/art/material_policy.json`):
+
+1. **The `_keep` suffix** on the material's name — the artist's mark, set in Blender: `Steel_keep`, `Plate_keep`.
+   This is the normal way for new assets: it travels with the model, needs no project change, and is visible in the
+   audit as `(keep)`.
+2. **`keep_materials`** — exact material names, for third-party files that cannot be renamed.
+3. **`keep_models`** — model path patterns with `*` (e.g. `res://assets/weapons/*`): every material of those models.
+4. **`metal_hints`** — a metal word in the material's name (`metal`, `iron`, `steel`, `sword`, `blade`, `armor`,
+   `lantern` ...), shown as `(metal)` in the audit. This is what already protects the existing packs' metal parts.
+
+Also: `glossy_hints` names (glass, water, eyes) lose `metallic` but keep their `roughness`; values driven by a
+metallic / ORM / roughness texture are never touched.
+
+**Why marks and not "only the Quaternius folder":** the materials that broke the rule came from six sources, not one
+(Quaternius packs, the KayKit adventurers and skeletons, both MegaKits' glass, the dungeon set, the baked foliage).
+A folder rule would have let the next imported pack through unchecked. With marks the default is safe for everything
+new, and the exception is an explicit decision recorded on the asset or in one data file.
+
+After changing the exceptions, re-import the models (delete the model's files under `.godot/imported/` or reimport in
+the editor) and run the audit: `godot --headless --path . -s tools/audit_materials.gd`.
+
 **1145 materials changed.** Most common before → after:
 
 - 940 × metallic 0.40, roughness 0.42 → metallic 0.00, roughness 0.70

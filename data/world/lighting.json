@@ -14,14 +14,30 @@
 		"angular_distance_high": 0.35
 	},
 	"ambient": {
-		"_about": "A cool blue fill: sky_contribution < 1 mixes in color, so shadows read blue against the warm sun.",
+		"_about": "A cool blue fill: sky_contribution < 1 mixes in color, so shadows read blue against the warm sun. min_energy: the floor for every play space — ambient never drops below it (times the mode's mood_scale, so a staged scene like the hub's door talk can still go darker on purpose). At night the sky is black, so the sky's share falls to night_sky_contribution and the colour turns to night_color (moonlit blue): the character's unlit side and the ground stay readable.",
 		"color": [
 			0.45,
 			0.58,
 			0.86
 		],
 		"sky_contribution": 0.55,
-		"energy_scale": 0.95
+		"energy_scale": 0.95,
+		"min_energy": 0.62,
+		"night_sky_contribution": 0.1,
+		"night_color": [
+			0.34,
+			0.44,
+			0.72
+		],
+		"camera_fill": {
+			"_about": "Night only: a weak cool shadowless light along the camera's view, so the side of the character the camera sees (his back, away from a fire) is never a black cut-out. energy at full night, times mood_scale.",
+			"energy": 0.4,
+			"color": [
+				0.55,
+				0.66,
+				0.95
+			]
+		}
 	},
 	"tone": {
 		"exposure": 1.12,
@@ -115,10 +131,11 @@
 		}
 	},
 	"benchmark": {
-		"_about": "First time in a gameplay scene (scripts/systems/benchmark.gd): measured at Medium with vsync off for `seconds` after `warmup`; >= high_fps picks High, >= medium_fps Medium, else Low; a failed or empty measurement keeps Medium. Calibrated on the Intel UHD dev machine (Kartal Yamacı ~50 fps at Medium, the valley ~27).",
-		"warmup": 2.5,
+		"_about": "First time in a gameplay scene (scripts/systems/benchmark.gd): every frame timed at Medium with vsync off; the first `discard` seconds are thrown away (shader compilation, streaming), then `seconds` are measured. The MEDIAN frame rate decides: >= high_fps picks High (never on an integrated GPU), >= medium_fps Medium, else Low; nothing measured keeps Medium. The 1% low is logged. The notice stays notice_seconds.",
+		"discard": 1.5,
 		"seconds": 5.0,
 		"high_fps": 65.0,
-		"medium_fps": 38.0
+		"medium_fps": 38.0,
+		"notice_seconds": 3.5
 	}
 }

@@ -3,6 +3,7 @@ extends SceneTree
 ## BaseMaterial3D metallic and roughness. Prints one line per unique material and a summary
 ## of the non-metals that break the rule (a scalar metallic > 0 or roughness < 0.7; values
 ## driven by an ORM / metallic texture are reported as (tex) and left to the texture).
+## Exempt materials are marked (keep) or (metal): see scripts/core/material_policy.gd.
 ## Run: godot --headless --path . -s tools/audit_materials.gd
 ## (Autoloads do not exist in -s mode; this script needs none.)
 
@@ -10,9 +11,7 @@ const ROOTS := ["res://assets/chars", "res://assets/characters", "res://assets/f
 	"res://assets/village_mk", "res://assets/quaternius", "res://assets/nature", "res://assets/buildings",
 	"res://assets/environment"]
 const EXT := ["glb", "gltf", "scn", "tscn"]
-## Names that are really metal (weapons, armour plates, fittings): they may stay metallic.
-const METAL_HINTS := ["metal", "iron", "steel", "sword", "blade", "axe", "gold", "silver", "copper", "bronze",
-	"chain", "armor", "armour", "helmet", "nail", "lantern", "hinge", "ornament", "coin", "weapon", "shield_metal"]
+const MaterialPolicy := preload("res://scripts/core/material_policy.gd")
 
 var _seen := {}
 var _bad: Array = []
@@ -68,15 +67,13 @@ func _material(path: String, m: Material) -> void:
 		return
 	_seen[key] = true
 	var bm := m as BaseMaterial3D
-	var name_l := m.resource_name.to_lower()   # the material's own name decides (an atlas is not metal)
-	var metal_ok := METAL_HINTS.any(func(h): return name_l.contains(h))
+	var why := MaterialPolicy.exemption(m.resource_name, path)   # "" | "keep" | "metal"
 	var line := "%s  mat=%s  metallic=%.2f%s  roughness=%.2f%s%s" % [path.trim_prefix("res://assets/"), m.resource_name,
 		bm.metallic, " (tex)" if bm.metallic_texture else "", bm.roughness, " (tex)" if bm.roughness_texture else "",
-		"  (metal)" if metal_ok else ""]
+		"" if why == "" else "  (%s)" % why]
 	print(line)
 	# texture-driven values are the texture's business (an ORM map marks the few metal pixels)
 	var bad_metal := bm.metallic > 0.0 and bm.metallic_texture == null
-	var bad_rough := bm.roughness < 0.699 and bm.roughness_texture == null
-	var glossy := ["eye", "glass", "water"].any(func(h): return name_l.contains(h))
-	if not metal_ok and (bad_metal or (bad_rough and not glossy)):
+	var bad_rough := bm.roughness < float(MaterialPolicy.config()["min_roughness"]) - 0.001 and bm.roughness_texture == null
+	if why == "" and (bad_metal or (bad_rough and not MaterialPolicy.is_glossy(m.resource_name))):
 		_bad.append(line)
