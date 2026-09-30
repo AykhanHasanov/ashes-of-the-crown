@@ -29,6 +29,7 @@ var env: Environment
 var light: DirectionalLight3D
 var sky_fill: DirectionalLight3D  # SDFGI only: the cool sky light, from the sky opposite the sun
 var sky_top: DirectionalLight3D   # SDFGI only: the cool sky light, from straight above
+var camera_fill: OmniLight3D   # night only: a weak cool light at the camera, short range
 var sky_mat: ShaderMaterial
 var weather_sun := 1.0      # 0..1 from weather
 var weather_cloud := 0.2
@@ -122,6 +123,16 @@ func _ready() -> void:
 	sky_fill = _fill_light("SkyFill")
 	sky_top = _fill_light("SkyTop")
 	sky_top.rotation_degrees = Vector3(-90, 0, 0)
+	# At the camera, reaching only a few metres: the character and the ground before him,
+	# never the far walls (a light along the whole view turned pale plaster grey-white)
+	camera_fill = OmniLight3D.new()
+	camera_fill.name = "CameraFill"
+	camera_fill.shadow_enabled = false
+	camera_fill.light_specular = 0.0
+	camera_fill.light_color = _color(_look["ambient"]["camera_fill"]["color"])
+	camera_fill.omni_range = float(_look["ambient"]["camera_fill"]["range"])
+	camera_fill.omni_attenuation = 0.8
+	add_child(camera_fill)
 	_apply()
 
 
@@ -190,7 +201,21 @@ func _apply() -> void:
 	sky_mat.set_shader_parameter("cloud_darkness", weather_dark)
 	sky_mat.set_shader_parameter("ember_pulse", 0.8 + 0.2 * sin(_t * 1.3) + 0.08 * sin(_t * 5.1))
 
-	env.ambient_light_energy = float(k[5]) * 0.72 * float(_look["ambient"]["energy_scale"]) * lerpf(0.75, 1.0, weather_sun) * mood_scale
+	# Ambient: the hour's own level, but never under the play-space floor (min_energy) — a
+	# night must stay readable: the unlit side of a character and the ground, not a silhouette.
+	# mood_scale still takes it down for a staged scene (the hub's door talk).
+	var amb: Dictionary = _look["ambient"]
+	var hour_ambient := float(k[5]) * 0.72 * float(amb["energy_scale"]) * lerpf(0.75, 1.0, weather_sun)
+	env.ambient_light_energy = maxf(hour_ambient, float(amb["min_energy"])) * mood_scale
+	env.ambient_light_sky_contribution = lerpf(float(amb["sky_contribution"]), float(amb["night_sky_contribution"]), n)
+	env.ambient_light_color = _color(amb["color"]).lerp(_color(amb["night_color"]), n)
+	# ... and what is just in front of the camera gets a little cool light at night
+	# (the character is never a black cut-out)
+	camera_fill.light_energy = float(amb["camera_fill"]["energy"]) * n * mood_scale
+	camera_fill.visible = camera_fill.light_energy > 0.001
+	var cam := get_viewport().get_camera_3d()
+	if cam != null and camera_fill.visible:
+		camera_fill.global_position = cam.global_position + cam.global_basis.y * 0.4
 	sky_fill.light_energy = env.ambient_light_energy * float(_look["sdfgi"]["sky_fill"]) * 0.5
 	sky_top.light_energy = sky_fill.light_energy
 	# from the sky on the far side of the sun: it reaches the faces the sun leaves in shade

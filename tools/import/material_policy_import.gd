@@ -8,5 +8,5 @@ const MaterialPolicy := preload("res://scripts/core/material_policy.gd")
 
 
 func _post_import(scene: Node) -> Object:
-	MaterialPolicy.apply(scene)
+	MaterialPolicy.apply(scene, get_source_file())
 	return scene

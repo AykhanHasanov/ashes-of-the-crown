@@ -408,6 +408,28 @@ func _demo_setup() -> void:
 			WorldState.set_time_of_day(22.0)
 			level.day_night.set_hour(22.0)
 			_demo_view(Vector3(0, 0, 2.4), Vector3(0, 1.5, -6.0))
+		"hub_light_hearth", "hub_light_corner":
+			# Night readability stills (fixed cameras): him by the hearth, and in the far corner
+			WorldState.set_time_of_day(22.0)
+			level.day_night.set_hour(22.0)
+			player.input_locked = true
+			var shot := Camera3D.new()
+			shot.fov = 60.0
+			add_child(shot)
+			if Settings.demo == "hub_light_hearth":
+				# as the game's camera sees him: from behind, the fire beyond him (the silhouette case)
+				player.global_position = level.hearth_pos + Vector3(0.4, 0.1, 3.4)
+				player.face_towards(level.hearth_pos)
+				shot.global_position = level.hearth_pos + Vector3(1.6, 1.9, 6.8)
+				shot.look_at(player.global_position + Vector3(0, 1.0, 0))
+			else:
+				var corner := Vector3(-HubLevel.SIDE_X + 2.6, 0.1, HubLevel.SOUTH_Z - 1.6)   # far from the fire
+				player.global_position = corner
+				player.face_towards(corner + Vector3(-3, 0, 1))   # his back to the camera here too
+				shot.global_position = corner + Vector3(3.6, 1.7, -1.2)
+				shot.look_at(corner + Vector3(0, 1.0, 0))
+			rig.snap()
+			shot.make_current()
 		"hub_room", "hub_room_day":
 			# Aras's room: at night Rüfət on his bed, the lamp lit; by day the door open
 			var hour := 10.5 if Settings.demo == "hub_room_day" else 22.0
