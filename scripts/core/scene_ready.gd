@@ -5,6 +5,14 @@ extends RefCounted
 ## Use: const SceneReady := preload("res://scripts/core/scene_ready.gd")
 
 
+## The same for any scene: one that is not a mode (no `begun`: a test scene, a plain scene)
+## is ready as soon as it is there.
+static func is_ready_or_plain(scene: Node) -> bool:
+	if scene == null or not is_instance_valid(scene):
+		return false
+	return is_ready(scene) if "begun" in scene else true
+
+
 static func is_ready(mode: Node) -> bool:
 	if mode == null or not is_instance_valid(mode) or mode.get("begun") != true:
 		return false

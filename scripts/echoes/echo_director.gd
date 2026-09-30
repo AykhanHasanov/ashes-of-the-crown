@@ -11,6 +11,7 @@ extends RefCounted
 ## exactly where he was, and releases the burned memory's fire.
 ## Nothing here is saved: an echo is always left before any save can happen.
 
+const LoadingScreen := preload("res://scripts/ui/loading_screen.gd")
 const EchoRegistry := preload("res://scripts/core/echo_registry.gd")
 
 static var active := false
@@ -35,7 +36,7 @@ static func enter(id: StringName, from: Node, player: Node3D, hour: float) -> bo
 	echo_id = id
 	active = true
 	from.get_tree().paused = false
-	from.get_tree().change_scene_to_file(def.scene_path)
+	LoadingScreen.go(from.get_tree(), def.scene_path)
 	return true
 
 
@@ -56,7 +57,7 @@ static func resolve(choice: StringName, tree: SceneTree) -> void:
 	SaveManager.autosave()
 	returning = true
 	tree.paused = false
-	tree.change_scene_to_file(String(_ctx["scene"]))
+	LoadingScreen.go(tree, String(_ctx["scene"]))
 
 
 ## The choice itself: BURN — the memory burns (context "echo"); KEEP — it is kept, and the

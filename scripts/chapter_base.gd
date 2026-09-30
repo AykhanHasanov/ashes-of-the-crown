@@ -16,6 +16,7 @@ const Journal := preload("res://scripts/ui/journal.gd")
 const KozcuJournal := preload("res://scripts/ui/kozcu_journal.gd")
 const StoryDirector := preload("res://scripts/story/story_director.gd")
 const Benchmark := preload("res://scripts/systems/benchmark.gd")
+const LoadingScreen := preload("res://scripts/ui/loading_screen.gd")
 const RadialMenu := preload("res://scripts/ui/radial_menu.gd")
 const AshOffer := preload("res://scripts/ui/ash_offer.gd")
 const Balance := preload("res://scripts/systems/balance.gd")
@@ -223,7 +224,7 @@ func _process(delta: float) -> void:
 func go_to_chapter(n: int, mode := "checkpoint") -> void:
 	restart_mode = mode
 	get_tree().paused = false
-	get_tree().change_scene_to_file(CHAPTER_SCENES[n])
+	LoadingScreen.go(get_tree(), CHAPTER_SCENES[n])
 
 
 func to_main_menu() -> void:

@@ -8,6 +8,8 @@ extends Node
 ## Kartal Yamacı and the save migration to v8.
 ## Run: godot --headless --path . res://scenes/tests/story_test.tscn   (exit code = failures)
 
+const LoadingScreen := preload("res://scripts/ui/loading_screen.gd")
+const SceneReady := preload("res://scripts/core/scene_ready.gd")
 const BurnPower := preload("res://scripts/combat/burn_power.gd")
 const KozcuJournal := preload("res://scripts/ui/kozcu_journal.gd")
 const StoryDirector := preload("res://scripts/story/story_director.gd")
@@ -57,6 +59,7 @@ func _run() -> void:
 	_migration_v8()
 	await _hub_a2()
 	await _kartal()
+	await _loading_screen()
 	_wipe()
 	print("STORY TESTS DONE, failures: ", _fails)
 	get_tree().quit(_fails)
@@ -528,6 +531,28 @@ func _kartal() -> void:
 	HubTravel._ctx = {}
 	var trail: Array = DataDB.prefab("hearth")["interact"].filter(func(d): return d["kind"] == "trail")
 	_check("the valley's trail sign stands at Karaağaç Ocağı only", trail.size() == 1 and trail[0]["only"] == "hearth_north" and trail[0]["to"] == "kartal_yamaci")
+
+
+# --- The loading screen -----------------------------------------------------------------------------
+
+func _loading_screen() -> void:
+	WorldState.new_game()
+	LoadingScreen.go(get_tree(), HUB)
+	var screen = LoadingScreen.active
+	_check("loading screen: up at once, before the scene changes", screen != null and is_instance_valid(screen)
+		and get_tree().current_scene.scene_file_path != HUB)
+	await _frames(2)
+	_check("... with its one line (a placeholder key)", is_instance_valid(screen) and screen._line != null and screen._line.text == tr("LOADING_LINE"))
+	var in_hub := func() -> bool: return get_tree().current_scene != null and get_tree().current_scene.scene_file_path == HUB
+	await _until(in_hub, 20.0)
+	_check("... the scene changes under it", in_hub.call() and is_instance_valid(screen))
+	var cold: float = screen.kindle() if is_instance_valid(screen) else 1.0
+	var gone := func() -> bool: return LoadingScreen.active == null
+	await _until(gone, 20.0)
+	var hub = get_tree().current_scene
+	_check("... it stays until the scene is ready and 30 frames are drawn, then leaves", gone.call() and SceneReady.is_ready(hub))
+	_check("... the ember catches fire while it waits", cold >= 0.0 and cold < 1.0)
+	_check("a plain scene (not a mode) counts as ready at once", SceneReady.is_ready_or_plain(self) and not SceneReady.is_ready(self))
 
 
 # --- Helpers --------------------------------------------------------------------------------------
