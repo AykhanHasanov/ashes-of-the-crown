@@ -788,6 +788,19 @@ func _demo_setup() -> void:
 					ep = p
 			_demo_view(Vector3(ep["pos"][0] + 3.5, 0, ep["pos"][2] + 1.0), Vector3(ep["pos"][0] + 3.5, ep["pos"][1] + 1.0, ep["pos"][2] - 2.5), 8.0)
 			get_tree().create_timer(2.5).timeout.connect(func(): EchoDirector.enter(&"test_echo", self, player, level.day_night.hour))
+		"world_hearth", "world_hearth_lit":
+			# Geçit Ocağı: cold (ash and smoke) or lit (flames, sparks); dusk so the fire reads
+			level.day_night.set_hour(19.3)
+			player.input_locked = true
+			var h: Dictionary = level.streamer.poi_by_id("hearth_west")
+			var c := Vector3(float(h["pos"][0]), 0, float(h["pos"][2]))
+			c.y = level.height_at(c.x, c.z)
+			if Settings.demo == "world_hearth_lit":
+				WorldState.add_world_entry("hearths", "hearth_west")
+			_demo_view(c + Vector3(-4.5, 0, 5.5), c + Vector3(0, 0.8, 0), 6.0)
+			get_tree().create_timer(1.0).timeout.connect(func():
+				for it in get_tree().get_nodes_in_group("interactables"):
+					it.refresh())
 		"world_hub_gate":
 			# The road to Son Ocaq by Geçit Ocağı; walk it after a moment
 			level.day_night.set_hour(10.5)

@@ -505,7 +505,8 @@ func _kartal() -> void:
 	var esref = k.npcs.bodies.get(&"esref")
 	_check("... Eşref at his hut's door", esref != null and esref.global_position.distance_to(lvl.hut_door) < 1.5)
 	_check("... the cold hearth (no fire) with the yazma on its stones", lvl.yazma != null and not lvl.yazma.is_taken()
-		and lvl.yazma.global_position.distance_to(lvl.hearth_pos) < 1.2 and lvl.get_node("ColdHearth").find_children("*", "GPUParticles3D").is_empty())
+		and lvl.yazma.global_position.distance_to(lvl.hearth_pos) < 1.2 and not lvl.hearth.lit and lvl.hearth.light == null
+		and lvl.hearth.find_children("Flames", "", true, false).is_empty())
 	_check("... story spots for the beats", k.story_spot("hearth") == lvl.hearth_pos and k.story_spot("hut") == lvl.hut_door)
 	k.player.global_position = lvl.yazma.global_position + Vector3(0.6, 0.2, 0.6)
 	await _frames(3)

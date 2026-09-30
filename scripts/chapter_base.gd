@@ -15,6 +15,7 @@ const PauseMenu := preload("res://scripts/ui/pause_menu.gd")
 const Journal := preload("res://scripts/ui/journal.gd")
 const KozcuJournal := preload("res://scripts/ui/kozcu_journal.gd")
 const StoryDirector := preload("res://scripts/story/story_director.gd")
+const Benchmark := preload("res://scripts/systems/benchmark.gd")
 const RadialMenu := preload("res://scripts/ui/radial_menu.gd")
 const AshOffer := preload("res://scripts/ui/ash_offer.gd")
 const Balance := preload("res://scripts/systems/balance.gd")
@@ -109,6 +110,8 @@ func _ready() -> void:
 		hud.set_hint(player.control_hint())
 		Settings.changed.connect(func(): hud.set_hint(player.control_hint()))
 	_setup()
+	if Settings.needs_benchmark() and player.has_method("control_hint"):
+		add_child(Benchmark.new())   # first time in a V3 scene: pick the graphics preset from the frame rate
 	if player.has_method("control_hint"):
 		story = StoryDirector.new()
 		story.mode = self
@@ -320,7 +323,7 @@ func _apply_quality() -> void:
 	level.apply_quality(high)
 	var vp := get_viewport()
 	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR if high else Viewport.SCALING_3D_MODE_FSR
-	vp.scaling_3d_scale = 1.0 if high else 0.77
+	vp.scaling_3d_scale = 1.0 if high else (0.87 if Settings.at_least_medium() else 0.77)
 	vp.msaa_3d = Viewport.MSAA_2X if high else Viewport.MSAA_DISABLED
 	vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED if high else Viewport.SCREEN_SPACE_AA_FXAA
 
@@ -345,7 +348,7 @@ func _capture() -> void:
 	img.save_png(Settings.capture_path)
 	var avg := _fps_sum / maxf(_fps_count, 1)
 	print("CAPTURE saved=%s avg_fps=%.1f adapter=%s quality=%s" % [
-		Settings.capture_path, avg, RenderingServer.get_video_adapter_name(), "high" if Settings.is_high() else "low"])
+		Settings.capture_path, avg, RenderingServer.get_video_adapter_name(), Settings.quality_id()])
 	# Profile for the phase reports (the F3 numbers)
 	print("PROFILE draw_calls=%d primitives=%dk objects=%d vram=%dMB frame_ms=%.1f physics_ms=%.1f nodes=%d" % [
 		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),

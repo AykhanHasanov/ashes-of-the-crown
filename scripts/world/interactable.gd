@@ -5,6 +5,7 @@ extends Node3D
 ## saved state lives in WorldState's world section, keyed by `key` / the POI id.
 
 const Effects := preload("res://scripts/world/effects.gd")
+const HearthFire := preload("res://scripts/world/hearth_fire.gd")
 const CHEST_CLOSED := "res://assets/quaternius/rpg_items_pack/Chest_Closed.glb"
 const CHEST_OPEN := "res://assets/quaternius/rpg_items_pack/Chest_Open.glb"
 
@@ -129,7 +130,8 @@ func prompt() -> String:
 	return ""
 
 
-## Visual state of a hearth: embers when cold, fire + ember pillar when lit.
+## Visual state of a hearth (scripts/world/hearth_fire.gd): cold ash and smoke until lit;
+## flames, sparks and the ember pillar once lit.
 func refresh() -> void:
 	if kind != "hearth":
 		return
@@ -141,8 +143,8 @@ func refresh() -> void:
 		_pillar.queue_free()
 		_pillar = null
 	if lit:
-		_fire = Effects.fire(1.6, 36)
-		_fire.position = Vector3(0, 0.3, 0)
+		# flames and sparks (the prefab has the stones and logs; this node keeps its own light)
+		_fire = HearthFire.new().setup(true, 1.1, false, false, false)
 		add_child(_fire)
 		# A column of embers into the sky: seen from across the valley
 		_pillar = Effects.ember_column(0.9, 40)
@@ -151,8 +153,8 @@ func refresh() -> void:
 		add_child(_pillar)
 		_light.light_energy = 3.2
 	else:
-		_fire = Effects.ember_field(Vector3(0.8, 0.3, 0.8), 8)
-		_fire.position = Vector3(0, 0.3, 0)
+		# not lit yet: cold ash and a thin thread of smoke
+		_fire = HearthFire.new().setup(false, 1.1, false, true, false)
 		add_child(_fire)
 		_light.light_energy = 0.6
 

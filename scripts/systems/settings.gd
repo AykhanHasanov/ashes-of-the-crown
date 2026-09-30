@@ -2,7 +2,9 @@ extends Node
 ## Player settings (saved to user://settings.cfg), input bindings and debug options.
 ##
 ## Command-line user args (after `--`):
-##   --quality=low|high     force a graphics preset (default: saved value or GPU auto-detect)
+##   --quality=low|medium|high  force a graphics preset (default: saved value or GPU auto-detect)
+##   --gi=on|off            the experimental global illumination (SDFGI) setting
+##   --benchmark            run the first-launch benchmark now, at Medium, without saving
 ##   --capture=<path.png>   save a screenshot at --frame and quit
 ##   --frame=<n>            frame number for --capture (default 150)
 ##   --demo=<mode>          menu | explore | dialogue | fight | combat | victory | pause |
@@ -16,11 +18,17 @@ extends Node
 
 signal changed
 
-enum Quality { LOW, HIGH }
+enum Quality { LOW, MEDIUM, HIGH }
+const QUALITY_IDS := ["low", "medium", "high"]
+const QUALITY_KEYS := ["QUALITY_LOW", "QUALITY_MEDIUM", "QUALITY_HIGH"]
 
 const PATH := "user://settings.cfg"
 
 var quality: Quality = Quality.LOW
+var global_illumination := false   # SDFGI, experimental: off unless the player turns it on
+var benchmark_done := false         # the first-launch benchmark has picked a preset (or the player did)
+var _quality_forced := false        # --quality on the command line: no benchmark this run
+var benchmark_dry_run := false      # --benchmark: measure now (even in a capture) but save nothing
 var music_volume := 0.8
 var sfx_volume := 0.9
 var voice_volume := 1.0
@@ -38,14 +46,33 @@ var demo := ""
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_setup_input()
-	quality = _detect_quality()
+	quality = Quality.MEDIUM   # until the first-launch benchmark (scripts/systems/benchmark.gd) decides
 	_load()
 	_parse_args()
 	apply.call_deferred()
 
 
+## High only: full shadows, SSIL, SDFGI, dense foliage.
 func is_high() -> bool:
 	return quality == Quality.HIGH
+
+
+## Medium or high: the cheaper screen effects (SSAO, volumetric fog) are on.
+func at_least_medium() -> bool:
+	return quality != Quality.LOW
+
+
+func quality_id() -> String:
+	return QUALITY_IDS[quality]
+
+
+func quality_name() -> String:
+	return tr(QUALITY_KEYS[quality])
+
+
+static func quality_from(id: String) -> Quality:
+	var i := QUALITY_IDS.find(id)
+	return Quality.LOW if i < 0 else i as Quality
 
 
 ## Pushes the current values to the engine (window, audio buses) and notifies listeners.
@@ -61,7 +88,9 @@ func apply() -> void:
 
 func save() -> void:
 	var cfg := ConfigFile.new()
-	cfg.set_value("video", "quality", "high" if is_high() else "low")
+	cfg.set_value("video", "quality", quality_id())
+	cfg.set_value("video", "global_illumination", global_illumination)
+	cfg.set_value("video", "benchmarked", benchmark_done)
 	cfg.set_value("video", "fullscreen", fullscreen)
 	cfg.set_value("audio", "music", music_volume)
 	cfg.set_value("audio", "sfx", sfx_volume)
@@ -73,7 +102,7 @@ func save() -> void:
 
 
 func toggle_quality() -> void:
-	quality = Quality.HIGH if quality == Quality.LOW else Quality.LOW
+	quality = ((quality + 1) % QUALITY_IDS.size()) as Quality   # low → medium → high → low
 	save()
 	apply()
 
@@ -94,8 +123,11 @@ func _load() -> void:
 	if cfg.load(PATH) != OK:
 		return
 	if cfg.has_section_key("video", "quality"):
-		quality = Quality.HIGH if cfg.get_value("video", "quality") == "high" else Quality.LOW
+		quality = quality_from(String(cfg.get_value("video", "quality")))
+	# an older settings file with a quality in it: that was the player's choice
+	benchmark_done = cfg.get_value("video", "benchmarked", cfg.has_section_key("video", "quality"))
 	fullscreen = cfg.get_value("video", "fullscreen", fullscreen)
+	global_illumination = cfg.get_value("video", "global_illumination", global_illumination)
 	music_volume = cfg.get_value("audio", "music", music_volume)
 	sfx_volume = cfg.get_value("audio", "sfx", sfx_volume)
 	voice_volume = cfg.get_value("audio", "voice", voice_volume)
@@ -104,19 +136,48 @@ func _load() -> void:
 	damage_numbers = cfg.get_value("game", "damage_numbers", damage_numbers)
 
 
-func _detect_quality() -> Quality:
-	var adapter := RenderingServer.get_video_adapter_name().to_lower()
-	for hint in ["geforce", "rtx", "gtx", "radeon rx", "arc a"]:
-		if adapter.contains(hint):
-			return Quality.HIGH
+## The first launch measures the frame rate once and picks the preset (the player can change
+## it any time; a saved choice is never overridden). Not in a --demo, a capture, headless or
+## with --quality.
+func needs_benchmark() -> bool:
+	if benchmark_dry_run:
+		return true
+	return not benchmark_done and not _quality_forced and demo == "" and capture_path == "" 		and DisplayServer.get_name() != "headless"
+
+
+## The preset for a measured frame rate (data/world/lighting.json benchmark), measured at
+## Medium: comfortably fast → High, fast enough → Medium, else Low. No measurement → Medium.
+static func quality_for_fps(fps: float, cfg: Dictionary) -> Quality:
+	if fps <= 0.0:
+		return Quality.MEDIUM
+	if fps >= float(cfg["high_fps"]):
+		return Quality.HIGH
+	if fps >= float(cfg["medium_fps"]):
+		return Quality.MEDIUM
 	return Quality.LOW
+
+
+func finish_benchmark(fps: float) -> void:
+	quality = quality_for_fps(fps, DataDB.world("lighting")["benchmark"])
+	if benchmark_dry_run:
+		apply()   # a dry run changes this session only
+		return
+	benchmark_done = true
+	save()
+	apply()
 
 
 func _parse_args() -> void:
 	for arg in OS.get_cmdline_user_args():
 		var value := arg.get_slice("=", 1)
 		if arg.begins_with("--quality="):
-			quality = Quality.HIGH if value == "high" else Quality.LOW
+			quality = quality_from(value)
+			_quality_forced = true
+		elif arg == "--benchmark":
+			benchmark_dry_run = true
+			quality = Quality.MEDIUM
+		elif arg.begins_with("--gi="):
+			global_illumination = value == "on"
 		elif arg.begins_with("--capture="):
 			capture_path = value
 		elif arg.begins_with("--frame="):

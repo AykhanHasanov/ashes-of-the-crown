@@ -9,6 +9,7 @@ extends SceneTree
 ## Output: assets/foliage/<id>.scn (instanced by Terrain3D through vegetation.json).
 ## Usage: godot --headless --path . -s tools/gen_trees.gd [-- id]
 
+const MaterialPolicy := preload("res://scripts/core/material_policy.gd")
 const OUT := "res://assets/foliage/"
 const CARDS := "res://assets/foliage/cards/%s.png"
 const BARK := "res://assets/foliage/bark/%s_%s.jpg"
@@ -437,6 +438,7 @@ func _save(id: String, mesh: ArrayMesh) -> void:
 	var root := MeshInstance3D.new()
 	root.name = id
 	root.mesh = mesh
+	MaterialPolicy.apply(root)   # the project's material rule: non-metals are matte
 	var scene := PackedScene.new()
 	scene.pack(root)
 	var path: String = OUT + id + ".scn"

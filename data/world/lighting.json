@@ -1,0 +1,124 @@
+{
+	"_about": "Look of every outdoor scene (scripts/world/day_night.gd): warm low sun against a cool blue ambient, soft shadows, filmic AgX tone, glow, distance haze plus light valley mist, and the screen effects each graphics preset turns on. Visual tuning only; no gameplay reads it.",
+	"sun": {
+		"_about": "elevation: the sun's height is scaled by this (1 = the old high noon sun, lower = longer, warmer light). warmth: how far day sun colours are pulled towards warm_color.",
+		"elevation": 0.62,
+		"warmth": 0.45,
+		"warm_color": [
+			1.0,
+			0.78,
+			0.55
+		],
+		"energy_scale": 1.75,
+		"shadow_blur": 1.3,
+		"angular_distance_high": 0.35
+	},
+	"ambient": {
+		"_about": "A cool blue fill: sky_contribution < 1 mixes in color, so shadows read blue against the warm sun.",
+		"color": [
+			0.45,
+			0.58,
+			0.86
+		],
+		"sky_contribution": 0.55,
+		"energy_scale": 0.95
+	},
+	"tone": {
+		"exposure": 1.12,
+		"white": 6.0,
+		"contrast": 1.14,
+		"saturation": 1.02
+	},
+	"glow": {
+		"intensity": 0.55,
+		"strength": 0.9,
+		"bloom": 0.02,
+		"hdr_threshold": 1.35,
+		"levels": [
+			3,
+			4,
+			5
+		]
+	},
+	"haze": {
+		"_about": "Exponential distance fog (all presets) and the valley's height mist (fog_height).",
+		"density": 0.0019,
+		"aerial_perspective": 0.6,
+		"sky_affect": 0.4
+	},
+	"volumetric": {
+		"_about": "Volumetric fog (medium: coarse and short; high: finer, longer, lit by SDFGI). density is thin on purpose: a light valley mist, not a wall.",
+		"density": 0.0028,
+		"albedo": [
+			0.82,
+			0.86,
+			0.92
+		],
+		"anisotropy": 0.45,
+		"length_medium": 48.0,
+		"length_high": 80.0,
+		"ambient_inject": 0.15,
+		"sky_affect": 0.25,
+		"size_medium": [
+			48,
+			32
+		],
+		"size_high": [
+			128,
+			64
+		]
+	},
+	"ssao": {
+		"radius": 1.2,
+		"intensity": 1.8,
+		"power": 1.4,
+		"light_affect": 0.1
+	},
+	"ssil": {
+		"radius": 4.0,
+		"intensity": 0.9
+	},
+	"sdfgi": {
+		"cascades": 4,
+		"min_cell_size": 0.4,
+		"energy": 1.0,
+		"bounce_feedback": 0.5,
+		"read_sky_light": false,
+		"_about": "SDFGI, only when Settings.global_illumination is on (experimental, off by default). Checked after the material fix: reading the sky still turns characters and trees chrome-white on the Intel UHD (its probes, not the materials), so it does not read the sky and two shadowless cool sky_fill lights stand in (energy = sky_fill x the hour's ambient). Without GI they are off: the sky ambient does their job.",
+		"sky_fill": 1.7
+	},
+	"presets": {
+		"_about": "What each graphics preset (Settings.quality) turns on. SDFGI is not a preset: it is the separate, experimental Settings.global_illumination (off by default).",
+		"low": {
+			"ssao": false,
+			"ssil": false,
+			"volumetric": false,
+			"glow": true,
+			"shadow_splits": 2,
+			"shadow_distance": 70.0
+		},
+		"medium": {
+			"ssao": true,
+			"ssil": false,
+			"volumetric": true,
+			"glow": true,
+			"shadow_splits": 2,
+			"shadow_distance": 90.0
+		},
+		"high": {
+			"ssao": true,
+			"ssil": true,
+			"volumetric": true,
+			"glow": true,
+			"shadow_splits": 4,
+			"shadow_distance": 140.0
+		}
+	},
+	"benchmark": {
+		"_about": "First time in a gameplay scene (scripts/systems/benchmark.gd): measured at Medium with vsync off for `seconds` after `warmup`; >= high_fps picks High, >= medium_fps Medium, else Low; a failed or empty measurement keeps Medium. Calibrated on the Intel UHD dev machine (Kartal Yamacı ~50 fps at Medium, the valley ~27).",
+		"warmup": 2.5,
+		"seconds": 5.0,
+		"high_fps": 65.0,
+		"medium_fps": 38.0
+	}
+}

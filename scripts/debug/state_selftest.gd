@@ -29,6 +29,7 @@ func _run() -> void:
 	_backup_fallback()
 	await _menu_cases()
 	_legacy_import()
+	_graphics_presets()
 	_wipe(TEST_DIR)
 	_wipe(LEGACY_DIR)
 	print("STATE SELFTEST DONE, failures: ", _fails)
@@ -36,6 +37,24 @@ func _run() -> void:
 
 
 # --- Checks --------------------------------------------------------------------------------------
+
+## Graphics presets and the first-launch benchmark's choice (no settings file is touched).
+func _graphics_presets() -> void:
+	var cfg: Dictionary = DataDB.world("lighting")["benchmark"]
+	var Q = Settings.Quality
+	_check("presets: low / medium / high by id, unknown → low", Settings.quality_from("medium") == Q.MEDIUM
+		and Settings.quality_from("high") == Q.HIGH and Settings.quality_from("x") == Q.LOW)
+	_check("benchmark: fast → High, fast enough → Medium, slow → Low, no measurement → Medium",
+		Settings.quality_for_fps(float(cfg["high_fps"]) + 1.0, cfg) == Q.HIGH
+		and Settings.quality_for_fps(float(cfg["medium_fps"]) + 1.0, cfg) == Q.MEDIUM
+		and Settings.quality_for_fps(float(cfg["medium_fps"]) - 1.0, cfg) == Q.LOW
+		and Settings.quality_for_fps(0.0, cfg) == Q.MEDIUM)
+	_check("benchmark never runs headless or in a --demo", not Settings.needs_benchmark())
+	var look: Dictionary = DataDB.world("lighting")
+	_check("SDFGI is not in any preset: it is the separate experimental setting (off by default)",
+		["low", "medium", "high"].all(func(p): return not look["presets"][p].has("sdfgi")) and not Settings.global_illumination)
+	_check("F9 cycles low → medium → high → low", ((Q.LOW + 1) % 3) == Q.MEDIUM and ((Q.HIGH + 1) % 3) == Q.LOW)
+
 
 func _translations() -> void:
 	_check("tr() finds the memory names (Turkish)", tr("MEMORY_RUFET_FACE_NAME") == "Rüfet'in yüzü")

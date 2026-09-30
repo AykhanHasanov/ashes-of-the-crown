@@ -2,7 +2,9 @@ extends Node3D
 ## Day/night cycle (spec V3 §6.1): 24 game hours = data/balance/world.json time.day_minutes
 ## real minutes. Moves one directional light between sun and moon, colours the sky
 ## shader, ambient light and fog, and exposes `hour`/`is_night()`. Weather multiplies
-## the light through `weather_sun` and `weather_cloud`.
+## the light through `weather_sun` and `weather_cloud`. The look (warm low sun, cool blue
+## ambient, soft shadows, AgX, glow, haze and mist, and what each graphics preset turns on:
+## SSAO, SSIL, SDFGI, volumetric fog) comes from data/world/lighting.json.
 
 signal hour_changed(hour: int)
 
@@ -25,9 +27,12 @@ var hour := 8.5
 var paused := false
 var env: Environment
 var light: DirectionalLight3D
+var sky_fill: DirectionalLight3D  # SDFGI only: the cool sky light, from the sky opposite the sun
+var sky_top: DirectionalLight3D   # SDFGI only: the cool sky light, from straight above
 var sky_mat: ShaderMaterial
 var weather_sun := 1.0      # 0..1 from weather
 var weather_cloud := 0.2
+var _look: Dictionary       # data/world/lighting.json
 var weather_dark := 0.0
 var weather_fog := 0.0      # extra fog density
 ## Scales sun/moon, sky and ambient light: < 1 darkens the scene (the night door conversation,
@@ -41,6 +46,7 @@ var _t := 0.0
 
 func _ready() -> void:
 	_cfg = DataDB.balance("world")["time"]
+	_look = DataDB.world("lighting")
 	hour = _cfg["start_hour"]
 	sky_mat = ShaderMaterial.new()
 	sky_mat.shader = SKY_SHADER
@@ -51,22 +57,55 @@ func _ready() -> void:
 	env = Environment.new()
 	env.background_mode = Environment.BG_SKY
 	env.sky = sky
+	# A cool blue fill mixed into the sky light: shadows read blue against the warm sun
+	var amb: Dictionary = _look["ambient"]
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	env.ambient_light_color = _color(amb["color"])
+	env.ambient_light_sky_contribution = float(amb["sky_contribution"])
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	# AgX: filmic highlight roll-off and natural colour (no neon greens or orange skin)
+	var tone: Dictionary = _look["tone"]
 	env.tonemap_mode = Environment.TONE_MAPPER_AGX
-	env.tonemap_exposure = 1.05
+	env.tonemap_exposure = float(tone["exposure"])
+	env.tonemap_white = float(tone["white"])
+	var haze: Dictionary = _look["haze"]
 	env.fog_enabled = true
 	env.fog_mode = Environment.FOG_MODE_EXPONENTIAL
-	env.fog_sky_affect = 0.35
-	env.fog_aerial_perspective = 0.5
+	env.fog_sky_affect = float(haze["sky_affect"])
+	env.fog_aerial_perspective = float(haze["aerial_perspective"])
+	var glow: Dictionary = _look["glow"]
 	env.glow_enabled = true
-	env.glow_intensity = 0.6
-	env.glow_bloom = 0.05
-	env.glow_hdr_threshold = 1.1
+	env.glow_intensity = float(glow["intensity"])
+	env.glow_strength = float(glow["strength"])
+	env.glow_bloom = float(glow["bloom"])
+	env.glow_hdr_threshold = float(glow["hdr_threshold"])
+	var levels: Array = (glow["levels"] as Array).map(func(x): return int(x))
+	for i in 7:
+		env.set_glow_level(i, 1.0 if levels.has(i + 1) else 0.0)
 	env.adjustment_enabled = true
-	env.adjustment_saturation = 0.95
-	env.adjustment_contrast = 1.08
+	env.adjustment_saturation = float(tone["saturation"])
+	env.adjustment_contrast = float(tone["contrast"])
+	var ao: Dictionary = _look["ssao"]
+	env.ssao_radius = float(ao["radius"])
+	env.ssao_intensity = float(ao["intensity"])
+	env.ssao_power = float(ao["power"])
+	env.ssao_light_affect = float(ao["light_affect"])
+	var il: Dictionary = _look["ssil"]
+	env.ssil_radius = float(il["radius"])
+	env.ssil_intensity = float(il["intensity"])
+	var gi: Dictionary = _look["sdfgi"]
+	env.sdfgi_use_occlusion = false   # occlusion blackened thick-walled buildings here
+	env.sdfgi_cascades = int(gi["cascades"])
+	env.sdfgi_min_cell_size = float(gi["min_cell_size"])
+	env.sdfgi_energy = float(gi["energy"])
+	env.sdfgi_bounce_feedback = float(gi["bounce_feedback"])
+	env.sdfgi_read_sky_light = bool(gi["read_sky_light"])
+	var vf: Dictionary = _look["volumetric"]
+	env.volumetric_fog_density = float(vf["density"])
+	env.volumetric_fog_albedo = _color(vf["albedo"])
+	env.volumetric_fog_anisotropy = float(vf["anisotropy"])
+	env.volumetric_fog_ambient_inject = float(vf["ambient_inject"])
+	env.volumetric_fog_sky_affect = float(vf["sky_affect"])
 	# Valley mist: fog that pools below the hills (cheap height fog, thick at dawn and dusk)
 	env.fog_height = 16.0
 	env.fog_height_density = 0.02
@@ -78,7 +117,11 @@ func _ready() -> void:
 	light.directional_shadow_max_distance = 110.0
 	light.directional_shadow_blend_splits = true
 	light.shadow_bias = 0.04
+	light.shadow_blur = float(_look["sun"]["shadow_blur"])   # softer shadow edges
 	add_child(light)
+	sky_fill = _fill_light("SkyFill")
+	sky_top = _fill_light("SkyTop")
+	sky_top.rotation_degrees = Vector3(-90, 0, 0)
 	_apply()
 
 
@@ -116,16 +159,18 @@ func _apply() -> void:
 	var n := night_amount()
 	# Sun travels east → south → west; the moon opposite
 	var ang := (hour - 6.0) / 24.0 * TAU
-	var sun_dir := Vector3(cos(ang) * 0.85, sin(ang), 0.35).normalized()
+	# a lower sun than a true noon one: longer, warmer light all day
+	var sun_dir := Vector3(cos(ang) * 0.85, sin(ang) * float(_look["sun"]["elevation"]), 0.35).normalized()
 	var moon_dir := -sun_dir
 	moon_dir.y = absf(moon_dir.y) * 0.8 + 0.2
 	moon_dir = moon_dir.normalized()
 	var use_moon := sun_dir.y < 0.05
 	var dir := moon_dir if use_moon else sun_dir
 	light.look_at_from_position(Vector3.ZERO, -dir, Vector3.UP if absf(dir.y) < 0.99 else Vector3.FORWARD)
-	light.light_color = k[3]
-	# Strong sun over a dimmer sky fill: shadows keep their depth (the old flat look)
-	light.light_energy = float(k[4]) * (1.0 if use_moon else 1.55) * lerpf(1.0, weather_sun, 0.9 if not use_moon else 0.5)
+	var sun: Dictionary = _look["sun"]
+	light.light_color = k[3] if use_moon else (k[3] as Color).lerp(_color(sun["warm_color"]), float(sun["warmth"]) * (1.0 - n))
+	# Strong warm sun over a dimmer cool fill: shadows keep their depth (the old flat look)
+	light.light_energy = float(k[4]) * (1.0 if use_moon else float(sun["energy_scale"])) * lerpf(1.0, weather_sun, 0.9 if not use_moon else 0.5)
 	light.shadow_opacity = lerpf(1.0, 0.35, 1.0 - weather_sun) * (0.6 if use_moon else 1.0)
 	light.light_energy *= mood_scale
 
@@ -145,11 +190,16 @@ func _apply() -> void:
 	sky_mat.set_shader_parameter("cloud_darkness", weather_dark)
 	sky_mat.set_shader_parameter("ember_pulse", 0.8 + 0.2 * sin(_t * 1.3) + 0.08 * sin(_t * 5.1))
 
-	env.ambient_light_energy = float(k[5]) * 0.72 * lerpf(0.75, 1.0, weather_sun) * mood_scale
+	env.ambient_light_energy = float(k[5]) * 0.72 * float(_look["ambient"]["energy_scale"]) * lerpf(0.75, 1.0, weather_sun) * mood_scale
+	sky_fill.light_energy = env.ambient_light_energy * float(_look["sdfgi"]["sky_fill"]) * 0.5
+	sky_top.light_energy = sky_fill.light_energy
+	# from the sky on the far side of the sun: it reaches the faces the sun leaves in shade
+	var away := Vector3(sun_dir.x, 0.0, sun_dir.z).normalized() + Vector3(0, -0.9, 0)
+	sky_fill.look_at_from_position(Vector3.ZERO, away, Vector3.UP)
 	env.background_energy_multiplier = lerpf(0.15, 1.0, mood_scale)
 	var fog: Color = k[6]
 	env.fog_light_color = fog.lerp(grey, weather_dark * 0.6)
-	env.fog_density = 0.0016 + weather_fog * 0.012 + n * 0.0015
+	env.fog_density = float(_look["haze"]["density"]) + weather_fog * 0.012 + n * 0.0015
 	# Mist: heavy around sunrise (5-8), lighter at dusk, a trace at noon
 	var dawn := clampf(1.0 - absf(hour - 6.5) / 2.0, 0.0, 1.0)
 	var dusk := clampf(1.0 - absf(hour - 19.5) / 2.0, 0.0, 1.0)
@@ -174,9 +224,41 @@ func _sample(h: float) -> Array:
 	return KEYS[0]
 
 
-func apply_quality(high: bool) -> void:
-	light.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS if high else DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
-	light.directional_shadow_max_distance = 140.0 if high else 70.0
-	env.ssao_enabled = high
-	env.sdfgi_enabled = false
-	env.volumetric_fog_enabled = false
+## The graphics preset (Settings.quality: low / medium / high, lighting.json presets).
+## `high` is kept for the shared apply_quality(high) call; the preset itself is read here.
+func apply_quality(_high: bool) -> void:
+	var p: Dictionary = _look["presets"][Settings.quality_id()]
+	var high: bool = Settings.is_high()
+	light.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS if int(p["shadow_splits"]) == 4 else DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+	light.directional_shadow_max_distance = float(p["shadow_distance"])
+	light.light_angular_distance = float(_look["sun"]["angular_distance_high"]) if high else 0.0   # contact-hardening soft shadows
+	env.ssao_enabled = p["ssao"]
+	env.ssil_enabled = p["ssil"]
+	var gi: bool = Settings.global_illumination   # experimental, its own setting (any preset)
+	env.sdfgi_enabled = gi
+	env.sdfgi_read_sky_light = bool(_look["sdfgi"]["read_sky_light"])
+	sky_fill.visible = gi and float(_look["sdfgi"]["sky_fill"]) > 0.0
+	sky_top.visible = sky_fill.visible
+	env.glow_enabled = p["glow"]
+	env.volumetric_fog_enabled = p["volumetric"]
+	if p["volumetric"]:
+		var vf: Dictionary = _look["volumetric"]
+		env.volumetric_fog_length = float(vf["length_high" if high else "length_medium"])
+		env.volumetric_fog_gi_inject = 0.5 if gi else 0.0
+		var size: Array = vf["size_high" if high else "size_medium"]
+		RenderingServer.environment_set_volumetric_fog_volume_size(int(size[0]), int(size[1]))
+
+
+func _fill_light(node_name: String) -> DirectionalLight3D:
+	var l := DirectionalLight3D.new()
+	l.name = node_name
+	l.shadow_enabled = false
+	l.light_specular = 0.0
+	l.light_color = _color(_look["ambient"]["color"])
+	l.visible = false
+	add_child(l)
+	return l
+
+
+static func _color(a: Array) -> Color:
+	return Color(float(a[0]), float(a[1]), float(a[2]))

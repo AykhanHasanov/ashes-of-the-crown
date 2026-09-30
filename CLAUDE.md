@@ -145,7 +145,7 @@ A permanent guide for future sessions. Read this first. Then read `ARCHITECTURE_
 - Közcü journal (`scripts/ui/kozcu_journal.gd`, Tab, V3 modes): people met (NPC flags `met` / `last_line`, recorded by chapter_base from every shown line; `NpcDefinition.relation_key`), the one-line thread (world value `thread`, action `thread:<KEY>`), kept/burned memories.
 - Hub nights (`scripts/hub/hub_nights.gd`): counted per NPC in the hub only (`hub_nights`); warning from `warning_night`; FAIRNESS: death only on a hub night after the warning was HEARD (the line at his door, or `warning_heard:<npc>` — Domrul's line 3); unheard it repeats; `cancel_if` (grief resolved) ends it.
 - Aras's room (hub): hollow room behind `door_protagonist` (`hub_level.room_spots`, `in_room`); by day walk in; at night "Odana gir", inside "Dinle / Dışarı çık"; Rüfət sits awake on his bed at night (`ally.rest_at`) — permanent design.
-- Kartal Yamacı: `scenes/kartal_yamaci.tscn` (`scripts/kartal_mode.gd`, `scripts/world/kartal_level.gd`), region `kartal_yamaci`, reached by the trail sign at Karaağaç Ocağı (`hearth.json` interact `trail`; `HubTravel.enter(..., target)`), Yadigar stands by that sign (`stand` in the entry → world_mode `_npc_stand`). Views `--demo=kartal | kartal_hut`.
+- Kartal Yamacı: `scenes/kartal_yamaci.tscn` (`scripts/kartal_mode.gd`, `scripts/world/kartal_level.gd`), region `kartal_yamaci`, reached by the trail sign at Karaağaç Ocağı (`hearth.json` interact `trail`; `HubTravel.enter(..., target)`), Yadigar stands by that sign (`stand` in the entry → world_mode `_npc_stand`). Views `--demo=kartal | kartal_hut | kartal_lit` (the lit hearth variant, debug only).
 - Balance rule: every slice encounter is comfortably beatable at base values (no burns). The balance suite in combat_test plays each (`combat.json` `balance_check`) with a plain bot, with the story's beats live (Rüfət joins S2 at wave 2 or below 30% health); every seed must win with ≥ 40% health.
 - Tests: `"$G" --headless --path . res://scenes/tests/story_test.tscn` (99 checks).
 
@@ -190,8 +190,18 @@ Set `G="C:/Users/User/Documents/games/_tools/godot/Godot_v4.7.2-stable_win64_con
 
 **Common flags and hotkeys**
 - `--capture=captures/x.png --frame=240` saves a screenshot and quits. It also prints a `PROFILE` line (fps, draw calls, primitives, VRAM).
-- `--quality=low|high` forces the graphics preset.
+- `--quality=low|medium|high` forces the graphics preset (F9 cycles them; the settings screen offers all three).
 - In game: F10 debug menu, F4 AI overlay, F6 streaming overlay, F3 FPS, F9 quality.
+
+**Look (lighting and presets)**
+- Every outdoor mode lights through `scripts/world/day_night.gd`; its look is data in `data/world/lighting.json`: warm low sun, cool blue ambient, soft shadows, AgX, glow, haze and valley mist, and per preset what is on.
+- Low: glow, 2 shadow splits. Medium: + SSAO and coarse volumetric fog. High: + SSIL, finer volumetric fog, 4 splits, contact-hardening shadows. `Settings.is_high()` is High only; `Settings.at_least_medium()` for Medium and up.
+- SDFGI is NOT part of a preset: it is the separate, experimental "Küresel aydınlatma (deneysel)" setting (`Settings.global_illumination`, `--gi=on`), off by default. It does not read the sky (on the dev Intel UHD its probes turned characters and trees chrome-white even with correct materials); two shadowless cool "sky fill" lights stand in for the sky while it is on.
+- First launch: `scripts/systems/benchmark.gd` measures the first gameplay scene at Medium with vsync off and picks the preset (`lighting.json` benchmark; no measurement → Medium). Saved; the player can change it. `--benchmark` runs it now without saving. Never in a --demo, capture or headless.
+- Materials: non-metals are `metallic 0`, `roughness >= 0.7` (`scripts/core/material_policy.gd`), applied at glTF import (`tools/import/material_policy_import.gd` is every model's import script — keep it when adding models) and to baked foliage (`tools/fix_materials.gd`). Audit: `-s tools/audit_materials.gd`; list in `docs/MATERIAL_AUDIT.md`.
+- Hearths look through `scripts/world/hearth_fire.gd` (lit: stone ring, embers, flames — mixed blend, so no white blob — sparks, flickering light; cold: ash, charred logs, a thread of smoke): Kartal Yamacı, the Son Ocak hearth, every valley hearth (cold until lit). Air dust: `Effects.dust_motes`. Views `--demo=world_hearth | world_hearth_lit`.
+
+**Session flow (before a merge to main):** `scenes/tests/flow_test.tscn` plays the real game in two launches on a clean user profile (New Game → valley, the benchmark → light a hearth → Son Ocak → change the preset in the settings → save → quit; then restart → Continue → the preset and the lit hearth are still there). Windowed, not part of the headless suites; the commands (APPDATA pointed at an empty folder, `FLOW_PHASE=1` then `2`) are in the header of `scripts/debug/flow_selftest.gd`.
 
 **Labs**
 - `res://scenes/char_lab.tscn`: `CHAR_LAB_LOOKS`, `CHAR_LAB_WEAPON`, `CHAR_LAB_OVERLAY`.

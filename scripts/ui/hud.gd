@@ -223,8 +223,7 @@ func _process(delta: float) -> void:
 		else:
 			_boss = null
 			_boss_box.visible = false
-	var quality := "Yüksek" if Settings.is_high() else "Düşük"
-	_info.text = "Grafik: %s (F9)" % quality
+	_info.text = tr("HUD_QUALITY") % Settings.quality_name()
 	if Settings.show_fps:
 		_info.text += "\nFPS: %d" % Engine.get_frames_per_second()
 
