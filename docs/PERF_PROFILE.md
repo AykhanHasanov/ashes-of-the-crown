@@ -2,7 +2,13 @@
 
 Measured 2026-09-30 on the dev machine: **Intel(R) UHD Graphics** (integrated), 1280×720 window, Godot 4.7.2
 Forward+, `main` at tag `v3-lighting-p2`. **No game code was changed for this report** — it only measures.
-Target for part 2: **Medium ≥ 45 fps in the valley and in Son Ocak** on this GPU (a 22.2 ms frame).
+Target (set 2026-09-30, after stage D — it replaces the earlier "Medium ≥ 45 fps" wording):
+
+- **Integrated GPU (this machine) = the minimum spec. Low ≥ 45 fps median everywhere, Kürköy included.** This is
+  the gate a change has to pass.
+- **Medium is the quality preset for entry-level discrete GPUs.** On this machine it is only a relative indicator:
+  no change may make it more than 1 ms worse than the baseline table below.
+- The benchmark's thresholds are recalibrated only after art part 2.
 
 ## How it was measured
 
@@ -334,3 +340,75 @@ projection, no detiling and no height blending (the cliff still). Options:
 (40): most launches pick Low, a few land in the dead zone (Medium, measured again). That is the dead zone doing its
 job, but it means this machine has no stable answer until part 2 moves Medium clear of the threshold — after which the
 thresholds must be recalibrated (noted in the code and in `lighting.json`).
+
+---
+
+# Stage D epilogue: the 1 % low check, the decisions, the new target (2026-09-30)
+
+## The three "regressions" were noise
+
+`docs/MERGE_CHECKLIST.md` asks for an explanation when a number is more than 1 ms worse. Three 1 % low values looked
+worse after stage D, so each spot was measured three more times (probe, `PERF_FAST=1`, same machine, nothing else
+running). The spread **within one build** is far larger than the difference between builds:
+
+| Spot | 1 % low before (2 runs) | 1 % low after (5–7 runs) | Median fps before → after |
+|---|---|---|---|
+| Kartal, Medium | 43.8–50.4 | 39.7–59.9 | 58.3–61.4 → 60.6–67.3 |
+| Kürköy, Low | 30.3–35.0 | 25.2–35.9 | 41.5–42.9 → 42.8–50.6 |
+| Valley start, Low | 43.1–45.9 | 35.3–46.9 | 50.5–51.6 → 51.6–56.5 |
+
+In frame time the after-runs of one and the same build differ by 7–12 ms in their 1 % low (Kürköy Low: 25.2 fps =
+39.7 ms against 35.9 fps = 27.9 ms). The 1 % low is the mean of the slowest ~4 frames out of ~350: it catches
+whatever the streamer, the OS or the driver did in that second, not what the renderer costs. The **median** moved up
+in every one of the three cases, and every stage-D change either removes work or changes nothing.
+
+**Conclusion: noise, no regression, nothing to fix.** From now on only the **median** gates a merge; the 1 % low is
+recorded but never decides (`docs/MERGE_CHECKLIST.md`).
+
+## Decisions taken (owner, 2026-09-30)
+
+**Ground shader: option B.** Low uses Terrain3D's lightweight shader, Medium and High keep the full one
+(`lighting.json` `presets.<q>.terrain`). Measured after the switch (best of three runs at Low):
+
+| Spot | Low before | Low after (lightweight) |
+|---|---|---|
+| Valley start | 53.9 fps (18.6 ms) | **56.2 fps (17.8 ms)** |
+| Kürköy | 44.9 fps (22.3 ms) | **45.2 fps (22.1 ms)**, spread 41.6–58.7 |
+| Son Ocak | 54.7 fps | 49.4 fps — unchanged by this (no Terrain3D there; within noise) |
+| Kartal Yamacı | 79.7 fps | 80.3 fps — unchanged (its slope is a plain mesh) |
+
+**Adaptive 3D resolution: rejected.** It reached 36.9 fps in Kürköy at Medium only by sitting at its floor (0.60),
+which is softer than Low's own 0.77 while being slower than Low (44.9 fps). The measuring code was removed from
+`scripts/debug/perf_probe.gd`; this paragraph is the record of the result.
+
+## Where the new target stands today (Low, the minimum spec)
+
+| Spot | Low median | Target 45 |
+|---|---|---|
+| Valley, start | 56.0 fps | ✔ |
+| Valley, Kürköy | 45.2 fps (six runs: 39.7 … 58.7) | **on the line** — part 2 must secure it |
+| Son Ocak | 52.9 fps | ✔ |
+| Kartal Yamacı | 80.3 fps | ✔ |
+
+Kürköy at Low sits exactly on the target and dips below it on a bad run; Son Ocak has little headroom. Those two are
+what part 2 has to buy margin for — and **Kürköy takes no new content until then**.
+
+## Baseline for the merge checklist
+
+Taken the way the checklist asks for it: **three runs per spot, the middle one** (not the best). The stage-D table
+above quoted the best run, which is why it said 35.0 ms for Kürköy at Medium: five runs of the merged branch land at
+36.4 / 36.6 / 36.8 / 36.8 / 37.1 ms, so ~36.7 ms is the honest number and nothing regressed — the earlier value was a
+lucky run. Measured 2026-09-30 on the merged branch (Intel UHD, vsync off, clean profile).
+
+| Spot | Low (the gate, ≥ 45 fps) | Medium (relative indicator) |
+|---|---|---|
+| Valley, start | **56.0 fps** / 17.9 ms | 39.4 fps / 25.4 ms |
+| Valley, Kürköy | **45.2 fps** / 22.1 ms — no margin | 27.2 fps / 36.7 ms |
+| Son Ocak | **52.9 fps** / 18.9 ms | 37.8 fps / 26.4 ms |
+| Kartal Yamacı | 80.3 fps / 12.5 ms | 62.1 fps / 16.1 ms |
+
+A merge may not make any Medium number more than 1 ms worse, and may not take any Low number under 45 fps, without
+a written reason.
+
+**Kürköy at Low has no margin** (six runs: 39.7 / 41.6 / 45.2 / 45.2 / 46.6 / 58.7, middle 45.2). It meets the gate
+on the median and misses it on a bad run. Part 2 must buy margin there; until then Kürköy takes no new content.

@@ -105,7 +105,7 @@
 		"sky_fill": 1.7
 	},
 	"presets": {
-		"_about": "What each graphics preset (Settings.quality) turns on. SDFGI is not a preset: it is the separate, experimental Settings.global_illumination (off by default). ssao_quality (very_low | low | medium | high | ultra) and ssao_half (half resolution): Medium runs SSAO at its cheapest (docs/PERF_PROFILE.md: it was 4-10 ms of the frame on the Intel UHD). terrain: the ground shader's level (full | lean | lightweight, scripts/world/terrain_setup.gd apply_detail). All presets stay on full until the owner picks: lightweight saves about 3.7 ms at the valley's start and 2.6 ms in Kürköy at Medium on the Intel UHD and looks the same on flat ground, but stretches textures on steep slopes.",
+		"_about": "What each graphics preset (Settings.quality) turns on. SDFGI is not a preset: it is the separate, experimental Settings.global_illumination (off by default). ssao_quality (very_low | low | medium | high | ultra) and ssao_half (half resolution): Medium runs SSAO at its cheapest (docs/PERF_PROFILE.md: it was 4-10 ms of the frame on the Intel UHD). terrain: the ground shader's level (full | lean | lightweight, scripts/world/terrain_setup.gd apply_detail). Low uses Terrain3D's own stripped shader (about 3.7 ms cheaper at the valley's start): flat ground looks the same, steep slopes stretch their texture. Medium and High keep the full shader (owner's decision, stage D).",
 		"low": {
 			"ssao": false,
 			"ssil": false,
@@ -113,7 +113,7 @@
 			"glow": true,
 			"shadow_splits": 2,
 			"shadow_distance": 70.0,
-			"terrain": "full"
+			"terrain": "lightweight"
 		},
 		"medium": {
 			"ssao": true,

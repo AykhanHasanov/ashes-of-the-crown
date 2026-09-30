@@ -63,11 +63,6 @@ func _start(dummy: Node) -> void:
 		await _diag(mode)
 		get_tree().quit()
 		return
-	if OS.get_environment("PERF_ADAPTIVE") == "1":
-		await _adaptive()
-		print("PERF_JSON ", JSON.stringify(out))
-		get_tree().quit()
-		return
 	out["base"] = await _measure(MEASURE)
 	out["counts"] = _counts(mode)
 	out["monitors"] = _monitors()
@@ -355,69 +350,3 @@ func _diag(mode) -> void:
 		await _seconds(0.6)
 		print("PERF_DIAG child %s [%s]: hidden %d, back %d" % [k.name, k.get_class(), hidden,
 			int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))])
-
-
-## MEASUREMENT ONLY (not a game feature): what an adaptive 3D resolution would give here.
-## A simple controller moves the viewport's scaling_3d_scale between 0.6 and the preset's
-## own scale, aiming at a 22.2 ms frame (45 fps): every half second it looks at the mean
-## frame time and steps the scale down (over the target) or up (well under it). It saves a
-## still at the fixed scale and one at the scale it settled on (PERF_SHOT_DIR).
-func _adaptive() -> void:
-	var vp := get_viewport()
-	var top := vp.scaling_3d_scale
-	var target_ms := 1000.0 / 45.0
-	out["fixed"] = await _measure(MEASURE)
-	out["fixed_scale"] = top
-	await _shot("adaptive_fixed")
-	var scale := top
-	var history: Array = []
-	var window_start := Time.get_ticks_usec()
-	var frames := 0
-	var t0 := Time.get_ticks_usec()
-	# settle for 12 s, then measure for MEASURE seconds with the controller still running
-	var us := PackedInt64Array()
-	var last := t0
-	while (Time.get_ticks_usec() - t0) / 1000000.0 < 12.0 + MEASURE:
-		await get_tree().process_frame
-		var now := Time.get_ticks_usec()
-		frames += 1
-		if (now - t0) / 1000000.0 >= 12.0:
-			us.append(now - last)
-			history.append(scale)
-		last = now
-		if (now - window_start) / 1000000.0 >= 0.5:
-			var mean_ms := (now - window_start) / 1000.0 / frames
-			if mean_ms > target_ms * 1.04:
-				scale = maxf(scale - 0.03, 0.6)
-			elif mean_ms < target_ms * 0.9:
-				scale = minf(scale + 0.02, top)
-			vp.scaling_3d_scale = scale
-			window_start = now
-			frames = 0
-	var sorted := Array(us)
-	sorted.sort()
-	var n := sorted.size()
-	var worst := maxi(n / 100, 1)
-	var low_us := 0.0
-	for i in worst:
-		low_us += float(sorted[n - 1 - i])
-	low_us /= worst
-	var mean_scale := 0.0
-	for h in history:
-		mean_scale += float(h)
-	out["adaptive"] = {"median_fps": snappedf(1000000.0 / float(sorted[n / 2]), 0.1), "low1_fps": snappedf(1000000.0 / low_us, 0.1),
-		"median_ms": snappedf(float(sorted[n / 2]) / 1000.0, 0.01), "scale_mean": snappedf(mean_scale / maxi(history.size(), 1), 0.01),
-		"scale_min": snappedf(history.min(), 0.01), "scale_max": snappedf(history.max(), 0.01), "scale_end": snappedf(scale, 0.01)}
-	await _shot("adaptive_settled")
-	vp.scaling_3d_scale = 0.6
-	await _seconds(1.0)
-	await _shot("adaptive_min_0.60")
-	vp.scaling_3d_scale = top
-
-
-func _shot(shot_name: String) -> void:
-	var dir := OS.get_environment("PERF_SHOT_DIR")
-	if dir == "":
-		return
-	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png(dir.path_join(shot_name + ".png"))
