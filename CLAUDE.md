@@ -206,6 +206,8 @@ Set `G="C:/Users/User/Documents/games/_tools/godot/Godot_v4.7.2-stable_win64_con
 
 **Session flow (before a merge to main):** `scenes/tests/flow_test.tscn` plays the real game in two launches on a clean user profile (New Game → valley, the benchmark → light a hearth → Son Ocak → change the preset in the settings → save → quit; then restart → Continue → the preset and the lit hearth are still there). Windowed, not part of the headless suites; the commands (APPDATA pointed at an empty folder, `FLOW_PHASE=1` then `2`) are in the header of `scripts/debug/flow_selftest.gd`.
 
+**Performance profile:** `docs/PERF_PROFILE.md` (numbers, heaviest sources, the budget for the art work). Measure again with `scenes/tests/perf_probe.tscn` — one scene and preset per run, vsync off, on a clean profile; the command is in the header of `scripts/debug/perf_probe.gd`. Its per-node results are reliable in the valley only (see the report).
+
 **Labs**
 - `res://scenes/char_lab.tscn`: `CHAR_LAB_LOOKS`, `CHAR_LAB_WEAPON`, `CHAR_LAB_OVERLAY`.
 - `res://scenes/tree_lab.tscn`: `TREE_LAB_IDS`, `TREE_LAB_DIST`.
