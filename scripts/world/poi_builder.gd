@@ -23,6 +23,7 @@ const PREFIX := {
 }
 
 var terrain: Terrain3D
+var min_caster_size := 0.5   # metres (lighting.json shadows.min_caster_size; set by the streamer)
 var _bounds := {}   # path -> AABB of the model at scale 1
 var _mutex := Mutex.new()
 
@@ -128,6 +129,11 @@ func build_visual(pieces: Array, node_name: String) -> Node3D:
 		root.add_child(inst)
 		for mi: MeshInstance3D in inst.find_children("*", "MeshInstance3D", true, false):
 			mi.visibility_range_end = 0.0
+		# a piece under half a metre (as placed) casts no shadow
+		var size: Vector3 = local_bounds(p["path"]).size * (p["xform"] as Transform3D).basis.get_scale().abs()
+		if maxf(size.x, maxf(size.y, size.z)) < min_caster_size:
+			for mi: MeshInstance3D in inst.find_children("*", "MeshInstance3D", true, false):
+				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return root
 
 

@@ -120,7 +120,7 @@
 			"volumetric": true,
 			"glow": true,
 			"shadow_splits": 2,
-			"shadow_distance": 90.0,
+			"shadow_distance": 70.0,
 			"ssao_quality": "very_low",
 			"ssao_half": true
 		},
@@ -144,5 +144,9 @@
 		"medium_fps": 46.0,
 		"low_fps": 40.0,
 		"notice_seconds": 3.5
+	},
+	"shadows": {
+		"_about": "min_caster_size: a model whose largest side is under this many metres never casts a shadow (small props; grass never does). Applied where models are placed: scripts/world/visuals.gd no_small_shadows.",
+		"min_caster_size": 0.5
 	}
 }

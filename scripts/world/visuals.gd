@@ -1,6 +1,24 @@
 extends RefCounted
 ## Static helpers for building level geometry in code: materials and primitive meshes.
 
+const SMALL_CASTER := 0.5   # metres; the default of lighting.json shadows.min_caster_size
+
+
+## Small things cast no shadow: every mesh under `model` whose largest side (at `scale`) is
+## under `limit` metres gets shadow casting off. Returns how many were switched off. Safe on
+## a worker thread (it touches only the given nodes).
+static func no_small_shadows(model: Node, scale := Vector3.ONE, limit := SMALL_CASTER) -> int:
+	var n := 0
+	var meshes: Array = model.find_children("*", "MeshInstance3D", true, false)
+	if model is MeshInstance3D:
+		meshes.append(model)
+	for mi in meshes:
+		var size: Vector3 = (mi as MeshInstance3D).get_aabb().size * scale.abs()
+		if maxf(size.x, maxf(size.y, size.z)) < limit:
+			(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			n += 1
+	return n
+
 
 static func mat(color: Color, roughness := 0.8, metallic := 0.0) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()

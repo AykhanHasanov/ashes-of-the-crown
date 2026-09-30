@@ -42,6 +42,7 @@ var stats := {"loads": 0, "last_ms": 0.0, "worker_ms": 0.0, "jobs": 0}
 
 func setup(meta: Dictionary, terrain: Terrain3D, cfg: Dictionary) -> void:
 	builder = Builder.new()
+	builder.min_caster_size = float(DataDB.world("lighting")["shadows"]["min_caster_size"])
 	builder.terrain = terrain
 	cell_size = cfg["cell_size"]
 	full_radius = cfg["full_radius"]
