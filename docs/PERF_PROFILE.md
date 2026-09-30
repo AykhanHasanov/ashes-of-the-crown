@@ -95,7 +95,7 @@ costs is — the terrain shader, SSAO, shadow sampling, overdraw.
 | # | Source | Saved | Note |
 |---|---|---|---|
 | 1 | SSAO | 4.8 ms | Medium only |
-| 2 | **Point lights (4), two with shadows** | 4.3 ms (shadows alone 2.8 ms) | the hearth's light is redrawn into its shadow cube **every frame** (365 draw calls) because its flicker moves the light a few centimetres each frame; Aras's room lamp adds 195 |
+| 2 | **Point lights (4), two with shadows** | 4.3 ms (shadows alone 2.8 ms) | the hearth's light is redrawn into its shadow cube **every frame** (365 draw calls); Aras's room lamp adds 195. *Correction (stage D): the redraw is caused by the animated characters standing in the light's range, not by the light's flicker — making the light stand still changed nothing.* |
 | 3 | Sun shadows | 4.2 ms | 325 draw calls |
 | 4 | Characters (7) | 3.6 ms | ≈ 400 draw calls: a modular character is many meshes, each drawn again in every shadow pass |
 | 5 | Glow / volumetric fog | 0.9 / 0.6 ms | |
@@ -225,8 +225,9 @@ the rooms and Aras's room interior stop being drawn from the courtyard; they als
 measured with the probe (target: ≤ 500 draw calls).
 
 Two hub changes that are not geometry but belong to the same budget (measured above):
-- the hearth light's flicker moves the light every frame, which redraws its shadow cube every frame (365 draw
-  calls): flicker the energy only, or update that shadow every few frames;
+- the hearth light's shadow cube is redrawn every frame (365 draw calls). *Stage D: the flicker now changes the
+  energy only, and that did not help — the animated characters in its range force the redraw. Dual-paraboloid
+  shadows cut the draw calls (919 → 754) without any frame-time gain; the hub is fill-rate bound.*
 - Aras's room lamp casts shadows all the time (195 draw calls): only while he is in the room.
 
 ### Limits per module (the Caucasus kit)
@@ -253,3 +254,83 @@ Two hub changes that are not geometry but belong to the same budget (measured ab
 | Hearth-light shadow not redrawn every frame; the room lamp's only when needed | 2.8 ms, 560 draw calls | hub |
 | Sun shadows at Medium: 70 m instead of 90 m, small props and grass not casting | 4.2–5.1 ms | every place |
 | A loading screen (3–10 s of black today) | — | valley entry |
+
+---
+
+# Stage D: quick wins (branch `v3/perf-quickwins`, 2026-09-30)
+
+Settings and small code changes only, no new art. Each step is its own commit and was measured on its own with
+`PERF_FAST=1` (the baseline only), **best of two runs** per spot. Run-to-run noise on this machine was about ±1 ms
+(and more when a run caught the streamer before a place had finished loading — such runs, recognisable by their low
+draw-call and primitive counts, were thrown away). The "before" numbers below were measured again the same way on the
+same day, so they differ a little from section 1.
+
+## What each step gave (Medium, median frame time)
+
+| # | Step | Valley, start | Kürköy | Son Ocak | Kartal | Note |
+|---|---|---|---|---|---|---|
+| 1 | Benchmark on "ready", dead zone | — | — | — | — | not a performance change. Ready after 1.8–3.0 s; three runs in the valley: median 38.7 / 38.6 / 38.0, 1 % low 30–32 (no false hitch), preset Low each time. One new-game run measured 40.2 → dead zone → Medium, to be measured again on the next launch |
+| 2 | SSAO at Medium: very low quality, half resolution | 26.8 → 25.6 ms | 40.7 → 36.5 ms | 28.7 → 27.5 ms | 16.3 → 15.4 ms | no visible difference in the Kürköy and hub stills |
+| 3 | Hearth flicker: energy only, the light does not move | — | — | 27.5 → 28.0 ms | — | **no gain**; draw calls unchanged (1115). The guess in the profile was wrong (see the correction above) |
+| 4 | Aras's room lamp: shadows only while he is in the room | — | — | 28.0 → 26.7 ms | — | draw calls 1115 → 919; Low 20.8 → 19.4 ms |
+| 5 | Sun shadows 70 m at Medium; models under 0.5 m cast none | 25.6 → 25.6 ms | 36.5 → 36.5 ms | 26.7 → 26.6 ms | 15.4 → 15.5 ms | **no measurable gain**: fewer draw calls (start 560 → 528, Kürköy 724 → 687) but the frame is fill-rate bound. Grass already cast none |
+| 6 | Ground shader levels (not switched on) | lightweight: 25.6 → **21.9 ms** | lightweight: 36.5 → 33.9 ms | — | — | lean (no macro variation, no projection): ≈ −0.5 ms (noise). See the options below |
+| 7 | Loading screen | — | — | — | — | not a frame-time change: the 3–10 s of black and the first 0.5 s of streaming hitches are now behind it |
+| 8 | Adaptive 3D resolution (**measured only, not applied**) | | 26.4 → 36.9 fps | | | the controller goes straight to its floor (0.60) in Kürköy and still misses 45 fps; distant detail is visibly softer |
+
+## Before → after (steps 1–5 and 7 applied; ground shader still "full")
+
+| Spot | Preset | Median fps | 1 % low | Draw calls | Frame (ms) |
+|---|---|---|---|---|---|
+| Valley, start | Low | 51.6 → **53.9** | 45.9 → 42.6 | 536 → 722 * | 19.4 → 18.6 |
+| Valley, start | Medium | 37.3 → **38.7** | 30.5 → 31.6 | 556 → 542 | 26.8 → 25.8 |
+| Valley, Kürköy | Low | 42.9 → **44.9** | 35.0 → 30.7 | 687 → 687 | 23.3 → 22.3 |
+| Valley, Kürköy | Medium | 24.5 → **28.6** | 15.3 → 24.6 | 920 → 736 * | 40.7 → 35.0 |
+| Son Ocak | Low | 49.4 → **54.7** | 36.0 → 51.3 | 1113 → 918 | 20.3 → 18.3 |
+| Son Ocak | Medium | 34.8 → **37.9** | 28.9 → 33.5 | 1114 → 918 | 28.7 → 26.4 |
+| Kartal Yamacı | Low | 76.7 → **79.7** | 60.5 → 58.7 | 240 → 240 | 13.0 → 12.6 |
+| Kartal Yamacı | Medium | 61.4 → **62.1** | 50.4 → 40.0 | 236 → 240 | 16.3 → 16.1 |
+
+\* The valley's draw calls move by ±150 between runs with what the streamer has in view at that moment (villagers,
+which places are in); they are not a result of the steps.
+
+**This table is the baseline for `docs/MERGE_CHECKLIST.md` section 3** (Medium: valley start 25.8 ms, Kürköy 35.0 ms,
+hub 26.4 ms).
+
+## What still misses 45 fps (22.2 ms) at Medium, and what part 2 must recover
+
+| Spot | Now | Missing | With the lightweight ground shader (option A below) |
+|---|---|---|---|
+| Valley, start | 25.8 ms (38.7 fps) | **3.6 ms** | 21.9 ms (45.6 fps) — reached |
+| Valley, Kürköy | 35.0 ms (28.6 fps) | **12.8 ms** | ≈ 33.9 ms — still 11.7 ms to find |
+| Son Ocak | 26.4 ms (37.9 fps) | **4.2 ms** | — (no terrain) |
+| Kartal Yamacı | 16.1 ms (62.1 fps) | reached | |
+
+At Low every spot is at or above the target except Kürköy, which sits on it (44.9 fps).
+
+Where part 2 has to find it (from section 2's measurements): in Kürköy the streamed houses and props were 12.4 ms
+(merged meshes per material, LOD1, far fewer unique materials); in the hub the frame is fill-rate bound — occlusion
+culling will cut draw calls but, as steps 3 and 5 showed, draw calls are not what costs here: the hub needs cheaper
+pixels (the 3D resolution, fewer overlapping transparent layers, the remaining SSAO cost).
+
+## Decisions waiting for the owner
+
+**Ground shader (step 6).** On flat ground the lightweight shader looks the same as the full one (near and far stills);
+on steep slopes it stretches the rock texture and the grass-to-rock edge is harder, because it has no sideways
+projection, no detiling and no height blending (the cliff still). Options:
+
+| Option | Gain at Medium | Look |
+|---|---|---|
+| A. Lightweight at Low and Medium | start −3.7 ms (→ 45.6 fps), Kürköy −2.6 ms | flat ground the same; cliffs stretched |
+| B. Lightweight at Low only | none at Medium; Low gains the same 3–4 ms | Medium keeps its cliffs |
+| C. Lean at Low and Medium (full shader, no macro variation, no projection) | ≈ −0.5 ms (noise) | cliffs stretched as in A, for almost nothing — not recommended |
+| D. Keep full everywhere (current) | 0 | unchanged |
+
+**Adaptive 3D resolution (step 8).** Measured only. In Kürköy at Medium it takes 26.4 fps to 36.9 fps by dropping the
+3D scale from 0.87 to 0.60 (its floor) and stays there; the village is visibly softer at a distance. It does not reach
+45 fps on its own, and at 0.60 it costs more image quality than Low does (Low runs at 0.77 and 44.9 fps there).
+
+**Benchmark on this machine.** The valley's start spot measures 38.0–40.2 fps at Medium, right at the lower threshold
+(40): most launches pick Low, a few land in the dead zone (Medium, measured again). That is the dead zone doing its
+job, but it means this machine has no stable answer until part 2 moves Medium clear of the threshold — after which the
+thresholds must be recalibrated (noted in the code and in `lighting.json`).
