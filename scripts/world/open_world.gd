@@ -167,6 +167,7 @@ func apply_quality(high: bool) -> void:
 	day_night.apply_quality(high)
 	weather.apply_quality(high)
 	terrain.mesh_size = 48 if high else 32
+	TerrainSetup.apply_detail(terrain, String(DataDB.world("lighting")["presets"][Settings.quality_id()].get("terrain", "full")))
 	var veg: Dictionary = DataDB.world("vegetation")
 	for i in veg["items"].size():
 		var ma: Terrain3DMeshAsset = terrain.assets.get_mesh_asset(i)

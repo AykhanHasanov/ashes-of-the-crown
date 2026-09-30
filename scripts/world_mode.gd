@@ -788,6 +788,26 @@ func _demo_setup() -> void:
 					ep = p
 			_demo_view(Vector3(ep["pos"][0] + 3.5, 0, ep["pos"][2] + 1.0), Vector3(ep["pos"][0] + 3.5, ep["pos"][1] + 1.0, ep["pos"][2] - 2.5), 8.0)
 			get_tree().create_timer(2.5).timeout.connect(func(): EchoDirector.enter(&"test_echo", self, player, level.day_night.hour))
+		"world_ground_cliff":
+			# a steep slope of the western ridge: where texture projection matters
+			level.day_night.set_hour(10.5)
+			level.day_night.paused = true
+			player.input_locked = true
+			_demo_view(Vector3(92, 0, 136), Vector3(52, 22, 130), 6.0)
+			rig.pitch = deg_to_rad(4.0)
+		"world_ground_near", "world_ground_far":
+			# The ground at the valley's start: close underfoot, and across the valley (stills)
+			level.day_night.set_hour(10.5)
+			level.day_night.paused = true
+			player.input_locked = true
+			var gh: Dictionary = level.streamer.poi_by_id("hearth_west")
+			var gc := Vector3(float(gh["pos"][0]), 0, float(gh["pos"][2]))
+			if Settings.demo == "world_ground_near":
+				_demo_view(gc + Vector3(10, 0, 14), gc + Vector3(22, 0, 30), 6.0)
+				rig.pitch = deg_to_rad(-28.0)
+			else:
+				_demo_view(gc + Vector3(10, 0, 14), Vector3(304, 14, 342), 6.0)
+				rig.pitch = deg_to_rad(-4.0)
 		"world_hearth", "world_hearth_lit":
 			# Geçit Ocağı: cold (ash and smoke) or lit (flames, sparks); dusk so the fire reads
 			level.day_night.set_hour(19.3)

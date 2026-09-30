@@ -5,6 +5,7 @@ extends RefCounted
 
 const TEX_DIR := "res://assets/terrain/"
 const DATA_DIR := "res://world/terrain"
+const LIGHTWEIGHT_SHADER := "res://addons/terrain_3d/extras/shaders/lightweight.gdshader"
 const FOLIAGE_SHADER := preload("res://shaders/foliage.gdshader")
 const CARD_SHADER := preload("res://shaders/grass_cards.gdshader")
 
@@ -31,6 +32,24 @@ static func create(high_quality: bool, world: Dictionary, veg: Dictionary) -> Te
 	m.set_shader_param("enable_projection", true)
 	m.set_shader_param("projection_threshold", 0.78)
 	return terrain
+
+
+## How much the ground's shader does (lighting.json presets.<preset>.terrain):
+##   "full"         everything: macro colour variation, sideways projection on cliffs,
+##                  height blending, detiling (High);
+##   "lean"         the same shader without the extra layers: no macro variation, no
+##                  projection (fewer texture samples per pixel);
+##   "lightweight"  Terrain3D's own stripped-down shader (extras/shaders/lightweight): each
+##                  texture id is read once; no projection, no detiling, no height blending.
+static func apply_detail(terrain: Terrain3D, level: String) -> void:
+	var m := terrain.material
+	var lean := level != "full"
+	m.shader_override_enabled = level == "lightweight"
+	if level == "lightweight":
+		m.shader_override = load(LIGHTWEIGHT_SHADER)
+		m.set_shader_param("blend_sharpness", 0.82)
+	m.set_shader_param("enable_macro_variation", not lean)
+	m.set_shader_param("enable_projection", not lean)
 
 
 static func make_assets(high_quality: bool, world: Dictionary, veg: Dictionary) -> Terrain3DAssets:
