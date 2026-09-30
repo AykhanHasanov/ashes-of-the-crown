@@ -1,7 +1,7 @@
 extends Node3D
 ## How a hearth looks (a view: it holds no state). Two variants:
 ##   lit   a ring of stones, a bed of glowing embers, flames and sparks (GPUParticles) and a
-##         warm OmniLight that flickers;
+##         warm OmniLight whose energy flickers (it never moves: see _process);
 ##   cold  the same stones round grey ash and two charred logs, with a thin thread of smoke.
 ## Parts can be left out where a prefab already has them (ring / bed / light).
 ## Use: const HearthFire := preload("res://scripts/world/hearth_fire.gd")
@@ -69,12 +69,13 @@ func _ready() -> void:
 	set_process(lit and light != null)
 
 
-## A fire never burns steady: two sines and a little noise, and the light shifts a hair.
+## A fire never burns steady: the light's ENERGY wavers (two sines and a little noise). Its
+## position never moves — a light that moves redraws its whole shadow cube every frame (365
+## draw calls in the hub, docs/PERF_PROFILE.md); a change of energy costs nothing.
 func _process(delta: float) -> void:
 	_t += delta
-	var f := 0.82 + 0.1 * sin(_t * 9.3 + _seed) + 0.06 * sin(_t * 23.1 + _seed * 2.0) + randf() * 0.05
+	var f := 0.8 + 0.13 * sin(_t * 9.3 + _seed) + 0.08 * sin(_t * 23.1 + _seed * 2.0) + randf() * 0.06
 	light.light_energy = light_energy * f
-	light.position = Vector3(sin(_t * 3.1) * 0.05, 0.7 + sin(_t * 5.3) * 0.04, cos(_t * 2.7) * 0.05)
 
 
 func _ring() -> void:

@@ -105,14 +105,15 @@
 		"sky_fill": 1.7
 	},
 	"presets": {
-		"_about": "What each graphics preset (Settings.quality) turns on. SDFGI is not a preset: it is the separate, experimental Settings.global_illumination (off by default).",
+		"_about": "What each graphics preset (Settings.quality) turns on. SDFGI is not a preset: it is the separate, experimental Settings.global_illumination (off by default). ssao_quality (very_low | low | medium | high | ultra) and ssao_half (half resolution): Medium runs SSAO at its cheapest (docs/PERF_PROFILE.md: it was 4-10 ms of the frame on the Intel UHD). terrain: the ground shader's level (full | lean | lightweight, scripts/world/terrain_setup.gd apply_detail). Low uses Terrain3D's own stripped shader (about 3.7 ms cheaper at the valley's start): flat ground looks the same, steep slopes stretch their texture. Medium and High keep the full shader (owner's decision, stage D).",
 		"low": {
 			"ssao": false,
 			"ssil": false,
 			"volumetric": false,
 			"glow": true,
 			"shadow_splits": 2,
-			"shadow_distance": 70.0
+			"shadow_distance": 70.0,
+			"terrain": "lightweight"
 		},
 		"medium": {
 			"ssao": true,
@@ -120,7 +121,10 @@
 			"volumetric": true,
 			"glow": true,
 			"shadow_splits": 2,
-			"shadow_distance": 90.0
+			"shadow_distance": 70.0,
+			"ssao_quality": "very_low",
+			"ssao_half": true,
+			"terrain": "full"
 		},
 		"high": {
 			"ssao": true,
@@ -128,15 +132,24 @@
 			"volumetric": true,
 			"glow": true,
 			"shadow_splits": 4,
-			"shadow_distance": 140.0
+			"shadow_distance": 140.0,
+			"ssao_quality": "medium",
+			"ssao_half": true,
+			"terrain": "full"
 		}
 	},
 	"benchmark": {
-		"_about": "First time in a gameplay scene (scripts/systems/benchmark.gd): every frame timed at Medium with vsync off; the first `discard` seconds are thrown away (shader compilation, streaming), then `seconds` are measured. The MEDIAN frame rate decides: >= high_fps picks High (never on an integrated GPU), >= medium_fps Medium, else Low; nothing measured keeps Medium. The 1% low is logged. The notice stays notice_seconds.",
-		"discard": 1.5,
+		"_about": "First time in a gameplay scene (scripts/systems/benchmark.gd). It waits for READY — the scene's _begin has run, the streamer has nothing pending, and ready_frames more frames were drawn (at most ready_cap seconds) — then times every frame for `seconds` at Medium with vsync off. The MEDIAN decides: >= high_fps High (never on an integrated GPU), >= medium_fps Medium, <= low_fps Low; between low_fps and medium_fps (the dead zone) it runs at Medium and saves only when the next launch's measurement agrees. Nothing measured keeps Medium. The 1% low is logged; the notice stays notice_seconds. THRESHOLDS: measured at the valley's start spot, where Kürköy runs at about 74% of that frame rate at Medium (docs/PERF_PROFILE.md); they must be recalibrated after art part 2.",
+		"ready_frames": 30,
+		"ready_cap": 10.0,
 		"seconds": 5.0,
 		"high_fps": 65.0,
-		"medium_fps": 38.0,
+		"medium_fps": 46.0,
+		"low_fps": 40.0,
 		"notice_seconds": 3.5
+	},
+	"shadows": {
+		"_about": "min_caster_size: a model whose largest side is under this many metres never casts a shadow (small props; grass never does). Applied where models are placed: scripts/world/visuals.gd no_small_shadows.",
+		"min_caster_size": 0.5
 	}
 }

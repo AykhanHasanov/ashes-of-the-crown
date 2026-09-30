@@ -3,23 +3,37 @@ extends Node
 ## (the title screen is too light to tell anything), at Medium with vsync off (a 60 Hz cap
 ## would hide the difference), then lets Settings pick the preset from the MEDIAN frame rate
 ## (Settings.finish_benchmark) and tells the player for a few seconds.
-##   - The first `discard` seconds are thrown away (shader compilation, streaming in).
+##   - It starts on READY, not on a clock: the scene's _begin has run, the streamer has
+##     nothing pending, and ready_frames more frames were drawn (scripts/core/scene_ready.gd).
+##     If that never comes it starts after ready_cap seconds anyway. So the tail of loading
+##     and shader compilation are never measured, on any machine.
 ##   - The median, not the mean: a few hitches must not decide the preset. The 1 % low
 ##     (the frame rate of the slowest 1 % of frames) is logged with it.
+##   - A dead zone between low_fps and medium_fps: there it runs at Medium and the preset is
+##     saved only when the next launch's measurement agrees (two agreeing results).
 ##   - On an integrated GPU (Intel UHD / Iris, AMD Vega / Radeon Graphics ...) High is never
 ##     picked automatically.
-## Numbers: data/world/lighting.json benchmark. If the scene is left before it finishes
-## nothing is saved and the next launch measures again; no frames measured → Medium.
+## Numbers: data/world/lighting.json benchmark. NOTE: the thresholds are calibrated on the
+## valley as it is now and MUST BE RECALIBRATED AFTER ART PART 2 (terrain, the modular kit).
+## If the scene is left before it finishes nothing is saved and the next launch measures
+## again; no frames measured → Medium.
 
+const SceneReady := preload("res://scripts/core/scene_ready.gd")
 const INTEGRATED_HINTS := ["intel", "uhd", "iris", "vega", "radeon(tm) graphics", "radeon graphics", "adreno", "mali"]
 const DISCRETE_HINTS := ["geforce", "rtx", "gtx", "radeon rx", "radeon pro", "arc a", "arc b", "quadro"]
 
-var result := {}                 # after the run: {median, low1, mean, frames, integrated, preset}
+enum Phase { WAIT_READY, MEASURE, DONE }
+
+var mode: Node                   # the scene being measured (chapter_base sets it)
+var result := {}                 # after the run: {median, low1, mean, frames, integrated, preset, final, waited}
 var _cfg: Dictionary
+var _phase := Phase.WAIT_READY
+var _created_us := 0
+var _ready_frames := 0
 var _start_us := 0
 var _last_us := 0
+var _waited := 0.0
 var _frame_us := PackedInt64Array()
-var _done := false
 var _vsync := DisplayServer.VSYNC_ENABLED
 var _label: Label
 
@@ -29,8 +43,7 @@ func _ready() -> void:
 	_cfg = DataDB.world("lighting")["benchmark"]
 	_vsync = DisplayServer.window_get_vsync_mode()
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
-	_start_us = Time.get_ticks_usec()
-	_last_us = _start_us
+	_created_us = Time.get_ticks_usec()
 
 
 func _exit_tree() -> void:
@@ -38,29 +51,40 @@ func _exit_tree() -> void:
 
 
 func _process(_delta: float) -> void:
-	if _done:
-		return
 	var now := Time.get_ticks_usec()
-	var t := (now - _start_us) / 1000000.0
-	var discard := float(_cfg["discard"])
-	if t >= discard:
-		_frame_us.append(now - _last_us)
-	_last_us = now
-	if t >= discard + float(_cfg["seconds"]):
-		_finish()
+	match _phase:
+		Phase.WAIT_READY:
+			# READY: set up, nothing streaming in, and a few frames drawn after that
+			_ready_frames = _ready_frames + 1 if SceneReady.is_ready(mode if mode != null else get_parent()) else 0
+			var waited := (now - _created_us) / 1000000.0
+			if _ready_frames >= int(_cfg["ready_frames"]) or waited >= float(_cfg["ready_cap"]):
+				_waited = waited
+				_phase = Phase.MEASURE
+				_start_us = now
+				_last_us = now
+		Phase.MEASURE:
+			_frame_us.append(now - _last_us)
+			_last_us = now
+			if (now - _start_us) / 1000000.0 >= float(_cfg["seconds"]):
+				_phase = Phase.DONE
+				_finish()
 
 
 func _finish() -> void:
-	_done = true
 	DisplayServer.window_set_vsync_mode(_vsync)
 	result = stats(_frame_us)
 	result["integrated"] = is_integrated_gpu()
-	Settings.finish_benchmark(float(result["median"]), result["integrated"])
+	result["waited"] = _waited
+	result["zone"] = Settings.benchmark_zone(float(result["median"]), _cfg, result["integrated"])
+	result["final"] = Settings.finish_benchmark(float(result["median"]), result["integrated"])
 	result["preset"] = Settings.quality_id()
-	print("BENCHMARK median=%.1f low1=%.1f mean=%.1f frames=%d integrated=%s gpu=\"%s\" → %s" % [result["median"], result["low1"],
-		result["mean"], result["frames"], result["integrated"], RenderingServer.get_video_adapter_name(), result["preset"]])
-	_notify(tr("BENCH_RESULT") % Settings.quality_name())
-	await get_tree().create_timer(float(_cfg["notice_seconds"]), true, false, true).timeout
+	print("BENCHMARK median=%.1f low1=%.1f mean=%.1f frames=%d ready_after=%.1fs integrated=%s gpu=\"%s\" zone=%s → %s%s" % [
+		result["median"], result["low1"], result["mean"], result["frames"], _waited, result["integrated"],
+		RenderingServer.get_video_adapter_name(), result["zone"], result["preset"],
+		"" if result["final"] else " (dead zone: measured again on the next launch)"])
+	if result["final"]:
+		_notify(tr("BENCH_RESULT") % Settings.quality_name())   # only a final choice is announced
+		await get_tree().create_timer(float(_cfg["notice_seconds"]), true, false, true).timeout
 	queue_free()
 
 

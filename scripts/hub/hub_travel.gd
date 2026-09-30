@@ -9,6 +9,7 @@ extends RefCounted
 ## inside the hub) and the scene puts him back through consume_return(): where he stood,
 ## or — when nothing was remembered — the valley gate from data/hub/son_ocaq.json.
 
+const LoadingScreen := preload("res://scripts/ui/loading_screen.gd")
 const HUB_SCENE := "res://scenes/son_ocaq.tscn"
 const VALLEY_SCENE := "res://scenes/world.tscn"
 const KARTAL_SCENE := "res://scenes/kartal_yamaci.tscn"
@@ -24,7 +25,7 @@ static func enter(from: Node, player: Node3D, hour: float, target := HUB_SCENE) 
 		"facing": player.facing() if player.has_method("facing") else Vector3.FORWARD}
 	returning = false
 	from.get_tree().paused = false
-	from.get_tree().change_scene_to_file(target)
+	LoadingScreen.go(from.get_tree(), target)
 
 
 static func leave(tree: SceneTree) -> void:
@@ -33,7 +34,7 @@ static func leave(tree: SceneTree) -> void:
 		_ctx = {"scene": scene}
 	returning = true
 	tree.paused = false
-	tree.change_scene_to_file(scene)
+	LoadingScreen.go(tree, scene)
 
 
 ## Where the road out of a place leads: the scene he came from, else the valley.

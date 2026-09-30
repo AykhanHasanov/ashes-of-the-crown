@@ -9,6 +9,9 @@ extends Node3D
 signal hour_changed(hour: int)
 
 const SKY_SHADER := preload("res://shaders/sky.gdshader")
+const SSAO_QUALITY := {"very_low": RenderingServer.ENV_SSAO_QUALITY_VERY_LOW, "low": RenderingServer.ENV_SSAO_QUALITY_LOW,
+	"medium": RenderingServer.ENV_SSAO_QUALITY_MEDIUM, "high": RenderingServer.ENV_SSAO_QUALITY_HIGH,
+	"ultra": RenderingServer.ENV_SSAO_QUALITY_ULTRA}
 
 # hour → [sky top, horizon, sun colour, sun energy, ambient energy, fog colour]
 const KEYS := [
@@ -258,6 +261,10 @@ func apply_quality(_high: bool) -> void:
 	light.directional_shadow_max_distance = float(p["shadow_distance"])
 	light.light_angular_distance = float(_look["sun"]["angular_distance_high"]) if high else 0.0   # contact-hardening soft shadows
 	env.ssao_enabled = p["ssao"]
+	if p["ssao"]:
+		# the engine's defaults except quality and resolution, which the preset picks
+		RenderingServer.environment_set_ssao_quality(SSAO_QUALITY.get(String(p.get("ssao_quality", "medium")), RenderingServer.ENV_SSAO_QUALITY_MEDIUM),
+			bool(p.get("ssao_half", true)), 0.5, 2, 50.0, 300.0)
 	env.ssil_enabled = p["ssil"]
 	var gi: bool = Settings.global_illumination   # experimental, its own setting (any preset)
 	env.sdfgi_enabled = gi

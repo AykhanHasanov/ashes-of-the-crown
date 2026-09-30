@@ -1,5 +1,7 @@
 # Credits
 
+Tam siyahı (mənbə, lisenziya, tarix): `docs/ASSETS.md`.
+
 ## 3D personajlar və mühit
 - **KayKit: Adventurers Character Pack 1.0** və **KayKit: Skeletons Character Pack 1.0**, Kay Lousberg (www.kaylousberg.com). Lisenziya: CC0.
   Mənbə: github.com/KayKit-Game-Assets

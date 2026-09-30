@@ -16,6 +16,7 @@ const Journal := preload("res://scripts/ui/journal.gd")
 const KozcuJournal := preload("res://scripts/ui/kozcu_journal.gd")
 const StoryDirector := preload("res://scripts/story/story_director.gd")
 const Benchmark := preload("res://scripts/systems/benchmark.gd")
+const LoadingScreen := preload("res://scripts/ui/loading_screen.gd")
 const RadialMenu := preload("res://scripts/ui/radial_menu.gd")
 const AshOffer := preload("res://scripts/ui/ash_offer.gd")
 const Balance := preload("res://scripts/systems/balance.gd")
@@ -38,6 +39,7 @@ var dialogue
 var pause_menu
 var journal
 var story: Node       # StoryDirector (V3 modes): the act's beats
+var begun := false    # _begin() has run: the scene is set up (scripts/core/scene_ready.gd)
 var radial
 var offer
 
@@ -110,8 +112,6 @@ func _ready() -> void:
 		hud.set_hint(player.control_hint())
 		Settings.changed.connect(func(): hud.set_hint(player.control_hint()))
 	_setup()
-	if Settings.needs_benchmark() and player.has_method("control_hint"):
-		add_child(Benchmark.new())   # first time in a V3 scene: pick the graphics preset from the frame rate
 	if player.has_method("control_hint"):
 		story = StoryDirector.new()
 		story.mode = self
@@ -119,6 +119,11 @@ func _ready() -> void:
 	var mode := restart_mode
 	restart_mode = ""
 	_begin(mode)
+	begun = true
+	if Settings.needs_benchmark() and player.has_method("control_hint"):
+		var bench = Benchmark.new()   # first time in a V3 scene: pick the graphics preset from the frame rate
+		bench.mode = self
+		add_child(bench)
 	if story != null:
 		story.fire.call_deferred("enter", String(WorldState.get_region()))   # the region we start in
 	if EchoDirector.returning:
@@ -219,7 +224,7 @@ func _process(delta: float) -> void:
 func go_to_chapter(n: int, mode := "checkpoint") -> void:
 	restart_mode = mode
 	get_tree().paused = false
-	get_tree().change_scene_to_file(CHAPTER_SCENES[n])
+	LoadingScreen.go(get_tree(), CHAPTER_SCENES[n])
 
 
 func to_main_menu() -> void:

@@ -42,6 +42,7 @@ var stats := {"loads": 0, "last_ms": 0.0, "worker_ms": 0.0, "jobs": 0}
 
 func setup(meta: Dictionary, terrain: Terrain3D, cfg: Dictionary) -> void:
 	builder = Builder.new()
+	builder.min_caster_size = float(DataDB.world("lighting")["shadows"]["min_caster_size"])
 	builder.terrain = terrain
 	cell_size = cfg["cell_size"]
 	full_radius = cfg["full_radius"]
@@ -292,6 +293,12 @@ func _make_light(def: Dictionary, center: Vector3) -> Node3D:
 	l.shadow_enabled = false
 	root.add_child(l)
 	return root
+
+
+## Work still to do: places a worker is building plus jobs waiting for the main thread.
+## 0 = everything around the focus is in (the benchmark and the loading screen wait for it).
+func pending_count() -> int:
+	return _pending.size() + _main_jobs.size()
 
 
 func loaded_count() -> Dictionary:

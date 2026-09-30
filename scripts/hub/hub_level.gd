@@ -15,6 +15,7 @@ const HubData := preload("res://scripts/hub/hub_data.gd")
 const Door := preload("res://scripts/hub/door.gd")
 const DayNight := preload("res://scripts/world/day_night.gd")
 const Effects := preload("res://scripts/world/effects.gd")
+const Visuals := preload("res://scripts/world/visuals.gd")
 const HearthFire := preload("res://scripts/world/hearth_fire.gd")
 const KIT := "res://assets/village_mk/%s.gltf"
 const FAMILY := [
@@ -375,7 +376,7 @@ func _interior(root: Node3D, door_x: float) -> void:
 	room_lamp.light_color = Color(1.0, 0.62, 0.3)
 	room_lamp.light_energy = 1.4
 	room_lamp.omni_range = 5.5
-	room_lamp.shadow_enabled = true
+	room_lamp.shadow_enabled = false   # on only while he is in the room (hub_mode._tick)
 	room_lamp.position = lamp_at + Vector3(0, 1.5, 0.3)
 	inner.add_child(room_lamp)
 	var xf: Transform3D = root.transform
@@ -745,6 +746,7 @@ func _prop(root: Node3D, path: String, pos: Vector3, yaw: float) -> void:
 	if n:
 		n.position = pos
 		n.rotation.y = yaw
+		Visuals.no_small_shadows(n, Vector3.ONE, float(DataDB.world("lighting")["shadows"]["min_caster_size"]))
 		root.add_child(n)
 
 

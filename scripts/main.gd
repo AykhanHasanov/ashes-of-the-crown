@@ -59,6 +59,8 @@ func _begin(mode: String) -> void:
 	match Settings.demo:
 		"menu":
 			_menu()
+		"loading":
+			LoadingScreen.preview(get_tree())   # the loading screen alone, for a screenshot
 		"pause", "settings", "keys":
 			_find_rufet()
 			process_mode = Node.PROCESS_MODE_ALWAYS  # keep counting frames for the capture
@@ -117,7 +119,7 @@ const REGION_SCENES := {&"kur_vadisi": "res://scenes/world.tscn", &"son_ocaq": "
 func _continue_save() -> void:
 	if REGION_SCENES.has(WorldState.get_region()):
 		restart_mode = "checkpoint"
-		get_tree().change_scene_to_file(REGION_SCENES[WorldState.get_region()])
+		LoadingScreen.go(get_tree(), REGION_SCENES[WorldState.get_region()])
 		return
 	if WorldState.get_chapter() != 1:
 		go_to_chapter(WorldState.get_chapter())
@@ -134,7 +136,7 @@ func _leave_menu() -> void:
 func _start_new_game() -> void:
 	prepare_new_game()
 	restart_mode = "new"
-	get_tree().change_scene_to_file(REGION_SCENES[WorldState.get_region()])
+	LoadingScreen.go(get_tree(), REGION_SCENES[WorldState.get_region()])
 
 
 ## The state of a new game (the menu has already chosen SaveManager.active_slot). The region
