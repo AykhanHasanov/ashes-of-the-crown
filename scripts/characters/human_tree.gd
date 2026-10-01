@@ -16,6 +16,31 @@ extends "res://scripts/characters/human.gd"
 ## MIXAMO: retarget the clips into the same AnimationPlayer and point CLIP_MAP (or a per-set
 ## map) at them — the tree, the states and the transitions stay as they are.
 
+## The Mixamo set (tools/retarget_mixamo.gd bakes it): the game's clip names on the left, the
+## retargeted clips on the right. THIS TABLE IS THE SWAP POINT — the tree, its states and its
+## transitions never change. Anything not listed falls back to the Quaternius library.
+const MIXAMO_LIB := "res://assets/anims/mixamo_library.res"
+const MIXAMO := {
+	"Idle": "idle", "Idle_B": "idle", "Unarmed_Idle": "idle",
+	"Idle_Combat": "idle_combat", "1H_Melee_Idle": "idle_combat", "2H_Melee_Idle": "idle_combat", "Idle_Shield": "idle_combat",
+	"Walking_A": "walk", "Walking_B": "walk", "Walking_C": "walk", "Walk": "walk",
+	"Running_A": "run", "Running_B": "run", "Running_C": "run", "Jog_Fwd": "run", "Sprint": "run",
+	"Jump_Start": "jump", "Jump": "jump", "Jump_Full_Short": "jump", "Jump_Land": "jump",
+	"Dodge_Forward": "dodge", "Dodge_Backward": "dodge", "Dodge_Left": "dodge", "Dodge_Right": "dodge",
+	"Dodge_Roll": "dodge", "Roll": "dodge",
+	"Block_Attack": "block", "Block_Hit": "block", "Blocking": "block", "1H_Melee_Block": "block",
+	"1H_Melee_Attack_Slice_Diagonal": "attack_stab", "1H_Melee_Attack_Slice_Horizontal": "attack_spin",
+	"1H_Melee_Attack_Chop": "attack_spin", "1H_Melee_Attack_Stab": "attack_stab",
+	"2H_Melee_Attack_Slice": "attack_spin", "2H_Melee_Attack_Chop": "attack_spin", "2H_Melee_Attack_Spin": "attack_spin",
+	"Unarmed_Melee_Attack_Punch_A": "punch", "Unarmed_Melee_Attack_Punch_B": "punch", "Punch": "punch",
+	"Hit_A": "hit_a", "Hit_B": "hit_b", "Hit_Knockback": "hit_b",
+	"Death_A": "death", "Death01": "death", "Death": "death",
+}
+## Rüfət's limp and anything else that wants its own walk (no Injured Walk was in the set; the
+## nearest is the drunk one, baked as walk_hurt).
+var walk_clip := "Walking_A"
+var use_mixamo := true
+
 const WALK_AT := 0.5          # where the walk clip sits on the blend line
 const XFADE_IN := 0.09        # into an action
 const XFADE_OUT := 0.16       # back to walking
@@ -48,6 +73,7 @@ func build_anim_tree() -> void:
 	_loco.min_space = 0.0
 	_loco.max_space = 1.0
 	_loco.blend_mode = AnimationNodeBlendSpace1D.BLEND_MODE_INTERPOLATED
+	_add_mixamo_library()
 	_set_loco_clips()
 	_action_node = AnimationNodeAnimation.new()
 	_action_node.animation = _loop_clip(idle_anim)
@@ -88,8 +114,26 @@ func _set_loco_clips() -> void:
 	for i in range(_loco.get_blend_point_count() - 1, -1, -1):
 		_loco.remove_blend_point(i)
 	_add_point(idle_anim, 0.0)
-	_add_point("Walking_A", WALK_AT)
+	_add_point(walk_clip, WALK_AT)
 	_add_point(move_anim, 1.0)
+
+
+## The retargeted clips live in their own library, beside the Quaternius one.
+func _add_mixamo_library() -> void:
+	if anim == null or anim.has_animation_library("mx"):
+		return
+	var lib = load(MIXAMO_LIB) if ResourceLoader.exists(MIXAMO_LIB) else null
+	if lib != null:
+		anim.add_animation_library("mx", lib)
+
+
+## A Mixamo clip when the set has one, else whatever the Quaternius library offers.
+func _map(clip: String) -> Array:
+	if use_mixamo and MIXAMO.has(clip):
+		var name: String = "mx/" + String(MIXAMO[clip])
+		if anim != null and anim.has_animation(name):
+			return [name, 1.0, 1.0]
+	return super._map(clip)
 
 
 func _add_point(clip: String, at: float) -> void:
