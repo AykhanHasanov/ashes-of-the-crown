@@ -1,0 +1,124 @@
+{
+	"id": "iron_bar",
+	"name": "Dəmir parça",
+	"damage_type": "crush",
+	"grip": "1h",
+	"model": {
+		"path": "res://assets/props_mk/Torch_Metal.gltf",
+		"length": 0.95,
+		"rotation": [
+			0,
+			0,
+			0
+		]
+	},
+	"shield": false,
+	"hitstop": "heavy",
+	"locomotion": {
+		"idle": "Idle",
+		"run": "Running_A"
+	},
+	"light": [
+		{
+			"clip": "1H_Melee_Attack_Slice_Diagonal",
+			"speed": 1.48,
+			"impact": 0.22,
+			"cancel": 0.34,
+			"damage": 23,
+			"range": 2.5,
+			"arc": 110,
+			"lunge": 7.5,
+			"shake": 0.35
+		},
+		{
+			"clip": "1H_Melee_Attack_Slice_Horizontal",
+			"speed": 1.48,
+			"impact": 0.23,
+			"cancel": 0.36,
+			"damage": 25,
+			"range": 2.6,
+			"arc": 130,
+			"lunge": 7.5,
+			"shake": 0.35
+		},
+		{
+			"clip": "1H_Melee_Attack_Chop",
+			"speed": 1.33,
+			"impact": 0.28,
+			"cancel": 0.42,
+			"damage": 29,
+			"range": 2.6,
+			"arc": 80,
+			"lunge": 8.5,
+			"shake": 0.48
+		},
+		{
+			"clip": "1H_Melee_Attack_Stab",
+			"speed": 1.4,
+			"impact": 0.24,
+			"cancel": 0.4,
+			"damage": 34,
+			"range": 2.9,
+			"arc": 50,
+			"lunge": 10.0,
+			"shake": 0.48,
+			"mastery": 2
+		}
+	],
+	"heavy": {
+		"clip": "1H_Melee_Attack_Chop",
+		"speed": 1.2,
+		"impact": 0.42,
+		"cancel": 0.62,
+		"damage": 38,
+		"range": 2.8,
+		"arc": 90,
+		"lunge": 9.0,
+		"shake": 0.5,
+		"hyper_armor": true
+	},
+	"charged": {
+		"clip": "1H_Melee_Attack_Chop",
+		"speed": 1.35,
+		"impact": 0.38,
+		"cancel": 0.6,
+		"damage": 58,
+		"range": 3.0,
+		"arc": 100,
+		"lunge": 11.0,
+		"shake": 0.7,
+		"hyper_armor": true,
+		"windup_clip": "2H_Melee_Idle"
+	},
+	"running": {
+		"clip": "1H_Melee_Attack_Stab",
+		"speed": 1.6,
+		"impact": 0.24,
+		"cancel": 0.45,
+		"damage": 28,
+		"range": 3.0,
+		"arc": 60,
+		"lunge": 12.0,
+		"shake": 0.3
+	},
+	"dodge_attack": {
+		"clip": "1H_Melee_Attack_Slice_Horizontal",
+		"speed": 2.1,
+		"impact": 0.18,
+		"cancel": 0.34,
+		"damage": 24,
+		"range": 2.7,
+		"arc": 140,
+		"lunge": 9.0,
+		"shake": 0.25
+	},
+	"execution": {
+		"clip": "1H_Melee_Attack_Stab",
+		"speed": 1.2,
+		"impact": 0.34,
+		"cancel": 0.8
+	},
+	"parry_window_bonus": 0.0,
+	"recovery_factor": 0.85,
+	"_about": "v4 side-view test: an improvised iron bar. PLACEHOLDER model (a metal torch shaft from the props kit); the swings are the sword's one-handed set, slower and heavier."
+}

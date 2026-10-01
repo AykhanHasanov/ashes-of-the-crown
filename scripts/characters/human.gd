@@ -61,6 +61,11 @@ const LOOPING := ["Idle", "Sword_Idle", "Jog_Fwd", "Walk", "Sprint", "Zombie_Wal
 	"Spell_Simple_Idle", "Pistol_Aim_Neutral", "Sitting_Idle", "Swim_Fwd", "Swim_Idle", "Crouch_Idle", "Jump", "Idle_Lantern", "Idle_FoldArms"]
 const BONE_ALIAS := {"handslot.r": "hand_r", "handslot.l": "hand_l", "chest": "spine_03", "head": "Head", "Head": "Head"}
 
+## v4 side-view test: while this is on, every Human built here is driven by an AnimationTree
+## (scripts/characters/human_tree.gd) instead of direct AnimationPlayer calls. The interface is
+## the same, so nothing else changes. The side-view mode turns it on for its own scene.
+static var tree_driven := false
+
 var anim: AnimationPlayer
 var skeleton: Skeleton3D
 var scene: Node3D                 # the outfit body (CharacterModel called it scene)
@@ -74,6 +79,8 @@ var _locomotion := ""
 ## spec: outfit ("Male_Ranger"...), gender, hair ("Hair_SimpleParted"...), beard (bool),
 ## hood (bool), hair_color, cloth_hue ([from_min, from_max, to_hue, sat, val]) or tint (Color)
 static func build(spec: Dictionary) -> Node3D:
+	if tree_driven:
+		return load("res://scripts/characters/human_tree.gd").build_tree(spec)
 	var h = load("res://scripts/characters/human.gd").new()
 	h.setup_human(spec)
 	return h
