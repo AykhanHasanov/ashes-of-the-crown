@@ -286,6 +286,11 @@ func bone_position(bone: String) -> Vector3:
 	return skeleton.global_transform * skeleton.get_bone_global_pose(i).origin if i >= 0 else global_position
 
 
+## An empty pivot in a hand (or on any bone), for a weapon built in code rather than loaded.
+func attach_point(bone: String) -> Node3D:
+	return _grip(bone, false, 1.0)
+
+
 ## Real-scale props (the Fantasy Props MegaKit) go in unscaled; `shield` faces out of the hand.
 func attach(path: String, bone: String, rot_deg := Vector3.ZERO, shield := false) -> Node3D:
 	var item: Node3D = load(path).instantiate()

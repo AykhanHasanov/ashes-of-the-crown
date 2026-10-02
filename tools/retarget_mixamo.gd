@@ -13,8 +13,10 @@ extends SceneTree
 ## S matters: the two skeletons do not share an orientation (ours is Z-up inside its armature,
 ## Mixamo's is Y-up), so without it every clip lands the character face down. It is measured
 ## from each rig's own rest: pelvis→head is "up", hand→hand is "right".
-## The hips keep their motion, scaled by the height difference between the rigs; for clips
-## marked in_place the horizontal part is dropped (the game moves the character itself).
+## The hips keep their motion, scaled by the height difference between the rigs; unless a clip
+## is marked `place` the horizontal part is dropped (the game moves the character itself).
+## A clip may also be one slice of a longer take (`from` / `to`), which is how the two light
+## blows and the heavy thrust are cut out of the combo and the stab.
 ##
 ## Run: godot --headless --path . -s tools/retarget_mixamo.gd
 ## v4 side-view test. Nothing else reads the library; see scripts/characters/human_tree.gd.
@@ -50,23 +52,28 @@ const BONES := {
 	"mixamorig_RightHandPinky1": "pinky_01_r", "mixamorig_RightHandPinky2": "pinky_02_r", "mixamorig_RightHandPinky3": "pinky_03_r",
 }
 
-## file (without .fbx) → [library name, loops, in place (drop the travel)]
+## library clip name → {file (without .fbx), loop, place (keep the clip's travel),
+## from / to (seconds: cut one strike out of a longer take)}.
+## A combo take gives several clips: the slices are where the swinging hand reaches furthest,
+## measured off the clip itself, so the hit windows below come from the animation, not taste.
 const CLIPS := {
-	"Sad Idle": ["idle", true, true],
-	"Ninja Idle": ["idle_combat", true, true],
-	"Sad Walk": ["walk", true, true],
-	"Drunk Walk": ["walk_hurt", true, true],
-	"Drunk Run Forward": ["run", true, true],
-	"Jumping": ["jump", false, true],
-	"Dodging Back": ["dodge", false, true],
-	"Blocking": ["block", true, true],
-	"Punch Combo": ["punch", false, true],
-	"Stabbing": ["attack_stab", false, true],
-	"Standing Melee Attack 360 High": ["attack_spin", false, true],
-	"Paladin WProp J Nordstrom": ["attack_swing", false, true],
-	"Hit Reaction": ["hit_a", false, true],
-	"Reaction": ["hit_b", false, true],
-	"Dying": ["death", false, false],
+	"idle":        {"file": "Sad Idle", "loop": true},
+	"idle_combat": {"file": "Fighting Idle", "loop": true},
+	"walk":        {"file": "Sad Walk", "loop": true},
+	"walk_hurt":   {"file": "Injured Walk", "loop": true},
+	"run":         {"file": "Running", "loop": true},
+	"jump":        {"file": "Jumping"},
+	"dodge":       {"file": "Dodging Back", "to": 1.05},
+	"block":       {"file": "Blocking", "loop": true},
+	"punch":       {"file": "Punch Combo"},
+	"light_1":     {"file": "Punch Combo", "from": 0.42, "to": 0.84},   # hand peaks at 0.60
+	"light_2":     {"file": "Punch Combo", "from": 0.95, "to": 1.42},   # and again at 1.10
+	"heavy":       {"file": "Stabbing", "from": 0.25, "to": 1.30},      # the thrust lands at 0.47
+	"charge_hold": {"file": "Stabbing", "from": 0.28, "to": 0.40, "loop": true},
+	"attack_stab": {"file": "Stabbing"},
+	"hit_a":       {"file": "Hit Reaction", "to": 0.95},
+	"hit_b":       {"file": "Reaction", "to": 0.85},
+	"death":       {"file": "Dying", "place": true},
 }
 
 var _tgt_rest := {}      # our bone name → global rest Transform3D
@@ -80,19 +87,19 @@ func _init() -> void:
 		return
 	var lib := AnimationLibrary.new()
 	var made := 0
-	for file in CLIPS:
-		var path: String = SRC_DIR + file + ".fbx"
+	for name in CLIPS:
+		var spec: Dictionary = CLIPS[name]
+		var path: String = SRC_DIR + String(spec["file"]) + ".fbx"
 		if not ResourceLoader.exists(path):
 			print("MISSING  ", path)
 			continue
-		var spec: Array = CLIPS[file]
-		var anim := _retarget(path, bool(spec[1]), bool(spec[2]))
+		var anim := _retarget(path, spec)
 		if anim == null:
-			print("FAILED   ", file)
+			print("FAILED   ", name)
 			continue
-		lib.add_animation(String(spec[0]), anim)
+		lib.add_animation(name, anim)
 		made += 1
-		print("ok  %-32s → %-12s %5.2f s, %d tracks" % [file, spec[0], anim.length, anim.get_track_count()])
+		print("ok  %-14s ← %-16s %5.2f s, %d tracks" % [name, spec["file"], anim.length, anim.get_track_count()])
 	var err := ResourceSaver.save(lib, OUT)
 	print("RETARGET DONE: %d clips → %s (err %d)" % [made, OUT, err])
 	quit(0 if err == OK and made > 0 else 1)
@@ -122,7 +129,7 @@ func _load_target() -> bool:
 	return true
 
 
-func _retarget(path: String, loops: bool, in_place: bool) -> Animation:
+func _retarget(path: String, spec: Dictionary) -> Animation:
 	var ps = load(path)
 	if ps == null:
 		return null
@@ -153,9 +160,12 @@ func _retarget(path: String, loops: bool, in_place: bool) -> Animation:
 		var th: float = (_tgt_rest["pelvis"] as Transform3D).origin.y
 		if sh > 0.001:
 			scale = th / sh
+	var from := float(spec.get("from", 0.0))
+	var to := minf(float(spec.get("to", src.length)), src.length)
+	var in_place: bool = not bool(spec.get("place", false))
 	var out := Animation.new()
-	out.length = src.length
-	out.loop_mode = Animation.LOOP_LINEAR if loops else Animation.LOOP_NONE
+	out.length = to - from
+	out.loop_mode = Animation.LOOP_LINEAR if bool(spec.get("loop", false)) else Animation.LOOP_NONE
 	out.step = 1.0 / FPS
 	# one rotation track per mapped bone, plus the hips' position
 	var tracks := {}
@@ -173,11 +183,12 @@ func _retarget(path: String, loops: bool, in_place: bool) -> Animation:
 		hips_space = (_tgt_rest[hips_parent] as Transform3D).affine_inverse()
 	var hips_track := out.add_track(Animation.TYPE_POSITION_3D)
 	out.track_set_path(hips_track, NodePath("Armature/Skeleton3D:pelvis"))
-	var frames := maxi(int(src.length * FPS), 1)
+	var frames := maxi(int(out.length * FPS), 1)
 	var first_flat := Vector3.ZERO
 	for f in frames + 1:
-		var time := minf(float(f) / FPS, src.length)
-		var pose := _sample_pose(src, sk, time)          # source local poses this frame
+		var at := minf(from + float(f) / FPS, to)
+		var time := at - from
+		var pose := _sample_pose(src, sk, at)            # source local poses this frame
 		var src_global := _globals(sk, pose, src_parent)  # source global poses
 		var tgt_global := {}
 		for src_bone in BONES:

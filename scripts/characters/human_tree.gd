@@ -22,22 +22,24 @@ extends "res://scripts/characters/human.gd"
 const MIXAMO_LIB := "res://assets/anims/mixamo_library.res"
 const MIXAMO := {
 	"Idle": "idle", "Idle_B": "idle", "Unarmed_Idle": "idle",
-	"Idle_Combat": "idle_combat", "1H_Melee_Idle": "idle_combat", "2H_Melee_Idle": "idle_combat", "Idle_Shield": "idle_combat",
+	"Idle_Combat": "idle_combat", "1H_Melee_Idle": "idle_combat", "Idle_Shield": "idle_combat",
 	"Walking_A": "walk", "Walking_B": "walk", "Walking_C": "walk", "Walk": "walk",
+	"Walking_Hurt": "walk_hurt",
 	"Running_A": "run", "Running_B": "run", "Running_C": "run", "Jog_Fwd": "run", "Sprint": "run",
 	"Jump_Start": "jump", "Jump": "jump", "Jump_Full_Short": "jump", "Jump_Land": "jump",
 	"Dodge_Forward": "dodge", "Dodge_Backward": "dodge", "Dodge_Left": "dodge", "Dodge_Right": "dodge",
 	"Dodge_Roll": "dodge", "Roll": "dodge",
 	"Block_Attack": "block", "Block_Hit": "block", "Blocking": "block", "1H_Melee_Block": "block",
-	"1H_Melee_Attack_Slice_Diagonal": "attack_stab", "1H_Melee_Attack_Slice_Horizontal": "attack_spin",
-	"1H_Melee_Attack_Chop": "attack_spin", "1H_Melee_Attack_Stab": "attack_stab",
-	"2H_Melee_Attack_Slice": "attack_spin", "2H_Melee_Attack_Chop": "attack_spin", "2H_Melee_Attack_Spin": "attack_spin",
-	"Unarmed_Melee_Attack_Punch_A": "punch", "Unarmed_Melee_Attack_Punch_B": "punch", "Punch": "punch",
+	# the two light blows and the heavy thrust, cut out of the combo and the stab take
+	"1H_Melee_Attack_Slice_Diagonal": "light_1", "1H_Melee_Attack_Slice_Horizontal": "light_2",
+	"1H_Melee_Attack_Chop": "heavy", "1H_Melee_Attack_Stab": "attack_stab",
+	"2H_Melee_Attack_Slice": "light_2", "2H_Melee_Attack_Chop": "heavy", "2H_Melee_Attack_Spin": "heavy",
+	"2H_Melee_Idle": "charge_hold",   # the cocked pose a heavy blow is held in
+	"Unarmed_Melee_Attack_Punch_A": "light_1", "Unarmed_Melee_Attack_Punch_B": "light_2", "Punch": "punch",
 	"Hit_A": "hit_a", "Hit_B": "hit_b", "Hit_Knockback": "hit_b",
 	"Death_A": "death", "Death01": "death", "Death": "death",
 }
-## Rüfət's limp and anything else that wants its own walk (no Injured Walk was in the set; the
-## nearest is the drunk one, baked as walk_hurt).
+## Rüfət's limp and anything else that wants its own walk ("Walking_Hurt" is the Injured Walk).
 var walk_clip := "Walking_A"
 var use_mixamo := true
 

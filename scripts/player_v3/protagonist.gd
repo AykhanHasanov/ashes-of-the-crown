@@ -190,7 +190,9 @@ func equip(id: String) -> void:
 	_weapon_nodes.clear()
 	weapon = w
 	var m: Dictionary = w["model"]
-	if m.has("donor"):
+	if m.has("generated"):
+		_weapon_nodes.append(_make_weapon(m))
+	elif m.has("donor"):
 		_weapon_nodes.append(_model.borrow(m["donor"], m["node"], "handslot.r"))
 	else:
 		var item: Node3D = _model.attach(m["path"], "handslot.r", _vec(m.get("rotation", [0, 0, 0])))
@@ -203,6 +205,33 @@ func equip(id: String) -> void:
 			_weapon_nodes.append(_model.borrow(w["shield"]["donor"], w["shield"]["node"], "handslot.l"))
 	_combo = -1
 	weapon_changed.emit(w["name"])
+
+
+## A weapon with no model of its own: a plain bar of iron, built here so the kit needs no
+## asset for it. It lies across the fist (the bar runs along the thumb axis, gripped
+## `grip_at` of the way along), so a punch or a thrust drives the far end forward.
+func _make_weapon(m: Dictionary) -> Node3D:
+	var len_m := float(m.get("length", 0.9))
+	var thick := float(m.get("thickness", 0.035))
+	var mi := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(thick, len_m, thick)
+	var c: Array = m.get("color", [0.18, 0.17, 0.17])
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(c[0], c[1], c[2])
+	mat.metallic = 0.6              # iron: an exception the policy allows by name
+	mat.roughness = 0.52
+	box.material = mat
+	mi.mesh = box
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var holder: Node3D = _model.attach_point("handslot.r")
+	var pivot := Node3D.new()
+	pivot.rotation_degrees = Vector3(float(m.get("tilt", 0.0)), 0, 0)
+	holder.add_child(pivot)
+	pivot.add_child(mi)
+	# the long end forward, out of the fist, not back through his own body
+	mi.position = Vector3(0, -len_m * (0.5 - float(m.get("grip_at", 0.3))), 0)
+	return mi
 
 
 func _fit_item(item: Node3D, length: float) -> void:
@@ -578,7 +607,9 @@ func _impact(a: Dictionary) -> void:
 		gain_ember(_cfg["ember"]["on_hit"] + BurnPower.total()["hit"])
 		var heavy_blow := _attack_kind in ["heavy", "charged"]
 		Audio.play("hit_heavy" if heavy_blow or weight == "heavy" else "hit", -2.0 if heavy_blow else -3.0, 0.08, null, 0 if heavy_blow or weight == "heavy" else 3)
-		Fx.hitstop(_cfg["hitstop"]["heavy" if heavy_blow or weight == "heavy" else "light"] * (1.3 if _attack_kind == "charged" else 1.0))
+		# a weapon may ask for its own freeze (an improvised lump of iron hits heavier than a blade)
+		var stop_cfg: Dictionary = weapon.get("hitstop_times", _cfg["hitstop"])
+		Fx.hitstop(float(stop_cfg["heavy" if heavy_blow or weight == "heavy" else "light"]) * (1.3 if _attack_kind == "charged" else 1.0))
 		Fx.shake(a.get("shake", 0.25))
 		if heavy_blow:
 			Fx.punch(1.0)

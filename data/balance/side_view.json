@@ -1,27 +1,33 @@
 {
 	"_about": "The 2.5D side-view test (v4/side-view-test, scripts/side_mode.gd). Camera: beside the lane, long lens, eased. Lane: the strip the protagonist walks; he may step `depth` metres towards or away from the camera, and is pulled back softly. Fight: the heavy feel — hit-stop, shake, stagger.",
 	"camera": {
-		"fov": 32.0,
-		"distance": 11.0,
-		"height": 2.6,
+		"fov": 33.0,
+		"distance": 9.5,
 		"look_height": 1.15,
 		"lead": 1.1,
 		"smoothing": 3.2,
 		"look_smoothing": 5.0,
 		"shake_strength": 0.5,
-		"shake_decay": 2.2
+		"shake_decay": 2.2,
+		"elevation": 12.0,
+		"_about": "Square to the lane: `elevation` is the angle in degrees the lens looks down from, `distance` how far out it stands. No player rotation."
 	},
 	"lane": {
-		"_about": "depth: how far he may stand off the lane line, towards or away from the lens. pull: how hard he is eased back to it. edge: how far before the ends of the strip he is stopped.",
+		"_about": "depth: how far he may stand off the lane line, towards or away from the lens. foe_depth: the same for a bandit, tighter so the fight stays flat to the lens. pull: how hard they are eased back to it. edge: how far before the ends of the strip he is stopped.",
 		"depth": 1.9,
 		"pull": 2.6,
-		"edge": 1.0
+		"edge": 1.0,
+		"foe_depth": 1.1
 	},
 	"fight": {
-		"_about": "Grounded and heavy. hit_stop: seconds the world freezes on a landed hit; shake: camera trauma; the rest is the shared combat data.",
-		"hit_stop": 0.085,
+		"_about": "Grounded and heavy. hit_stop: seconds the world freezes on a landed hit; knock_*: how far a blow throws a bandit ALONG the lane (the only direction a side view can show); kill_slowmo: the lean-back on the blow that ends the fight.",
+		"hit_stop": 0.07,
 		"hit_stop_heavy": 0.13,
 		"shake": 0.35,
-		"shake_heavy": 0.55
+		"shake_heavy": 0.55,
+		"knock_light": 1.4,
+		"knock_per_damage": 0.09,
+		"kill_slowmo": 0.35,
+		"kill_slowmo_time": 0.55
 	}
 }

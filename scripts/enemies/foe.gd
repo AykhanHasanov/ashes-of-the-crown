@@ -84,6 +84,10 @@ var _orbit := 1.0
 var _flank_side := 1.0
 var _model
 var _overlay: ShaderMaterial
+## Whether an attack telegraphs with the ground ring and the body tint (configure opts).
+var ground_tell := true
+## A landed blow flashes the body white for a moment — short, so it never reads as a tint.
+const HIT_FLASH := Color(1.0, 0.97, 0.92)
 var _ring: MeshInstance3D
 var _ring_mat: StandardMaterial3D
 var _bar: MeshInstance3D
@@ -135,6 +139,9 @@ func configure(id: String, enemy_level := 1, opts := {}) -> void:
 	tier = data.get("tier", "normal")
 	role = data.get("role", "melee")
 	risen = opts.get("risen", false)
+	# A side-on view reads a wind-up from the pose itself, so the ground ring and the body
+	# tint that go with it can be switched off and the tell left to animation and sound.
+	ground_tell = opts.get("ground_tell", true)
 	_rng.randomize()
 	var st: Dictionary = data["stats"]
 	var lv: Dictionary = _ai["levels"]
@@ -261,7 +268,7 @@ func _build_model() -> void:
 		intensity = maxf(intensity, 0.45)
 		_overlay.set_shader_parameter("ember_color", Affixes.color(affixes))
 	_overlay.set_shader_parameter("intensity", intensity)
-	_overlay.set_shader_parameter("flash_color", Color(1.0, 0.7, 0.45))
+	_overlay.set_shader_parameter("flash_color", HIT_FLASH)
 	_model.set_overlay(_overlay)
 	if m.get("spots", false):
 		var spots := ShaderMaterial.new()
@@ -944,7 +951,9 @@ func _begin_attack(a: Dictionary) -> void:
 	else:
 		_model.play_action(a["clip"], float(a["clip_impact"]) / windup, 0.06)
 	var kind: String = a.get("kind", "melee")
-	_ring.visible = kind not in ["ranged", "ward", "buff", "resurrect"]
+	_ring.visible = ground_tell and kind not in ["ranged", "ward", "buff", "resurrect"]
+	# the tell a side view can always read: the swing is heard before it is seen
+	Audio.play("swing", -8.0 if _attack.get("unstoppable", 0.0) <= 0.0 else -4.0, 0.12, global_position, 3)
 	_ring.scale = Vector3(0.4, 0.3, 0.4)
 	Audio.play("shade_windup", -12.0, 0.15, global_position)
 	if _stealthed:
@@ -964,6 +973,8 @@ func _begin_attack(a: Dictionary) -> void:
 
 
 func _update_ring() -> void:
+	if not ground_tell:
+		return
 	var windup := float(_attack["windup"]) / _atk_speed
 	var k := clampf(_t / windup, 0.0, 1.0)
 	var reach: float = float(_attack.get("radius", float(_attack["range"]) + radius))
@@ -1345,7 +1356,7 @@ func _on_hurt(hit, amount: float) -> void:
 	if _stealthed:
 		_unstealth()
 	_flash = 1.0
-	_overlay.set_shader_parameter("flash_color", Color(1.0, 0.7, 0.45))
+	_overlay.set_shader_parameter("flash_color", HIT_FLASH)
 	_bar.visible = tier != "boss"
 	_bar_hold = 0.45
 	_knock += hit.knock * (0.5 if role == "tank" else (0.2 if tier != "normal" else 1.0))
@@ -1507,6 +1518,11 @@ func _vengeance() -> void:
 # --- Voice ------------------------------------------------------------------------------------
 
 ## Says something for `event` if this enemy's voice has a line for it.
+## An outside shove: the side view throws a staggered foe back along the lane.
+func push(v: Vector3) -> void:
+	_knock += v
+
+
 func bark(event: String, chance := 1.0) -> bool:
 	if voice == "" or lod == LOD.FROZEN:
 		return false

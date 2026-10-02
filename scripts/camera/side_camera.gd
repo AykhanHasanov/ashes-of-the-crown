@@ -3,6 +3,12 @@ extends Node3D
 ## protagonist from the side with a long lens — Inside / Little Nightmares. The lane may curve
 ## through the world, so "sideways" turns with it; the camera eases into every change.
 ##
+## The frame is built from the lane, never from the protagonist: the lens sits square to the
+## lane at a fixed `elevation` (degrees) and looks at the lane, so the optical axis is exactly
+## perpendicular and the picture never drifts into a three-quarter view. The protagonist's own
+## step towards or away from the lens therefore reads as depth, which is the point of the view.
+## The player cannot turn this camera.
+##
 ## It stands in for the third-person rig, so the protagonist and chapter_base need no change:
 ##   flat_right()    along the lane (left / right walks the strip)
 ##   flat_forward()  away from the camera (depth: a step into or out of the picture)
@@ -25,9 +31,10 @@ var _offset := 0.0            # where the protagonist is along the lane
 var _pos := Vector3.ZERO      # the camera's eased position
 var _look := Vector3.ZERO     # the eased point it looks at
 var _side := 1.0              # which side of the lane the camera is on
-## Fixed frames for places the side view cannot see into (the walled courtyard): while the
-## protagonist is inside one, the camera eases to that frame instead of riding the lane.
-## [{"from_z": float, "to_z": float, "pos": Vector3, "look": Vector3}]
+## Stretches that want their own framing (the walled courtyard, where the wide lens cannot see
+## in): while the protagonist is inside one, its `distance` / `elevation` override the defaults,
+## or a fixed `pos` / `look` replaces the frame outright.
+## [{"from_z": float, "to_z": float, "distance": float, "elevation": float}]
 var zones: Array = []
 var _shake := 0.0
 var _t := 0.0
@@ -112,16 +119,17 @@ func _frame_for(at: Vector3) -> Dictionary:
 	_offset = l["offset"]
 	var dir: Vector3 = l["dir"]
 	var out := dir.cross(Vector3.UP).normalized() * _side
-	var lane_pos: Vector3 = l["pos"]
 	var lead := 0.0
 	if target.has_method("facing"):
 		var f: Vector3 = target.facing()
 		lead = clampf(f.dot(dir), -1.0, 1.0) * float(_cfg["lead"])
 	# a zone may pull the lens in (a walled space the wide frame cannot see into)
 	var dist := float(zone.get("distance", _cfg["distance"]))
-	var high := float(zone.get("height", _cfg["height"]))
-	var pos := lane_pos + out * dist + Vector3(0, high, 0) + dir * lead
-	var look := at + Vector3(0, float(_cfg["look_height"]), 0) + dir * lead * 0.5
+	var elev := deg_to_rad(float(zone.get("elevation", _cfg["elevation"])))
+	# look at the lane, not at him: that is what keeps the axis square to the strip. The lead
+	# shifts both ends by the same amount, so it slides the frame without turning it.
+	var look: Vector3 = l["pos"] + Vector3(0, float(_cfg["look_height"]), 0) + dir * lead
+	var pos: Vector3 = look + out * dist + Vector3(0, dist * tan(elev), 0)
 	return {"pos": pos, "look": look}
 
 

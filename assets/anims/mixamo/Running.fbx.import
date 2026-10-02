@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://ca1aar61miptb"
-path="res://.godot/imported/Paladin WProp J Nordstrom.fbx-48c2534e1e4f922f2c18e9e0198380f9.scn"
+uid="uid://dhdyirppq5acc"
+path="res://.godot/imported/Running.fbx-eb625f1556b3bc643cbb526904c186cc.scn"
 
 [deps]
 
-source_file="res://assets/anims/mixamo/Paladin WProp J Nordstrom.fbx"
-dest_files=["res://.godot/imported/Paladin WProp J Nordstrom.fbx-48c2534e1e4f922f2c18e9e0198380f9.scn"]
+source_file="res://assets/anims/mixamo/Running.fbx"
+dest_files=["res://.godot/imported/Running.fbx-eb625f1556b3bc643cbb526904c186cc.scn"]
 
 [params]
 

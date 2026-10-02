@@ -20,6 +20,10 @@ const START_Z := 62.0        # the valley edge
 const GATE_Z := 12.0         # where the courtyard's gate passage begins
 const FIGHT_Z := 44.0        # the bandits wait here
 const CAMERA_SIDE := 1.0     # the camera stands on +X
+## Foreground silhouettes sit this far out from the lane: nearer than the lens at its closest
+## (7.4 m in the courtyard, 6.5 m over the fight), or the camera would stand inside one. None
+## of them belong anywhere near FIGHT_Z either.
+const FG_X := 4.4
 
 var hub: Node3D              # HubLevel: the courtyard at the end of the strip
 var day_night                # forwarded from the hub, so there is one sky
@@ -28,7 +32,7 @@ var player_spawn := Vector3(0, 0.2, START_Z - 2.0)
 var braziers: Array = []     # the road's fires heal like the hub's
 var fight_at := Vector3(0, 0, FIGHT_Z)
 ## The courtyard is walled: from inside the gate the camera takes a fixed frame above the
-## south side, looking north across the hearth (scripts/camera/side_camera.gd zones).
+## south side at the same angle, only closer (scripts/camera/side_camera.gd zones).
 var camera_zones: Array = []
 var _rng := RandomNumberGenerator.new()
 
@@ -46,8 +50,10 @@ func build() -> void:
 	_foreground()
 	_mood()
 	player_spawn = lane.sample_baked(0.0) + Vector3(0, 0.3, 0)
-	# inside the walls the lens comes in close and a little higher, over the gallery roof
-	camera_zones = [{"from_z": -9.0, "to_z": 10.5, "distance": 5.2, "height": 3.4}]
+	# two places want their own lens, at the same angle, so each cut reads as a lens change and
+	# not as a different camera: inside the walls, and close in on the fight
+	camera_zones = [{"from_z": -9.0, "to_z": 10.5, "distance": 7.4, "elevation": 12.0},
+		{"from_z": FIGHT_Z - 9.0, "to_z": FIGHT_Z + 9.0, "distance": 6.5, "elevation": 11.0}]
 
 
 func apply_quality(high: bool) -> void:
@@ -58,10 +64,10 @@ func height_at(_x: float, _z: float) -> float:
 	return 0.0
 
 
-## The strip's spine: straight out of the valley, a slow bend, then true north into the gate.
+## The strip's spine: dead straight from the valley to the gate. A bend turns the lens with it
+## and the frame starts reading as three-quarter, which is the one thing this view must not do.
 func _build_lane() -> void:
-	for p in [Vector3(1.8, 0, START_Z), Vector3(1.2, 0, 52.0), Vector3(-1.6, 0, 40.0),
-			Vector3(-1.0, 0, 28.0), Vector3(0.0, 0, 18.0), Vector3(0.0, 0, GATE_Z), Vector3(0.0, 0, 2.0)]:
+	for p in [Vector3(0, 0, START_Z), Vector3(0, 0, 40.0), Vector3(0, 0, 20.0), Vector3(0, 0, 2.0)]:
 		lane.add_point(p)
 	lane.bake_interval = 0.25
 
@@ -146,20 +152,22 @@ func _valley_edge() -> void:
 
 
 ## Between the lens and the lane: dark shapes he walks behind, the oldest trick in a side view.
+## None of them sit near FIGHT_Z — a foreground mass over the fight hides the one thing the
+## test exists to show.
 func _foreground() -> void:
 	var fg := Node3D.new()
 	fg.name = "Foreground"
 	add_child(fg)
 	var dark := Visuals.mat(Color(0.05, 0.045, 0.04), 1.0)
-	for spot in [[58.0, 1.6, 3.2], [37.0, 2.2, 2.6], [19.0, 1.4, 3.6]]:
-		var at := _lane_point(float(spot[0])) + Vector3(5.6 * CAMERA_SIDE, 0, 0)
+	for spot in [[58.0, 1.6, 3.2], [31.0, 2.2, 2.6], [19.0, 1.4, 3.6]]:
+		var at := _lane_point(float(spot[0])) + Vector3(FG_X * CAMERA_SIDE, 0, 0)
 		_box(fg, Vector3(float(spot[2]), float(spot[1]), 0.6), at + Vector3(0, float(spot[1]) * 0.5, 0), dark)
-	for z in [50.0, 30.0]:
+	for z in [62.0, 26.0]:
 		var path := FOLIAGE % "dead"
 		if not ResourceLoader.exists(path):
 			continue
 		var tree: Node3D = (load(path) as PackedScene).instantiate()
-		tree.position = _lane_point(z) + Vector3(6.4 * CAMERA_SIDE, 0, 0)
+		tree.position = _lane_point(z) + Vector3((FG_X + 0.8) * CAMERA_SIDE, 0, 0)
 		tree.scale = Vector3(1.6, 1.8, 1.6)
 		fg.add_child(tree)
 

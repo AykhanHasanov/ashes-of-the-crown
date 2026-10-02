@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dcj2hl4bi8opq"
-path="res://.godot/imported/Standing Melee Attack 360 High.fbx-d51e62dc5c65409e9ec1d32f947ecad1.scn"
+uid="uid://0tk7cmpva5a6"
+path="res://.godot/imported/Injured Walk.fbx-1acd9860c913d88b90454befe9a17097.scn"
 
 [deps]
 
-source_file="res://assets/anims/mixamo/Standing Melee Attack 360 High.fbx"
-dest_files=["res://.godot/imported/Standing Melee Attack 360 High.fbx-d51e62dc5c65409e9ec1d32f947ecad1.scn"]
+source_file="res://assets/anims/mixamo/Injured Walk.fbx"
+dest_files=["res://.godot/imported/Injured Walk.fbx-1acd9860c913d88b90454befe9a17097.scn"]
 
 [params]
 

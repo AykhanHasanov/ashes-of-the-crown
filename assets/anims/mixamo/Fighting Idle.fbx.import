@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://crwv4eu6pn3bj"
-path="res://.godot/imported/Ninja Idle.fbx-ae7d1bf9a59ec46ceaef8d6f257a4a1b.scn"
+uid="uid://d0vwuv88ei0a4"
+path="res://.godot/imported/Fighting Idle.fbx-64fa9a2a7024972cf713fbf32ca4c306.scn"
 
 [deps]
 
-source_file="res://assets/anims/mixamo/Ninja Idle.fbx"
-dest_files=["res://.godot/imported/Ninja Idle.fbx-ae7d1bf9a59ec46ceaef8d6f257a4a1b.scn"]
+source_file="res://assets/anims/mixamo/Fighting Idle.fbx"
+dest_files=["res://.godot/imported/Fighting Idle.fbx-64fa9a2a7024972cf713fbf32ca4c306.scn"]
 
 [params]
 
