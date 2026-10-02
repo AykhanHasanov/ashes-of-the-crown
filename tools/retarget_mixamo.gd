@@ -16,7 +16,9 @@ extends SceneTree
 ## The hips keep their motion, scaled by the height difference between the rigs; unless a clip
 ## is marked `place` the horizontal part is dropped (the game moves the character itself).
 ## A clip may also be one slice of a longer take (`from` / `to`), which is how the two light
-## blows and the heavy thrust are cut out of the combo and the stab.
+## blows and the heavy thrust are cut out of the combo and the stab, and a kneel out of the
+## death; and `neutral` pulls named bones back towards our rest, which is how a plain walk is
+## got out of a sad one without touching the legs.
 ##
 ## Run: godot --headless --path . -s tools/retarget_mixamo.gd
 ## v4 side-view test. Nothing else reads the library; see scripts/characters/human_tree.gd.
@@ -56,10 +58,23 @@ const BONES := {
 ## from / to (seconds: cut one strike out of a longer take)}.
 ## A combo take gives several clips: the slices are where the swinging hand reaches furthest,
 ## measured off the clip itself, so the hit windows below come from the animation, not taste.
+## How far a bone is pulled back towards our own rest pose, to take an attitude out of a take
+## without touching what the legs are doing.
+const UPRIGHT := {
+	"spine_01": 0.55, "spine_02": 0.7, "spine_03": 0.7, "neck_01": 0.85, "Head": 0.85,
+	"clavicle_l": 0.4, "clavicle_r": 0.4, "upperarm_l": 0.35, "upperarm_r": 0.35,
+}
+
 const CLIPS := {
 	"idle":        {"file": "Sad Idle", "loop": true},
 	"idle_combat": {"file": "Fighting Idle", "loop": true},
-	"walk":        {"file": "Sad Walk", "loop": true},
+	# two more standing idles, so a crowd is not one pose repeated (human.gd NPC_IDLES)
+	"idle_upright": {"file": "Sad Idle", "loop": true, "neutral": UPRIGHT},
+	"idle_waiting": {"file": "Fighting Idle", "loop": true, "neutral": UPRIGHT},
+	# the everyday walk: Sad Walk with the hunch and the bowed head taken back out of it, so
+	# the sad take is only used where the story asks for it (walk_sad)
+	"walk":        {"file": "Sad Walk", "loop": true, "neutral": UPRIGHT},
+	"walk_sad":    {"file": "Sad Walk", "loop": true},
 	"walk_hurt":   {"file": "Injured Walk", "loop": true},
 	"run":         {"file": "Running", "loop": true},
 	"jump":        {"file": "Jumping"},
@@ -74,6 +89,7 @@ const CLIPS := {
 	"hit_a":       {"file": "Hit Reaction", "to": 0.95},
 	"hit_b":       {"file": "Reaction", "to": 0.85},
 	"death":       {"file": "Dying", "place": true},
+	"kneel":       {"file": "Dying", "from": 2.1, "to": 2.22, "loop": true},   # down but not fallen
 }
 
 var _tgt_rest := {}      # our bone name → global rest Transform3D
@@ -160,6 +176,7 @@ func _retarget(path: String, spec: Dictionary) -> Animation:
 		var th: float = (_tgt_rest["pelvis"] as Transform3D).origin.y
 		if sh > 0.001:
 			scale = th / sh
+	var neutral: Dictionary = spec.get("neutral", {})
 	var from := float(spec.get("from", 0.0))
 	var to := minf(float(spec.get("to", src.length)), src.length)
 	var in_place: bool = not bool(spec.get("place", false))
@@ -201,8 +218,13 @@ func _retarget(path: String, spec: Dictionary) -> Animation:
 			var parent: String = _tgt_parent[tgt_bone]
 			var parent_basis: Basis = tgt_global.get(parent, (_tgt_rest[parent] as Transform3D).basis if _tgt_rest.has(parent) else Basis())
 			var local: Basis = parent_basis.inverse() * want
+			var q := local.orthonormalized().get_rotation_quaternion()
+			if neutral.has(tgt_bone):
+				var rest_q: Quaternion = (_tgt_local[tgt_bone] as Transform3D).basis.get_rotation_quaternion()
+				q = q.slerp(rest_q, float(neutral[tgt_bone]))
+				want = parent_basis * Basis(q)     # the children follow the straightened bone
 			tgt_global[tgt_bone] = want
-			out.rotation_track_insert_key(tracks[src_bone], time, local.orthonormalized().get_rotation_quaternion())
+			out.rotation_track_insert_key(tracks[src_bone], time, q)
 		# the hips: their travel in our scale, flattened for in-place clips, then taken out of
 		# skeleton space into the pelvis' parent (a rotated `root` bone on this rig) — a track
 		# Godot plays is local, and a global position written straight in tips him over

@@ -59,6 +59,8 @@ var ground_query := Callable()
 var world_visibility := Callable()
 var perception
 var surrendered := false
+## What he is holding, so it can be thrown down when he gives up.
+var weapon_items: Array = []
 var voice := ""              # Barks profile (tools/gen_voices.py)
 var _idle_bark_t := 0.0
 var lod := LOD.FULL
@@ -229,6 +231,7 @@ func _build_model() -> void:
 	if m.has("human"):
 		# Realistic human (V3 realism): look, outfit and colours come from data/looks.json
 		_model = Human.build(Human.spec_from_json(m["human"], _rng))
+		_model.scatter_timing(_rng)
 		add_child(_model)
 	else:
 		_model = CharacterModel.new()
@@ -260,6 +263,8 @@ func _build_model() -> void:
 				CharacterModel.fit_item(item, float(w["length"]))
 		if item != null and w.has("scale"):
 			item.scale *= float(w["scale"])
+		if item != null:
+			weapon_items.append(item)
 	_model.scale = Vector3.ONE * _body_scale
 	_overlay = ShaderMaterial.new()
 	_overlay.shader = OVERLAY
@@ -1247,12 +1252,27 @@ func _check_summoner() -> void:
 func _morale_break() -> void:
 	_morale_checked = true
 	_release_token()
-	if randf() < float(_ai["morale"]["surrender_chance"]):
+	# some enemies always give up rather than run: a fight that ends in a choice, not a chase
+	if data["behavior"].get("always_surrender", false) or randf() < float(_ai["morale"]["surrender_chance"]):
 		_surrender()
 	else:
 		Fx.notify(display_name + " kaçıyor!")
 		bark("flee")
 		_enter(S.FLEE)
+
+
+## Throws down whatever he is holding: it lands flat where he stands and stays there.
+func drop_weapon() -> void:
+	for item in weapon_items:
+		if not is_instance_valid(item):
+			continue
+		var at: Vector3 = item.global_position
+		var holder: Node3D = item.get_parent()
+		holder.remove_child(item)
+		get_parent().add_child(item)
+		item.global_position = Vector3(at.x, global_position.y + 0.05, at.z)
+		item.global_rotation = Vector3(PI * 0.5, randf() * TAU, 0.0)
+	weapon_items.clear()
 
 
 func _surrender() -> void:

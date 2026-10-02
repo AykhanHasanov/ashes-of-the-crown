@@ -56,7 +56,10 @@ func _ready() -> void:
 	add_child(shape)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(def.get("name", ""))
-	_model = Human.build(Human.spec_from_json({"look": def["look"]}, rng))
+	var look := Human.spec_from_json({"look": def["look"]}, rng)
+	look["idle"] = Human.pick_idle(rng)
+	_model = Human.build(look)
+	_model.scatter_timing(rng)   # his own idle, phase and rate: a street is not a chorus line
 	add_child(_model)
 	_model.move_anim = "Walk"
 	if def.has("prop"):

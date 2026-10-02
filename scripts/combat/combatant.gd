@@ -27,6 +27,9 @@ var stance := 0.0
 var radius := 0.45
 var resist := {"slash": 1.0, "crush": 1.0, "pierce": 1.0, "fire": 1.0}
 var dead := false
+## The damage type of the last blow that got through. A Kullu is only gone for good when
+## that is fire; iron merely scatters it (scripts/side_mode.gd).
+var last_hit_type := ""
 var invulnerable_until := 0     # real-time ms
 ## Attack tokens currently held from other combatants' budgets.
 var tokens_held := 0
@@ -70,6 +73,7 @@ func receive_hit(hit) -> String:
 	var defended := _defend(hit)
 	if defended != "":
 		return defended
+	last_hit_type = hit.damage_type        # what finally felled him, for whoever cares
 	var amount: float = hit.damage * float(resist.get(hit.damage_type, 1.0))
 	if ward > 0.0 and Time.get_ticks_msec() < ward_until:
 		var soak := minf(ward, amount)

@@ -49,6 +49,16 @@ var _card_sub: Label
 var _card_body: Label
 var _vignette_mat: ShaderMaterial
 var _damage := 0.0
+## Slim skin (v4 side-view test, hud.slim()): thinner bars in deeper colours, the memories as
+## glowing ember segments instead of diamonds, no permanent control list and no quality label.
+## The whole set fades out a few seconds after anything happens and comes back when it does.
+var slim := false
+var _quiet := 0.0              # seconds since anything asked for the HUD
+var _fade := 1.0
+var _fade_group: Array = []
+var _hinted: Dictionary = {}   # a contextual hint is shown once, the first time it applies
+const SLIM_HOLD := 4.0         # how long the HUD stays after the last thing that mattered
+const SLIM_FADE := 2.0         # and how long it takes to go
 var _whisper_tween: Tween
 var _banner_tween: Tween
 
@@ -204,7 +214,48 @@ func _ready() -> void:
 	_refresh_memories()
 
 
+## Switches to the slim skin. Call once, right after the HUD is built.
+func slim_hud() -> void:
+	slim = true
+	_hint.visible = false        # the controls are taught in context, not listed forever
+	_info.visible = false        # and the quality label belongs in the menu, not the picture
+	_name_label.visible = false
+	_health_fill.get_parent().offset_bottom = 51.0   # 14 px of bar becomes 7
+	_health_fill.size.y = 5.0
+	_health_fill.color = Color(0.52, 0.07, 0.06)     # deep red, not signal red
+	_health_fill.get_parent().color = Color(0.05, 0.03, 0.03, 0.55)
+	_ember_back.offset_top = 55.0
+	_ember_back.offset_bottom = 60.0
+	_ember_fill.size.y = 3.0
+	_stamina_back.offset_top = 63.0
+	_stamina_back.offset_bottom = 67.0
+	_stamina_fill.size.y = 2.0
+	_stamina_fill.color = Color(0.55, 0.58, 0.3)
+	_fade_group = [_health_fill.get_parent(), _ember_back, _stamina_back, _embers, _flasks, _weapon]
+	wake()
+
+
+## Something happened that the player should see the bars for (a fight starting, say).
+func wake() -> void:
+	_quiet = 0.0
+
+
+## Shows a one-line hint the first time a situation comes up, and never again.
+func hint_once(key: String, text: String) -> void:
+	if _hinted.has(key):
+		return
+	_hinted[key] = true
+	set_prompt(text)
+	var tree := get_tree()
+	if tree != null:
+		await tree.create_timer(4.5).timeout
+		if _prompt.text == text:
+			set_prompt("")
+
+
 func _process(delta: float) -> void:
+	if slim:
+		_slim_fade(delta)
 	_shown_ratio = lerpf(_shown_ratio, _health_ratio, 1.0 - exp(-10.0 * delta))
 	_health_fill.size.x = 316.0 * _shown_ratio
 	_ember_fill.size.x = lerpf(_ember_fill.size.x, 238.0 * _ember_ratio, 1.0 - exp(-12.0 * delta))
@@ -223,9 +274,23 @@ func _process(delta: float) -> void:
 		else:
 			_boss = null
 			_boss_box.visible = false
+	if slim:
+		return
 	_info.text = tr("HUD_QUALITY") % Settings.quality_name()
 	if Settings.show_fps:
 		_info.text += "\nFPS: %d" % Engine.get_frames_per_second()
+
+
+## Out of combat and at full health the bars have nothing to say, so they go.
+func _slim_fade(delta: float) -> void:
+	if _health_ratio < 0.999 or _stamina_ratio < 0.995 or _ember_ratio > 0.01 or _damage > 0.01:
+		_quiet = 0.0
+	else:
+		_quiet += delta
+	var want: float = 1.0 if _quiet < SLIM_HOLD else clampf(1.0 - (_quiet - SLIM_HOLD) / SLIM_FADE, 0.0, 1.0)
+	_fade = move_toward(_fade, want, delta * (4.0 if want > _fade else 0.8))
+	for c: Control in _fade_group:
+		c.modulate.a = _fade
 
 
 func set_stamina(current: float, maximum: float) -> void:
@@ -475,6 +540,9 @@ func _refresh_memories() -> void:
 ## The protagonist's own memories as large ember diamonds (burned ones are grey ash) and the
 ## memories gifted by survivors as a smaller row underneath.
 func _draw_embers() -> void:
+	if slim:
+		_draw_ember_segments()
+		return
 	var x := 10.0
 	for m in Memory.combat_memories():
 		_diamond(Vector2(x, 12), 9.0, Color(0.3, 0.28, 0.27, 0.9) if WorldState.has_burned(m.id) else Color(0.95, 0.42, 0.12))
@@ -483,6 +551,24 @@ func _draw_embers() -> void:
 	for g in Memory.gifted:
 		_diamond(Vector2(x, 34), 5.5, Color(1.0, 0.7, 0.35))
 		x += 15.0
+
+
+## The slim skin: each memory is a short bar of coal that still glows if it has not been
+## burned, breathing very slightly out of step with the others.
+func _draw_ember_segments() -> void:
+	var x := 10.0
+	for m in Memory.combat_memories():
+		var burned: bool = WorldState.has_burned(m.id)
+		var warm := 0.6 + 0.4 * sin(_ember_pulse * 1.7 + x * 0.21)
+		var col := Color(0.2, 0.18, 0.17, 0.85) if burned else Color(0.95, 0.38, 0.1).lerp(Color(1.0, 0.72, 0.3), warm)
+		_embers.draw_rect(Rect2(Vector2(x, 9), Vector2(16, 3)), col)
+		if not burned:
+			_embers.draw_rect(Rect2(Vector2(x - 1, 8), Vector2(18, 5)), Color(col.r, col.g, col.b, 0.18))
+		x += 21.0
+	x = 10.0
+	for g in Memory.gifted:
+		_embers.draw_rect(Rect2(Vector2(x, 20), Vector2(10, 2)), Color(1.0, 0.7, 0.35, 0.8))
+		x += 13.0
 
 
 func _diamond(c: Vector2, r: float, col: Color) -> void:

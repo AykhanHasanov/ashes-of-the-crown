@@ -34,6 +34,8 @@ const PlayerHabits := preload("res://scripts/combat/player_habits.gd")
 const MODEL_PATH := "res://assets/characters/adventurers/Rogue_Hooded.glb"
 const HIDDEN := ["Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Knife", "Throwable"]
 const MAX_HEALTH := 120.0
+## Where the carried ember hangs, in his own frame: behind the off shoulder, below the chin.
+const EMBER_OFFSET := Vector3(-0.26, -0.3, -0.26)
 
 enum S { MOVE, AIR, DODGE, ATTACK, CHARGE, BLOCK, DRINK, HURT, KNOCKDOWN, EXECUTE, STRIKE, CAST, DEAD, SWIM, SLIDE, VAULT }
 
@@ -132,6 +134,7 @@ func _ready() -> void:
 	add_child(shape)
 
 	_model = Human.build(LOOK)
+	_model.crowd_variety = false   # his timing is the player's, never scattered
 	add_child(_model)
 	_cloth = _model.recolor(0.18, 0.55, 0.985, 1.05, 0.62)
 	_overlay = ShaderMaterial.new()
@@ -166,8 +169,8 @@ func _make_ember() -> void:
 	mat.emission_energy_multiplier = 3.0
 	var core := MeshInstance3D.new()
 	var sphere := SphereMesh.new()
-	sphere.radius = 0.07
-	sphere.height = 0.14
+	sphere.radius = 0.045
+	sphere.height = 0.09
 	core.mesh = sphere
 	core.material_override = mat
 	_ember_node.add_child(core)
@@ -371,8 +374,13 @@ func _physics_process(delta: float) -> void:
 
 
 func _process(_delta: float) -> void:
+	# The Koz he carries: a live ember out of the Great Hearth, hanging at his off shoulder.
+	# It used to float a hand in front of his chest, which from a side-on camera sat exactly
+	# over his face, so it trails behind the shoulder instead.
 	var fwd: Vector3 = -_model.global_basis.z
-	_ember_node.global_position = _model.bone_position("chest") + fwd * 0.3 + Vector3(0, 0.05, 0)
+	var side: Vector3 = _model.global_basis.x
+	var at: Vector3 = _model.bone_position("chest") + fwd * EMBER_OFFSET.z + side * EMBER_OFFSET.x
+	_ember_node.global_position = at + Vector3(0, EMBER_OFFSET.y, 0)
 	if _fire_down_ms >= 0 and radial != null and not radial.is_open:
 		if (Time.get_ticks_msec() - _fire_down_ms) / 1000.0 >= _cfg["ember"]["tap_threshold"]:
 			_open_wheel()

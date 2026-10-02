@@ -69,6 +69,12 @@ static var tree_driven := false
 var anim: AnimationPlayer
 var skeleton: Skeleton3D
 var scene: Node3D                 # the outfit body (CharacterModel called it scene)
+## Nobody in a crowd stands the same way or breathes at the same rate: every Human gets one
+## of these idles, a random phase and a playback rate a little off everyone else's. Set
+## `crowd_variety` false for anyone whose timing matters (the protagonist, a boss).
+const NPC_IDLES := ["Idle", "Idle_Upright", "Idle_Waiting"]
+var crowd_variety := true
+var anim_rate := 1.0           # this body's own playback rate, ±10 %
 var idle_anim := "Idle"
 var move_anim := "Running_A"
 var action := ""
@@ -139,6 +145,7 @@ static func spec_from_json(d: Dictionary, rng: RandomNumberGenerator) -> Diction
 
 
 func setup_human(spec: Dictionary) -> void:
+	idle_anim = spec.get("idle", idle_anim)
 	var outfit: String = spec.get("outfit", "Male_Ranger")
 	var gender: String = spec.get("gender", "female" if outfit.begins_with("Female") else "male")
 	scene = load(OUTFITS % outfit).instantiate()
@@ -338,6 +345,28 @@ func _grip(bone: String, shield := false, prop_scale := PROP_SCALE) -> Node3D:
 	return pivot
 
 
+## One of the standing idles, for a spawner to put in the spec BEFORE the body is built: an
+## AnimationTree is wired to its clips when it is made, so swapping one afterwards is a rebuild.
+static func pick_idle(rng: RandomNumberGenerator) -> String:
+	return NPC_IDLES[rng.randi() % NPC_IDLES.size()]
+
+
+## Gives this body its own phase and rate, so a street never beats in time. Call once, after
+## the body is built; the idle itself comes from the spec (see pick_idle).
+func scatter_timing(rng: RandomNumberGenerator) -> void:
+	if not crowd_variety:
+		return
+	anim_rate = rng.randf_range(0.9, 1.1)
+	seek_random(rng.randf())
+
+
+## Starts the current loop somewhere other than frame zero.
+func seek_random(fraction: float) -> void:
+	if anim == null or anim.current_animation == "":
+		return
+	anim.seek(anim.current_animation_length * clampf(fraction, 0.0, 0.99), true)
+
+
 ## Compatibility: height-based fitting is not needed for humans.
 func fit_length(_length: float) -> void:
 	pass
@@ -373,7 +402,7 @@ func play_loop(clip: String, speed := 1.0, blend := 0.18) -> void:
 	var m := _map(clip)
 	if action != "" or m[0] == "":
 		return
-	anim.speed_scale = speed * float(m[2])
+	anim.speed_scale = speed * float(m[2]) * anim_rate
 	if _locomotion != m[0]:
 		_locomotion = m[0]
 		var clip_name: String = m[0]

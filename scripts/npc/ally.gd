@@ -76,7 +76,10 @@ func _ready() -> void:
 	add_child(shape)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(String(npc_id))
-	_model = Human.build(Human.spec_from_json({"look": def.look_id}, rng))
+	var look := Human.spec_from_json({"look": def.look_id}, rng)
+	look["idle"] = Human.pick_idle(rng)
+	_model = Human.build(look)
+	_model.scatter_timing(rng)
 	add_child(_model)
 	_model.move_anim = "Running_A"
 	if def.weapon_path != "":

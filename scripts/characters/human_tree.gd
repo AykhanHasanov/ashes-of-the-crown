@@ -24,7 +24,8 @@ const MIXAMO := {
 	"Idle": "idle", "Idle_B": "idle", "Unarmed_Idle": "idle",
 	"Idle_Combat": "idle_combat", "1H_Melee_Idle": "idle_combat", "Idle_Shield": "idle_combat",
 	"Walking_A": "walk", "Walking_B": "walk", "Walking_C": "walk", "Walk": "walk",
-	"Walking_Hurt": "walk_hurt",
+	"Walking_Hurt": "walk_hurt", "Walking_Sad": "walk_sad",
+	"Idle_Upright": "idle_upright", "Idle_Waiting": "idle_waiting",
 	"Running_A": "run", "Running_B": "run", "Running_C": "run", "Jog_Fwd": "run", "Sprint": "run",
 	"Jump_Start": "jump", "Jump": "jump", "Jump_Full_Short": "jump", "Jump_Land": "jump",
 	"Dodge_Forward": "dodge", "Dodge_Backward": "dodge", "Dodge_Left": "dodge", "Dodge_Right": "dodge",
@@ -38,6 +39,9 @@ const MIXAMO := {
 	"Unarmed_Melee_Attack_Punch_A": "light_1", "Unarmed_Melee_Attack_Punch_B": "light_2", "Punch": "punch",
 	"Hit_A": "hit_a", "Hit_B": "hit_b", "Hit_Knockback": "hit_b",
 	"Death_A": "death", "Death01": "death", "Death": "death",
+	# down but not fallen: the surrender pose, and getting up out of it
+	"Sit_Floor_Down": "kneel", "Sit_Floor_Idle": "kneel", "Kneel": "kneel",
+	"Lie_Down": "kneel", "Lie_StandUp": "idle",
 }
 ## Rüfət's limp and anything else that wants its own walk ("Walking_Hurt" is the Injured Walk).
 var walk_clip := "Walking_A"
@@ -58,6 +62,7 @@ var _playback: AnimationNodeStateMachinePlayback
 var _want_blend := 0.0
 var _blend_now := 0.0
 var _want_scale := 1.0
+var _phase := -1.0            # a scattered start, applied on the first frame in the tree
 
 
 static func build_tree(spec: Dictionary) -> Node3D:
@@ -82,6 +87,10 @@ func build_anim_tree() -> void:
 	_machine = AnimationNodeStateMachine.new()
 	_machine.add_node("Locomotion", _loco, Vector2(0, 0))
 	_machine.add_node("Action", _action_node, Vector2(300, 0))
+	# A state machine starts on its Start node and stays there until something travels, which
+	# for a body nobody drives (an idling villager, a Küllü standing in the ash) means the
+	# skeleton never leaves its rest pose. This transition walks it straight into Locomotion.
+	_machine.add_transition("Start", "Locomotion", _transition(0.0, AnimationNodeStateMachineTransition.SWITCH_MODE_IMMEDIATE, true))
 	_machine.add_transition("Locomotion", "Action", _transition(XFADE_IN, AnimationNodeStateMachineTransition.SWITCH_MODE_IMMEDIATE, false))
 	_machine.add_transition("Action", "Locomotion", _transition(XFADE_OUT, AnimationNodeStateMachineTransition.SWITCH_MODE_AT_END, true))
 	var scale := AnimationNodeTimeScale.new()
@@ -95,10 +104,24 @@ func build_anim_tree() -> void:
 	tree.tree_root = root
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE
 	add_child(tree)
-	tree.anim_player = tree.get_path_to(anim)   # both are in the tree now, so the path resolves
+	tree.anim_player = tree.get_path_to(anim)
 	tree.active = true
 	_playback = tree.get("parameters/machine/playback")
 	_apply_blend(0.0)
+
+
+## A body built before it is put in the scene (every NPC: Human.build runs first, add_child
+## second) has its AnimationTree wired up while it is outside the SceneTree, and an inactive
+## tree leaves the skeleton sitting in its rest pose. Wiring it again on the way in fixes that
+## and costs nothing for a body that was already inside.
+func _ready() -> void:
+	if tree == null:
+		return
+	tree.anim_player = tree.get_path_to(anim)
+	tree.active = true
+	_playback = tree.get("parameters/machine/playback")
+	_playback.travel("Locomotion")
+	_apply_blend(_blend_now)
 
 
 func _transition(xfade: float, mode: int, auto: bool) -> AnimationNodeStateMachineTransition:
@@ -144,7 +167,7 @@ func _add_point(clip: String, at: float) -> void:
 		return
 	var node := AnimationNodeAnimation.new()
 	node.animation = name
-	_loco.add_blend_point(node, at)
+	_loco.add_blend_point(node, at, -1, clip)
 
 
 ## The clip's real name in the player, looped (locomotion clips must cycle).
@@ -163,7 +186,7 @@ func set_locomotion(moving: bool, speed_scale := 1.0) -> void:
 		return
 	# speed_scale is 0.5 … 1.2 of the run speed; map it onto idle → walk → run
 	_want_blend = 0.0 if not moving else clampf(speed_scale, 0.0, 1.0)
-	_want_scale = 1.0 if not moving else clampf(speed_scale * 1.1, 0.75, 1.4)
+	_want_scale = anim_rate * (1.0 if not moving else clampf(speed_scale * 1.1, 0.75, 1.4))
 
 
 func set_idle(clip: String) -> void:
@@ -186,8 +209,16 @@ func play_action(clip: String, speed := 1.0, blend := 0.08, hold := false) -> vo
 	action = String(m[0])
 	hold_last = hold
 	_action_node.animation = _with_loop(String(m[0]), Animation.LOOP_NONE)
-	_want_scale = speed * float(m[1])
+	_want_scale = speed * float(m[1]) * anim_rate
 	_playback.travel("Action")
+
+
+## The tree owns the clock here, so a phase offset is a seek on the tree, not on the player.
+func seek_random(fraction: float) -> void:
+	if tree == null or not is_inside_tree():
+		_phase = fraction          # the tree can only be advanced once it is running
+		return
+	tree.advance(fraction * 2.5)
 
 
 func cancel_action() -> void:
@@ -200,6 +231,9 @@ func cancel_action() -> void:
 func _process(delta: float) -> void:
 	if tree == null:
 		return
+	if _phase >= 0.0:
+		tree.advance(_phase * 2.5)
+		_phase = -1.0
 	# the action is over once the machine is back on its feet (the transition is automatic)
 	if action != "" and not hold_last and _playback.get_current_node() == "Locomotion":
 		var done := action

@@ -38,6 +38,13 @@ var _side := 1.0              # which side of the lane the camera is on
 var zones: Array = []
 var _shake := 0.0
 var _t := 0.0
+## Anything standing between the lens and him is faded out while it does (Inside does this
+## with the whole foreground): {MeshInstance3D: how far it is faded, 0 .. FADE_TO}.
+var _faded: Dictionary = {}
+const FADE_TO := 0.82         # how transparent an occluder goes
+const FADE_IN := 7.0          # fade out this fast, and back this fast / 2
+## Everything that may fade: the level fills this in (scripts/world/side_strip.gd).
+var occluders: Array = []
 
 
 func _ready() -> void:
@@ -104,6 +111,7 @@ func _process(delta: float) -> void:
 	_look = _look.lerp(frame["look"], 1.0 - exp(-float(_cfg["look_smoothing"]) * delta))
 	_shake = maxf(_shake - delta * float(_cfg["shake_decay"]), 0.0)
 	_apply()
+	_fade_occluders(delta)
 
 
 ## Where the camera belongs for a protagonist at `at`: beside the lane, a little above, looking
@@ -131,6 +139,45 @@ func _frame_for(at: Vector3) -> Dictionary:
 	var look: Vector3 = l["pos"] + Vector3(0, float(_cfg["look_height"]), 0) + dir * lead
 	var pos: Vector3 = look + out * dist + Vector3(0, dist * tan(elev), 0)
 	return {"pos": pos, "look": look}
+
+
+## Everything the lens has to look through to see him is faded out while it is in the way,
+## and brought back as soon as it is not (Inside fades its whole foreground this way). A
+## side-on camera walks into walls constantly — an arch, a gate, the courtyard's own south
+## wall — and a third of the picture goes black.
+##
+## The test is the mesh's own box against the line of sight, not a physics ray: half of what
+## stands in the way here is decoration with no collision shape at all, and a ray walks
+## straight through it. `occluders` is the list the level hands over.
+func _fade_occluders(delta: float) -> void:
+	var want := {}
+	var from := global_position
+	var to: Vector3 = target.global_position + Vector3(0, 1.0, 0)
+	var reach: float = from.distance_to(to) + 2.0
+	for mi in occluders:
+		if not is_instance_valid(mi) or not mi.visible:
+			continue
+		if mi.global_position.distance_to(from) > reach:
+			continue
+		var inv: Transform3D = (mi as MeshInstance3D).global_transform.affine_inverse()
+		var box: AABB = (mi as MeshInstance3D).get_aabb().grow(0.15)
+		if box.intersects_segment(inv * from, inv * to):
+			want[mi] = true
+	for mi in _faded.keys():
+		if not want.has(mi):
+			want[mi] = false
+	for mi in want:
+		if not is_instance_valid(mi):
+			_faded.erase(mi)
+			continue
+		var goal: float = FADE_TO if want[mi] else 0.0
+		var rate: float = FADE_IN if want[mi] else FADE_IN * 0.5
+		var now: float = move_toward(float(_faded.get(mi, 0.0)), goal, rate * delta)
+		mi.transparency = now
+		if now <= 0.001:
+			_faded.erase(mi)
+		else:
+			_faded[mi] = now
 
 
 func _apply() -> void:

@@ -7,7 +7,26 @@
 	"xp": 20,
 	"model": {
 		"human": {
-			"look": "bandit"
+			"outfit": "Male_Peasant",
+			"hood": false,
+			"beard": true,
+			"hair": "Hair_SimpleParted",
+			"hair_color": [
+				0.16,
+				0.12,
+				0.08
+			],
+			"tint": [
+				0.42,
+				0.34,
+				0.26
+			],
+			"skin_tint": [
+				0.74,
+				0.6,
+				0.5
+			],
+			"scale": 1.09
 		},
 		"weapons": [
 			{
@@ -92,7 +111,7 @@
 		"block_chance": 0.0,
 		"aggression": 0.85,
 		"can_dodge": 0.1,
-		"never_flee": true
+		"always_surrender": true
 	},
-	"_about": "v4 side-view test: the slow, heavy bandit. Long wind-up (0.6 s) and a long recovery — the punish window. Never flees: the test is one fight to the end, not a morale study."
+	"_about": "v4 side-view test: the slow, heavy bandit. Long wind-up (0.6 s) and a long recovery — the punish window. Gives up rather than runs: at low health he drops his weapon and kneels, and the player chooses (scripts/side_mode.gd). Dressed as a peasant in dirty cloth — nothing like Aras's crimson hooded ranger — and the two differ in bulk as well as colour."
 }
