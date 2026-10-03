@@ -55,5 +55,7 @@ later looked like a regression.
 ## 4. Then
 
 - Models or materials changed: `"$G" --headless --path . -s tools/audit_materials.gd` reports 0 violations.
+- `project.godot` still has `run/main_scene="res://scenes/main.tscn"`. A test branch may point
+  Play at its own scene; that line must never reach `main`.
 - `git merge --no-ff <branch>` on `main`, tag if the owner asked for one, `git push` (and push the tag).
 - A red line is not merged "for now": fix it on the branch, or tell the owner first.

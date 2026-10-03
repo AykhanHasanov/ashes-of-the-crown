@@ -7,7 +7,9 @@ config_version=5
 
 config/name="Ashes of the Crown"
 config/description="Kül Gecəsindən sonra Atəşan səltənəti."
-run/main_scene="res://scenes/main.tscn"
+; v4/side-view-test only: Play opens the test strip. This line goes back to
+; res://scenes/main.tscn before this branch is merged anywhere.
+run/main_scene="res://scenes/side_test.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 
 [autoload]
