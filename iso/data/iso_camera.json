@@ -1,0 +1,18 @@
+{
+	"_about": "The iso camera (iso/scripts/iso_camera.gd). Fixed yaw and pitch; perspective with a narrow lens by default (depth without distortion), orthographic as a switch. Two zoom levels, eased between. Follows a point ahead of the player in the direction he is moving. Everything between the lens and the player is dithered away.",
+	"projection": "perspective",
+	"fov": 22.0,
+	"yaw": 45.0,
+	"pitch": 40.0,
+	"distance": {"explore": 33.0, "close": 22.0},
+	"zoom_time": 0.55,
+	"follow": 7.5,
+	"look_ahead": 2.4,
+	"look_ahead_smoothing": 2.6,
+	"target_height": 1.0,
+	"fade_to": 0.86,
+	"cut_to": 0.94,
+	"cut_height": 0.55,
+	"fade_speed": 6.0,
+	"pull_out": {"extra": 22.0, "pitch_drop": 9.0, "in": 1.4, "hold": 1.6, "out": 1.6}
+}

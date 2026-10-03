@@ -1,0 +1,124 @@
+{
+	"_about": "Iso lighting (iso/scripts/iso_lighting.gd). Two times of day and two quality tiers. The rule the numbers serve: the world is cold and grey, fire is the only warm, strong colour, and a body is never a black cut-out (ambient floor + the character rim). HIGH spends on volumetric fog, SDFGI bounce, SSAO + SSIL, TAA and soft shadows; LOW keeps the identity with plain depth fog, no GI and fewer shadows. Fog: an iso lens sits 40-60 m from everything, so distance fog washes the whole picture; the haze hugs the ground instead — height fog on LOW, a FogVolume over the map on HIGH, which the fires light up. Shadow distance is measured from the lens, which in iso stands 30-60 m from the ground it looks at: anything shorter and the ground under the player has no sun shadows at all.",
+	"day": {
+		"sun_color": [
+			0.84,
+			0.87,
+			0.95
+		],
+		"sun_energy": 1.25,
+		"sun_pitch": -34.0,
+		"sun_yaw": 150.0,
+		"sky_top": [
+			0.32,
+			0.35,
+			0.4
+		],
+		"sky_horizon": [
+			0.52,
+			0.53,
+			0.55
+		],
+		"ground": [
+			0.2,
+			0.2,
+			0.21
+		],
+		"ambient_energy": 0.48,
+		"fog_color": [
+			0.4,
+			0.42,
+			0.46
+		],
+		"fog_density_low": 0.0025,
+		"vol_density": 0.0025,
+		"vol_albedo": [
+			0.7,
+			0.71,
+			0.74
+		],
+		"exposure": 1.05,
+		"haze_density": 0.035
+	},
+	"night": {
+		"sun_color": [
+			0.48,
+			0.58,
+			0.92
+		],
+		"sun_energy": 0.3,
+		"sun_pitch": -52.0,
+		"sun_yaw": 210.0,
+		"sky_top": [
+			0.025,
+			0.032,
+			0.055
+		],
+		"sky_horizon": [
+			0.06,
+			0.07,
+			0.1
+		],
+		"ground": [
+			0.02,
+			0.02,
+			0.03
+		],
+		"ambient_energy": 0.42,
+		"fog_color": [
+			0.05,
+			0.06,
+			0.09
+		],
+		"fog_density_low": 0.003,
+		"vol_density": 0.003,
+		"vol_albedo": [
+			0.45,
+			0.47,
+			0.55
+		],
+		"exposure": 1.2,
+		"haze_density": 0.06
+	},
+	"high": {
+		"sdfgi": true,
+		"ssao": true,
+		"ssil": true,
+		"volumetric": true,
+		"taa": true,
+		"shadow_distance": 95.0,
+		"shadow_splits": 4,
+		"glow_threshold": 1.1
+	},
+	"low": {
+		"sdfgi": false,
+		"ssao": false,
+		"ssil": false,
+		"volumetric": false,
+		"taa": false,
+		"shadow_distance": 75.0,
+		"shadow_splits": 2,
+		"glow_threshold": 1.2
+	},
+	"character_light": {
+		"_about": "A soft light that travels with Aras (Diablo's light radius): it lifts him off a dark road and gives the ground around him form at night. Cool by day, a touch warmer at night (the ember he carries).",
+		"day": {
+			"energy": 0.55,
+			"range": 5.0,
+			"color": [
+				0.85,
+				0.88,
+				0.95
+			]
+		},
+		"night": {
+			"energy": 1.1,
+			"range": 6.5,
+			"color": [
+				1.0,
+				0.72,
+				0.48
+			]
+		}
+	}
+}

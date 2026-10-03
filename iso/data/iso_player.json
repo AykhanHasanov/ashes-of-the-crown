@@ -1,0 +1,18 @@
+{
+	"_about": "Iso movement (iso/scripts/iso_player.gd). Speeds are matched to the clips' own ground speed (iso/tools/measure_gait.gd: walk 0.82 m/s, run 3.02 m/s, walk_hurt 1.17 m/s), so playback = speed / clip speed and the feet never slide. Outside the walls the default gait is a run; inside the caravanserai (calm zones) it is a walk, and Shift / the left trigger swaps them.",
+	"clip_speed": {"walk": 0.82, "run": 3.02, "walk_hurt": 1.17},
+	"walk_speed": 1.05,
+	"run_speed": 3.4,
+	"accel": 14.0,
+	"decel": 18.0,
+	"turn_rate": 11.0,
+	"turn_in_place_deg": 110.0,
+	"turn_in_place_time": 0.32,
+	"lean_deg": 9.0,
+	"lean_smoothing": 6.0,
+	"dash_speed": 11.0,
+	"dash_time": 0.2,
+	"dash_cooldown": 0.45,
+	"dash_iframes": 0.18,
+	"follower": {"look": "npc_rufet", "gap": 2.6, "catch_up": 6.0, "speed": 1.6, "run_speed": 3.4}
+}
