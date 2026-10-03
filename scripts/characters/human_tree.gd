@@ -68,6 +68,7 @@ var _phase := -1.0            # a scattered start, applied on the first frame in
 static func build_tree(spec: Dictionary) -> Node3D:
 	var h = load("res://scripts/characters/human_tree.gd").new()
 	h.setup_human(spec)
+	h.walk_clip = spec.get("walk", h.walk_clip)   # a body's own walk (Rüfət's limp) goes in before the tree is wired
 	h.build_anim_tree()
 	return h
 
@@ -80,6 +81,7 @@ func build_anim_tree() -> void:
 	_loco.min_space = 0.0
 	_loco.max_space = 1.0
 	_loco.blend_mode = AnimationNodeBlendSpace1D.BLEND_MODE_INTERPOLATED
+	_loco.sync = true    # walk and run keep the same phase while they blend: no double steps
 	_add_mixamo_library()
 	_set_loco_clips()
 	_action_node = AnimationNodeAnimation.new()
@@ -187,6 +189,17 @@ func set_locomotion(moving: bool, speed_scale := 1.0) -> void:
 	# speed_scale is 0.5 … 1.2 of the run speed; map it onto idle → walk → run
 	_want_blend = 0.0 if not moving else clampf(speed_scale, 0.0, 1.0)
 	_want_scale = anim_rate * (1.0 if not moving else clampf(speed_scale * 1.1, 0.75, 1.4))
+
+
+## For a controller that knows its real ground speed (the iso game): where on the idle → walk
+## → run line the body is, and how fast its clip plays, set directly. The caller matches
+## `rate` to the clip's own ground speed so the feet do not slide.
+func set_gait(blend: float, rate: float) -> void:
+	if tree == null:
+		set_locomotion(blend > 0.01, rate)
+		return
+	_want_blend = clampf(blend, 0.0, 1.0)
+	_want_scale = rate * anim_rate
 
 
 func set_idle(clip: String) -> void:
